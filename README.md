@@ -1,4 +1,4 @@
-# Grotto Seekers
+# Grotto Sitters
 
 Callum Disley & Niamh Roche — trusted house & pet sitters across the UK and Australia.
 
