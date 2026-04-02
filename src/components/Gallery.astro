@@ -30,25 +30,11 @@ const pets = [
     platform: "Rover",
   },
   {
-    src: `${base}images/daisy-rocky.jpg`,
-    name: "Daisy & Rocky",
-    quote: "We came home to happy puppies and they went the extra mile. I'm so grateful our dogs were in such great hands.",
-    owner: "Heather",
-    platform: "TrustedHouseSitters",
-  },
-  {
-    src: `${base}images/luffy.jpg`,
-    name: "Luffy",
-    quote: "Both lovely, very professional but also super friendly. He came home so content! We would absolutely use them again in a heartbeat.",
-    owner: "Phillipa",
-    platform: "Rover",
-  },
-  {
     src: `${base}images/matilda.jpg`,
     name: "Matilda",
-    quote: "They took excellent care of both our dogs for 2 weeks. The dogs were exercised, loved and treated like family. You won't find better!",
-    owner: "Deb",
-    platform: "Rover",
+    quote: "They both cared and gave Matilda the time she needed and kept me up to date with photos. We would definitely have them come to sit again.",
+    owner: "Erin",
+    platform: "TrustedHouseSitters",
   },
   {
     src: `${base}images/poppy.jpg`,
@@ -58,27 +44,29 @@ const pets = [
     platform: "TrustedHouseSitters",
   },
   {
+    src: `${base}images/molly.jpg`,
+    name: "Molly & Sparky",
+    quote: "They left the house perfectly clean and the pool looked amazing! Molly and Sparky were taken care of and there were no problems at all.",
+    owner: "Emily",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    src: `${base}images/daisy-rocky.jpg`,
+    name: "Daisy & Rocky",
+  },
+  {
+    src: `${base}images/luffy.jpg`,
+    name: "Luffy",
+  },
+  {
     src: `${base}images/finley.jpg`,
     name: "Finley",
-    quote: "Mali took to them immediately. They were loving and took great care of him, even taking him for walks in the rain.",
-    owner: "Elizabeth",
-    platform: "TrustedHouseSitters",
   },
   {
     src: `${base}images/hero-ted.jpg`,
     name: "Hero & Ted",
-    quote: "We couldn't have asked for better pet sitters. They absolutely exceeded expectations. Bailey clearly loved them too!",
-    owner: "Libby",
-    platform: "TrustedHouseSitters",
   },
-  {
-    src: `${base}images/molly.jpg`,
-    name: "Molly",
-    quote: "Solly absolutely adores them both. They are reliable, trustworthy, and clearly care about his wellbeing. I couldn't recommend them highly enough.",
-    owner: "Thomas James",
-    platform: "Rover",
-  },
-];
+] as { src: string; name: string; quote?: string; owner?: string; platform?: string }[];
 ---
 
 <section id="gallery">
@@ -100,8 +88,12 @@ const pets = [
           </div>
           <div class="pet-info">
             <h3 class="pet-name">{pet.name}</h3>
-            <p class="pet-quote">"{pet.quote}"</p>
-            <p class="pet-owner">— {pet.owner}, <span>{pet.platform}</span></p>
+            {pet.quote ? (
+              <>
+                <p class="pet-quote">"{pet.quote}"</p>
+                <p class="pet-owner">— {pet.owner}, <span>{pet.platform}</span></p>
+              </>
+            ) : null}
           </div>
         </div>
       ))}
