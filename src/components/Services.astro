@@ -1,25 +1,16 @@
 ---
 const services = [
   {
+    icon: "&#128062;",
+    title: "Pet Sitting",
+    description:
+      "Dogs, cats, rabbits, birds — all animals welcome. We stay in your home and keep your pets happy, fed, walked, and loved in their own environment.",
+  },
+  {
     icon: "&#127969;",
     title: "House Sitting",
     description:
-      "We stay in your home overnight, keeping it safe, secure, and exactly as you left it. Perfect for when you're travelling or away for work.",
-    price: "£25",
-  },
-  {
-    icon: "&#128021;",
-    title: "Dog Sitting",
-    description:
-      "Your dog stays at home in their own environment with us there for walks, feeding, play and all the belly rubs they deserve.",
-    price: "£25",
-  },
-  {
-    icon: "&#128062;",
-    title: "All Pets Welcome",
-    description:
-      "Cats, dogs, rabbits, birds — if they're part of your family, they're welcome. We'll care for all your animals as a package.",
-    price: "£25",
+      "We move in and take care of everything while you're away — keeping your home safe, secure, and exactly as you left it. Pricing is flexible and can be discussed based on your needs.",
   },
 ];
 ---
@@ -37,11 +28,7 @@ const services = [
             <span class="service-icon" set:html={service.icon} />
             <h3>{service.title}</h3>
             <p>{service.description}</p>
-            <div class="service-price">
-              <span class="price-from">from</span>
-              <span class="price-amount">{service.price}</span>
-              <span class="price-period">/ night</span>
-            </div>
+            <a href="#enquiry" class="service-cta">Get in touch</a>
           </div>
         ))
       }
@@ -64,7 +51,7 @@ const services = [
 
   .services-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 28px;
     margin-bottom: 32px;
   }
@@ -104,29 +91,20 @@ const services = [
     margin-bottom: 20px;
   }
 
-  .service-price {
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-  }
-
-  .price-from {
-    font-size: 0.75rem;
-    color: var(--text-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .price-amount {
-    font-family: "Playfair Display", serif;
-    font-size: 1.6rem;
+  .service-cta {
+    display: inline-block;
     color: var(--gold);
     font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    border-bottom: 2px solid var(--gold-pale);
+    padding-bottom: 2px;
+    transition: border-color 0.2s;
   }
 
-  .price-period {
-    font-size: 0.8rem;
-    color: var(--text-soft);
+  .service-cta:hover {
+    border-color: var(--gold);
   }
 
   .pricing-note {
