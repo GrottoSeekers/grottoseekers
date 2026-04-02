@@ -1,0 +1,83 @@
+---
+---
+
+<section id="about">
+  <div class="section-inner about-grid">
+    <div class="about-image">
+      <div class="about-image-placeholder">
+        <span>Your photo here</span>
+      </div>
+    </div>
+    <div class="about-text">
+      <p class="section-label">Who We Are</p>
+      <h2 class="section-title">
+        A home away from home — for you and your pets.
+      </h2>
+      <div class="divider"></div>
+      <p>
+        We're <strong>Callum & Niamh</strong>, a couple from the UK currently
+        travelling and house sitting across Australia. With years of experience
+        caring for pets and homes, we treat every sit like it's our own.
+      </p>
+      <p>
+        Whether it's a weekend away or a month-long trip, we move in and keep
+        everything running smoothly — daily walks, feeding routines, garden care,
+        and plenty of love for your animals.
+      </p>
+      <p>
+        We're verified on <strong>Rover</strong> and
+        <strong>TrustedHouseSitters</strong>, with over 40 five-star reviews from
+        happy pet owners. Your home and pets are in safe hands.
+      </p>
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 80px 48px;
+    background: var(--warm-white);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+
+  .about-image-placeholder {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    background: var(--gold-pale);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brown-light);
+    font-size: 1rem;
+    font-style: italic;
+  }
+
+  .about-text p {
+    color: var(--text-soft);
+    line-height: 1.8;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+  }
+
+  .about-text p strong {
+    color: var(--brown-dark);
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 60px 24px;
+    }
+
+    .about-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+</style>
