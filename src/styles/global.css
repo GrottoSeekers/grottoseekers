@@ -1,0 +1,265 @@
+:root {
+  --cream: #faf6ee;
+  --warm-white: #fff9f0;
+  --gold: #c8963e;
+  --gold-light: #e8b96a;
+  --gold-pale: #f5e4c3;
+  --brown-dark: #2c1a0e;
+  --brown-mid: #5c3d20;
+  --brown-light: #8b5e3c;
+  --sage: #7a8c6a;
+  --text: #2c1a0e;
+  --text-soft: #6b4e35;
+}
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Lato", sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ── TYPOGRAPHY ── */
+.section-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-family: "Playfair Display", serif;
+  font-size: 2.2rem;
+  color: var(--brown-dark);
+  line-height: 1.25;
+}
+
+.divider {
+  width: 48px;
+  height: 2px;
+  background: var(--gold);
+  margin: 20px 0 28px;
+}
+
+.section-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  display: inline-block;
+  background: var(--gold);
+  color: #fff;
+  padding: 14px 36px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--gold-light);
+  transform: translateY(-1px);
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 18px 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(250, 246, 238, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(200, 150, 62, 0.15);
+}
+
+.nav-logo {
+  font-family: "Playfair Display", serif;
+  font-size: 1.4rem;
+  color: var(--brown-dark);
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+
+.nav-logo span {
+  color: var(--gold);
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  gap: 36px;
+}
+
+nav ul a {
+  text-decoration: none;
+  color: var(--brown-mid);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+nav ul a:hover {
+  color: var(--gold);
+}
+
+/* Hamburger (mobile) */
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.nav-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--brown-dark);
+  transition: transform 0.3s, opacity 0.3s;
+}
+
+@media (max-width: 768px) {
+  nav {
+    padding: 14px 24px;
+  }
+
+  .nav-toggle {
+    display: flex;
+  }
+
+  nav ul {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 260px;
+    flex-direction: column;
+    background: var(--cream);
+    padding: 80px 32px 32px;
+    gap: 24px;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+  }
+
+  nav ul.open {
+    transform: translateX(0);
+  }
+}
+
+/* ── FOOTER ── */
+footer {
+  background: var(--brown-dark);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 60px 48px 30px;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 40px;
+}
+
+.footer-brand h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem;
+  color: #fff;
+  margin-bottom: 12px;
+}
+
+.footer-brand h2 span {
+  color: var(--gold);
+}
+
+.footer-brand p {
+  line-height: 1.7;
+  font-size: 0.9rem;
+}
+
+.footer-links h4 {
+  color: #fff;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.footer-links ul {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  color: rgba(255, 255, 255, 0.6);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: var(--gold);
+}
+
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 24px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+  .footer-top {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+
+  footer {
+    padding: 40px 24px 24px;
+  }
+}

@@ -1,0 +1,121 @@
+---
+---
+
+<section id="profiles">
+  <div class="section-inner">
+    <p class="section-label">Find Us Online</p>
+    <h2 class="section-title">Our Verified Profiles</h2>
+    <div class="divider"></div>
+    <p class="profiles-intro">
+      We're verified sitters on both major platforms. Browse our full review
+      histories and verified profiles below.
+    </p>
+
+    <div class="profiles-grid">
+      <a
+        href="https://www.rover.com/sit/callud53623"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="platform-card"
+      >
+        <span class="platform-logo">&#128021;</span>
+        <h3>Rover</h3>
+        <p>
+          Our UK-based profile with verified reviews from pet owners across
+          Britain.
+        </p>
+        <span class="platform-link-text">View Profile &rarr;</span>
+      </a>
+
+      <a
+        href="https://www.trustedhousesitters.com/house-and-pet-sitters/australia/new-south-wales/sydney/l/6979617/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="platform-card"
+      >
+        <span class="platform-logo">&#127969;</span>
+        <h3>TrustedHouseSitters</h3>
+        <p>
+          Our Australian profile with house and pet sitting reviews from across
+          the country.
+        </p>
+        <span class="platform-link-text">View Profile &rarr;</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 80px 48px;
+    background: var(--cream);
+  }
+
+  .profiles-intro {
+    color: var(--text-soft);
+    margin-bottom: 40px;
+    max-width: 500px;
+    line-height: 1.75;
+    font-size: 0.95rem;
+  }
+
+  .profiles-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+
+  .platform-card {
+    display: block;
+    background: var(--warm-white);
+    border: 1px solid rgba(200, 150, 62, 0.15);
+    border-radius: 12px;
+    padding: 36px 28px;
+    text-decoration: none;
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
+
+  .platform-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(44, 26, 14, 0.08);
+  }
+
+  .platform-logo {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .platform-card h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.25rem;
+    color: var(--brown-dark);
+    margin-bottom: 10px;
+  }
+
+  .platform-card p {
+    color: var(--text-soft);
+    line-height: 1.7;
+    font-size: 0.9rem;
+    margin-bottom: 16px;
+  }
+
+  .platform-link-text {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 60px 24px;
+    }
+
+    .profiles-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
