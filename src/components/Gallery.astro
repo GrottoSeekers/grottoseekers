@@ -1,0 +1,221 @@
+---
+const base = import.meta.env.BASE_URL;
+const galleryImages = [
+  { src: `${base}images/callum-niamh-airport.jpg`, alt: "Callum and Niamh at the Etihad airport" },
+  { src: `${base}images/callum-niamh-wedding.jpg`, alt: "Callum and Niamh in a field at sunset" },
+  { src: `${base}images/callum-niamh-dinner.jpg`, alt: "Callum and Niamh at a seaside dinner" },
+  { src: `${base}images/callum-niamh-selfie.jpg`, alt: "Callum and Niamh selfie at Nu Vintage" },
+  { src: `${base}images/callum-niamh-villa.jpg`, alt: "Callum and Niamh at a villa" },
+  { src: `${base}images/callum-niamh-event.jpg`, alt: "Callum and Niamh at an evening event" },
+  { src: `${base}images/callum-niamh-boat.jpg`, alt: "Callum and Niamh on a boat at sunset" },
+];
+---
+
+<section id="gallery">
+  <div class="section-inner">
+    <p class="section-label">In Good Hands</p>
+    <h2 class="section-title">The ones we've loved</h2>
+    <div class="divider"></div>
+    <p class="gallery-intro">
+      From Sydney to the English countryside — every sit brings new friends.
+      Here are some of the wonderful animals we've had the pleasure of caring
+      for.
+    </p>
+
+    <div class="gallery-slider" id="gallerySlider">
+      <div class="gallery-track" id="galleryTrack">
+        {
+          galleryImages.map((img) => (
+            <div class="gallery-slide">
+              <img src={img.src} alt={img.alt} loading="lazy" />
+            </div>
+          ))
+        }
+      </div>
+
+      <button class="gallery-btn gallery-btn-prev" id="galleryPrev"
+        >&larr;</button
+      >
+      <button class="gallery-btn gallery-btn-next" id="galleryNext"
+        >&rarr;</button
+      >
+    </div>
+
+    <div class="gallery-dots" id="galleryDots"></div>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 80px 48px;
+    background: var(--cream);
+  }
+
+  .gallery-intro {
+    color: var(--text-soft);
+    margin-bottom: 32px;
+    max-width: 600px;
+    line-height: 1.75;
+    font-size: 0.95rem;
+  }
+
+  .gallery-slider {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  .gallery-track {
+    display: flex;
+    transition: transform 0.4s ease;
+  }
+
+  .gallery-slide {
+    min-width: 100%;
+    padding: 0 4px;
+  }
+
+  @media (min-width: 600px) {
+    .gallery-slide {
+      min-width: 50%;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .gallery-slide {
+      min-width: 33.333%;
+    }
+  }
+
+  .gallery-slide img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+  }
+
+  .gallery-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(200, 150, 62, 0.2);
+    color: var(--brown-dark);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition:
+      background 0.2s,
+      transform 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .gallery-btn:hover {
+    background: var(--gold);
+    color: #fff;
+    border-color: var(--gold);
+  }
+
+  .gallery-btn-prev {
+    left: 12px;
+  }
+
+  .gallery-btn-next {
+    right: 12px;
+  }
+
+  .gallery-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .gallery-dots :global(.dot) {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold-pale);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .gallery-dots :global(.dot.active) {
+    background: var(--gold);
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 60px 24px;
+    }
+  }
+</style>
+
+<script>
+  function initGallerySlider() {
+    const track = document.getElementById("galleryTrack") as HTMLElement;
+    const slides = track?.querySelectorAll(".gallery-slide");
+    const dotsContainer = document.getElementById(
+      "galleryDots"
+    ) as HTMLElement;
+    const prevBtn = document.getElementById("galleryPrev");
+    const nextBtn = document.getElementById("galleryNext");
+
+    if (!track || !slides || !dotsContainer) return;
+
+    let current = 0;
+
+    function getVisible() {
+      if (window.innerWidth >= 900) return 3;
+      if (window.innerWidth >= 600) return 2;
+      return 1;
+    }
+
+    function getMaxIndex() {
+      return Math.max(0, slides.length - getVisible());
+    }
+
+    function buildDots() {
+      dotsContainer.innerHTML = "";
+      const total = getMaxIndex() + 1;
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement("div");
+        dot.className = "dot" + (i === current ? " active" : "");
+        dot.addEventListener("click", () => goTo(i));
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    function update() {
+      if (current > getMaxIndex()) current = getMaxIndex();
+      const slideWidth = (slides[0] as HTMLElement).offsetWidth;
+      track.style.transform = `translateX(-${current * slideWidth}px)`;
+      dotsContainer.querySelectorAll(".dot").forEach((d, i) => {
+        d.classList.toggle("active", i === current);
+      });
+    }
+
+    function goTo(i: number) {
+      current = Math.max(0, Math.min(i, getMaxIndex()));
+      update();
+    }
+
+    prevBtn?.addEventListener("click", () => goTo(current - 1));
+    nextBtn?.addEventListener("click", () => goTo(current + 1));
+    window.addEventListener("resize", () => {
+      buildDots();
+      update();
+    });
+
+    buildDots();
+    update();
+  }
+
+  document.addEventListener("DOMContentLoaded", initGallerySlider);
+  document.addEventListener("astro:page-load", initGallerySlider);
+</script>

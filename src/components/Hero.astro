@@ -1,0 +1,97 @@
+---
+---
+
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-badge">&#128062; UK & Australia</p>
+    <h1>Grotto<br /><em>Sitters</em></h1>
+    <p class="hero-names">Callum Disley & Niamh Roche</p>
+    <p class="hero-tagline">
+      Trusted house & pet sitters, wherever in the world you call home.
+    </p>
+    <a href="#enquiry" class="btn-primary">Book Us Today</a>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: var(--gold-pale);
+    padding: 120px 48px 80px;
+    text-align: center;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(200, 150, 62, 0.15) 0%,
+      rgba(250, 246, 238, 0.6) 50%,
+      rgba(122, 140, 106, 0.1) 100%
+    );
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(200, 150, 62, 0.15);
+    color: var(--brown-mid);
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-family: "Playfair Display", serif;
+    font-size: 5rem;
+    color: var(--brown-dark);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  h1 em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .hero-names {
+    font-size: 1.15rem;
+    color: var(--brown-mid);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    margin-bottom: 16px;
+  }
+
+  .hero-tagline {
+    font-size: 1.15rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 0 auto 36px;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 100px 24px 60px;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+    }
+  }
+</style>

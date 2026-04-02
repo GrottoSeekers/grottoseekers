@@ -1,0 +1,441 @@
+---
+---
+
+<section id="enquiry">
+  <div class="section-inner">
+    <div class="form-layout">
+      <div class="form-intro">
+        <p class="section-label">Get In Touch</p>
+        <h2 class="section-title">Book Us or Say Hello</h2>
+        <div class="divider"></div>
+        <p>
+          Fill in the form and we'll get back to you as soon as possible to
+          discuss your dates, do a meet & greet, or answer any questions you
+          might have.
+        </p>
+        <p>
+          We love hearing about your pets — the more detail you give us, the
+          better we can plan!
+        </p>
+
+        <div class="contact-options">
+          <a href="mailto:grottositters@outlook.com" class="contact-option">
+            <span class="contact-option-icon">&#9993;&#65039;</span>
+            <div class="contact-option-text">
+              <strong>Email Us</strong>
+              <span>grottositters@outlook.com</span>
+            </div>
+          </a>
+          <a
+            href="https://wa.me/447306100251"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-option"
+          >
+            <span class="contact-option-icon">&#128172;</span>
+            <div class="contact-option-text">
+              <strong>WhatsApp Us</strong>
+              <span>+44 7306 100251</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <form id="enquiryForm">
+        <p class="form-section-title">Your Details</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fname">First Name</label>
+            <input
+              type="text"
+              id="fname"
+              name="fname"
+              placeholder="Jane"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="lname">Last Name</label>
+            <input
+              type="text"
+              id="lname"
+              name="lname"
+              placeholder="Smith"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder="jane@example.com"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone / WhatsApp</label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              placeholder="+44 7700 000000"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Property Address</label>
+          <input
+            type="text"
+            id="address"
+            name="address"
+            placeholder="123 Example St, Sydney NSW 2000"
+            required
+          />
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="date-from">Date From</label>
+            <input type="date" id="date-from" name="date-from" required />
+          </div>
+          <div class="form-group">
+            <label for="date-to">Date To</label>
+            <input type="date" id="date-to" name="date-to" required />
+          </div>
+        </div>
+
+        <p class="form-section-title" style="margin-top: 8px">Your Pets</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pet-name">Pet Name(s)</label>
+            <input
+              type="text"
+              id="pet-name"
+              name="pet-name"
+              placeholder="Biscuit, Luna…"
+            />
+          </div>
+          <div class="form-group">
+            <label for="pet-type">Type of Pet(s)</label>
+            <select id="pet-type" name="pet-type">
+              <option value="">Select…</option>
+              <option>Dog(s)</option>
+              <option>Cat(s)</option>
+              <option>Dog(s) & Cat(s)</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="pet-breed">Breed(s)</label>
+            <input
+              type="text"
+              id="pet-breed"
+              name="pet-breed"
+              placeholder="Golden Retriever…"
+            />
+          </div>
+          <div class="form-group">
+            <label for="pet-age">Age(s)</label>
+            <input
+              type="text"
+              id="pet-age"
+              name="pet-age"
+              placeholder="3 years, 7 months…"
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Anything else we should know?</label>
+          <textarea
+            id="message"
+            name="message"
+            placeholder="Special requirements, feeding routines, medical needs, access instructions…"
+          ></textarea>
+        </div>
+
+        <div class="submit-btns">
+          <button type="button" class="btn-email" id="sendEmailBtn"
+            >&#9993;&#65039; &nbsp; Send via Email</button
+          >
+          <button type="button" class="btn-whatsapp" id="sendWhatsAppBtn">
+            Send via WhatsApp
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 80px 48px;
+    background: var(--warm-white);
+  }
+
+  .form-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 60px;
+    align-items: start;
+  }
+
+  .form-intro p {
+    color: var(--text-soft);
+    line-height: 1.8;
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+  }
+
+  .contact-options {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .contact-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--cream);
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform 0.2s;
+  }
+
+  .contact-option:hover {
+    transform: translateX(4px);
+  }
+
+  .contact-option-icon {
+    font-size: 1.3rem;
+  }
+
+  .contact-option-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contact-option-text strong {
+    color: var(--brown-dark);
+    font-size: 0.9rem;
+  }
+
+  .contact-option-text span {
+    color: var(--text-soft);
+    font-size: 0.82rem;
+  }
+
+  form {
+    background: var(--cream);
+    border: 1px solid rgba(200, 150, 62, 0.12);
+    border-radius: 14px;
+    padding: 36px;
+  }
+
+  .form-section-title {
+    font-family: "Playfair Display", serif;
+    font-size: 1.05rem;
+    color: var(--brown-dark);
+    margin-bottom: 18px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+  }
+
+  .form-row .form-group {
+    margin-bottom: 0;
+  }
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--brown-mid);
+    margin-bottom: 6px;
+  }
+
+  input,
+  select,
+  textarea {
+    padding: 12px 14px;
+    border: 1px solid rgba(200, 150, 62, 0.2);
+    border-radius: 8px;
+    font-family: "Lato", sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--warm-white);
+    transition: border-color 0.2s;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .submit-btns {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .btn-email,
+  .btn-whatsapp {
+    flex: 1;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition:
+      transform 0.2s,
+      opacity 0.2s;
+  }
+
+  .btn-email {
+    background: var(--gold);
+    color: #fff;
+  }
+
+  .btn-whatsapp {
+    background: #25d366;
+    color: #fff;
+  }
+
+  .btn-email:hover,
+  .btn-whatsapp:hover {
+    transform: translateY(-1px);
+    opacity: 0.9;
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 60px 24px;
+    }
+
+    .form-layout {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .submit-btns {
+      flex-direction: column;
+    }
+
+    form {
+      padding: 24px;
+    }
+  }
+</style>
+
+<script>
+  function initEnquiryForm() {
+    function getFormData() {
+      const f = document.getElementById("enquiryForm") as HTMLFormElement;
+      return {
+        fname: (f.querySelector("#fname") as HTMLInputElement).value,
+        lname: (f.querySelector("#lname") as HTMLInputElement).value,
+        email: (f.querySelector("#email") as HTMLInputElement).value,
+        phone: (f.querySelector("#phone") as HTMLInputElement).value,
+        address: (f.querySelector("#address") as HTMLInputElement).value,
+        dateFrom: (f.querySelector("#date-from") as HTMLInputElement).value,
+        dateTo: (f.querySelector("#date-to") as HTMLInputElement).value,
+        petName: (f.querySelector("#pet-name") as HTMLInputElement).value,
+        petType: (f.querySelector("#pet-type") as HTMLSelectElement).value,
+        petBreed: (f.querySelector("#pet-breed") as HTMLInputElement).value,
+        petAge: (f.querySelector("#pet-age") as HTMLInputElement).value,
+        message: (f.querySelector("#message") as HTMLTextAreaElement).value,
+      };
+    }
+
+    function validateForm() {
+      const f = document.getElementById("enquiryForm") as HTMLFormElement;
+      const fname = (f.querySelector("#fname") as HTMLInputElement).value;
+      const lname = (f.querySelector("#lname") as HTMLInputElement).value;
+      const email = (f.querySelector("#email") as HTMLInputElement).value;
+      const address = (f.querySelector("#address") as HTMLInputElement).value;
+      const dateFrom = (f.querySelector("#date-from") as HTMLInputElement)
+        .value;
+      const dateTo = (f.querySelector("#date-to") as HTMLInputElement).value;
+
+      if (!fname || !lname || !email || !address || !dateFrom || !dateTo) {
+        alert(
+          "Please fill in your name, email, address, and dates before sending."
+        );
+        return false;
+      }
+      return true;
+    }
+
+    document
+      .getElementById("sendEmailBtn")
+      ?.addEventListener("click", () => {
+        if (!validateForm()) return;
+        const d = getFormData();
+        const subject = encodeURIComponent(
+          `House Sit Enquiry — ${d.dateFrom} to ${d.dateTo}`
+        );
+        const body = encodeURIComponent(
+          `Hi Callum & Niamh,\n\nI'd love to book a sit. Here are my details:\n\n` +
+            `Name: ${d.fname} ${d.lname}\nEmail: ${d.email}\nPhone: ${d.phone}\n` +
+            `Address: ${d.address}\nDates: ${d.dateFrom} → ${d.dateTo}\n\n` +
+            `Pet Details:\nName(s): ${d.petName}\nType: ${d.petType}\nBreed: ${d.petBreed}\nAge: ${d.petAge}\n\n` +
+            `Additional info:\n${d.message}\n\nLooking forward to hearing from you!`
+        );
+        window.location.href = `mailto:grottositters@outlook.com?subject=${subject}&body=${body}`;
+      });
+
+    document
+      .getElementById("sendWhatsAppBtn")
+      ?.addEventListener("click", () => {
+        if (!validateForm()) return;
+        const d = getFormData();
+        const msg = encodeURIComponent(
+          `Hi Callum & Niamh! I found you through your website and would love to book a sit.\n\n` +
+            `*Name:* ${d.fname} ${d.lname}\n*Dates:* ${d.dateFrom} → ${d.dateTo}\n*Address:* ${d.address}\n\n` +
+            `*Pet Details:*\nName(s): ${d.petName}\nType: ${d.petType}\nBreed: ${d.petBreed}\nAge: ${d.petAge}\n\n` +
+            `*Additional info:*\n${d.message}`
+        );
+        window.open(`https://wa.me/447306100251?text=${msg}`, "_blank");
+      });
+  }
+
+  document.addEventListener("DOMContentLoaded", initEnquiryForm);
+  document.addEventListener("astro:page-load", initEnquiryForm);
+</script>
