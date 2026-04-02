@@ -1,13 +1,83 @@
 ---
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-const galleryImages = [
-  { src: `${base}images/callum-niamh-airport.jpg`, alt: "Callum and Niamh at the Etihad airport" },
-  { src: `${base}images/callum-niamh-wedding.jpg`, alt: "Callum and Niamh in a field at sunset" },
-  { src: `${base}images/callum-niamh-dinner.jpg`, alt: "Callum and Niamh at a seaside dinner" },
-  { src: `${base}images/callum-niamh-selfie.jpg`, alt: "Callum and Niamh selfie at Nu Vintage" },
-  { src: `${base}images/callum-niamh-villa.jpg`, alt: "Callum and Niamh at a villa" },
-  { src: `${base}images/callum-niamh-event.jpg`, alt: "Callum and Niamh at an evening event" },
-  { src: `${base}images/callum-niamh-boat.jpg`, alt: "Callum and Niamh on a boat at sunset" },
+const pets = [
+  {
+    src: `${base}images/zeus.jpg`,
+    name: "Zeus",
+    quote: "They looked after Zeus and the house impeccably. We're pretty sure Zeus was disappointed when we came home!",
+    owner: "Danielle",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    src: `${base}images/scuff.jpg`,
+    name: "Scuff",
+    quote: "Scuff is still looking in the spare room to check if his friends have really gone! We appreciated the regular updates and photos.",
+    owner: "Kimberley",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    src: `${base}images/chester.jpg`,
+    name: "Chester",
+    quote: "We've been blown away by the great job they've done. Our holidays are so much more relaxed for having found them.",
+    owner: "Charlotte",
+    platform: "Rover",
+  },
+  {
+    src: `${base}images/daisy-rocky.jpg`,
+    name: "Daisy & Rocky",
+    quote: "We came home to happy puppies and they went the extra mile. I'm so grateful our dogs were in such great hands.",
+    owner: "Heather",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    src: `${base}images/luffy.jpg`,
+    name: "Luffy",
+    quote: "Both lovely, very professional but also super friendly. He came home so content! We would absolutely use them again in a heartbeat.",
+    owner: "Phillipa",
+    platform: "Rover",
+  },
+  {
+    src: `${base}images/matilda.jpg`,
+    name: "Matilda",
+    quote: "They took excellent care of both our dogs for 2 weeks. The dogs were exercised, loved and treated like family. You won't find better!",
+    owner: "Deb",
+    platform: "Rover",
+  },
+  {
+    src: `${base}images/poppy.jpg`,
+    name: "Poppy",
+    quote: "We have 4 dogs, a cat, chooks and a big garden. The animals were very well looked after and happy. I would highly recommend these two.",
+    owner: "Angela",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    src: `${base}images/finley.jpg`,
+    name: "Finley",
+    quote: "Mali took to them immediately. They were loving and took great care of him, even taking him for walks in the rain.",
+    owner: "Elizabeth",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    src: `${base}images/alfie-1.jpg`,
+    name: "Alfie",
+    quote: "We can fully relax when away, knowing our dog is in the very best possible care. She completely adores them!",
+    owner: "Ben",
+    platform: "Rover",
+  },
+  {
+    src: `${base}images/hero-ted.jpg`,
+    name: "Hero & Ted",
+    quote: "We couldn't have asked for better pet sitters. They absolutely exceeded expectations. Bailey clearly loved them too!",
+    owner: "Libby",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    src: `${base}images/molly.jpg`,
+    name: "Molly",
+    quote: "Solly absolutely adores them both. They are reliable, trustworthy, and clearly care about his wellbeing. I couldn't recommend them highly enough.",
+    owner: "Thomas James",
+    platform: "Rover",
+  },
 ];
 ---
 
@@ -22,26 +92,20 @@ const galleryImages = [
       for.
     </p>
 
-    <div class="gallery-slider" id="gallerySlider">
-      <div class="gallery-track" id="galleryTrack">
-        {
-          galleryImages.map((img) => (
-            <div class="gallery-slide">
-              <img src={img.src} alt={img.alt} loading="lazy" />
-            </div>
-          ))
-        }
-      </div>
-
-      <button class="gallery-btn gallery-btn-prev" id="galleryPrev"
-        >&larr;</button
-      >
-      <button class="gallery-btn gallery-btn-next" id="galleryNext"
-        >&rarr;</button
-      >
+    <div class="pets-grid">
+      {pets.map((pet) => (
+        <div class="pet-card">
+          <div class="pet-image">
+            <img src={pet.src} alt={pet.name} loading="lazy" />
+          </div>
+          <div class="pet-info">
+            <h3 class="pet-name">{pet.name}</h3>
+            <p class="pet-quote">"{pet.quote}"</p>
+            <p class="pet-owner">— {pet.owner}, <span>{pet.platform}</span></p>
+          </div>
+        </div>
+      ))}
     </div>
-
-    <div class="gallery-dots" id="galleryDots"></div>
   </div>
 </section>
 
@@ -53,169 +117,93 @@ const galleryImages = [
 
   .gallery-intro {
     color: var(--text-soft);
-    margin-bottom: 32px;
+    margin-bottom: 40px;
     max-width: 600px;
     line-height: 1.75;
     font-size: 0.95rem;
   }
 
-  .gallery-slider {
-    position: relative;
-    overflow: hidden;
+  .pets-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .pet-card {
+    background: var(--warm-white);
+    border: 1px solid rgba(200, 150, 62, 0.12);
     border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
   }
 
-  .gallery-track {
-    display: flex;
-    transition: transform 0.4s ease;
+  .pet-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(44, 26, 14, 0.08);
   }
 
-  .gallery-slide {
-    min-width: 100%;
-    padding: 0 4px;
-  }
-
-  @media (min-width: 600px) {
-    .gallery-slide {
-      min-width: 50%;
-    }
-  }
-
-  @media (min-width: 900px) {
-    .gallery-slide {
-      min-width: 33.333%;
-    }
-  }
-
-  .gallery-slide img {
+  .pet-image {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 1;
+    overflow: hidden;
+  }
+
+  .pet-image img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 10px;
     display: block;
+    transition: transform 0.3s ease;
   }
 
-  .gallery-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(200, 150, 62, 0.2);
+  .pet-card:hover .pet-image img {
+    transform: scale(1.03);
+  }
+
+  .pet-info {
+    padding: 20px;
+  }
+
+  .pet-name {
+    font-family: "Playfair Display", serif;
+    font-size: 1.15rem;
     color: var(--brown-dark);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition:
-      background 0.2s,
-      transform 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin-bottom: 8px;
   }
 
-  .gallery-btn:hover {
-    background: var(--gold);
-    color: #fff;
-    border-color: var(--gold);
+  .pet-quote {
+    color: var(--text-soft);
+    font-size: 0.85rem;
+    line-height: 1.65;
+    font-style: italic;
+    margin-bottom: 12px;
   }
 
-  .gallery-btn-prev {
-    left: 12px;
+  .pet-owner {
+    font-size: 0.78rem;
+    color: var(--brown-mid);
+    font-weight: 700;
   }
 
-  .gallery-btn-next {
-    right: 12px;
+  .pet-owner span {
+    color: var(--gold);
+    font-weight: 400;
   }
 
-  .gallery-dots {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
+  @media (max-width: 900px) {
+    .pets-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
   }
 
-  .gallery-dots :global(.dot) {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--gold-pale);
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-
-  .gallery-dots :global(.dot.active) {
-    background: var(--gold);
-  }
-
-  @media (max-width: 768px) {
+  @media (max-width: 600px) {
     section {
       padding: 60px 24px;
     }
+
+    .pets-grid {
+      grid-template-columns: 1fr;
+      max-width: 400px;
+    }
   }
 </style>
-
-<script>
-  function initGallerySlider() {
-    const track = document.getElementById("galleryTrack") as HTMLElement;
-    const slides = track?.querySelectorAll(".gallery-slide");
-    const dotsContainer = document.getElementById(
-      "galleryDots"
-    ) as HTMLElement;
-    const prevBtn = document.getElementById("galleryPrev");
-    const nextBtn = document.getElementById("galleryNext");
-
-    if (!track || !slides || !dotsContainer) return;
-
-    let current = 0;
-
-    function getVisible() {
-      if (window.innerWidth >= 900) return 3;
-      if (window.innerWidth >= 600) return 2;
-      return 1;
-    }
-
-    function getMaxIndex() {
-      return Math.max(0, slides.length - getVisible());
-    }
-
-    function buildDots() {
-      dotsContainer.innerHTML = "";
-      const total = getMaxIndex() + 1;
-      for (let i = 0; i < total; i++) {
-        const dot = document.createElement("div");
-        dot.className = "dot" + (i === current ? " active" : "");
-        dot.addEventListener("click", () => goTo(i));
-        dotsContainer.appendChild(dot);
-      }
-    }
-
-    function update() {
-      if (current > getMaxIndex()) current = getMaxIndex();
-      const slideWidth = (slides[0] as HTMLElement).offsetWidth;
-      track.style.transform = `translateX(-${current * slideWidth}px)`;
-      dotsContainer.querySelectorAll(".dot").forEach((d, i) => {
-        d.classList.toggle("active", i === current);
-      });
-    }
-
-    function goTo(i: number) {
-      current = Math.max(0, Math.min(i, getMaxIndex()));
-      update();
-    }
-
-    prevBtn?.addEventListener("click", () => goTo(current - 1));
-    nextBtn?.addEventListener("click", () => goTo(current + 1));
-    window.addEventListener("resize", () => {
-      buildDots();
-      update();
-    });
-
-    buildDots();
-    update();
-  }
-
-  document.addEventListener("DOMContentLoaded", initGallerySlider);
-  document.addEventListener("astro:page-load", initGallerySlider);
-</script>
