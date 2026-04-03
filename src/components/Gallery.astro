@@ -1,72 +1,96 @@
 ---
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
-const pets = [
+
+type PetCard = {
+  images: string[];
+  name: string;
+  quote?: string;
+  owner?: string;
+  platform?: string;
+};
+
+const pets: PetCard[] = [
   {
-    src: `${base}images/zeus.jpg`,
+    images: [
+      `${base}images/angela-fireplace.jpg`,
+      `${base}images/poppy.jpg`,
+      `${base}images/angela-farm.jpg`,
+      `${base}images/angela-bella-tess.jpg`,
+      `${base}images/angela-fraser-bag.jpg`,
+      `${base}images/angela-fraser-tv.jpg`,
+      `${base}images/angela-fraser-bed.jpg`,
+    ],
+    name: "Angela's Family",
+    quote: "We have 4 dogs, a cat, chooks and a big garden, including herbs in pots that need watering. The animals were very well looked after and nurtured and happy. I would be very happy to recommend these two lovely people to anyone.",
+    owner: "Angela",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    images: [`${base}images/zeus.jpg`],
     name: "Zeus",
     quote: "They looked after Zeus and the house impeccably. We're pretty sure Zeus was disappointed when we came home!",
     owner: "Danielle",
     platform: "TrustedHouseSitters",
   },
   {
-    src: `${base}images/scuff.jpg`,
+    images: [`${base}images/rocco-1.jpg`, `${base}images/rocco-2.jpg`],
+    name: "Rocco",
+    quote: "Super lovely couple who took great care of our cat Rocco! They sent regular updates and pictures. Rocco was extremely happy when we got home and seemed very at ease.",
+    owner: "Jess & Sam",
+    platform: "TrustedHouseSitters",
+  },
+  {
+    images: [`${base}images/scuff.jpg`],
     name: "Scuff",
     quote: "Scuff is still looking in the spare room to check if his friends have really gone! We appreciated the regular updates and photos.",
     owner: "Kimberley",
     platform: "TrustedHouseSitters",
   },
   {
-    src: `${base}images/alfie-1.jpg`,
+    images: [`${base}images/alfie-1.jpg`],
     name: "Alfie",
     quote: "Alfie absolutely adores Callum and Niamh! He doesn't want to come home after! They always provide so many updates and look after him like he's their own.",
     owner: "Carissa D.",
     platform: "Rover",
   },
   {
-    src: `${base}images/chester.jpg`,
+    images: [`${base}images/chester.jpg`],
     name: "Chester",
     quote: "We've been blown away by the great job they've done. Our holidays are so much more relaxed for having found them.",
     owner: "Charlotte",
     platform: "Rover",
   },
   {
-    src: `${base}images/matilda.jpg`,
+    images: [`${base}images/matilda.jpg`],
     name: "Matilda",
     quote: "They both cared and gave Matilda the time she needed and kept me up to date with photos. We would definitely have them come to sit again.",
     owner: "Erin",
     platform: "TrustedHouseSitters",
   },
   {
-    src: `${base}images/poppy.jpg`,
-    name: "Poppy",
-    quote: "We have 4 dogs, a cat, chooks and a big garden. The animals were very well looked after and happy. I would highly recommend these two.",
-    owner: "Angela",
-    platform: "TrustedHouseSitters",
-  },
-  {
-    src: `${base}images/molly.jpg`,
+    images: [`${base}images/molly.jpg`],
     name: "Molly & Sparky",
     quote: "They left the house perfectly clean and the pool looked amazing! Molly and Sparky were taken care of and there were no problems at all.",
     owner: "Emily",
     platform: "TrustedHouseSitters",
   },
   {
-    src: `${base}images/daisy-rocky.jpg`,
+    images: [`${base}images/daisy-rocky.jpg`],
     name: "Daisy & Rocky",
   },
   {
-    src: `${base}images/luffy.jpg`,
+    images: [`${base}images/luffy.jpg`],
     name: "Luffy",
   },
   {
-    src: `${base}images/finley.jpg`,
+    images: [`${base}images/finley.jpg`],
     name: "Finley",
   },
   {
-    src: `${base}images/hero-ted.jpg`,
+    images: [`${base}images/hero-ted.jpg`],
     name: "Hero & Ted",
   },
-] as { src: string; name: string; quote?: string; owner?: string; platform?: string }[];
+];
 ---
 
 <section id="gallery">
@@ -81,10 +105,29 @@ const pets = [
     </p>
 
     <div class="pets-grid">
-      {pets.map((pet) => (
-        <div class="pet-card">
-          <div class="pet-image">
-            <img src={pet.src} alt={pet.name} loading="lazy" />
+      {pets.map((pet, cardIndex) => (
+        <div class={`pet-card ${pet.images.length > 1 ? "has-carousel" : ""}`}>
+          <div class="pet-image" data-card={cardIndex}>
+            {pet.images.map((src, i) => (
+              <img
+                src={src}
+                alt={`${pet.name} - photo ${i + 1}`}
+                loading="lazy"
+                class={i === 0 ? "active" : ""}
+                data-slide={i}
+              />
+            ))}
+            {pet.images.length > 1 && (
+              <div class="card-dots">
+                {pet.images.map((_, i) => (
+                  <button
+                    class={`card-dot ${i === 0 ? "active" : ""}`}
+                    data-dot={i}
+                    aria-label={`Photo ${i + 1}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
           <div class="pet-info">
             <h3 class="pet-name">{pet.name}</h3>
@@ -135,21 +178,59 @@ const pets = [
   }
 
   .pet-image {
+    position: relative;
     width: 100%;
     aspect-ratio: 1;
     overflow: hidden;
   }
 
   .pet-image img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 0.3s ease;
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.3s ease;
   }
 
-  .pet-card:hover .pet-image img {
+  .pet-image img.active {
+    opacity: 1;
+  }
+
+  .pet-card:hover .pet-image img.active {
     transform: scale(1.03);
+  }
+
+  /* Single-image cards don't need absolute positioning */
+  .pet-card:not(.has-carousel) .pet-image img {
+    position: relative;
+  }
+
+  .card-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+    z-index: 2;
+  }
+
+  .card-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255, 255, 255, 0.8);
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s;
+  }
+
+  .card-dot.active {
+    background: rgba(255, 255, 255, 0.9);
   }
 
   .pet-info {
@@ -199,3 +280,42 @@ const pets = [
     }
   }
 </style>
+
+<script>
+  function initCardCarousels() {
+    document.querySelectorAll<HTMLDivElement>(".pet-image").forEach((container) => {
+      const imgs = container.querySelectorAll<HTMLImageElement>("img");
+      const dots = container.querySelectorAll<HTMLButtonElement>(".card-dot");
+      if (imgs.length <= 1) return;
+
+      let current = 0;
+      let timer: ReturnType<typeof setInterval>;
+
+      function goTo(index: number) {
+        imgs[current].classList.remove("active");
+        dots[current]?.classList.remove("active");
+        current = (index + imgs.length) % imgs.length;
+        imgs[current].classList.add("active");
+        dots[current]?.classList.add("active");
+      }
+
+      function startAuto() {
+        timer = setInterval(() => goTo(current + 1), 3500);
+      }
+
+      dots.forEach((dot, i) => {
+        dot.addEventListener("click", (e) => {
+          e.stopPropagation();
+          clearInterval(timer);
+          goTo(i);
+          startAuto();
+        });
+      });
+
+      startAuto();
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", initCardCarousels);
+  document.addEventListener("astro:page-load", initCardCarousels);
+</script>
