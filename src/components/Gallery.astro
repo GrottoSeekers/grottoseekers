@@ -4,13 +4,13 @@ const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const pets = [
   {
     name: "Chester",
-    owner: "Jess & Sam",
+    owner: "",
     images: [`${base}images/chester-1.jpg`],
     alt: ["Chester the cocker spaniel cuddling on the couch"],
   },
   {
     name: "Travis",
-    owner: "Emma",
+    owner: "",
     images: [
       `${base}images/travis-1.jpg`,
       `${base}images/travis-2.jpg`,
@@ -24,7 +24,7 @@ const pets = [
   },
   {
     name: "Solomon",
-    owner: "Thomas James",
+    owner: "",
     images: [
       `${base}images/solomon-1.jpg`,
       `${base}images/solomon-4.jpg`,
@@ -38,13 +38,13 @@ const pets = [
   },
   {
     name: "Zeus",
-    owner: "Danielle",
+    owner: "",
     images: [`${base}images/zeus-1.jpg`],
     alt: ["Zeus the Weimaraner with Callum"],
   },
   {
     name: "Alfie",
-    owner: "Carissa",
+    owner: "",
     images: [
       `${base}images/alfie-1.jpg`,
       `${base}images/alfie-2.jpg`,
@@ -56,7 +56,7 @@ const pets = [
   },
   {
     name: "Orca",
-    owner: "Ben",
+    owner: "",
     images: [
       `${base}images/orca-1.jpg`,
       `${base}images/orca-4.jpg`,
@@ -68,19 +68,19 @@ const pets = [
   },
   {
     name: "Bailey",
-    owner: "Libby",
+    owner: "",
     images: [`${base}images/black-dog-toy-1.jpg`],
     alt: ["Bailey with her champagne bottle toy"],
   },
   {
     name: "Matilda",
-    owner: "Erin",
+    owner: "",
     images: [`${base}images/matilda-1.jpg`],
     alt: ["Matilda the cocker spaniel giving Niamh a kiss"],
   },
   {
     name: "Molly & Sparky",
-    owner: "Emily",
+    owner: "",
     images: [
       `${base}images/molly-2.jpg`,
       `${base}images/sparky-1.jpg`,
@@ -94,13 +94,13 @@ const pets = [
   },
   {
     name: "Scuff",
-    owner: "Kimberley",
+    owner: "",
     images: [`${base}images/scuff-1.jpg`],
     alt: ["Scuff in Christmas reindeer antlers"],
   },
   {
     name: "Toby",
-    owner: "Phillipa",
+    owner: "",
     images: [
       `${base}images/orca-2.jpg`,
       `${base}images/orca-3.jpg`,
@@ -112,7 +112,7 @@ const pets = [
   },
   {
     name: "Lena",
-    owner: "Onur",
+    owner: "",
     images: [
       `${base}images/toby-1.jpg`,
       `${base}images/toby-2.jpg`,
@@ -130,19 +130,19 @@ const pets = [
   },
   {
     name: "Hero & Ted",
-    owner: "Charlotte",
+    owner: "",
     images: [`${base}images/hero-ted-1.jpg`],
     alt: ["Hero the Doberman and Ted cuddling on the couch"],
   },
   {
     name: "Finley",
-    owner: "Kimberley",
+    owner: "",
     images: [`${base}images/finley-1.jpg`],
     alt: ["Finley in the kitchen"],
   },
   {
     name: "Mali",
-    owner: "Elizabeth",
+    owner: "",
     images: [
       `${base}images/mali-1.jpg`,
       `${base}images/mali-2.jpg`,
@@ -160,7 +160,7 @@ const pets = [
   },
   {
     name: "YubYub",
-    owner: "Javier",
+    owner: "",
     images: [
       `${base}images/yubyub-1.jpg`,
       `${base}images/bailey-1.jpg`,
@@ -180,7 +180,7 @@ const pets = [
   },
   {
     name: "Arlo",
-    owner: "Stephanie",
+    owner: "",
     images: [
       `${base}images/arlo-1.jpg`,
       `${base}images/arlo-2.jpg`,
@@ -192,7 +192,7 @@ const pets = [
   },
   {
     name: "Angela's Pets",
-    owner: "Angela",
+    owner: "",
     images: [
       `${base}images/poppy-1.jpg`,
       `${base}images/angela-pets-1.jpg`,
@@ -247,7 +247,6 @@ const pets = [
             </div>
             <div class="pet-info">
               <span class="pet-name">{pet.name}</span>
-              {pet.owner && <span class="pet-owner">{pet.owner}</span>}
             </div>
           </div>
         ))
@@ -378,10 +377,7 @@ const pets = [
   }
 
   .pet-info {
-    padding: 16px 18px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 14px 18px;
   }
 
   .pet-name {
@@ -389,12 +385,6 @@ const pets = [
     font-weight: 700;
     font-size: 1rem;
     color: var(--brown-dark);
-  }
-
-  .pet-owner {
-    font-size: 0.8rem;
-    color: var(--text-soft);
-    font-style: italic;
   }
 
   @media (max-width: 768px) {
