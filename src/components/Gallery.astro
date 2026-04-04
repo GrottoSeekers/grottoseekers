@@ -1,13 +1,211 @@
 ---
-const base = import.meta.env.BASE_URL;
-const galleryImages = [
-  { src: `${base}images/callum-niamh-airport.jpg`, alt: "Callum and Niamh at the Etihad airport" },
-  { src: `${base}images/callum-niamh-wedding.jpg`, alt: "Callum and Niamh in a field at sunset" },
-  { src: `${base}images/callum-niamh-dinner.jpg`, alt: "Callum and Niamh at a seaside dinner" },
-  { src: `${base}images/callum-niamh-selfie.jpg`, alt: "Callum and Niamh selfie at Nu Vintage" },
-  { src: `${base}images/callum-niamh-villa.jpg`, alt: "Callum and Niamh at a villa" },
-  { src: `${base}images/callum-niamh-event.jpg`, alt: "Callum and Niamh at an evening event" },
-  { src: `${base}images/callum-niamh-boat.jpg`, alt: "Callum and Niamh on a boat at sunset" },
+const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
+
+const pets = [
+  {
+    name: "Chester",
+    owner: "Jess & Sam",
+    images: [`${base}images/chester-1.jpg`],
+    alt: ["Chester the cocker spaniel cuddling on the couch"],
+  },
+  {
+    name: "Travis",
+    owner: "Emma",
+    images: [
+      `${base}images/travis-2.jpg`,
+      `${base}images/travis-1.jpg`,
+      `${base}images/travis-3.jpg`,
+    ],
+    alt: [
+      "Travis the Vizsla close-up portrait",
+      "Travis on a countryside walk",
+      "Travis sleeping in blankets",
+    ],
+  },
+  {
+    name: "Solomon",
+    owner: "Thomas James",
+    images: [
+      `${base}images/solomon-1.jpg`,
+      `${base}images/solomon-4.jpg`,
+      `${base}images/solomon-2.jpg`,
+    ],
+    alt: [
+      "Solomon the labradoodle on the grass",
+      "Solomon in the snow",
+      "Solomon on a muddy walk",
+    ],
+  },
+  {
+    name: "Zeus",
+    owner: "Danielle",
+    images: [`${base}images/zeus-1.jpg`],
+    alt: ["Zeus the Weimaraner with Callum"],
+  },
+  {
+    name: "Alfie",
+    owner: "Carissa",
+    images: [
+      `${base}images/alfie-1.jpg`,
+      `${base}images/alfie-2.jpg`,
+    ],
+    alt: [
+      "Alfie the cockapoo with Callum",
+      "Alfie relaxing at home",
+    ],
+  },
+  {
+    name: "Orca",
+    owner: "Ben",
+    images: [
+      `${base}images/orca-1.jpg`,
+      `${base}images/orca-2.jpg`,
+      `${base}images/orca-3.jpg`,
+    ],
+    alt: [
+      "Orca the springer spaniel on the couch",
+      "Orca in the park with a stick",
+      "Orca in the kitchen",
+    ],
+  },
+  {
+    name: "Bailey",
+    owner: "Libby",
+    images: [
+      `${base}images/bailey-1.jpg`,
+      `${base}images/bailey-3.jpg`,
+    ],
+    alt: [
+      "Bailey on a sunset walk",
+      "Bailey in the garden with a tennis ball",
+    ],
+  },
+  {
+    name: "Poppy",
+    owner: "Janet",
+    images: [`${base}images/poppy-1.jpg`],
+    alt: ["Poppy the black Labrador"],
+  },
+  {
+    name: "Matilda",
+    owner: "Erin",
+    images: [`${base}images/matilda-1.jpg`],
+    alt: ["Matilda the cocker spaniel giving Niamh a kiss"],
+  },
+  {
+    name: "Molly & Sparky",
+    owner: "Emily",
+    images: [
+      `${base}images/molly-2.jpg`,
+      `${base}images/sparky-1.jpg`,
+      `${base}images/molly-3.jpg`,
+    ],
+    alt: [
+      "Molly the labradoodle at home",
+      "Sparky the bearded dragon in his terrarium",
+      "Molly in the doorway",
+    ],
+  },
+  {
+    name: "Scuff",
+    owner: "Kimberley",
+    images: [`${base}images/scuff-1.jpg`],
+    alt: ["Scuff in Christmas reindeer antlers"],
+  },
+  {
+    name: "Toby",
+    owner: "Phillipa",
+    images: [
+      `${base}images/toby-1.jpg`,
+      `${base}images/toby-2.jpg`,
+    ],
+    alt: [
+      "Toby at the back door",
+      "Toby out with Niamh at a cafe",
+    ],
+  },
+  {
+    name: "Lena",
+    owner: "Onur",
+    images: [
+      `${base}images/lena-1.jpg`,
+      `${base}images/lena-4.jpg`,
+      `${base}images/lena-5.jpg`,
+    ],
+    alt: [
+      "Lena with a ball in the park",
+      "Lena looking up on a walk",
+      "Lena out in the city at night",
+    ],
+  },
+  {
+    name: "Hero & Ted",
+    owner: "Charlotte",
+    images: [`${base}images/hero-ted-1.jpg`],
+    alt: ["Hero the Doberman and Ted cuddling on the couch"],
+  },
+  {
+    name: "Finley",
+    owner: "Kimberley",
+    images: [`${base}images/finley-1.jpg`],
+    alt: ["Finley in the kitchen"],
+  },
+  {
+    name: "Mali",
+    owner: "Elizabeth",
+    images: [
+      `${base}images/mali-1.jpg`,
+      `${base}images/mali-2.jpg`,
+    ],
+    alt: [
+      "Mali in a Santa outfit",
+      "Mali with Callum in the kitchen",
+    ],
+  },
+  {
+    name: "Luffy",
+    owner: "",
+    images: [`${base}images/luffy-1.jpg`],
+    alt: ["Luffy the chocolate spaniel puppy with Callum"],
+  },
+  {
+    name: "YubYub",
+    owner: "Javier",
+    images: [`${base}images/yubyub-1.jpg`],
+    alt: ["YubYub the cavapoo being held"],
+  },
+  {
+    name: "Daisy & Rocky",
+    owner: "",
+    images: [`${base}images/daisy-rocky-1.jpg`],
+    alt: ["Daisy and Rocky cuddling on the chair"],
+  },
+  {
+    name: "Arlo",
+    owner: "Stephanie",
+    images: [
+      `${base}images/arlo-1.jpg`,
+      `${base}images/arlo-2.jpg`,
+    ],
+    alt: [
+      "Arlo with Niamh",
+      "Arlo asleep in the car",
+    ],
+  },
+  {
+    name: "Angela's Pets",
+    owner: "Angela",
+    images: [
+      `${base}images/angela-pets-1.jpg`,
+      `${base}images/angela-pets-3.jpg`,
+      `${base}images/angela-pets-5.jpg`,
+    ],
+    alt: [
+      "Angela's dogs by the fireplace",
+      "Angela's cat in a paper bag",
+      "Angela's animals on the farm",
+    ],
+  },
 ];
 ---
 
@@ -22,26 +220,39 @@ const galleryImages = [
       for.
     </p>
 
-    <div class="gallery-slider" id="gallerySlider">
-      <div class="gallery-track" id="galleryTrack">
-        {
-          galleryImages.map((img) => (
-            <div class="gallery-slide">
-              <img src={img.src} alt={img.alt} loading="lazy" />
+    <div class="pet-grid">
+      {
+        pets.map((pet, petIdx) => (
+          <div class="pet-card" data-pet-index={petIdx}>
+            <div class="pet-carousel">
+              <div class="pet-images">
+                {pet.images.map((src, imgIdx) => (
+                  <img
+                    src={src}
+                    alt={pet.alt[imgIdx]}
+                    loading="lazy"
+                    class={imgIdx === 0 ? "active" : ""}
+                  />
+                ))}
+              </div>
+              {pet.images.length > 1 && (
+                <button class="carousel-btn carousel-prev">&lsaquo;</button>
+                <button class="carousel-btn carousel-next">&rsaquo;</button>
+                <div class="carousel-dots">
+                  {pet.images.map((_, i) => (
+                    <span class={`carousel-dot ${i === 0 ? "active" : ""}`} data-index={i} />
+                  ))}
+                </div>
+              )}
             </div>
-          ))
-        }
-      </div>
-
-      <button class="gallery-btn gallery-btn-prev" id="galleryPrev"
-        >&larr;</button
-      >
-      <button class="gallery-btn gallery-btn-next" id="galleryNext"
-        >&rarr;</button
-      >
+            <div class="pet-info">
+              <span class="pet-name">{pet.name}</span>
+              {pet.owner && <span class="pet-owner">{pet.owner}</span>}
+            </div>
+          </div>
+        ))
+      }
     </div>
-
-    <div class="gallery-dots" id="galleryDots"></div>
   </div>
 </section>
 
@@ -53,169 +264,184 @@ const galleryImages = [
 
   .gallery-intro {
     color: var(--text-soft);
-    margin-bottom: 32px;
+    margin-bottom: 40px;
     max-width: 600px;
     line-height: 1.75;
     font-size: 0.95rem;
   }
 
-  .gallery-slider {
+  .pet-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 24px;
+  }
+
+  .pet-card {
+    background: var(--warm-white);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(200, 150, 62, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .pet-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  .pet-carousel {
     position: relative;
     overflow: hidden;
-    border-radius: 12px;
   }
 
-  .gallery-track {
-    display: flex;
-    transition: transform 0.4s ease;
-  }
-
-  .gallery-slide {
-    min-width: 100%;
-    padding: 0 4px;
-  }
-
-  @media (min-width: 600px) {
-    .gallery-slide {
-      min-width: 50%;
-    }
-  }
-
-  @media (min-width: 900px) {
-    .gallery-slide {
-      min-width: 33.333%;
-    }
-  }
-
-  .gallery-slide img {
+  .pet-images {
+    position: relative;
     width: 100%;
     aspect-ratio: 4 / 3;
-    object-fit: cover;
-    border-radius: 10px;
-    display: block;
   }
 
-  .gallery-btn {
+  .pet-images img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .pet-images img.active {
+    opacity: 1;
+  }
+
+  .carousel-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(200, 150, 62, 0.2);
+    background: rgba(255, 255, 255, 0.85);
+    border: none;
     color: var(--brown-dark);
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     cursor: pointer;
-    transition:
-      background 0.2s,
-      transform 0.2s;
     display: flex;
     align-items: center;
     justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 2;
+    line-height: 1;
   }
 
-  .gallery-btn:hover {
+  .pet-card:hover .carousel-btn {
+    opacity: 1;
+  }
+
+  .carousel-btn:hover {
     background: var(--gold);
     color: #fff;
-    border-color: var(--gold);
   }
 
-  .gallery-btn-prev {
-    left: 12px;
+  .carousel-prev {
+    left: 8px;
   }
 
-  .gallery-btn-next {
-    right: 12px;
+  .carousel-next {
+    right: 8px;
   }
 
-  .gallery-dots {
+  .carousel-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
+    gap: 6px;
+    z-index: 2;
   }
 
-  .gallery-dots :global(.dot) {
-    width: 10px;
-    height: 10px;
+  .carousel-dot {
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: var(--gold-pale);
+    background: rgba(255, 255, 255, 0.5);
     cursor: pointer;
     transition: background 0.2s;
   }
 
-  .gallery-dots :global(.dot.active) {
-    background: var(--gold);
+  .carousel-dot.active {
+    background: #fff;
+  }
+
+  .pet-info {
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .pet-name {
+    font-family: var(--heading);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--brown-dark);
+  }
+
+  .pet-owner {
+    font-size: 0.8rem;
+    color: var(--text-soft);
+    font-style: italic;
   }
 
   @media (max-width: 768px) {
     section {
       padding: 60px 24px;
     }
+
+    .pet-grid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .pet-grid {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 
 <script>
-  function initGallerySlider() {
-    const track = document.getElementById("galleryTrack") as HTMLElement;
-    const slides = track?.querySelectorAll(".gallery-slide");
-    const dotsContainer = document.getElementById(
-      "galleryDots"
-    ) as HTMLElement;
-    const prevBtn = document.getElementById("galleryPrev");
-    const nextBtn = document.getElementById("galleryNext");
+  function initPetCarousels() {
+    document.querySelectorAll(".pet-card").forEach((card) => {
+      const images = card.querySelectorAll(".pet-images img");
+      const dots = card.querySelectorAll(".carousel-dot");
+      const prevBtn = card.querySelector(".carousel-prev");
+      const nextBtn = card.querySelector(".carousel-next");
 
-    if (!track || !slides || !dotsContainer) return;
+      if (images.length <= 1) return;
 
-    let current = 0;
+      let current = 0;
 
-    function getVisible() {
-      if (window.innerWidth >= 900) return 3;
-      if (window.innerWidth >= 600) return 2;
-      return 1;
-    }
-
-    function getMaxIndex() {
-      return Math.max(0, slides.length - getVisible());
-    }
-
-    function buildDots() {
-      dotsContainer.innerHTML = "";
-      const total = getMaxIndex() + 1;
-      for (let i = 0; i < total; i++) {
-        const dot = document.createElement("div");
-        dot.className = "dot" + (i === current ? " active" : "");
-        dot.addEventListener("click", () => goTo(i));
-        dotsContainer.appendChild(dot);
+      function show(idx: number) {
+        images.forEach((img) => img.classList.remove("active"));
+        dots.forEach((dot) => dot.classList.remove("active"));
+        current = ((idx % images.length) + images.length) % images.length;
+        images[current].classList.add("active");
+        dots[current]?.classList.add("active");
       }
-    }
 
-    function update() {
-      if (current > getMaxIndex()) current = getMaxIndex();
-      const slideWidth = (slides[0] as HTMLElement).offsetWidth;
-      track.style.transform = `translateX(-${current * slideWidth}px)`;
-      dotsContainer.querySelectorAll(".dot").forEach((d, i) => {
-        d.classList.toggle("active", i === current);
+      prevBtn?.addEventListener("click", () => show(current - 1));
+      nextBtn?.addEventListener("click", () => show(current + 1));
+      dots.forEach((dot, i) => {
+        dot.addEventListener("click", () => show(i));
       });
-    }
-
-    function goTo(i: number) {
-      current = Math.max(0, Math.min(i, getMaxIndex()));
-      update();
-    }
-
-    prevBtn?.addEventListener("click", () => goTo(current - 1));
-    nextBtn?.addEventListener("click", () => goTo(current + 1));
-    window.addEventListener("resize", () => {
-      buildDots();
-      update();
     });
-
-    buildDots();
-    update();
   }
 
-  document.addEventListener("DOMContentLoaded", initGallerySlider);
-  document.addEventListener("astro:page-load", initGallerySlider);
+  document.addEventListener("DOMContentLoaded", initPetCarousels);
+  document.addEventListener("astro:page-load", initPetCarousels);
 </script>
