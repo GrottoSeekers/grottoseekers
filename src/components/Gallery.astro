@@ -177,6 +177,7 @@ const pets = [
     owner: "",
     images: [`${base}images/daisy-rocky-1.jpg`],
     alt: ["Daisy and Rocky cuddling on the chair"],
+    position: "center 80%",
   },
   {
     name: "Arlo",
@@ -232,6 +233,7 @@ const pets = [
                     alt={pet.alt[imgIdx]}
                     loading="lazy"
                     class={imgIdx === 0 ? "active" : ""}
+                    style={pet.position ? `object-position: ${pet.position}` : undefined}
                   />
                 ))}
               </div>
