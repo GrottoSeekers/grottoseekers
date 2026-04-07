@@ -1,7 +1,7 @@
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  site: "https://grottoseekers.github.io",
-  base: "/grottoseekers",
+  site: "https://grottositters.com",
+  base: "/",
   output: "static",
 });
