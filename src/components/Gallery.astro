@@ -280,7 +280,10 @@ const pets = [
 
 <div class="lightbox" id="lightbox">
   <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&lsaquo;</button>
   <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+  <button class="lightbox-nav lightbox-next" id="lightboxNext">&rsaquo;</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
 </div>
 
 <style>
@@ -473,6 +476,51 @@ const pets = [
   .lightbox-close:hover {
     color: var(--gold);
   }
+
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    line-height: 1;
+  }
+
+  .lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .lightbox-nav.hidden {
+    display: none;
+  }
+
+  .lightbox-prev {
+    left: 16px;
+  }
+
+  .lightbox-next {
+    right: 16px;
+  }
+
+  .lightbox-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+  }
 </style>
 
 <script>
@@ -507,16 +555,55 @@ const pets = [
     const lightbox = document.getElementById("lightbox")!;
     const lightboxImg = document.getElementById("lightboxImg") as HTMLImageElement;
     const lightboxClose = document.getElementById("lightboxClose")!;
+    const lightboxPrev = document.getElementById("lightboxPrev")!;
+    const lightboxNext = document.getElementById("lightboxNext")!;
+    const lightboxCounter = document.getElementById("lightboxCounter")!;
 
-    document.querySelectorAll(".pet-images img").forEach((img) => {
-      img.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const target = e.currentTarget as HTMLImageElement;
-        lightboxImg.src = target.dataset.fullSrc || target.src;
-        lightboxImg.alt = target.dataset.fullAlt || target.alt;
+    let currentImages: { src: string; alt: string }[] = [];
+    let currentIndex = 0;
+
+    function showImage(idx: number) {
+      currentIndex = idx;
+      lightboxImg.src = currentImages[idx].src;
+      lightboxImg.alt = currentImages[idx].alt;
+      lightboxPrev.classList.toggle("hidden", currentImages.length <= 1);
+      lightboxNext.classList.toggle("hidden", currentImages.length <= 1);
+      lightboxCounter.textContent = currentImages.length > 1
+        ? `${idx + 1} / ${currentImages.length}`
+        : "";
+    }
+
+    document.querySelectorAll(".pet-card").forEach((card) => {
+      const imagesContainer = card.querySelector(".pet-images");
+      if (!imagesContainer) return;
+
+      imagesContainer.addEventListener("click", (e) => {
+        const allImgs = Array.from(card.querySelectorAll(".pet-images img")) as HTMLImageElement[];
+        if (!allImgs.length) return;
+
+        currentImages = allImgs.map((img) => ({
+          src: img.dataset.fullSrc || img.src,
+          alt: img.dataset.fullAlt || img.alt,
+        }));
+
+        // Find which image is currently active/visible
+        const activeImg = card.querySelector(".pet-images img.active") as HTMLImageElement;
+        const activeIdx = allImgs.indexOf(activeImg);
+        showImage(activeIdx >= 0 ? activeIdx : 0);
+
         lightbox.classList.add("open");
         document.body.style.overflow = "hidden";
       });
+    });
+
+    lightboxPrev.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showImage((currentIndex - 1 + currentImages.length) % currentImages.length);
+    });
+
+    lightboxNext.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showImage((currentIndex + 1) % currentImages.length);
     });
 
     lightboxClose.addEventListener("click", closeLightbox);
@@ -525,7 +612,10 @@ const pets = [
     });
 
     document.addEventListener("keydown", (e) => {
+      if (!lightbox.classList.contains("open")) return;
       if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") showImage((currentIndex - 1 + currentImages.length) % currentImages.length);
+      if (e.key === "ArrowRight") showImage((currentIndex + 1) % currentImages.length);
     });
 
     function closeLightbox() {
