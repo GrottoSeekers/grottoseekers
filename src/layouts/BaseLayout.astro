@@ -41,6 +41,7 @@ const base = import.meta.env.BASE_URL;
         <li><a href="#enquiry">Book Us</a></li>
       </ul>
     </nav>
+    <div class="nav-overlay" id="navOverlay"></div>
 
     <slot />
 
@@ -95,11 +96,24 @@ const base = import.meta.env.BASE_URL;
     <script>
       const toggle = document.querySelector(".nav-toggle");
       const navList = document.querySelector("nav ul");
+      const overlay = document.getElementById("navOverlay");
+
+      function closeMenu() {
+        navList?.classList.remove("open");
+        overlay?.classList.remove("open");
+        document.body.style.overflow = "";
+      }
+
       toggle?.addEventListener("click", () => {
-        navList?.classList.toggle("open");
+        const isOpen = navList?.classList.toggle("open");
+        overlay?.classList.toggle("open", isOpen);
+        document.body.style.overflow = isOpen ? "hidden" : "";
       });
+
+      overlay?.addEventListener("click", closeMenu);
+
       navList?.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", () => navList?.classList.remove("open"));
+        link.addEventListener("click", closeMenu);
       });
     </script>
   </body>
