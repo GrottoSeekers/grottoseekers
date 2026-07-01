@@ -130,6 +130,11 @@ nav ul a:hover {
   color: var(--gold);
 }
 
+/* Brand item inside mobile panel — hidden on desktop */
+.nav-panel-brand {
+  display: none;
+}
+
 /* Hamburger (mobile) */
 .nav-toggle {
   display: none;
@@ -171,14 +176,14 @@ nav ul a:hover {
     top: 0;
     right: 0;
     bottom: 0;
-    width: 260px;
+    width: 270px;
     flex-direction: column;
     background: #2c1a0e;
-    padding: 80px 32px 32px;
-    gap: 24px;
+    padding: 0 32px 32px;
+    gap: 20px;
     transform: translateX(100%);
     transition: transform 0.3s ease;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
     z-index: 110;
   }
 
@@ -186,13 +191,40 @@ nav ul a:hover {
     transform: translateX(0);
   }
 
+  .nav-panel-brand {
+    display: flex;
+    align-items: center;
+    height: 62px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding-right: 44px;
+    flex-shrink: 0;
+  }
+
+  .nav-panel-brand a {
+    font-family: "Playfair Display", serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: #ffffff;
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-panel-brand a span {
+    color: #c8963e;
+  }
+
   nav ul a {
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.14em;
   }
 
   nav ul a:hover {
     color: #c8963e;
+  }
+
+  .nav-toggle.open span {
+    background: #ffffff;
   }
 
   .nav-overlay {
