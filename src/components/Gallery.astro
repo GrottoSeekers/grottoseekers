@@ -7,7 +7,7 @@ const pets = [
     owner: "",
     images: [`${base}images/chester-1.jpg`],
     alt: ["Chester the cocker spaniel cuddling on the couch"],
-    pos: "center 30%",
+    pos: "center center",
   },
   {
     name: "Travis",
@@ -22,7 +22,7 @@ const pets = [
       "Travis the Vizsla close-up portrait",
       "Travis sleeping in blankets",
     ],
-    pos: "center 20%",
+    pos: "center 30%",
   },
   {
     name: "Solomon",
@@ -39,14 +39,14 @@ const pets = [
       "Solomon on a muddy walk",
       "Solomon in a Santa outfit",
     ],
-    pos: "center 25%",
+    pos: "center 50%",
   },
   {
     name: "Zeus",
     owner: "",
     images: [`${base}images/zeus-1.jpg`],
     alt: ["Zeus the Weimaraner with Callum"],
-    pos: "center 20%",
+    pos: "center 30%",
   },
   {
     name: "Alfie",
@@ -59,7 +59,7 @@ const pets = [
       "Alfie the cockapoo with Callum",
       "Alfie relaxing at home",
     ],
-    pos: "center 15%",
+    pos: "center 30%",
   },
   {
     name: "Orca",
@@ -72,21 +72,21 @@ const pets = [
       "Orca the springer spaniel on the couch",
       "Orca on a countryside walk",
     ],
-    pos: "center 30%",
+    pos: "center 35%",
   },
   {
     name: "Bailey",
     owner: "",
     images: [`${base}images/black-dog-toy-1.jpg`],
     alt: ["Bailey with her champagne bottle toy"],
-    pos: "center 30%",
+    pos: "center 40%",
   },
   {
     name: "Matilda",
     owner: "",
     images: [`${base}images/matilda-1.jpg`],
     alt: ["Matilda the cocker spaniel giving Niamh a kiss"],
-    pos: "center 20%",
+    pos: "center 30%",
   },
   {
     name: "Molly & Sparky",
@@ -101,14 +101,14 @@ const pets = [
       "Sparky the bearded dragon in his terrarium",
       "Molly in the doorway",
     ],
-    pos: "center 30%",
+    pos: "center 40%",
   },
   {
     name: "Scuff",
     owner: "",
     images: [`${base}images/scuff-1.jpg`],
     alt: ["Scuff in Christmas reindeer antlers"],
-    pos: "center 60%",
+    pos: "center 55%",
   },
   {
     name: "Toby",
@@ -121,7 +121,7 @@ const pets = [
       "Toby in the park with a stick",
       "Toby in the kitchen",
     ],
-    pos: "center 30%",
+    pos: "center 35%",
   },
   {
     name: "Lena",
@@ -140,21 +140,21 @@ const pets = [
       "Lena looking up on a walk",
       "Lena out in the city at night",
     ],
-    pos: "center 30%",
+    pos: "center 35%",
   },
   {
     name: "Hero & Ted",
     owner: "",
     images: [`${base}images/hero-ted-1.jpg`],
     alt: ["Hero the Doberman and Ted cuddling on the couch"],
-    pos: "center 25%",
+    pos: "center 40%",
   },
   {
     name: "Finley",
     owner: "",
     images: [`${base}images/finley-1.jpg`],
     alt: ["Finley in the kitchen"],
-    pos: "center 40%",
+    pos: "center 50%",
   },
   {
     name: "Mali",
@@ -167,14 +167,14 @@ const pets = [
       "Mali being held",
       "Mali with Callum in the kitchen",
     ],
-    pos: "center 25%",
+    pos: "center 35%",
   },
   {
     name: "Luffy",
     owner: "",
     images: [`${base}images/luffy-1.jpg`],
     alt: ["Luffy the chocolate spaniel puppy with Callum"],
-    pos: "center 15%",
+    pos: "center 40%",
   },
   {
     name: "YubYub",
@@ -187,14 +187,14 @@ const pets = [
       "YubYub on a sunset walk",
       "YubYub in the garden with a tennis ball",
     ],
-    pos: "center 30%",
+    pos: "center 35%",
   },
   {
     name: "Daisy & Rocky",
     owner: "",
     images: [`${base}images/daisy-rocky-1.jpg`],
     alt: ["Daisy and Rocky cuddling on the chair"],
-    pos: "center 60%",
+    pos: "center 55%",
   },
   {
     name: "Arlo",
@@ -207,24 +207,24 @@ const pets = [
       "Arlo with Niamh",
       "Arlo asleep in the car",
     ],
-    pos: "center 25%",
+    pos: "center 30%",
   },
   {
     name: "Angela's Pets",
     owner: "",
     images: [
+      `${base}images/angela-pets-3.jpg`,
       `${base}images/poppy-1.jpg`,
       `${base}images/angela-pets-1.jpg`,
-      `${base}images/angela-pets-3.jpg`,
       `${base}images/angela-pets-5.jpg`,
     ],
     alt: [
+      "Angela's cat in a paper bag",
       "Poppy the black Labrador",
       "Angela's dogs by the fireplace",
-      "Angela's cat in a paper bag",
       "Angela's animals on the farm",
     ],
-    pos: "center 30%",
+    pos: "center 55%",
   },
 ];
 ---
@@ -327,7 +327,7 @@ const pets = [
   .pet-images {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 4 / 5;
   }
 
   .pet-images img {
