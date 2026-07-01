@@ -1,0 +1,238 @@
+---
+export const prerender = false;
+
+import '../styles/global.css';
+import { getSession } from '../lib/auth';
+import { supabase } from '../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('slug, name, tagline, profile_pic, reviews_json')
+  .eq('user_id', session.userId)
+  .single();
+
+const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.length : 0;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>Dashboard — Grotto Sitters</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
+      <div class="nav-right">
+        <span class="nav-email">{session.email}</span>
+        <a href="/api/auth/logout" class="nav-logout">Log out</a>
+      </div>
+    </nav>
+
+    <main class="dash-wrap">
+      <div class="section-inner">
+        <header class="dash-header">
+          <div>
+            <p class="section-label">Sitter Portal</p>
+            <h1 class="section-title">Your Dashboard</h1>
+            <div class="divider"></div>
+          </div>
+        </header>
+
+        {profile ? (
+          <div class="dash-grid">
+            <!-- Profile card -->
+            <div class="dash-card profile-card">
+              <div class="profile-card-inner">
+                {profile.profile_pic && (
+                  <img src={profile.profile_pic} alt={profile.name} class="profile-avatar" />
+                )}
+                <div class="profile-card-info">
+                  <h2 class="profile-name">{profile.name}</h2>
+                  {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
+                  <a href={`/profile/${profile.slug}`} target="_blank" class="profile-link">
+                    grottositters.com/profile/{profile.slug} ↗
+                  </a>
+                </div>
+              </div>
+              <div class="profile-card-actions">
+                <a href={`/profile/${profile.slug}`} target="_blank" class="btn-primary">View public page</a>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <span class="stat-number">{reviewCount}</span>
+                <span class="stat-label">Reviews</span>
+              </div>
+              <div class="stat-card">
+                <span class="stat-number">★ 5.0</span>
+                <span class="stat-label">Rating</span>
+              </div>
+            </div>
+
+            <!-- Share card -->
+            <div class="dash-card share-card">
+              <h3>Share your profile</h3>
+              <p>Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
+              <div class="share-url">
+                <input
+                  type="text"
+                  readonly
+                  value={`https://grottositters.com/profile/${profile.slug}`}
+                  id="shareUrl"
+                />
+                <button onclick="copyUrl()" class="copy-btn">Copy</button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div class="no-profile">
+            <div class="no-profile-icon">🐾</div>
+            <h2>You don't have a profile yet</h2>
+            <p>Create your sitter profile to get a shareable page with your bio, photos, and reviews.</p>
+            <a href="/profile/create" class="btn-primary">Create your profile</a>
+          </div>
+        )}
+      </div>
+    </main>
+
+    <script>
+      function copyUrl() {
+        const input = document.getElementById('shareUrl') as HTMLInputElement;
+        input?.select();
+        navigator.clipboard?.writeText(input?.value ?? '').then(() => {
+          const btn = document.querySelector('.copy-btn') as HTMLButtonElement;
+          if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+        });
+      }
+    </script>
+
+    <style>
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+
+      nav {
+        position: static;
+        border-bottom: 1px solid rgba(200,150,62,0.2);
+        padding: 18px 48px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .nav-right { display: flex; align-items: center; gap: 20px; }
+      .nav-email { font-size: 0.85rem; color: var(--text-soft); }
+      .nav-logout {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--gold);
+        text-decoration: none;
+      }
+      .nav-logout:hover { color: var(--brown-dark); }
+
+      .dash-wrap { flex: 1; padding: 60px 48px; }
+      .dash-header { margin-bottom: 40px; }
+
+      .dash-grid {
+        display: grid;
+        grid-template-columns: 1fr 260px;
+        grid-template-rows: auto auto;
+        gap: 24px;
+      }
+
+      .dash-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
+      }
+
+      .profile-card { grid-column: 1; grid-row: 1; }
+      .profile-card-inner { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 24px; }
+      .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+      .profile-name { font-family: "Playfair Display", serif; font-size: 1.4rem; color: var(--brown-dark); margin-bottom: 6px; }
+      .profile-tagline { font-size: 0.9rem; color: var(--text-soft); line-height: 1.5; margin-bottom: 10px; }
+      .profile-link { font-size: 0.8rem; color: var(--gold); font-weight: 700; text-decoration: none; letter-spacing: 0.03em; }
+      .profile-link:hover { text-decoration: underline; }
+      .profile-card-actions { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 24px; }
+
+      .stats-grid { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 16px; }
+      .stat-card {
+        background: #fff;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
+        text-align: center;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .stat-number { font-family: "Playfair Display", serif; font-size: 2rem; color: var(--gold); font-weight: 700; }
+      .stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); }
+
+      .share-card { grid-column: 1 / -1; grid-row: 2; }
+      .share-card h3 { font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark); margin-bottom: 8px; }
+      .share-card p { font-size: 0.9rem; color: var(--text-soft); margin-bottom: 16px; line-height: 1.6; }
+      .share-url { display: flex; gap: 10px; }
+      .share-url input {
+        flex: 1;
+        border: 1.5px solid rgba(44,26,14,0.15);
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        font-family: "Lato", sans-serif;
+        color: var(--text);
+        background: var(--cream);
+        outline: none;
+      }
+      .copy-btn {
+        background: var(--gold);
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 10px 20px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.2s;
+      }
+      .copy-btn:hover { background: var(--gold-light); }
+
+      .no-profile {
+        background: #fff;
+        border-radius: 12px;
+        padding: 80px 48px;
+        text-align: center;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
+        max-width: 520px;
+        margin: 0 auto;
+      }
+      .no-profile-icon { font-size: 3rem; margin-bottom: 20px; }
+      .no-profile h2 { font-family: "Playfair Display", serif; font-size: 1.6rem; color: var(--brown-dark); margin-bottom: 12px; }
+      .no-profile p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 32px; }
+
+      @media (max-width: 768px) {
+        nav { padding: 14px 24px; }
+        .nav-email { display: none; }
+        .dash-wrap { padding: 40px 24px; }
+        .dash-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+        .stats-grid { grid-column: 1; grid-row: 2; flex-direction: row; }
+        .share-card { grid-column: 1; grid-row: 3; }
+        .share-url { flex-direction: column; }
+        .no-profile { padding: 48px 24px; }
+      }
+    </style>
+  </body>
+</html>
