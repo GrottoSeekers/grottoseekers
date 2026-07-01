@@ -170,12 +170,12 @@ nav ul a:hover {
     bottom: 0;
     width: 260px;
     flex-direction: column;
-    background: var(--cream);
+    background: #2c1a0e;
     padding: 80px 32px 32px;
     gap: 24px;
     transform: translateX(100%);
     transition: transform 0.3s ease;
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.3);
     z-index: 110;
   }
 
@@ -184,8 +184,12 @@ nav ul a:hover {
   }
 
   nav ul a {
-    color: var(--brown-dark);
+    color: #ffffff;
     font-size: 1rem;
+  }
+
+  nav ul a:hover {
+    color: #c8963e;
   }
 
   .nav-overlay {
