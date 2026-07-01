@@ -1,30 +1,28 @@
 ---
 const base = import.meta.env.BASE_URL.replace(/\/?$/, "/");
 const heroImages = [
-  `${base}images/couple-boat-1.jpg`,
-  `${base}images/couple-dinner-1.jpg`,
-  `${base}images/couple-field-1.jpg`,
-  `${base}images/couple-villa-1.jpg`,
-  `${base}images/couple-airport-1.jpg`,
-  `${base}images/couple-bw-1.jpg`,
+  { src: `${base}images/couple-dinner-1.jpg`, pos: "center 25%" },
+  { src: `${base}images/couple-airport-1.jpg`, pos: "center 25%" },
+  { src: `${base}images/couple-field-1.jpg`, pos: "center 15%" },
+  { src: `${base}images/couple-bw-1.jpg`, pos: "center 15%" },
 ];
 ---
 
 <section class="hero">
   <div class="hero-slideshow" id="heroSlideshow">
-    {heroImages.map((src, i) => (
+    {heroImages.map((img, i) => (
       <div class={`hero-slide ${i === 0 ? "active" : ""}`}>
-        <img src={src} alt="" loading={i === 0 ? "eager" : "lazy"} />
+        <img src={img.src} alt="" loading={i === 0 ? "eager" : "lazy"} style={`object-position: ${img.pos}`} />
       </div>
     ))}
   </div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <p class="hero-badge">UK & Australia</p>
+    <p class="hero-badge">Currently in Australia — Returning to the UK October 2026</p>
     <h1>Grotto<br /><em>Sitters</em></h1>
     <p class="hero-names">Callum Disley & Niamh Roche</p>
     <p class="hero-tagline">
-      Trusted house & pet sitters, wherever in the world you call home.
+      Experienced house & pet sitters available across Australia now and the UK from October.
     </p>
     <a href="#enquiry" class="btn-primary">Book Us Today</a>
   </div>
@@ -32,13 +30,13 @@ const heroImages = [
 
 <style>
   .hero {
-    min-height: 100vh;
+    min-height: 70vh;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
-    padding: 120px 48px 80px;
+    padding: 100px 48px 60px;
     text-align: center;
   }
 

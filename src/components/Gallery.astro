@@ -7,7 +7,7 @@ const pets = [
     owner: "",
     images: [`${base}images/chester-1.jpg`],
     alt: ["Chester the cocker spaniel cuddling on the couch"],
-    position: "center 60%",
+    pos: "center center",
   },
   {
     name: "Travis",
@@ -22,6 +22,7 @@ const pets = [
       "Travis the Vizsla close-up portrait",
       "Travis sleeping in blankets",
     ],
+    pos: "center 30%",
   },
   {
     name: "Solomon",
@@ -30,18 +31,22 @@ const pets = [
       `${base}images/solomon-1.jpg`,
       `${base}images/solomon-4.jpg`,
       `${base}images/solomon-2.jpg`,
+      `${base}images/mali-1.jpg`,
     ],
     alt: [
       "Solomon the labradoodle on the grass",
       "Solomon in the snow",
       "Solomon on a muddy walk",
+      "Solomon in a Santa outfit",
     ],
+    pos: "center 50%",
   },
   {
     name: "Zeus",
     owner: "",
     images: [`${base}images/zeus-1.jpg`],
     alt: ["Zeus the Weimaraner with Callum"],
+    pos: "center 30%",
   },
   {
     name: "Alfie",
@@ -54,6 +59,7 @@ const pets = [
       "Alfie the cockapoo with Callum",
       "Alfie relaxing at home",
     ],
+    pos: "center 30%",
   },
   {
     name: "Orca",
@@ -66,18 +72,21 @@ const pets = [
       "Orca the springer spaniel on the couch",
       "Orca on a countryside walk",
     ],
+    pos: "center 35%",
   },
   {
     name: "Bailey",
     owner: "",
     images: [`${base}images/black-dog-toy-1.jpg`],
     alt: ["Bailey with her champagne bottle toy"],
+    pos: "center 40%",
   },
   {
     name: "Matilda",
     owner: "",
     images: [`${base}images/matilda-1.jpg`],
     alt: ["Matilda the cocker spaniel giving Niamh a kiss"],
+    pos: "center 30%",
   },
   {
     name: "Molly & Sparky",
@@ -92,12 +101,14 @@ const pets = [
       "Sparky the bearded dragon in his terrarium",
       "Molly in the doorway",
     ],
+    pos: "center 40%",
   },
   {
     name: "Scuff",
     owner: "",
     images: [`${base}images/scuff-1.jpg`],
     alt: ["Scuff in Christmas reindeer antlers"],
+    pos: "center 55%",
   },
   {
     name: "Toby",
@@ -110,6 +121,7 @@ const pets = [
       "Toby in the park with a stick",
       "Toby in the kitchen",
     ],
+    pos: "center 35%",
   },
   {
     name: "Lena",
@@ -128,59 +140,61 @@ const pets = [
       "Lena looking up on a walk",
       "Lena out in the city at night",
     ],
+    pos: "center 35%",
   },
   {
     name: "Hero & Ted",
     owner: "",
     images: [`${base}images/hero-ted-1.jpg`],
     alt: ["Hero the Doberman and Ted cuddling on the couch"],
-    position: "center 30%",
+    pos: "center 40%",
   },
   {
     name: "Finley",
     owner: "",
     images: [`${base}images/finley-1.jpg`],
     alt: ["Finley in the kitchen"],
+    pos: "center 50%",
   },
   {
     name: "Mali",
     owner: "",
     images: [
-      `${base}images/mali-1.jpg`,
+      `${base}images/yubyub-1.jpg`,
       `${base}images/mali-2.jpg`,
     ],
     alt: [
-      "Mali in a Santa outfit",
+      "Mali being held",
       "Mali with Callum in the kitchen",
     ],
+    pos: "center 35%",
   },
   {
     name: "Luffy",
     owner: "",
     images: [`${base}images/luffy-1.jpg`],
     alt: ["Luffy the chocolate spaniel puppy with Callum"],
-    position: "center 20%",
+    pos: "center 40%",
   },
   {
     name: "YubYub",
     owner: "",
     images: [
-      `${base}images/yubyub-1.jpg`,
       `${base}images/bailey-1.jpg`,
       `${base}images/bailey-3.jpg`,
     ],
     alt: [
-      "YubYub the cavapoo being held",
       "YubYub on a sunset walk",
       "YubYub in the garden with a tennis ball",
     ],
+    pos: "center 35%",
   },
   {
     name: "Daisy & Rocky",
     owner: "",
     images: [`${base}images/daisy-rocky-1.jpg`],
     alt: ["Daisy and Rocky cuddling on the chair"],
-    position: "center 80%",
+    pos: "center 55%",
   },
   {
     name: "Arlo",
@@ -193,6 +207,7 @@ const pets = [
       "Arlo with Niamh",
       "Arlo asleep in the car",
     ],
+    pos: "center 30%",
   },
   {
     name: "Angela's Pets",
@@ -209,7 +224,7 @@ const pets = [
       "Angela's dogs by the fireplace",
       "Angela's animals on the farm",
     ],
-    position: "center 40%",
+    pos: "center 55%",
   },
 ];
 ---
@@ -220,9 +235,9 @@ const pets = [
     <h2 class="section-title">The ones we've loved</h2>
     <div class="divider"></div>
     <p class="gallery-intro">
-      From Sydney to the English countryside — every sit brings new friends.
-      Here are some of the wonderful animals we've had the pleasure of caring
-      for.
+      From the English countryside to the suburbs of Sydney — every sit brings
+      new friends. Here are some of the wonderful animals we've had the
+      pleasure of caring for since we started sitting in the UK and Australia.
     </p>
 
     <div class="pet-grid">
@@ -237,7 +252,9 @@ const pets = [
                     alt={pet.alt[imgIdx]}
                     loading="lazy"
                     class={imgIdx === 0 ? "active" : ""}
-                    style={pet.position ? `object-position: ${pet.position}` : undefined}
+                    style={`object-position: ${pet.pos}`}
+                    data-full-src={src}
+                    data-full-alt={pet.alt[imgIdx]}
                   />
                 ))}
               </div>
@@ -260,6 +277,14 @@ const pets = [
     </div>
   </div>
 </section>
+
+<div class="lightbox" id="lightbox">
+  <button class="lightbox-close" id="lightboxClose">&times;</button>
+  <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&lsaquo;</button>
+  <img class="lightbox-img" id="lightboxImg" src="" alt="" />
+  <button class="lightbox-nav lightbox-next" id="lightboxNext">&rsaquo;</button>
+  <div class="lightbox-counter" id="lightboxCounter"></div>
+</div>
 
 <style>
   section {
@@ -312,7 +337,7 @@ const pets = [
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center center;
+    cursor: pointer;
     opacity: 0;
     transition: opacity 0.35s ease;
   }
@@ -411,6 +436,93 @@ const pets = [
   }
 </style>
 
+<style is:global>
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.9);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .lightbox.open {
+    display: flex;
+  }
+
+  .lightbox-img {
+    width: 85vw;
+    height: 85vh;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .lightbox-close {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2.5rem;
+    cursor: pointer;
+    z-index: 10000;
+    line-height: 1;
+    padding: 8px;
+  }
+
+  .lightbox-close:hover {
+    color: var(--gold);
+  }
+
+  .lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    line-height: 1;
+  }
+
+  .lightbox-nav:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  .lightbox-nav.hidden {
+    display: none;
+  }
+
+  .lightbox-prev {
+    left: 16px;
+  }
+
+  .lightbox-next {
+    right: 16px;
+  }
+
+  .lightbox-counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+  }
+</style>
+
 <script>
   function initPetCarousels() {
     document.querySelectorAll(".pet-card").forEach((card) => {
@@ -439,6 +551,79 @@ const pets = [
     });
   }
 
-  document.addEventListener("DOMContentLoaded", initPetCarousels);
-  document.addEventListener("astro:page-load", initPetCarousels);
+  function initLightbox() {
+    const lightbox = document.getElementById("lightbox")!;
+    const lightboxImg = document.getElementById("lightboxImg") as HTMLImageElement;
+    const lightboxClose = document.getElementById("lightboxClose")!;
+    const lightboxPrev = document.getElementById("lightboxPrev")!;
+    const lightboxNext = document.getElementById("lightboxNext")!;
+    const lightboxCounter = document.getElementById("lightboxCounter")!;
+
+    let currentImages: { src: string; alt: string }[] = [];
+    let currentIndex = 0;
+
+    function showImage(idx: number) {
+      currentIndex = idx;
+      lightboxImg.src = currentImages[idx].src;
+      lightboxImg.alt = currentImages[idx].alt;
+      lightboxPrev.classList.toggle("hidden", currentImages.length <= 1);
+      lightboxNext.classList.toggle("hidden", currentImages.length <= 1);
+      lightboxCounter.textContent = currentImages.length > 1
+        ? `${idx + 1} / ${currentImages.length}`
+        : "";
+    }
+
+    document.querySelectorAll(".pet-card").forEach((card) => {
+      const imagesContainer = card.querySelector(".pet-images");
+      if (!imagesContainer) return;
+
+      imagesContainer.addEventListener("click", (e) => {
+        const allImgs = Array.from(card.querySelectorAll(".pet-images img")) as HTMLImageElement[];
+        if (!allImgs.length) return;
+
+        currentImages = allImgs.map((img) => ({
+          src: img.dataset.fullSrc || img.src,
+          alt: img.dataset.fullAlt || img.alt,
+        }));
+
+        // Find which image is currently active/visible
+        const activeImg = card.querySelector(".pet-images img.active") as HTMLImageElement;
+        const activeIdx = allImgs.indexOf(activeImg);
+        showImage(activeIdx >= 0 ? activeIdx : 0);
+
+        lightbox.classList.add("open");
+        document.body.style.overflow = "hidden";
+      });
+    });
+
+    lightboxPrev.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showImage((currentIndex - 1 + currentImages.length) % currentImages.length);
+    });
+
+    lightboxNext.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showImage((currentIndex + 1) % currentImages.length);
+    });
+
+    lightboxClose.addEventListener("click", closeLightbox);
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeLightbox();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (!lightbox.classList.contains("open")) return;
+      if (e.key === "Escape") closeLightbox();
+      if (e.key === "ArrowLeft") showImage((currentIndex - 1 + currentImages.length) % currentImages.length);
+      if (e.key === "ArrowRight") showImage((currentIndex + 1) % currentImages.length);
+    });
+
+    function closeLightbox() {
+      lightbox.classList.remove("open");
+      document.body.style.overflow = "";
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => { initPetCarousels(); initLightbox(); });
+  document.addEventListener("astro:page-load", () => { initPetCarousels(); initLightbox(); });
 </script>
