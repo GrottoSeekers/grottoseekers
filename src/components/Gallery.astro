@@ -7,6 +7,7 @@ const pets = [
     owner: "",
     images: [`${base}images/chester-1.jpg`],
     alt: ["Chester the cocker spaniel cuddling on the couch"],
+    position: "center 60%",
   },
   {
     name: "Travis",
@@ -133,6 +134,7 @@ const pets = [
     owner: "",
     images: [`${base}images/hero-ted-1.jpg`],
     alt: ["Hero the Doberman and Ted cuddling on the couch"],
+    position: "center 30%",
   },
   {
     name: "Finley",
@@ -157,6 +159,7 @@ const pets = [
     owner: "",
     images: [`${base}images/luffy-1.jpg`],
     alt: ["Luffy the chocolate spaniel puppy with Callum"],
+    position: "center 20%",
   },
   {
     name: "YubYub",
@@ -195,17 +198,18 @@ const pets = [
     name: "Angela's Pets",
     owner: "",
     images: [
+      `${base}images/angela-pets-3.jpg`,
       `${base}images/poppy-1.jpg`,
       `${base}images/angela-pets-1.jpg`,
-      `${base}images/angela-pets-3.jpg`,
       `${base}images/angela-pets-5.jpg`,
     ],
     alt: [
+      "Angela's cat in a paper bag",
       "Poppy the black Labrador",
       "Angela's dogs by the fireplace",
-      "Angela's cat in a paper bag",
       "Angela's animals on the farm",
     ],
+    position: "center 40%",
   },
 ];
 ---
@@ -298,7 +302,7 @@ const pets = [
   .pet-images {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 4 / 5;
   }
 
   .pet-images img {
@@ -308,7 +312,7 @@ const pets = [
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 20%;
+    object-position: center center;
     opacity: 0;
     transition: opacity 0.35s ease;
   }
