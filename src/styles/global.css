@@ -183,6 +183,11 @@ nav ul a:hover {
     transform: translateX(0);
   }
 
+  nav ul a {
+    color: var(--brown-dark);
+    font-size: 1rem;
+  }
+
   .nav-overlay {
     display: block;
     position: fixed;
