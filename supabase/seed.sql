@@ -1,0 +1,198 @@
+-- ═══════════════════════════════════════════════════════════════════
+--  Grotto Sitters — Seed Script
+--  Seeds Callum & Niamh's existing site data as the permanent
+--  founding account. Run AFTER schema.sql.
+--
+--  BEFORE RUNNING:
+--    Replace the password placeholder on line ~22 with a real bcrypt hash.
+--    Generate one (Node.js):
+--      npm install -g bcryptjs
+--      node -e "require('bcryptjs').hash('YourPassword123', 12).then(console.log)"
+-- ═══════════════════════════════════════════════════════════════════
+
+
+-- ── 1. USER ──────────────────────────────────────────────────────────────────
+-- Fixed UUID so the profile FK is deterministic and the seed is idempotent.
+INSERT INTO users (id, email, password)
+VALUES (
+  'a0000000-0000-0000-0000-000000000001'::uuid,
+  'callumgarydisley@outlook.com',
+  '$2b$12$REPLACE_THIS_WITH_YOUR_ACTUAL_BCRYPT_HASH'   -- ← update this
+)
+ON CONFLICT (email) DO NOTHING;
+
+
+-- ── 2. PROFILE ───────────────────────────────────────────────────────────────
+INSERT INTO profiles (
+  user_id,
+  slug,
+  name,
+  tagline,
+  badge_text,
+  bio,
+  profile_pic,
+  hero_images_json,
+  about_images_json,
+  gallery_json,
+  reviews_json,
+  platforms_json
+)
+VALUES (
+
+  -- user_id
+  'a0000000-0000-0000-0000-000000000001'::uuid,
+
+  -- slug  →  /profile/callum-and-niamh
+  'callum-and-niamh',
+
+  -- name
+  'Callum & Niamh',
+
+  -- tagline (hero sub-headline)
+  'Experienced house & pet sitters available across Australia now and the UK from October.',
+
+  -- badge_text (small pill shown in the hero)
+  'Currently in Australia — Returning to the UK October 2026',
+
+  -- bio  (paragraphs separated by blank lines — template splits on \n\n)
+  -- Dollar-quoting avoids escaping the apostrophes throughout
+  $bio$We're Callum & Niamh, a couple from the UK who have been house and pet sitting full-time across Australia since December 2025. With years of experience caring for pets and homes back in Britain, we brought that same dedication with us Down Under.
+
+Whether it's a weekend away or a month-long trip, we move in and keep everything running smoothly — daily walks, feeding routines, garden care, and plenty of love for your animals. We treat every sit like it's our own home.
+
+We're returning to the UK in October 2026 and would love to hear from pet owners looking for reliable sitters — whether you're in Australia now or planning ahead in the UK. We're verified on Rover and TrustedHouseSitters, with over 40 five-star reviews.$bio$,
+
+  -- profile_pic
+  'https://grottositters.com/images/couple-field-1.jpg',
+
+  -- hero_images_json  [{src, pos}]
+  '[
+    {"src": "https://grottositters.com/images/couple-dinner-1.jpg",  "pos": "center 25%"},
+    {"src": "https://grottositters.com/images/couple-airport-1.jpg", "pos": "center 25%"},
+    {"src": "https://grottositters.com/images/couple-field-1.jpg",   "pos": "center 15%"},
+    {"src": "https://grottositters.com/images/couple-bw-1.jpg",      "pos": "center 15%"}
+  ]'::jsonb,
+
+  -- about_images_json  [{src, alt}]
+  '[
+    {"src": "https://grottositters.com/images/couple-boat-1.jpg",    "alt": "Callum and Niamh on a boat at sunset"},
+    {"src": "https://grottositters.com/images/couple-dinner-1.jpg",  "alt": "Callum and Niamh at a seaside dinner"},
+    {"src": "https://grottositters.com/images/couple-field-1.jpg",   "alt": "Callum and Niamh in a field at sunset"},
+    {"src": "https://grottositters.com/images/couple-villa-1.jpg",   "alt": "Callum and Niamh at a villa"},
+    {"src": "https://grottositters.com/images/couple-night-1.jpg",   "alt": "Callum and Niamh out at night"},
+    {"src": "https://grottositters.com/images/couple-bw-1.jpg",      "alt": "Callum and Niamh black and white"},
+    {"src": "https://grottositters.com/images/couple-airport-1.jpg", "alt": "Callum and Niamh at the airport"}
+  ]'::jsonb,
+
+  -- gallery_json  [{src, alt}]
+  '[
+    {"src": "https://grottositters.com/images/chester-1.jpg",  "alt": "Chester the cocker spaniel"},
+    {"src": "https://grottositters.com/images/travis-1.jpg",   "alt": "Travis on a countryside walk"},
+    {"src": "https://grottositters.com/images/travis-2.jpg",   "alt": "Travis the Vizsla close-up"},
+    {"src": "https://grottositters.com/images/travis-3.jpg",   "alt": "Travis sleeping in blankets"},
+    {"src": "https://grottositters.com/images/solomon-1.jpg",  "alt": "Solomon the labradoodle"},
+    {"src": "https://grottositters.com/images/solomon-4.jpg",  "alt": "Solomon in the snow"},
+    {"src": "https://grottositters.com/images/solomon-2.jpg",  "alt": "Solomon on a muddy walk"},
+    {"src": "https://grottositters.com/images/zeus-1.jpg",     "alt": "Zeus the Weimaraner with Callum"},
+    {"src": "https://grottositters.com/images/alfie-1.jpg",    "alt": "Alfie the cockapoo with Callum"},
+    {"src": "https://grottositters.com/images/alfie-2.jpg",    "alt": "Alfie relaxing at home"}
+  ]'::jsonb,
+
+  -- reviews_json  [{text, name, initials, platform}]
+  -- Dollar-quoting handles all apostrophes inside review text
+  $reviews$[
+    {
+      "text": "Super lovely couple who took great care of our cat Rocco! They sent regular updates and pictures and kept us in the loop throughout the trip. Rocco was extremely happy when we got home and seemed very at ease. Our apartment was also in wonderful condition!",
+      "name": "Jess & Sam", "initials": "JS",
+      "platform": "TrustedHouseSitters · Sydney, NSW"
+    },
+    {
+      "text": "Callum and Niamh were and are a delightful couple. The house was impeccable on our return and the animals were well looked after. They both went out of their way to come and meet me a few weeks before our departure which put me at absolute ease. Both would be welcomed back anytime.",
+      "name": "Janet", "initials": "JA",
+      "platform": "TrustedHouseSitters · Kurrajong Heights, NSW · Mar 2026"
+    },
+    {
+      "text": "Callum & Niamh were amazing sitters! We came home to happy puppies and they went the extra mile. One of our dogs wasn't feeling well and they took excellent care of everything. I'm so grateful our dogs were in such great hands. The house was spotless and they were a pleasure to talk with!",
+      "name": "Heather", "initials": "HE",
+      "platform": "TrustedHouseSitters · Sydney, NSW · Mar 2026"
+    },
+    {
+      "text": "We couldn't have asked for better pet sitters. From start to finish Callum and Niamh were reliable, trustworthy, and incredibly caring with Bailey. They were very communicative, providing updates and photos the whole time. They also left our home spotless. They absolutely exceeded expectations. Bailey clearly loved them too!",
+      "name": "Libby", "initials": "LI",
+      "platform": "TrustedHouseSitters · Sydney, NSW · Feb 2026"
+    },
+    {
+      "text": "Callum and Niamh were just lovely house sitters. We have 4 dogs, a cat, chooks and a big garden. The animals were very well looked after and happy. The house was tidy and sheets washed. I would be very happy to recommend these two lovely people to anyone.",
+      "name": "Angela", "initials": "AN",
+      "platform": "TrustedHouseSitters · Bowral, NSW · Jan–Feb 2026"
+    },
+    {
+      "text": "Callum and Niamh were amazing. Mali took to them immediately, especially as Mali doesn't usually take to men quickly. They were loving and took great care of him, even taking him for walks in the rain. Our place was left in perfect condition. Mali adored them — so grateful our first experience with a sitter was so perfect!",
+      "name": "Elizabeth", "initials": "EL",
+      "platform": "TrustedHouseSitters · Faulconbridge, NSW · Jan 2026"
+    },
+    {
+      "text": "Niamh and Callum were the perfect house sitters — reliable with fantastic communication. They looked after Zeus and the house impeccably. We're pretty sure Zeus was disappointed when we came home! We wish them all the very best and hope to see them again. Zeus already misses them!",
+      "name": "Danielle", "initials": "DA",
+      "platform": "TrustedHouseSitters · Sydney, NSW · Jan 2026"
+    },
+    {
+      "text": "Our 3 pets loved their time with Callum and Niamh for 2 weeks over Christmas — Scuff is still looking in the spare room to check if his friends have really gone! We appreciated the regular updates and photos, and their due diligence taking Scuff out in the cooler parts of the day during 35–40 degree heat. Would have them back anytime!",
+      "name": "Kimberley", "initials": "KI",
+      "platform": "TrustedHouseSitters · Joondalup, WA · Dec 2025–Jan 2026"
+    },
+    {
+      "text": "Callum and his partner looked after our Spaniel whilst we were away for a week — both lovely, very professional but also super friendly. Toby looked very happy and chilled and came home so content! We would absolutely use Callum again in a heartbeat and would highly recommend.",
+      "name": "Phillipa", "initials": "PH",
+      "platform": "Rover · United Kingdom · Oct 2025"
+    },
+    {
+      "text": "I wouldn't hesitate in recommending Callum & Niamh. They took excellent care of both our dogs for 2 weeks, provided daily updates and photos. The dogs were exercised, loved and treated like family. I was so content knowing they were enjoying their holiday whilst we were on ours. You won't find better!",
+      "name": "Deb", "initials": "DE",
+      "platform": "Rover · United Kingdom · Sep 2025"
+    },
+    {
+      "text": "Callum and Niamh have looked after my Hungarian Vizsla Travis on multiple home stays and are his regular dog walkers. They have a key to my house — they are trustworthy and reliable and he adores them, to the point where he drags me to their house. When Travis was ill at a festival stay, they handled two vet visits brilliantly. I would highly recommend them to anyone.",
+      "name": "Emma", "initials": "EM",
+      "platform": "Rover · United Kingdom · Sep 2025"
+    },
+    {
+      "text": "Callum and Niamh have come to stay at our home to look after our cocker spaniel and tabby cat whenever we go away. On each occasion we've been blown away by the great job they've done. Our holidays are so much more relaxed for having found them — we go away knowing our most loved pets and possessions are being cared for just as we would. Thanks again!",
+      "name": "Charlotte", "initials": "CH",
+      "platform": "Rover · United Kingdom · Sep 2025"
+    },
+    {
+      "text": "Callum and his partner Niamh have looked after my labradoodle Solomon for the last four years, since he was a puppy. Solly absolutely adores them both. They are reliable, trustworthy, and clearly care about his wellbeing. Whether it's regular walks, overnight stays, or house-sitting, they go above and beyond. I couldn't recommend them highly enough.",
+      "name": "Thomas James", "initials": "TJ",
+      "platform": "Rover · United Kingdom · Sep 2025"
+    },
+    {
+      "text": "Callum and Niamh have looked after our dog multiple times and we couldn't recommend them enough. They are both lovely, kind and genuine people who put you at ease the moment you meet them. We can fully relax when away, knowing our dog is in the very best possible care. She completely adores them — you won't find a more trustworthy, dependable couple!",
+      "name": "Ben", "initials": "BE",
+      "platform": "Rover · United Kingdom · Sep 2025"
+    },
+    {
+      "text": "Callum and his partner were recommended to look after my home and cat while I was abroad. Cat was very well cared for with regular WhatsApp updates. My home was immaculate on return — better than I'd left it. They even left fresh milk and bread, and washed the bedding. So thoughtful and considerate. I'd highly recommend and would use again.",
+      "name": "Anne-Marie", "initials": "AM",
+      "platform": "Rover · United Kingdom · Sep 2025"
+    }
+  ]$reviews$::jsonb,
+
+  -- platforms_json  [{name, url, emoji, description}]
+  '[
+    {
+      "name": "Rover",
+      "url": "https://www.rover.com/sit/callud53623",
+      "emoji": "🐕",
+      "description": "Our UK-based profile with verified reviews from pet owners across Britain."
+    },
+    {
+      "name": "TrustedHouseSitters",
+      "url": "https://www.trustedhousesitters.com/house-and-pet-sitters/australia/new-south-wales/sydney/l/6979617/",
+      "emoji": "🏠",
+      "description": "Our Australian profile with house and pet sitting reviews from across the country."
+    }
+  ]'::jsonb
+
+)
+ON CONFLICT (slug) DO NOTHING;
