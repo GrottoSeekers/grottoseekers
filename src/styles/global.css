@@ -130,6 +130,25 @@ nav ul a:hover {
   color: var(--gold);
 }
 
+.nav-cta {
+  background: var(--gold);
+  color: #fff !important;
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 0.82rem !important;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.nav-cta:hover {
+  background: var(--gold-light);
+  color: #fff !important;
+  transform: translateY(-1px);
+}
+
+.nav-link-muted {
+  color: var(--text-soft) !important;
+}
+
 /* Hamburger (mobile) */
 .nav-toggle {
   display: none;

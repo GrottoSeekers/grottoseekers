@@ -1,0 +1,131 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="hero">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <p class="hero-badge">&#128062; For Pet & House Sitters</p>
+    <h1>Your sitting business,<br /><em>online in minutes.</em></h1>
+    <p class="hero-tagline">
+      GrottoSitters gives professional pet &amp; house sitters their own
+      beautiful website with a booking enquiry form, photo gallery, and reviews
+      — all in one place. No coding required.
+    </p>
+    <div class="hero-actions">
+      <a href={`${base}signup`} class="btn-primary">Start Free Trial</a>
+      <a href="#showcase" class="btn-secondary">See an Example</a>
+    </div>
+    <p class="hero-trial-note">1 month free, then just &pound;9/month. Cancel anytime.</p>
+  </div>
+</section>
+
+<style>
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: var(--gold-pale);
+    padding: 120px 48px 80px;
+    text-align: center;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(200, 150, 62, 0.15) 0%,
+      rgba(250, 246, 238, 0.6) 50%,
+      rgba(122, 140, 106, 0.1) 100%
+    );
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    max-width: 750px;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    background: rgba(200, 150, 62, 0.15);
+    color: var(--brown-mid);
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-family: "Playfair Display", serif;
+    font-size: 3.8rem;
+    color: var(--brown-dark);
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+
+  h1 em {
+    color: var(--gold);
+    font-style: italic;
+  }
+
+  .hero-tagline {
+    font-size: 1.1rem;
+    color: var(--text-soft);
+    line-height: 1.7;
+    max-width: 580px;
+    margin: 0 auto 32px;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .btn-secondary {
+    display: inline-block;
+    background: transparent;
+    color: var(--brown-dark);
+    padding: 14px 36px;
+    border: 2px solid var(--brown-dark);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--brown-dark);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .hero-trial-note {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .hero {
+      padding: 100px 24px 60px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+    }
+  }
+</style>

@@ -1,0 +1,88 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "GrottoSitters — The platform for professional pet & house sitters. Get your own website, manage bookings, and grow your business." } = Astro.props;
+const base = import.meta.env.BASE_URL;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>{title}</title>
+  </head>
+  <body>
+    <nav>
+      <a href={`${base}`} class="nav-logo">Grotto<span>Sitters</span></a>
+      <button class="nav-toggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <ul>
+        <li><a href={`${base}#features`}>Features</a></li>
+        <li><a href={`${base}#showcase`}>Example</a></li>
+        <li><a href={`${base}#pricing`}>Pricing</a></li>
+        <li><a href={`${base}login`} class="nav-link-muted">Log In</a></li>
+        <li><a href={`${base}signup`} class="nav-cta">Get Started Free</a></li>
+      </ul>
+    </nav>
+
+    <slot />
+
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <h2>Grotto<span>Sitters</span></h2>
+            <p>
+              The platform for professional pet &amp; house sitters. Build your
+              online presence, manage bookings, and grow your sitting business.
+            </p>
+          </div>
+          <div class="footer-links">
+            <h4>Platform</h4>
+            <ul>
+              <li><a href={`${base}#features`}>Features</a></li>
+              <li><a href={`${base}#pricing`}>Pricing</a></li>
+              <li><a href={`${base}#showcase`}>Example Profile</a></li>
+            </ul>
+          </div>
+          <div class="footer-links">
+            <h4>Account</h4>
+            <ul>
+              <li><a href={`${base}login`}>Log In</a></li>
+              <li><a href={`${base}signup`}>Sign Up</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; 2026 GrottoSitters</span>
+          <span>Made with &#128062; for pet sitters everywhere</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const toggle = document.querySelector(".nav-toggle");
+      const navList = document.querySelector("nav ul");
+      toggle?.addEventListener("click", () => {
+        navList?.classList.toggle("open");
+      });
+      navList?.querySelectorAll("a").forEach((link) => {
+        link.addEventListener("click", () => navList?.classList.remove("open"));
+      });
+    </script>
+  </body>
+</html>

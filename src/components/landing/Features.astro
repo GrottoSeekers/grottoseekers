@@ -1,0 +1,115 @@
+---
+const features = [
+  {
+    icon: "&#127760;",
+    title: "Your Own Website",
+    description:
+      "A professional, mobile-friendly profile page with your name, photos, services, and contact details. Share one link with every client.",
+  },
+  {
+    icon: "&#128172;",
+    title: "Enquiry Form",
+    description:
+      "Built-in booking form with email and WhatsApp integration. Clients fill in their details, dates, and pet info — it lands straight in your inbox.",
+  },
+  {
+    icon: "&#9733;",
+    title: "Reviews & Trust",
+    description:
+      "Display your reviews from any platform — Rover, TrustedHouseSitters, or direct clients. Build credibility and let your track record speak.",
+  },
+  {
+    icon: "&#128247;",
+    title: "Photo Gallery",
+    description:
+      "Showcase your best moments with pets. Upload photos, add captions, and let potential clients see you in action.",
+  },
+  {
+    icon: "&#128736;",
+    title: "Easy Dashboard",
+    description:
+      "Edit your profile, update photos, manage your services and pricing — all from a simple dashboard. No technical skills needed.",
+  },
+  {
+    icon: "&#128176;",
+    title: "Affordable Pricing",
+    description:
+      "One month free, then just &pound;9/month. No contracts, no hidden fees. Cancel anytime. One sit pays for a year of your website.",
+  },
+];
+---
+
+<section id="features">
+  <div class="section-inner">
+    <p class="section-label">Why GrottoSitters</p>
+    <h2 class="section-title">Everything you need to grow your sitting business.</h2>
+    <div class="divider"></div>
+
+    <div class="features-grid">
+      {
+        features.map((feature) => (
+          <div class="feature-card">
+            <span class="feature-icon" set:html={feature.icon} />
+            <h3>{feature.title}</h3>
+            <p set:html={feature.description} />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  section {
+    padding: 80px 48px;
+    background: var(--warm-white);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+
+  .feature-card {
+    background: var(--cream);
+    border: 1px solid rgba(200, 150, 62, 0.12);
+    border-radius: 12px;
+    padding: 32px 24px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(44, 26, 14, 0.08);
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 14px;
+  }
+
+  .feature-card h3 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.15rem;
+    color: var(--brown-dark);
+    margin-bottom: 10px;
+  }
+
+  .feature-card p {
+    color: var(--text-soft);
+    line-height: 1.7;
+    font-size: 0.88rem;
+  }
+
+  @media (max-width: 768px) {
+    section {
+      padding: 60px 24px;
+    }
+
+    .features-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

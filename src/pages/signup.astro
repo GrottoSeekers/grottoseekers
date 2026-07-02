@@ -1,0 +1,277 @@
+---
+import LandingLayout from "../layouts/LandingLayout.astro";
+import "../styles/global.css";
+const base = import.meta.env.BASE_URL;
+---
+
+<LandingLayout title="Sign Up — GrottoSitters">
+  <section class="auth-section">
+    <div class="auth-card">
+      <h1>Create your profile</h1>
+      <p class="auth-subtitle">Start your free month — no card required.</p>
+
+      <form id="signupForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="fname">First Name</label>
+            <input
+              type="text"
+              id="fname"
+              name="fname"
+              placeholder="Jane"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="lname">Last Name</label>
+            <input
+              type="text"
+              id="lname"
+              name="lname"
+              placeholder="Smith"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="you@example.com"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="At least 8 characters"
+            minlength="8"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input
+            type="text"
+            id="location"
+            name="location"
+            placeholder="e.g. Sydney, NSW or Manchester, UK"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="profile-url">Profile URL</label>
+          <div class="url-input">
+            <span class="url-prefix">grottositters.com/sitter/</span>
+            <input
+              type="text"
+              id="profile-url"
+              name="profile-url"
+              placeholder="jane-smith"
+              pattern="[a-z0-9\-]+"
+              required
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary btn-full">Create Free Account</button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Already have an account? <a href={`${base}login`}>Log in</a></p>
+      </div>
+
+      <div class="trial-info">
+        <p>&#128155; 1 month free trial. No credit card needed. Cancel anytime.</p>
+      </div>
+    </div>
+  </section>
+</LandingLayout>
+
+<style>
+  .auth-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 120px 24px 80px;
+    background: var(--gold-pale);
+  }
+
+  .auth-card {
+    background: var(--warm-white);
+    border: 1px solid rgba(200, 150, 62, 0.15);
+    border-radius: 14px;
+    padding: 48px 40px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(44, 26, 14, 0.08);
+  }
+
+  h1 {
+    font-family: "Playfair Display", serif;
+    font-size: 2rem;
+    color: var(--brown-dark);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .auth-subtitle {
+    text-align: center;
+    color: var(--text-soft);
+    font-size: 0.92rem;
+    margin-bottom: 32px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--brown-mid);
+    margin-bottom: 6px;
+  }
+
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(200, 150, 62, 0.2);
+    border-radius: 8px;
+    font-family: "Lato", sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--cream);
+    transition: border-color 0.2s;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  .url-input {
+    display: flex;
+    align-items: center;
+    background: var(--cream);
+    border: 1px solid rgba(200, 150, 62, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .url-prefix {
+    padding: 12px 4px 12px 14px;
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    white-space: nowrap;
+    background: rgba(200, 150, 62, 0.06);
+    border-right: 1px solid rgba(200, 150, 62, 0.1);
+  }
+
+  .url-input input {
+    border: none;
+    border-radius: 0;
+    padding-left: 8px;
+  }
+
+  .url-input input:focus {
+    border: none;
+  }
+
+  .btn-full {
+    width: 100%;
+    text-align: center;
+    margin-top: 8px;
+  }
+
+  .auth-footer {
+    text-align: center;
+    margin-top: 24px;
+  }
+
+  .auth-footer p {
+    color: var(--text-soft);
+    font-size: 0.88rem;
+  }
+
+  .auth-footer a {
+    color: var(--gold);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .auth-footer a:hover {
+    text-decoration: underline;
+  }
+
+  .trial-info {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(200, 150, 62, 0.1);
+  }
+
+  .trial-info p {
+    color: var(--text-soft);
+    font-size: 0.82rem;
+  }
+
+  @media (max-width: 480px) {
+    .auth-card {
+      padding: 32px 24px;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .url-prefix {
+      font-size: 0.72rem;
+    }
+  }
+</style>
+
+<script>
+  const urlInput = document.getElementById("profile-url") as HTMLInputElement;
+  const fnameInput = document.getElementById("fname") as HTMLInputElement;
+  const lnameInput = document.getElementById("lname") as HTMLInputElement;
+
+  function updateSlug() {
+    const fname = fnameInput?.value.toLowerCase().trim() || "";
+    const lname = lnameInput?.value.toLowerCase().trim() || "";
+    if (fname && lname && urlInput && !urlInput.dataset.manual) {
+      urlInput.value = `${fname}-${lname}`.replace(/[^a-z0-9\-]/g, "");
+    }
+  }
+
+  fnameInput?.addEventListener("input", updateSlug);
+  lnameInput?.addEventListener("input", updateSlug);
+  urlInput?.addEventListener("input", () => {
+    if (urlInput) urlInput.dataset.manual = "true";
+  });
+
+  document.getElementById("signupForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    // Supabase auth will replace this
+    alert("Sign-up will be available once the platform launches. Stay tuned!");
+  });
+</script>

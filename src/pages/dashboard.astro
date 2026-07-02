@@ -1,0 +1,311 @@
+---
+import LandingLayout from "../layouts/LandingLayout.astro";
+import "../styles/global.css";
+const base = import.meta.env.BASE_URL;
+---
+
+<LandingLayout title="Dashboard — GrottoSitters">
+  <section class="dashboard-section">
+    <div class="dashboard-container">
+      <aside class="sidebar">
+        <div class="sidebar-user">
+          <div class="user-avatar">CN</div>
+          <div class="user-info">
+            <strong>Callum &amp; Niamh</strong>
+            <span>Pro Plan</span>
+          </div>
+        </div>
+        <nav class="sidebar-nav">
+          <a href="#" class="active">Profile</a>
+          <a href="#">Photos</a>
+          <a href="#">Reviews</a>
+          <a href="#">Services</a>
+          <a href="#">Enquiries</a>
+          <a href="#">Settings</a>
+        </nav>
+        <a href={`${base}sitter/callum-niamh`} class="sidebar-preview">View Live Profile</a>
+      </aside>
+
+      <main class="dashboard-main">
+        <div class="dashboard-header">
+          <h1>Your Profile</h1>
+          <p>Edit your sitter profile details below. Changes are saved and published instantly.</p>
+        </div>
+
+        <form class="dashboard-form" id="profileForm">
+          <div class="form-section">
+            <h2>Basic Information</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="d-name">Display Name</label>
+                <input type="text" id="d-name" value="Callum & Niamh" />
+              </div>
+              <div class="form-group">
+                <label for="d-location">Location</label>
+                <input type="text" id="d-location" value="UK & Australia" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="d-tagline">Tagline</label>
+              <input type="text" id="d-tagline" value="Trusted house & pet sitters, wherever in the world you call home." />
+            </div>
+            <div class="form-group">
+              <label for="d-about">About You</label>
+              <textarea id="d-about" rows="5">We're Callum & Niamh, a couple from the UK currently travelling and house sitting across Australia. With years of experience caring for pets and homes, we treat every sit like it's our own.</textarea>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>Contact Details</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="d-email">Email</label>
+                <input type="email" id="d-email" value="grottositters@outlook.com" />
+              </div>
+              <div class="form-group">
+                <label for="d-phone">WhatsApp Number</label>
+                <input type="tel" id="d-phone" value="+44 7306 100251" />
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h2>External Profiles</h2>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="d-rover">Rover Profile URL</label>
+                <input type="url" id="d-rover" value="https://www.rover.com/sit/callud53623" />
+              </div>
+              <div class="form-group">
+                <label for="d-ths">TrustedHouseSitters URL</label>
+                <input type="url" id="d-ths" value="https://www.trustedhousesitters.com/house-and-pet-sitters/australia/new-south-wales/sydney/l/6979617/" />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary">Save Changes</button>
+        </form>
+      </main>
+    </div>
+  </section>
+</LandingLayout>
+
+<style>
+  .dashboard-section {
+    padding-top: 64px;
+    min-height: 100vh;
+    background: var(--cream);
+  }
+
+  .dashboard-container {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 64px);
+  }
+
+  .sidebar {
+    background: var(--brown-dark);
+    padding: 32px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  .user-info strong {
+    display: block;
+    color: #fff;
+    font-size: 0.9rem;
+  }
+
+  .user-info span {
+    color: var(--gold-light);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .sidebar-nav a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .sidebar-nav a:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  .sidebar-nav a.active {
+    background: rgba(200, 150, 62, 0.2);
+    color: var(--gold-light);
+  }
+
+  .sidebar-preview {
+    margin-top: auto;
+    color: var(--gold-light);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid rgba(200, 150, 62, 0.3);
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .sidebar-preview:hover {
+    background: rgba(200, 150, 62, 0.15);
+  }
+
+  .dashboard-main {
+    padding: 40px 48px;
+    max-width: 800px;
+  }
+
+  .dashboard-header {
+    margin-bottom: 36px;
+  }
+
+  .dashboard-header h1 {
+    font-family: "Playfair Display", serif;
+    font-size: 2rem;
+    color: var(--brown-dark);
+    margin-bottom: 8px;
+  }
+
+  .dashboard-header p {
+    color: var(--text-soft);
+    font-size: 0.92rem;
+  }
+
+  .form-section {
+    background: var(--warm-white);
+    border: 1px solid rgba(200, 150, 62, 0.12);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+  }
+
+  .form-section h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 1.15rem;
+    color: var(--brown-dark);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(200, 150, 62, 0.1);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--brown-mid);
+    margin-bottom: 6px;
+  }
+
+  input, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(200, 150, 62, 0.2);
+    border-radius: 8px;
+    font-family: "Lato", sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--cream);
+    transition: border-color 0.2s;
+  }
+
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--gold);
+  }
+
+  textarea {
+    resize: vertical;
+  }
+
+  @media (max-width: 768px) {
+    .dashboard-container {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+      padding: 16px 20px;
+    }
+
+    .sidebar-nav {
+      flex-direction: row;
+      overflow-x: auto;
+      gap: 8px;
+    }
+
+    .sidebar-nav a {
+      white-space: nowrap;
+      font-size: 0.8rem;
+    }
+
+    .sidebar-preview {
+      display: none;
+    }
+
+    .dashboard-main {
+      padding: 24px;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  document.getElementById("profileForm")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    // Supabase integration will replace this
+    alert("Profile editing will be available once the platform launches. Stay tuned!");
+  });
+</script>

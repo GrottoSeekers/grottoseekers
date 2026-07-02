@@ -1,0 +1,56 @@
+---
+const base = import.meta.env.BASE_URL;
+---
+
+<section class="cta-section">
+  <div class="section-inner cta-content">
+    <h2>Ready to grow your sitting business?</h2>
+    <p>
+      Join GrottoSitters today and get your professional profile online in
+      minutes. Your first month is completely free.
+    </p>
+    <a href={`${base}signup`} class="btn-primary btn-large">Create Your Free Profile</a>
+  </div>
+</section>
+
+<style>
+  .cta-section {
+    padding: 100px 48px;
+    background: var(--brown-dark);
+    text-align: center;
+  }
+
+  .cta-content {
+    max-width: 600px;
+  }
+
+  h2 {
+    font-family: "Playfair Display", serif;
+    font-size: 2.4rem;
+    color: #fff;
+    margin-bottom: 16px;
+    line-height: 1.25;
+  }
+
+  p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.05rem;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .btn-large {
+    padding: 18px 48px;
+    font-size: 1rem;
+  }
+
+  @media (max-width: 768px) {
+    .cta-section {
+      padding: 60px 24px;
+    }
+
+    h2 {
+      font-size: 1.8rem;
+    }
+  }
+</style>
