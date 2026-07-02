@@ -1,10 +1,8 @@
 ---
-// Dynamic profile page — requires Astro SSR (output: "hybrid" or "server").
-// Each sitter's page lives at /profile/[slug], e.g. /profile/callum-and-niamh
 export const prerender = false;
 
-import { supabase } from '../../lib/supabase';
-import '../../styles/global.css';
+import { supabase } from '../lib/supabase';
+import '../styles/global.css';
 
 interface HeroImage { src: string; pos: string }
 interface Photo     { src: string; alt: string }
@@ -22,11 +20,11 @@ const { data: profile, error } = await supabase
 
 if (!profile || error) return new Response(null, { status: 404 });
 
-const heroImages   = (profile.hero_images_json  ?? []) as HeroImage[];
-const aboutImages  = (profile.about_images_json ?? []) as Photo[];
-const gallery      = (profile.gallery_json       ?? []) as Photo[];
-const reviews      = (profile.reviews_json       ?? []) as Review[];
-const platforms    = (profile.platforms_json     ?? []) as Platform[];
+const heroImages    = (profile.hero_images_json  ?? []) as HeroImage[];
+const aboutImages   = (profile.about_images_json ?? []) as Photo[];
+const gallery       = (profile.gallery_json       ?? []) as Photo[];
+const reviews       = (profile.reviews_json       ?? []) as Review[];
+const platforms     = (profile.platforms_json     ?? []) as Platform[];
 const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boolean);
 ---
 
@@ -38,16 +36,10 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
     <meta name="description" content={`${profile.name} — trusted house & pet sitters.`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
     <title>{profile.name} — Grotto Sitters</title>
   </head>
-
   <body>
-
-    <!-- ── NAV ──────────────────────────────────────────────────────── -->
     <nav>
       <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
       <button class="nav-toggle" aria-label="Toggle navigation">
@@ -64,25 +56,17 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
     </nav>
     <div class="nav-overlay" id="navOverlay"></div>
 
-    <!-- ── HERO ─────────────────────────────────────────────────────── -->
     <section class="hero">
       <div class="hero-slideshow" id="heroSlideshow">
         {heroImages.map((img, i) => (
           <div class={`hero-slide ${i === 0 ? 'active' : ''}`}>
-            <img
-              src={img.src}
-              alt=""
-              loading={i === 0 ? 'eager' : 'lazy'}
-              style={`object-position: ${img.pos}`}
-            />
+            <img src={img.src} alt="" loading={i === 0 ? 'eager' : 'lazy'} style={`object-position: ${img.pos}`} />
           </div>
         ))}
       </div>
       <div class="hero-overlay"></div>
       <div class="hero-content">
-        {profile.badge_text && (
-          <p class="hero-badge">{profile.badge_text}</p>
-        )}
+        {profile.badge_text && <p class="hero-badge">{profile.badge_text}</p>}
         <h1>Grotto<br /><em>Sitters</em></h1>
         <p class="hero-names">{profile.name}</p>
         {profile.tagline && <p class="hero-tagline">{profile.tagline}</p>}
@@ -90,7 +74,6 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       </div>
     </section>
 
-    <!-- ── ABOUT ─────────────────────────────────────────────────────── -->
     <section id="about" class="about-section">
       <div class="section-inner about-grid">
         <div class="about-carousel">
@@ -105,11 +88,7 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
           <button class="carousel-btn carousel-next" id="aboutNext" aria-label="Next photo">&#8250;</button>
           <div class="carousel-dots" id="aboutDots">
             {aboutImages.map((_, i) => (
-              <button
-                class={`dot ${i === 0 ? 'active' : ''}`}
-                data-index={i}
-                aria-label={`Go to photo ${i + 1}`}
-              ></button>
+              <button class={`dot ${i === 0 ? 'active' : ''}`} data-index={i} aria-label={`Go to photo ${i + 1}`}></button>
             ))}
           </div>
         </div>
@@ -122,7 +101,6 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       </div>
     </section>
 
-    <!-- ── REVIEWS ───────────────────────────────────────────────────── -->
     <section id="reviews" class="reviews-section">
       <div class="section-inner">
         <p class="section-label">What People Say</p>
@@ -163,7 +141,6 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       </div>
     </section>
 
-    <!-- ── GALLERY ───────────────────────────────────────────────────── -->
     <section id="gallery" class="gallery-section">
       <div class="section-inner">
         <p class="section-label">Pets We've Loved</p>
@@ -179,16 +156,12 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       </div>
     </section>
 
-    <!-- ── PLATFORMS ─────────────────────────────────────────────────── -->
     <section id="profiles" class="platforms-section">
       <div class="section-inner">
         <p class="section-label">Find Us Online</p>
         <h2 class="section-title">Our Verified Profiles</h2>
         <div class="divider"></div>
-        <p class="platforms-intro">
-          We're verified sitters on both major platforms — Rover for our UK sits
-          and TrustedHouseSitters for Australia. Browse our full review histories below.
-        </p>
+        <p class="platforms-intro">We're verified sitters on both major platforms — Rover for our UK sits and TrustedHouseSitters for Australia. Browse our full review histories below.</p>
         <div class="profiles-grid">
           {platforms.map(p => (
             <a href={p.url} target="_blank" rel="noopener noreferrer" class="platform-card">
@@ -202,7 +175,6 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       </div>
     </section>
 
-    <!-- ── ENQUIRY ───────────────────────────────────────────────────── -->
     <section id="enquiry" class="enquiry-section">
       <div class="section-inner enquiry-inner">
         <div class="enquiry-text">
@@ -240,19 +212,11 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
             <label for="message">Tell us about your pets & home</label>
             <textarea id="message" name="message" rows="4" placeholder="Breed, age, any special needs…"></textarea>
           </div>
-          <button
-            type="button"
-            class="btn-primary"
-            id="sendEmailBtn"
-            style="width:100%"
-          >
-            Send Enquiry
-          </button>
+          <button type="button" class="btn-primary" id="sendEmailBtn" style="width:100%">Send Enquiry</button>
         </form>
       </div>
     </section>
 
-    <!-- ── FOOTER ────────────────────────────────────────────────────── -->
     <footer>
       <div class="footer-inner">
         <div class="footer-top">
@@ -274,9 +238,7 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
             <h4>Platforms</h4>
             <ul>
               {platforms.map(p => (
-                <li>
-                  <a href={p.url} target="_blank" rel="noopener noreferrer">{p.name}</a>
-                </li>
+                <li><a href={p.url} target="_blank" rel="noopener noreferrer">{p.name}</a></li>
               ))}
             </ul>
           </div>
@@ -287,194 +249,74 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
         </div>
       </div>
     </footer>
-
   </body>
 </html>
 
 <style>
-  /* ── HERO ──────────────────────────────────────────────────────── */
-  .hero {
-    min-height: 70vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    padding: 100px 48px 60px;
-    text-align: center;
-  }
+  .hero { min-height: 70vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 100px 48px 60px; text-align: center; }
   .hero-slideshow { position: absolute; inset: 0; z-index: 0; }
   .hero-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease; }
   .hero-slide.active { opacity: 1; }
   .hero-slide img { width: 100%; height: 100%; object-fit: cover; }
   .hero-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.55); z-index: 1; }
   .hero-content { position: relative; z-index: 2; max-width: 700px; }
-  .hero-badge {
-    display: inline-block;
-    background: rgba(255,255,255,0.15);
-    color: #fff;
-    padding: 8px 20px;
-    border-radius: 50px;
-    font-size: 0.8rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    margin-bottom: 24px;
-  }
-  .hero-content h1 {
-    font-family: "Playfair Display", serif;
-    font-size: 5rem;
-    color: #fff;
-    line-height: 1;
-    margin-bottom: 16px;
-  }
+  .hero-badge { display: inline-block; background: rgba(255,255,255,0.15); color: #fff; padding: 8px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; margin-bottom: 24px; }
+  .hero-content h1 { font-family: "Playfair Display", serif; font-size: 5rem; color: #fff; line-height: 1; margin-bottom: 16px; }
   .hero-content h1 em { color: var(--gold); font-style: italic; }
-  .hero-names {
-    font-size: 1.15rem;
-    color: rgba(255,255,255,0.9);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    margin-bottom: 16px;
-  }
-  .hero-tagline {
-    font-size: 1.15rem;
-    color: rgba(255,255,255,0.8);
-    line-height: 1.7;
-    max-width: 520px;
-    margin: 0 auto 36px;
-  }
+  .hero-names { font-size: 1.15rem; color: rgba(255,255,255,0.9); font-weight: 700; letter-spacing: 0.06em; margin-bottom: 16px; }
+  .hero-tagline { font-size: 1.15rem; color: rgba(255,255,255,0.8); line-height: 1.7; max-width: 520px; margin: 0 auto 36px; }
 
-  /* ── ABOUT ─────────────────────────────────────────────────────── */
   .about-section { padding: 80px 48px; background: var(--warm-white); }
-  .about-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    align-items: center;
-  }
-  .about-carousel {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4/5;
-    border-radius: 12px;
-    overflow: hidden;
-    background: var(--gold-pale);
-  }
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .about-carousel { position: relative; width: 100%; aspect-ratio: 4/5; border-radius: 12px; overflow: hidden; background: var(--gold-pale); }
   .carousel-track { position: relative; width: 100%; height: 100%; }
   .carousel-slide { position: absolute; inset: 0; opacity: 0; transition: opacity 0.5s ease; }
   .carousel-slide.active { opacity: 1; }
   .carousel-slide img { width: 100%; height: 100%; object-fit: cover; object-position: center top; display: block; }
-  .carousel-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(255,255,255,0.85);
-    border: none;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    font-size: 1.4rem;
-    color: var(--brown-dark);
-    cursor: pointer;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s, transform 0.2s;
-  }
+  .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.85); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.4rem; color: var(--brown-dark); cursor: pointer; z-index: 2; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.2s; }
   .carousel-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
   .carousel-prev { left: 12px; }
   .carousel-next { right: 12px; }
-  .carousel-dots {
-    position: absolute;
-    bottom: 14px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 8px;
-    z-index: 2;
-  }
-  .dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,0.8);
-    background: transparent;
-    cursor: pointer;
-    padding: 0;
-    transition: background 0.2s;
-  }
+  .carousel-dots { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 2; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.8); background: transparent; cursor: pointer; padding: 0; transition: background 0.2s; }
   .dot.active { background: rgba(255,255,255,0.9); }
   .about-text p { color: var(--text-soft); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
 
-  /* ── REVIEWS ───────────────────────────────────────────────────── */
   .reviews-section { padding: 80px 48px; background: var(--warm-white); }
   .stars-row { display: flex; align-items: center; gap: 4px; margin-bottom: 32px; }
   .star { color: var(--gold); font-size: 1.2rem; }
   .stars-label { color: var(--text-soft); font-size: 0.85rem; margin-left: 12px; font-weight: 700; }
   .reviews-track-wrapper { overflow: hidden; margin-bottom: 24px; }
   .reviews-track { display: flex; gap: 24px; transition: transform 0.4s ease; }
-  .review-card {
-    min-width: 340px; max-width: 340px;
-    background: var(--cream);
-    border: 1px solid rgba(200,150,62,0.12);
-    border-radius: 12px;
-    padding: 28px;
-    flex-shrink: 0;
-  }
+  .review-card { min-width: 340px; max-width: 340px; background: var(--cream); border: 1px solid rgba(200,150,62,0.12); border-radius: 12px; padding: 28px; flex-shrink: 0; }
   .review-stars { margin-bottom: 14px; }
   .review-stars .star { font-size: 0.95rem; }
   .review-text { color: var(--text-soft); font-size: 0.88rem; line-height: 1.75; margin-bottom: 20px; font-style: italic; }
   .review-author { display: flex; align-items: center; gap: 12px; }
-  .review-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
-    background: var(--gold); color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
-  }
+  .review-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--gold); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
   .review-name { font-weight: 700; color: var(--brown-dark); font-size: 0.9rem; }
   .review-platform { color: var(--text-soft); font-size: 0.78rem; }
   .reviews-nav { display: flex; align-items: center; gap: 12px; }
-  .rev-btn {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 1px solid rgba(200,150,62,0.3);
-    background: transparent; color: var(--brown-mid);
-    font-size: 1rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.2s, color 0.2s;
-  }
+  .rev-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid rgba(200,150,62,0.3); background: transparent; color: var(--brown-mid); font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, color 0.2s; }
   .rev-btn:hover { background: var(--gold); color: #fff; border-color: var(--gold); }
   .rev-dots { display: flex; gap: 6px; margin-left: 8px; }
 
-  /* ── GALLERY ───────────────────────────────────────────────────── */
   .gallery-section { padding: 80px 48px; background: var(--cream); }
-  .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-  }
+  .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
   .gallery-item { border-radius: 10px; overflow: hidden; aspect-ratio: 1; background: var(--gold-pale); }
   .gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.3s ease; }
   .gallery-item:hover img { transform: scale(1.04); }
 
-  /* ── PLATFORMS ─────────────────────────────────────────────────── */
   .platforms-section { padding: 80px 48px; background: var(--warm-white); }
   .platforms-intro { color: var(--text-soft); margin-bottom: 40px; max-width: 500px; line-height: 1.75; font-size: 0.95rem; }
   .profiles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
-  .platform-card {
-    display: block;
-    background: var(--cream);
-    border: 1px solid rgba(200,150,62,0.15);
-    border-radius: 12px;
-    padding: 36px 28px;
-    text-decoration: none;
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
+  .platform-card { display: block; background: var(--cream); border: 1px solid rgba(200,150,62,0.15); border-radius: 12px; padding: 36px 28px; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
   .platform-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(44,26,14,0.08); }
   .platform-logo { font-size: 2rem; display: block; margin-bottom: 14px; }
   .platform-card h3 { font-family: "Playfair Display", serif; font-size: 1.25rem; color: var(--brown-dark); margin-bottom: 10px; }
   .platform-card p { color: var(--text-soft); line-height: 1.7; font-size: 0.9rem; margin-bottom: 16px; }
   .platform-link-text { color: var(--gold); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; }
 
-  /* ── ENQUIRY ───────────────────────────────────────────────────── */
   .enquiry-section { padding: 80px 48px; background: var(--cream); }
   .enquiry-inner { display: grid; grid-template-columns: 1fr 1.4fr; gap: 60px; align-items: start; }
   .enquiry-text p { color: var(--text-soft); line-height: 1.8; font-size: 0.95rem; }
@@ -482,42 +324,26 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
   .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .form-group { display: flex; flex-direction: column; gap: 6px; }
   .form-group label { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; color: var(--brown-mid); text-transform: uppercase; }
-  .form-group input,
-  .form-group textarea,
-  .form-group select {
-    padding: 12px 16px;
-    border: 1.5px solid rgba(200,150,62,0.25);
-    border-radius: 6px;
-    background: #fff;
-    color: var(--text);
-    font-family: "Lato", sans-serif;
-    font-size: 0.95rem;
-    transition: border-color 0.2s;
+  .form-group input, .form-group textarea {
+    padding: 12px 16px; border: 1.5px solid rgba(200,150,62,0.25); border-radius: 6px;
+    background: #fff; color: var(--text); font-family: "Lato", sans-serif; font-size: 0.95rem; transition: border-color 0.2s;
   }
-  .form-group input:focus,
-  .form-group textarea:focus { outline: none; border-color: var(--gold); }
+  .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--gold); }
   .form-group textarea { resize: vertical; min-height: 100px; }
 
-  /* ── RESPONSIVE ────────────────────────────────────────────────── */
   @media (max-width: 768px) {
     .hero { padding: 100px 24px 60px; }
     .hero-content h1 { font-size: 3.2rem; }
-    .about-section { padding: 60px 24px; }
+    .about-section, .reviews-section, .gallery-section, .platforms-section, .enquiry-section { padding: 60px 24px; }
     .about-grid { grid-template-columns: 1fr; gap: 40px; }
-    .reviews-section { padding: 60px 24px; }
     .review-card { min-width: 280px; max-width: 280px; }
-    .gallery-section { padding: 60px 24px; }
     .gallery-grid { grid-template-columns: repeat(2, 1fr); }
-    .platforms-section { padding: 60px 24px; }
-    .profiles-grid { grid-template-columns: 1fr; }
-    .enquiry-section { padding: 60px 24px; }
-    .enquiry-inner { grid-template-columns: 1fr; gap: 40px; }
+    .profiles-grid, .enquiry-inner { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
   }
 </style>
 
 <script>
-  // ── NAV TOGGLE ──────────────────────────────────────────────────
   const toggle  = document.querySelector('.nav-toggle');
   const navList = document.querySelector('nav ul');
   const overlay = document.getElementById('navOverlay');
@@ -555,7 +381,6 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
     });
   });
 
-  // ── HERO SLIDESHOW ──────────────────────────────────────────────
   const heroSlides = document.querySelectorAll('#heroSlideshow .hero-slide');
   if (heroSlides.length > 1) {
     let cur = 0;
@@ -566,7 +391,6 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
     }, 5000);
   }
 
-  // ── ABOUT CAROUSEL ──────────────────────────────────────────────
   const slides  = document.querySelectorAll('#aboutCarouselTrack .carousel-slide');
   const dots    = document.querySelectorAll('#aboutDots .dot');
   const prevBtn = document.getElementById('aboutPrev');
@@ -575,7 +399,6 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
   if (slides.length) {
     let cur = 0;
     let timer: ReturnType<typeof setInterval>;
-
     const goTo = (i: number) => {
       slides[cur].classList.remove('active');
       dots[cur]?.classList.remove('active');
@@ -583,12 +406,10 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       slides[cur].classList.add('active');
       dots[cur]?.classList.add('active');
     };
-
     const reset = () => { clearInterval(timer); timer = setInterval(() => goTo(cur + 1), 4000); };
     prevBtn?.addEventListener('click', () => { goTo(cur - 1); reset(); });
     nextBtn?.addEventListener('click', () => { goTo(cur + 1); reset(); });
     dots.forEach(d => d.addEventListener('click', () => { goTo(Number((d as HTMLElement).dataset.index)); reset(); }));
-
     let tx = 0;
     const track = document.getElementById('aboutCarouselTrack');
     track?.addEventListener('touchstart', (e: TouchEvent) => { tx = e.touches[0].clientX; }, { passive: true });
@@ -596,24 +417,20 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       const diff = tx - e.changedTouches[0].clientX;
       if (Math.abs(diff) > 40) { goTo(diff > 0 ? cur + 1 : cur - 1); reset(); }
     });
-
     reset();
   }
 
-  // ── REVIEWS CAROUSEL ────────────────────────────────────────────
-  const track       = document.getElementById('reviewsTrack') as HTMLElement;
-  const cards       = track?.querySelectorAll('.review-card');
-  const dotsEl      = document.getElementById('revDots') as HTMLElement;
-  const revPrev     = document.getElementById('prevBtn');
-  const revNext     = document.getElementById('nextBtn');
+  const track   = document.getElementById('reviewsTrack') as HTMLElement;
+  const cards   = track?.querySelectorAll('.review-card');
+  const dotsEl  = document.getElementById('revDots') as HTMLElement;
+  const revPrev = document.getElementById('prevBtn');
+  const revNext = document.getElementById('nextBtn');
 
   if (track && cards && dotsEl) {
     let rcur = 0;
-
     const visible = () => window.innerWidth >= 900 ? 3 : window.innerWidth >= 600 ? 2 : 1;
     const cardW   = () => (cards[0] as HTMLElement).offsetWidth + 24;
     const maxIdx  = () => Math.max(0, cards.length - visible());
-
     const buildDots = () => {
       dotsEl.innerHTML = '';
       for (let i = 0; i <= maxIdx(); i++) {
@@ -623,34 +440,23 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
         dotsEl.appendChild(d);
       }
     };
-
     const goRev = (i: number) => {
       rcur = Math.max(0, Math.min(i, maxIdx()));
       track.style.transform = `translateX(-${rcur * cardW()}px)`;
-      dotsEl.querySelectorAll('div').forEach((d, j) => {
-        d.style.background = j === rcur ? 'var(--gold)' : 'var(--gold-pale)';
-      });
+      dotsEl.querySelectorAll('div').forEach((d, j) => { d.style.background = j === rcur ? 'var(--gold)' : 'var(--gold-pale)'; });
     };
-
     revPrev?.addEventListener('click', () => goRev(rcur - 1));
     revNext?.addEventListener('click', () => goRev(rcur + 1));
     window.addEventListener('resize', () => { buildDots(); goRev(rcur); });
-
     buildDots();
     goRev(0);
   }
 
-  // ── ENQUIRY FORM → EMAIL ─────────────────────────────────────────
   document.getElementById('sendEmailBtn')?.addEventListener('click', () => {
     const f = document.getElementById('enquiryForm') as HTMLFormElement;
     if (!f.reportValidity()) return;
     const get = (id: string) => (document.getElementById(id) as HTMLInputElement)?.value ?? '';
-    const body = [
-      `Name: ${get('fname')} ${get('lname')}`,
-      `Email: ${get('email')}`,
-      `Dates: ${get('date-from')} to ${get('date-to')}`,
-      `Message: ${get('message')}`,
-    ].join('\n');
+    const body = [`Name: ${get('fname')} ${get('lname')}`, `Email: ${get('email')}`, `Dates: ${get('date-from')} to ${get('date-to')}`, `Message: ${get('message')}`].join('\n');
     window.location.href = `mailto:callumgarydisley@outlook.com?subject=House Sitting Enquiry&body=${encodeURIComponent(body)}`;
   });
 </script>

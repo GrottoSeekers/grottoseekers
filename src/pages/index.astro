@@ -1,21 +1,291 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
-import Hero from "../components/Hero.astro";
-import About from "../components/About.astro";
-import Services from "../components/Services.astro";
-import Gallery from "../components/Gallery.astro";
-import Reviews from "../components/Reviews.astro";
-import Profiles from "../components/Profiles.astro";
-import Enquiry from "../components/Enquiry.astro";
-import "../styles/global.css";
+import '../styles/global.css';
 ---
 
-<BaseLayout title="Grotto Sitters — Trusted House & Pet Sitters">
-  <Hero />
-  <About />
-  <Services />
-  <Reviews />
-  <Gallery />
-  <Profiles />
-  <Enquiry />
-</BaseLayout>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Grotto Sitters — Create your professional pet sitting profile and share it with pet owners worldwide." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>Grotto Sitters — Beautiful profiles for pet sitters</title>
+  </head>
+  <body>
+
+    <!-- NAV -->
+    <nav class="landing-nav">
+      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
+      <div class="nav-actions">
+        <a href="/login" class="nav-link-plain">Log in</a>
+        <a href="/signup" class="btn-primary btn-small">Get started</a>
+      </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg">
+        <img src="https://grottositters.com/images/couple-field-1.jpg" alt="" />
+        <div class="hero-overlay"></div>
+      </div>
+      <div class="hero-content">
+        <p class="hero-eyebrow">For professional pet sitters</p>
+        <h1>Your sitter profile,<br /><em>beautifully showcased</em></h1>
+        <p class="hero-sub">Create a stunning profile page that pet owners can't ignore — with your bio, photos, reviews, and booking form all in one place.</p>
+        <div class="hero-ctas">
+          <a href="/signup" class="btn-primary">Create your profile</a>
+          <a href="/callumandniamh" class="btn-outline">See a real example &darr;</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXAMPLE PREVIEW -->
+    <section class="preview-section">
+      <div class="section-inner">
+        <p class="section-label">Live example</p>
+        <h2 class="section-title">See what your profile could look like</h2>
+        <div class="divider"></div>
+        <p class="preview-intro">Callum & Niamh are experienced sitters with over 40 five-star reviews across Australia and the UK. Their Grotto Sitters profile is their single shareable link for every pet owner enquiry.</p>
+
+        <div class="preview-grid">
+          <div class="preview-photo-stack">
+            <img src="https://grottositters.com/images/couple-dinner-1.jpg" alt="Callum and Niamh" class="preview-img preview-img-back" />
+            <img src="https://grottositters.com/images/couple-field-1.jpg" alt="Callum and Niamh" class="preview-img preview-img-front" />
+          </div>
+
+          <div class="preview-content">
+            <div class="preview-profile-header">
+              <img src="https://grottositters.com/images/couple-field-1.jpg" alt="Callum & Niamh" class="preview-avatar" />
+              <div>
+                <h3>Callum & Niamh</h3>
+                <p>Experienced house & pet sitters — Australia &amp; UK</p>
+                <div class="preview-stars">
+                  ★★★★★ <span>40+ reviews</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="preview-reviews">
+              <div class="mini-review">
+                <div class="mini-stars">★★★★★</div>
+                <p>"Super lovely couple who took great care of our cat Rocco! Regular updates, spotless apartment on return."</p>
+                <span>— Jess & Sam · TrustedHouseSitters, Sydney</span>
+              </div>
+              <div class="mini-review">
+                <div class="mini-stars">★★★★★</div>
+                <p>"We couldn't have asked for better pet sitters — reliable, trustworthy, and incredibly caring with Bailey."</p>
+                <span>— Libby · TrustedHouseSitters, Sydney</span>
+              </div>
+            </div>
+
+            <a href="/callumandniamh" class="btn-outline btn-small" style="align-self:flex-start">View full profile &rarr;</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features-section">
+      <div class="section-inner">
+        <p class="section-label">What you get</p>
+        <h2 class="section-title">Everything you need, nothing you don't</h2>
+        <div class="divider"></div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🌐</div>
+            <h3>Your own page</h3>
+            <p>A professional profile at <strong>grottositters.com/yourname</strong> — shareable with any pet owner in seconds.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">⭐</div>
+            <h3>Showcase reviews</h3>
+            <p>Display your best reviews from Rover, TrustedHouseSitters, or anywhere else — all in one place.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">📸</div>
+            <h3>Photo gallery</h3>
+            <p>A beautiful gallery of the pets you've cared for. Let your love for animals speak for itself.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">✉️</div>
+            <h3>Built-in enquiry form</h3>
+            <p>Pet owners can send you enquiries directly from your page — no extra tools needed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GALLERY PREVIEW -->
+    <section class="gallery-preview-section">
+      <div class="gallery-preview-grid">
+        <img src="https://grottositters.com/images/chester-1.jpg" alt="Chester the cocker spaniel" />
+        <img src="https://grottositters.com/images/travis-1.jpg" alt="Travis on a countryside walk" />
+        <img src="https://grottositters.com/images/solomon-1.jpg" alt="Solomon the labradoodle" />
+        <img src="https://grottositters.com/images/zeus-1.jpg" alt="Zeus the Weimaraner" />
+        <img src="https://grottositters.com/images/alfie-1.jpg" alt="Alfie the cockapoo" />
+        <img src="https://grottositters.com/images/travis-2.jpg" alt="Travis the Vizsla" />
+      </div>
+      <div class="gallery-preview-overlay">
+        <p>Your sits, beautifully displayed</p>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="section-inner cta-inner">
+        <h2 class="section-title" style="color:#fff">Ready to get your profile?</h2>
+        <p>Join Callum, Niamh, and sitters across the UK and Australia.</p>
+        <a href="/signup" class="btn-primary btn-large">Create your profile — it's free</a>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-inner">
+        <div class="footer-top">
+          <div class="footer-brand">
+            <h2>Grotto <span>Sitters</span></h2>
+            <p>Beautiful profile pages for professional house and pet sitters.</p>
+          </div>
+          <div class="footer-links">
+            <h4>Platform</h4>
+            <ul>
+              <li><a href="/signup">Create a profile</a></li>
+              <li><a href="/login">Log in</a></li>
+              <li><a href="/callumandniamh">See an example</a></li>
+            </ul>
+          </div>
+          <div class="footer-links">
+            <h4>Example profile</h4>
+            <ul>
+              <li><a href="https://www.rover.com/sit/callud53623" target="_blank" rel="noopener noreferrer">Rover (UK)</a></li>
+              <li><a href="https://www.trustedhousesitters.com/house-and-pet-sitters/australia/new-south-wales/sydney/l/6979617/" target="_blank" rel="noopener noreferrer">TrustedHouseSitters (AU)</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>&copy; {new Date().getFullYear()} Grotto Sitters</span>
+          <span>Made with &#128062; for pet lovers everywhere</span>
+        </div>
+      </div>
+    </footer>
+
+  </body>
+</html>
+
+<style>
+  /* NAV */
+  .landing-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 18px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(250,246,238,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(200,150,62,0.15);
+  }
+  .nav-actions { display: flex; align-items: center; gap: 24px; }
+  .nav-link-plain { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--brown-mid); text-decoration: none; transition: color 0.2s; }
+  .nav-link-plain:hover { color: var(--gold); }
+  .btn-small { padding: 10px 24px; font-size: 0.8rem; }
+  .btn-large { padding: 18px 48px; font-size: 1rem; }
+  .btn-outline {
+    display: inline-block;
+    border: 2px solid rgba(255,255,255,0.7);
+    color: #fff;
+    padding: 14px 36px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.15); border-color: #fff; }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 120px 48px 80px;
+    text-align: center;
+  }
+  .hero-bg { position: absolute; inset: 0; z-index: 0; }
+  .hero-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+  .hero-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.6); }
+  .hero-content { position: relative; z-index: 2; max-width: 760px; }
+  .hero-eyebrow { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-light); margin-bottom: 20px; }
+  .hero-content h1 { font-family: "Playfair Display", serif; font-size: 5rem; color: #fff; line-height: 1.05; margin-bottom: 24px; }
+  .hero-content h1 em { color: var(--gold); font-style: italic; }
+  .hero-sub { font-size: 1.15rem; color: rgba(255,255,255,0.85); line-height: 1.75; max-width: 540px; margin: 0 auto 40px; }
+  .hero-ctas { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  /* PREVIEW */
+  .preview-section { padding: 100px 48px; background: var(--cream); }
+  .preview-intro { color: var(--text-soft); font-size: 0.95rem; line-height: 1.75; max-width: 600px; margin-bottom: 56px; }
+  .preview-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 60px; align-items: center; }
+  .preview-photo-stack { position: relative; height: 440px; }
+  .preview-img { position: absolute; width: 72%; aspect-ratio: 3/4; object-fit: cover; border-radius: 12px; box-shadow: 0 16px 48px rgba(44,26,14,0.18); }
+  .preview-img-back { top: 0; left: 0; opacity: 0.7; transform: rotate(-3deg); }
+  .preview-img-front { bottom: 0; right: 0; transform: rotate(2deg); }
+  .preview-content { display: flex; flex-direction: column; gap: 28px; }
+  .preview-profile-header { display: flex; gap: 16px; align-items: flex-start; }
+  .preview-avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+  .preview-profile-header h3 { font-family: "Playfair Display", serif; font-size: 1.3rem; color: var(--brown-dark); margin-bottom: 4px; }
+  .preview-profile-header p { font-size: 0.88rem; color: var(--text-soft); line-height: 1.5; margin-bottom: 8px; }
+  .preview-stars { color: var(--gold); font-size: 0.9rem; }
+  .preview-stars span { color: var(--text-soft); font-size: 0.82rem; margin-left: 6px; }
+  .preview-reviews { display: flex; flex-direction: column; gap: 16px; }
+  .mini-review { background: #fff; border: 1px solid rgba(200,150,62,0.12); border-radius: 10px; padding: 20px; }
+  .mini-stars { color: var(--gold); font-size: 0.85rem; margin-bottom: 8px; }
+  .mini-review p { font-size: 0.88rem; color: var(--text-soft); line-height: 1.65; font-style: italic; margin-bottom: 10px; }
+  .mini-review span { font-size: 0.78rem; font-weight: 700; color: var(--brown-light); }
+  .btn-outline.btn-small { border-color: var(--gold); color: var(--gold); padding: 10px 20px; font-size: 0.8rem; }
+  .btn-outline.btn-small:hover { background: var(--gold); color: #fff; }
+
+  /* FEATURES */
+  .features-section { padding: 100px 48px; background: var(--warm-white); }
+  .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 8px; }
+  .feature-card { background: #fff; border-radius: 12px; padding: 32px 24px; box-shadow: 0 2px 16px rgba(44,26,14,0.05); }
+  .feature-icon { font-size: 2rem; margin-bottom: 16px; }
+  .feature-card h3 { font-family: "Playfair Display", serif; font-size: 1.1rem; color: var(--brown-dark); margin-bottom: 10px; }
+  .feature-card p { font-size: 0.88rem; color: var(--text-soft); line-height: 1.7; }
+  .feature-card strong { color: var(--gold); }
+
+  /* GALLERY PREVIEW */
+  .gallery-preview-section { position: relative; height: 320px; overflow: hidden; }
+  .gallery-preview-grid { display: grid; grid-template-columns: repeat(6, 1fr); height: 100%; gap: 4px; }
+  .gallery-preview-grid img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .gallery-preview-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.45); display: flex; align-items: center; justify-content: center; }
+  .gallery-preview-overlay p { font-family: "Playfair Display", serif; font-size: 1.8rem; color: #fff; font-style: italic; letter-spacing: 0.02em; }
+
+  /* CTA */
+  .cta-section { background: var(--brown-dark); padding: 100px 48px; text-align: center; }
+  .cta-inner p { color: rgba(255,255,255,0.7); font-size: 1rem; margin: 16px 0 36px; }
+
+  @media (max-width: 900px) {
+    .features-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .landing-nav { padding: 14px 24px; }
+    .hero { padding: 100px 24px 60px; min-height: auto; }
+    .hero-content h1 { font-size: 3rem; }
+    .hero-ctas { flex-direction: column; align-items: center; }
+    .preview-section, .features-section, .cta-section { padding: 60px 24px; }
+    .preview-grid { grid-template-columns: 1fr; }
+    .preview-photo-stack { height: 280px; }
+    .features-grid { grid-template-columns: 1fr; }
+    .gallery-preview-grid { grid-template-columns: repeat(3, 1fr); }
+    .gallery-preview-grid img:nth-child(n+4) { display: none; }
+  }
+</style>

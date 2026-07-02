@@ -57,13 +57,13 @@ const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.
                 <div class="profile-card-info">
                   <h2 class="profile-name">{profile.name}</h2>
                   {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
-                  <a href={`/profile/${profile.slug}`} target="_blank" class="profile-link">
-                    grottositters.com/profile/{profile.slug} ↗
+                  <a href={`/${profile.slug}`} target="_blank" class="profile-link">
+                    grottositters.com/{profile.slug} ↗
                   </a>
                 </div>
               </div>
               <div class="profile-card-actions">
-                <a href={`/profile/${profile.slug}`} target="_blank" class="btn-primary">View public page</a>
+                <a href={`/${profile.slug}`} target="_blank" class="btn-primary">View public page</a>
               </div>
             </div>
 
@@ -87,7 +87,7 @@ const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.
                 <input
                   type="text"
                   readonly
-                  value={`https://grottositters.com/profile/${profile.slug}`}
+                  value={`https://grottositters.com/${profile.slug}`}
                   id="shareUrl"
                 />
                 <button onclick="copyUrl()" class="copy-btn">Copy</button>
