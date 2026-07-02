@@ -22,11 +22,15 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(null, { status: 302, headers: { Location: '/signup?error=mismatch' } });
     }
 
-    const { data: existing } = await supabase
+    const { data: existing, error: lookupError } = await supabase
       .from('users')
       .select('id')
       .eq('email', email)
-      .single();
+      .maybeSingle();
+
+    if (lookupError) {
+      return new Response(null, { status: 302, headers: { Location: `/signup?error=db&detail=${encodeURIComponent(lookupError.message)}` } });
+    }
 
     if (existing) {
       return new Response(null, { status: 302, headers: { Location: '/signup?error=exists' } });
@@ -40,7 +44,7 @@ export const POST: APIRoute = async ({ request }) => {
       .single();
 
     if (error || !newUser) {
-      return new Response(null, { status: 302, headers: { Location: '/signup?error=server' } });
+      return new Response(null, { status: 302, headers: { Location: `/signup?error=db&detail=${encodeURIComponent(error?.message ?? 'Insert failed')}` } });
     }
 
     const token = await signSession(newUser.id, newUser.email);
@@ -52,7 +56,8 @@ export const POST: APIRoute = async ({ request }) => {
         'Set-Cookie': sessionCookie(token),
       },
     });
-  } catch {
-    return new Response(null, { status: 302, headers: { Location: '/signup?error=server' } });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error';
+    return new Response(null, { status: 302, headers: { Location: `/signup?error=db&detail=${encodeURIComponent(msg)}` } });
   }
 };

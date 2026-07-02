@@ -8,12 +8,14 @@ const session = await getSession(Astro.request);
 if (session) return Astro.redirect('/dashboard');
 
 const error = Astro.url.searchParams.get('error');
+const detail = Astro.url.searchParams.get('detail');
 const errorMessages: Record<string, string> = {
   missing: 'Please fill in all fields.',
   short: 'Password must be at least 8 characters.',
   mismatch: 'Passwords do not match.',
   exists: 'An account with that email already exists.',
   server: 'Something went wrong. Please try again.',
+  db: `Database error: ${detail ?? 'unknown'}`,
 };
 const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please try again.') : null;
 ---
