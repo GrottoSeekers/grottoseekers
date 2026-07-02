@@ -42,8 +42,8 @@ VALUES (
   -- user_id
   'a0000000-0000-0000-0000-000000000001'::uuid,
 
-  -- slug  →  /profile/callum-and-niamh
-  'callum-and-niamh',
+  -- slug  →  /callumandniamh
+  'callumandniamh',
 
   -- name
   'Callum & Niamh',
