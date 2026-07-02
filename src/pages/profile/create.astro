@@ -128,15 +128,67 @@ const errorMsg = errorMap[errorKey] ?? '';
           .replace(/-+/g, '-');
       });
 
+      function compressImage(file: File, maxWidth: number, maxHeight: number, quality: number): Promise<File> {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            let { width, height } = img;
+            if (width > maxWidth || height > maxHeight) {
+              const ratio = Math.min(maxWidth / width, maxHeight / height);
+              width = Math.round(width * ratio);
+              height = Math.round(height * ratio);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) { resolve(file); return; }
+            ctx.drawImage(img, 0, 0, width, height);
+            canvas.toBlob(
+              (blob) => {
+                if (!blob) { resolve(file); return; }
+                resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+              },
+              'image/jpeg',
+              quality,
+            );
+          };
+          img.onerror = () => reject(new Error('Failed to load image'));
+          img.src = URL.createObjectURL(file);
+        });
+      }
+
+      let compressedFile: File | null = null;
+
       const fileInput = document.getElementById('profile_pic') as HTMLInputElement;
       const fileLabel = document.getElementById('file-label');
-      fileInput?.addEventListener('change', () => {
+      fileInput?.addEventListener('change', async () => {
         const file = fileInput.files?.[0];
         if (file && fileLabel) {
           const textEl = fileLabel.querySelector('.file-upload-text');
-          if (textEl) textEl.textContent = file.name;
+          if (textEl) textEl.textContent = 'Compressing…';
           fileLabel.classList.add('has-file');
+          try {
+            compressedFile = await compressImage(file, 1200, 1200, 0.8);
+            if (textEl) textEl.textContent = file.name;
+          } catch {
+            compressedFile = null;
+            if (textEl) textEl.textContent = file.name;
+          }
         }
+      });
+
+      const form = document.querySelector('.create-form') as HTMLFormElement;
+      form?.addEventListener('submit', (e) => {
+        if (!compressedFile) return;
+        e.preventDefault();
+        const formData = new FormData(form);
+        formData.set('profile_pic', compressedFile, compressedFile.name);
+        const btn = form.querySelector('.btn-submit') as HTMLButtonElement;
+        if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+        fetch(form.action, { method: 'POST', body: formData, redirect: 'follow' })
+          .then((res) => { window.location.href = res.url; })
+          .catch(() => { window.location.href = '/profile/create?error=server'; });
       });
     </script>
 
