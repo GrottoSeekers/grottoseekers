@@ -8,11 +8,15 @@ import { supabase } from '../lib/supabase';
 const session = await getSession(Astro.request);
 if (!session) return Astro.redirect('/login');
 
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('slug, name, tagline, profile_pic, reviews_json')
-  .eq('user_id', session.userId)
-  .single();
+let profile: any = null;
+try {
+  const { data } = await supabase
+    .from('profiles')
+    .select('slug, name, tagline, profile_pic, reviews_json')
+    .eq('user_id', session.userId)
+    .single();
+  profile = data;
+} catch {}
 
 const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.length : 0;
 ---
