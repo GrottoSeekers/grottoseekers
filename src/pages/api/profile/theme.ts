@@ -39,11 +39,12 @@ export const POST: APIRoute = async ({ request }) => {
       .eq('id', profile.id);
 
     if (error) {
-      return new Response(null, { status: 302, headers: { Location: '/profile/edit?error=server#colours' } });
+      return new Response(null, { status: 302, headers: { Location: `/profile/edit?error=upload&detail=${encodeURIComponent(error.message)}#colours` } });
     }
 
     return new Response(null, { status: 302, headers: { Location: '/profile/edit?saved=colours#colours' } });
-  } catch {
-    return new Response(null, { status: 302, headers: { Location: '/profile/edit?error=server#colours' } });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : 'Unknown error';
+    return new Response(null, { status: 302, headers: { Location: `/profile/edit?error=upload&detail=${encodeURIComponent(msg)}#colours` } });
   }
 };
