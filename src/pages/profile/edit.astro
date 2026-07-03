@@ -1,0 +1,598 @@
+---
+export const prerender = false;
+
+import '../../styles/global.css';
+import { getSession } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('user_id', session.userId)
+  .single();
+
+if (!profile) return Astro.redirect('/profile/create');
+
+const heroImages: any[] = Array.isArray(profile.hero_images_json) ? profile.hero_images_json : [];
+const aboutImages: any[] = Array.isArray(profile.about_images_json) ? profile.about_images_json : [];
+const gallery: any[] = Array.isArray(profile.gallery_json) ? profile.gallery_json : [];
+const reviews: any[] = Array.isArray(profile.reviews_json) ? profile.reviews_json : [];
+const platforms: any[] = Array.isArray(profile.platforms_json) ? profile.platforms_json : [];
+
+const saved = Astro.url.searchParams.get('saved');
+const errorKey = Astro.url.searchParams.get('error') ?? '';
+const errorMap: Record<string, string> = {
+  missing:        'Please fill in the required fields.',
+  file_too_large: 'Image must be under 5 MB.',
+  server:         'Something went wrong. Please try again.',
+};
+const errorMsg = errorMap[errorKey] ?? '';
+const savedMsg = saved ? 'Changes saved!' : '';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>Edit your profile — Grotto Sitters</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
+      <div class="nav-right">
+        <span class="nav-email">{session.email}</span>
+        <a href="/api/auth/logout" class="nav-logout">Log out</a>
+      </div>
+    </nav>
+
+    <main class="edit-wrap">
+      <div class="section-inner">
+        <header class="edit-header">
+          <div>
+            <p class="section-label">Sitter Portal</p>
+            <h1 class="section-title">Edit your profile</h1>
+            <div class="divider"></div>
+          </div>
+          <div class="header-actions">
+            <a href="/dashboard" class="btn-back">← Dashboard</a>
+            <a href={`/${profile.slug}`} target="_blank" class="btn-primary btn-sm">View public page ↗</a>
+          </div>
+        </header>
+
+        {savedMsg && <div class="success-banner" id="success-banner">{savedMsg}</div>}
+        {errorMsg && <div class="error-banner">{errorMsg}</div>}
+
+        <!-- Section nav -->
+        <div class="section-nav">
+          <a href="#details">Details</a>
+          <a href="#hero">Hero slideshow</a>
+          <a href="#about">About photos</a>
+          <a href="#gallery">Gallery</a>
+          <a href="#reviews">Reviews</a>
+          <a href="#platforms">Platform links</a>
+        </div>
+
+        <!-- DETAILS -->
+        <section class="edit-card" id="details">
+          <h2>Your details</h2>
+          <form action="/api/profile/update" method="POST" enctype="multipart/form-data" class="edit-form" id="details-form">
+            <div class="field">
+              <label for="name">Display name <span class="req">*</span></label>
+              <input type="text" id="name" name="name" value={profile.name} required />
+            </div>
+            <div class="field">
+              <label for="tagline">Tagline</label>
+              <input type="text" id="tagline" name="tagline" value={profile.tagline ?? ''} placeholder="e.g. Experienced pet sitters based in London" />
+            </div>
+            <div class="field">
+              <label for="badge_text">Badge text</label>
+              <input type="text" id="badge_text" name="badge_text" value={profile.badge_text ?? ''} placeholder="e.g. 5★ rated on TrustedHouseSitters" />
+              <p class="field-hint">Shown on the hero section of your page. Leave blank to hide.</p>
+            </div>
+            <div class="field">
+              <label for="bio">About you</label>
+              <textarea id="bio" name="bio" rows="8" placeholder="Tell pet owners about yourselves…">{profile.bio ?? ''}</textarea>
+              <p class="field-hint">Use blank lines to separate paragraphs.</p>
+            </div>
+            <div class="field">
+              <label>Profile photo</label>
+              <div class="pic-row">
+                {profile.profile_pic && <img src={profile.profile_pic} alt={profile.name} class="current-pic" />}
+                <div class="file-upload-wrap">
+                  <input type="file" name="profile_pic" accept="image/*" class="file-input" />
+                  <div class="file-upload-label">
+                    <span class="file-upload-icon">📷</span>
+                    <span class="file-upload-text">{profile.profile_pic ? 'Change photo' : 'Upload photo'}</span>
+                  </div>
+                </div>
+              </div>
+              <p class="field-hint">JPG or PNG, max 5 MB. Leave empty to keep current photo.</p>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary btn-sm">Save details</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- HERO IMAGES -->
+        <section class="edit-card" id="hero">
+          <h2>Hero slideshow</h2>
+          <p class="card-desc">These images appear as a full-screen slideshow at the top of your page. Landscape photos work best (1600 x 900 or larger).</p>
+
+          {heroImages.length > 0 && (
+            <div class="image-grid">
+              {heroImages.map((img: any, i: number) => (
+                <div class="image-thumb">
+                  <img src={img.src} alt={`Hero ${i + 1}`} />
+                  <form action="/api/profile/images" method="POST" class="delete-form">
+                    <input type="hidden" name="_action" value="delete" />
+                    <input type="hidden" name="category" value="hero" />
+                    <input type="hidden" name="index" value={String(i)} />
+                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <form action="/api/profile/images" method="POST" enctype="multipart/form-data" class="upload-form" data-category="hero">
+            <input type="hidden" name="_action" value="upload" />
+            <input type="hidden" name="category" value="hero" />
+            <div class="upload-row">
+              <div class="file-upload-wrap upload-wide">
+                <input type="file" name="file" accept="image/*" required class="file-input" />
+                <div class="file-upload-label">
+                  <span class="file-upload-icon">🖼️</span>
+                  <span class="file-upload-text">Choose hero image</span>
+                </div>
+              </div>
+              <select name="pos" class="pos-select">
+                <option value="center">Center</option>
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+              <button type="submit" class="btn-primary btn-sm">Upload</button>
+            </div>
+            <p class="field-hint">The position controls which part of the image stays visible on different screen sizes.</p>
+          </form>
+        </section>
+
+        <!-- ABOUT IMAGES -->
+        <section class="edit-card" id="about">
+          <h2>About section photos</h2>
+          <p class="card-desc">These appear as a carousel next to your bio text. Square or portrait photos work well.</p>
+
+          {aboutImages.length > 0 && (
+            <div class="image-grid">
+              {aboutImages.map((img: any, i: number) => (
+                <div class="image-thumb">
+                  <img src={img.src} alt={img.alt || `About ${i + 1}`} />
+                  <form action="/api/profile/images" method="POST" class="delete-form">
+                    <input type="hidden" name="_action" value="delete" />
+                    <input type="hidden" name="category" value="about" />
+                    <input type="hidden" name="index" value={String(i)} />
+                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <form action="/api/profile/images" method="POST" enctype="multipart/form-data" class="upload-form" data-category="about">
+            <input type="hidden" name="_action" value="upload" />
+            <input type="hidden" name="category" value="about" />
+            <div class="upload-row">
+              <div class="file-upload-wrap upload-wide">
+                <input type="file" name="file" accept="image/*" required class="file-input" />
+                <div class="file-upload-label">
+                  <span class="file-upload-icon">📸</span>
+                  <span class="file-upload-text">Choose about photo</span>
+                </div>
+              </div>
+              <input type="text" name="alt" placeholder="Describe the photo (optional)" class="alt-input" />
+              <button type="submit" class="btn-primary btn-sm">Upload</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- GALLERY -->
+        <section class="edit-card" id="gallery">
+          <h2>Photo gallery</h2>
+          <p class="card-desc">A grid of your best photos — pets you've looked after, places you've stayed, happy owners.</p>
+
+          {gallery.length > 0 && (
+            <div class="image-grid">
+              {gallery.map((img: any, i: number) => (
+                <div class="image-thumb">
+                  <img src={img.src} alt={img.alt || `Gallery ${i + 1}`} />
+                  <form action="/api/profile/images" method="POST" class="delete-form">
+                    <input type="hidden" name="_action" value="delete" />
+                    <input type="hidden" name="category" value="gallery" />
+                    <input type="hidden" name="index" value={String(i)} />
+                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <form action="/api/profile/images" method="POST" enctype="multipart/form-data" class="upload-form" data-category="gallery">
+            <input type="hidden" name="_action" value="upload" />
+            <input type="hidden" name="category" value="gallery" />
+            <div class="upload-row">
+              <div class="file-upload-wrap upload-wide">
+                <input type="file" name="file" accept="image/*" required class="file-input" />
+                <div class="file-upload-label">
+                  <span class="file-upload-icon">📷</span>
+                  <span class="file-upload-text">Choose gallery photo</span>
+                </div>
+              </div>
+              <input type="text" name="alt" placeholder="Describe the photo (optional)" class="alt-input" />
+              <button type="submit" class="btn-primary btn-sm">Upload</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- REVIEWS -->
+        <section class="edit-card" id="reviews">
+          <h2>Reviews</h2>
+          <p class="card-desc">Add reviews from pet owners or other platforms. These show as a scrollable card section on your page.</p>
+
+          {reviews.length > 0 && (
+            <div class="item-list">
+              {reviews.map((rev: any, i: number) => (
+                <div class="item-card">
+                  <div class="item-content">
+                    <p class="item-quote">"{rev.text}"</p>
+                    <p class="item-meta">— {rev.name}{rev.platform ? ` on ${rev.platform}` : ''}</p>
+                  </div>
+                  <form action="/api/profile/reviews" method="POST" class="delete-form">
+                    <input type="hidden" name="_action" value="delete" />
+                    <input type="hidden" name="index" value={String(i)} />
+                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <form action="/api/profile/reviews" method="POST" class="add-form">
+            <h3>Add a review</h3>
+            <input type="hidden" name="_action" value="add" />
+            <div class="field">
+              <label>Review text <span class="req">*</span></label>
+              <textarea name="text" rows="3" required placeholder="What did the pet owner say?"></textarea>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Reviewer name <span class="req">*</span></label>
+                <input type="text" name="name" required placeholder="e.g. Sarah M." />
+              </div>
+              <div class="field">
+                <label>Platform</label>
+                <input type="text" name="platform" placeholder="e.g. TrustedHouseSitters" />
+              </div>
+            </div>
+            <button type="submit" class="btn-primary btn-sm">Add review</button>
+          </form>
+        </section>
+
+        <!-- PLATFORMS -->
+        <section class="edit-card" id="platforms">
+          <h2>Platform links</h2>
+          <p class="card-desc">Link to your profiles on pet sitting platforms (Rover, TrustedHouseSitters, etc.).</p>
+
+          {platforms.length > 0 && (
+            <div class="item-list">
+              {platforms.map((plat: any, i: number) => (
+                <div class="item-card">
+                  <div class="item-content">
+                    <p class="item-title">{plat.emoji} {plat.name}</p>
+                    <p class="item-meta">{plat.url}</p>
+                    {plat.description && <p class="item-desc">{plat.description}</p>}
+                  </div>
+                  <form action="/api/profile/platforms" method="POST" class="delete-form">
+                    <input type="hidden" name="_action" value="delete" />
+                    <input type="hidden" name="index" value={String(i)} />
+                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <form action="/api/profile/platforms" method="POST" class="add-form">
+            <h3>Add a platform</h3>
+            <input type="hidden" name="_action" value="add" />
+            <div class="field-row">
+              <div class="field">
+                <label>Platform name <span class="req">*</span></label>
+                <input type="text" name="name" required placeholder="e.g. TrustedHouseSitters" />
+              </div>
+              <div class="field field-sm">
+                <label>Emoji</label>
+                <input type="text" name="emoji" placeholder="🏠" maxlength="4" />
+              </div>
+            </div>
+            <div class="field">
+              <label>Profile URL <span class="req">*</span></label>
+              <input type="url" name="url" required placeholder="https://www.trustedhousesitters.com/…" />
+            </div>
+            <div class="field">
+              <label>Short description</label>
+              <input type="text" name="description" placeholder="e.g. 10 five-star reviews" />
+            </div>
+            <button type="submit" class="btn-primary btn-sm">Add platform</button>
+          </form>
+        </section>
+
+      </div>
+    </main>
+
+    <script>
+      function compressImage(file: File, maxW: number, maxH: number, quality: number): Promise<File> {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            let { width, height } = img;
+            if (width > maxW || height > maxH) {
+              const r = Math.min(maxW / width, maxH / height);
+              width = Math.round(width * r);
+              height = Math.round(height * r);
+            }
+            const c = document.createElement('canvas');
+            c.width = width; c.height = height;
+            const ctx = c.getContext('2d');
+            if (!ctx) { resolve(file); return; }
+            ctx.drawImage(img, 0, 0, width, height);
+            c.toBlob(
+              (blob) => {
+                if (!blob) { resolve(file); return; }
+                resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+              },
+              'image/jpeg', quality,
+            );
+          };
+          img.onerror = () => reject(new Error('Failed to load image'));
+          img.src = URL.createObjectURL(file);
+        });
+      }
+
+      // Handle file input labels
+      document.querySelectorAll('.file-input').forEach(input => {
+        input.addEventListener('change', () => {
+          const fi = input as HTMLInputElement;
+          const label = fi.closest('.file-upload-wrap')?.querySelector('.file-upload-text');
+          if (fi.files?.[0] && label) label.textContent = fi.files[0].name;
+        });
+      });
+
+      // Intercept all forms with file uploads to compress images
+      document.querySelectorAll<HTMLFormElement>('form[enctype="multipart/form-data"]').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+          const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
+          const file = fileInput?.files?.[0];
+          if (!file) return; // no file selected, let regular submit happen (for details form without new photo)
+
+          e.preventDefault();
+          const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+          const origText = btn?.textContent ?? '';
+          if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+
+          try {
+            const maxDim = form.dataset.category === 'hero' ? 1920 : 1200;
+            const compressed = await compressImage(file, maxDim, maxDim, 0.85);
+            const fd = new FormData(form);
+            const fieldName = fileInput!.name;
+            fd.set(fieldName, compressed, compressed.name);
+            const res = await fetch(form.action, { method: 'POST', body: fd, redirect: 'follow' });
+            window.location.href = res.url;
+          } catch {
+            if (btn) { btn.disabled = false; btn.textContent = origText; }
+            alert('Upload failed. Please try again.');
+          }
+        });
+      });
+
+      // Auto-hide success banner
+      const banner = document.getElementById('success-banner');
+      if (banner) setTimeout(() => { banner.style.opacity = '0'; setTimeout(() => banner.remove(), 300); }, 3000);
+    </script>
+
+    <style>
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+
+      nav {
+        position: static;
+        border-bottom: 1px solid rgba(200,150,62,0.2);
+        padding: 18px 48px;
+        display: flex; justify-content: space-between; align-items: center;
+      }
+      .nav-right { display: flex; align-items: center; gap: 20px; }
+      .nav-email { font-size: 0.85rem; color: var(--text-soft); }
+      .nav-logout {
+        font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--gold); text-decoration: none;
+      }
+      .nav-logout:hover { color: var(--brown-dark); }
+
+      .edit-wrap { flex: 1; padding: 60px 48px; }
+
+      .edit-header {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        flex-wrap: wrap; gap: 20px; margin-bottom: 32px;
+      }
+      .header-actions { display: flex; gap: 12px; align-items: center; }
+      .btn-back {
+        font-size: 0.85rem; color: var(--text-soft); text-decoration: none;
+        font-weight: 600;
+      }
+      .btn-back:hover { color: var(--brown-dark); }
+      .btn-sm { padding: 10px 24px; font-size: 0.82rem; }
+
+      .success-banner {
+        background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px;
+        padding: 14px 18px; color: #166534; font-size: 0.9rem; font-weight: 600;
+        margin-bottom: 24px; max-width: 780px; transition: opacity 0.3s;
+      }
+      .error-banner {
+        background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+        padding: 14px 18px; color: #b91c1c; font-size: 0.9rem;
+        margin-bottom: 24px; max-width: 780px;
+      }
+
+      .section-nav {
+        display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px;
+      }
+      .section-nav a {
+        background: #fff; border: 1.5px solid rgba(44,26,14,0.12);
+        border-radius: 6px; padding: 8px 16px; font-size: 0.8rem;
+        font-weight: 700; color: var(--brown-mid); text-decoration: none;
+        letter-spacing: 0.04em; transition: all 0.2s;
+      }
+      .section-nav a:hover { border-color: var(--gold); color: var(--gold); }
+
+      .edit-card {
+        background: #fff; border-radius: 12px; padding: 36px;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
+        margin-bottom: 24px; max-width: 780px;
+        scroll-margin-top: 24px;
+      }
+      .edit-card h2 {
+        font-family: "Playfair Display", serif; font-size: 1.15rem;
+        color: var(--brown-dark); margin-bottom: 8px;
+      }
+      .card-desc {
+        font-size: 0.88rem; color: var(--text-soft); line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      .edit-form, .add-form { display: flex; flex-direction: column; gap: 20px; }
+
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field-sm { max-width: 100px; }
+      label { font-size: 0.82rem; font-weight: 700; color: var(--brown-dark); letter-spacing: 0.02em; }
+      .req { color: var(--gold); }
+      .field-hint { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
+
+      input[type="text"], input[type="url"], textarea, select {
+        width: 100%; box-sizing: border-box;
+        border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px;
+        padding: 11px 14px; font-size: 0.93rem; font-family: "Lato", sans-serif;
+        color: var(--text); background: var(--cream); outline: none;
+        transition: border-color 0.2s;
+      }
+      input:focus, textarea:focus, select:focus { border-color: var(--gold); }
+      textarea { resize: vertical; line-height: 1.6; }
+
+      .field-row {
+        display: flex; gap: 16px;
+      }
+      .field-row .field { flex: 1; }
+
+      .form-actions { padding-top: 8px; }
+
+      /* Profile pic row */
+      .pic-row { display: flex; align-items: center; gap: 20px; }
+      .current-pic { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(200,150,62,0.3); }
+
+      /* File upload */
+      .file-upload-wrap { position: relative; flex: 1; }
+      .file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
+      .file-upload-label {
+        display: flex; align-items: center; gap: 10px;
+        border: 2px dashed rgba(44,26,14,0.18); border-radius: 8px;
+        padding: 14px 16px; background: var(--cream);
+        transition: border-color 0.2s, background 0.2s; cursor: pointer;
+      }
+      .file-upload-wrap:hover .file-upload-label { border-color: var(--gold); background: rgba(200,150,62,0.04); }
+      .file-upload-icon { font-size: 1.2rem; }
+      .file-upload-text { font-size: 0.85rem; color: var(--text-soft); }
+
+      .upload-row {
+        display: flex; gap: 12px; align-items: stretch;
+      }
+      .upload-wide { flex: 1; }
+      .pos-select {
+        width: auto; min-width: 100px; flex-shrink: 0;
+      }
+      .alt-input {
+        flex: 1; min-width: 160px;
+      }
+      .upload-row .btn-primary { flex-shrink: 0; white-space: nowrap; height: auto; }
+
+      /* Image grid */
+      .image-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 12px; margin-bottom: 24px;
+      }
+      .image-thumb {
+        position: relative; border-radius: 8px; overflow: hidden;
+        aspect-ratio: 4/3; background: rgba(44,26,14,0.05);
+      }
+      .image-thumb img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+      }
+
+      /* Item list (reviews, platforms) */
+      .item-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+      .item-card {
+        display: flex; gap: 16px; align-items: flex-start;
+        padding: 16px; background: var(--cream); border-radius: 8px;
+        border: 1px solid rgba(44,26,14,0.08);
+      }
+      .item-content { flex: 1; min-width: 0; }
+      .item-quote { font-size: 0.9rem; color: var(--text); line-height: 1.6; font-style: italic; margin-bottom: 6px; }
+      .item-meta { font-size: 0.8rem; color: var(--text-soft); }
+      .item-title { font-size: 0.92rem; font-weight: 700; color: var(--brown-dark); margin-bottom: 4px; }
+      .item-desc { font-size: 0.82rem; color: var(--text-soft); margin-top: 4px; }
+
+      /* Delete button */
+      .delete-form { flex-shrink: 0; }
+      .delete-btn {
+        width: 28px; height: 28px; border-radius: 50%;
+        background: rgba(185,28,28,0.85); color: #fff;
+        border: none; cursor: pointer; font-size: 0.75rem;
+        display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s;
+      }
+      .delete-btn:hover { background: #991b1b; }
+      .image-thumb .delete-form { position: absolute; top: 6px; right: 6px; z-index: 2; }
+      .image-thumb .delete-btn { background: rgba(0,0,0,0.6); }
+      .image-thumb .delete-btn:hover { background: rgba(185,28,28,0.9); }
+
+      .add-form {
+        border-top: 1px solid rgba(44,26,14,0.08);
+        padding-top: 24px;
+      }
+      .add-form h3 {
+        font-family: "Playfair Display", serif; font-size: 1rem;
+        color: var(--brown-dark); margin-bottom: 16px;
+      }
+
+      @media (max-width: 768px) {
+        nav { padding: 14px 24px; }
+        .nav-email { display: none; }
+        .edit-wrap { padding: 32px 16px; }
+        .edit-card { padding: 24px 18px; }
+        .edit-header { flex-direction: column; gap: 12px; }
+        .header-actions { width: 100%; justify-content: space-between; }
+        .upload-row { flex-direction: column; }
+        .field-row { flex-direction: column; gap: 12px; }
+        .image-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+        .section-nav { gap: 6px; }
+        .section-nav a { padding: 6px 12px; font-size: 0.75rem; }
+        .pic-row { flex-direction: column; align-items: flex-start; }
+      }
+    </style>
+  </body>
+</html>
