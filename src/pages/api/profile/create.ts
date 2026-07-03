@@ -39,9 +39,10 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
       const path = `${session.userId}/${slug}-profile.${ext}`;
 
+      const buffer = new Uint8Array(await file.arrayBuffer());
       const { error: uploadError } = await supabase.storage
         .from('profile-pics')
-        .upload(path, file, {
+        .upload(path, buffer, {
           contentType: file.type,
           upsert: true,
         });

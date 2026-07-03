@@ -24,9 +24,11 @@ const platforms: any[] = Array.isArray(profile.platforms_json) ? profile.platfor
 
 const saved = Astro.url.searchParams.get('saved');
 const errorKey = Astro.url.searchParams.get('error') ?? '';
+const detail = Astro.url.searchParams.get('detail');
 const errorMap: Record<string, string> = {
   missing:        'Please fill in the required fields.',
   file_too_large: 'Image must be under 5 MB.',
+  upload:         `Upload error: ${detail ?? 'unknown'}`,
   server:         'Something went wrong. Please try again.',
 };
 const errorMsg = errorMap[errorKey] ?? '';

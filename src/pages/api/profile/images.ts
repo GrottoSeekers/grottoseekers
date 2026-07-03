@@ -50,12 +50,13 @@ export const POST: APIRoute = async ({ request }) => {
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
       const path = `${session.userId}/${category}-${Date.now()}.${ext}`;
 
+      const buffer = new Uint8Array(await file.arrayBuffer());
       const { error: uploadError } = await supabase.storage
         .from('profile-pics')
-        .upload(path, file, { contentType: file.type, upsert: true });
+        .upload(path, buffer, { contentType: file.type, upsert: true });
 
       if (uploadError) {
-        return new Response(null, { status: 302, headers: { Location: `/profile/edit?error=server#${anchor}` } });
+        return new Response(null, { status: 302, headers: { Location: `/profile/edit?error=upload&detail=${encodeURIComponent(uploadError.message)}#${anchor}` } });
       }
 
       const { data: urlData } = supabase.storage.from('profile-pics').getPublicUrl(path);
