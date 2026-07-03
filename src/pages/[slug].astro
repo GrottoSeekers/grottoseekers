@@ -48,9 +48,9 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       <ul>
         <li class="nav-panel-brand"><a href="/">Grotto <span>Sitters</span></a></li>
         <li><a href="#about">About</a></li>
-        <li><a href="#reviews">Reviews</a></li>
-        <li><a href="#gallery">Gallery</a></li>
-        <li><a href="#profiles">Profiles</a></li>
+        {reviews.length > 0 && <li><a href="#reviews">Reviews</a></li>}
+        {gallery.length > 0 && <li><a href="#gallery">Gallery</a></li>}
+        {platforms.length > 0 && <li><a href="#profiles">Profiles</a></li>}
         <li><a href="#enquiry">Book Us</a></li>
       </ul>
     </nav>
@@ -101,10 +101,11 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
       </div>
     </section>
 
+    {reviews.length > 0 && (
     <section id="reviews" class="reviews-section">
       <div class="section-inner">
         <p class="section-label">What People Say</p>
-        <h2 class="section-title">Over 40 five-star reviews.</h2>
+        <h2 class="section-title">{reviews.length === 1 ? '1 five-star review.' : `${reviews.length} five-star reviews.`}</h2>
         <div class="divider"></div>
         <div class="stars-row">
           <span class="star">&#9733;</span><span class="star">&#9733;</span>
@@ -140,7 +141,9 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
         </div>
       </div>
     </section>
+    )}
 
+    {gallery.length > 0 && (
     <section id="gallery" class="gallery-section">
       <div class="section-inner">
         <p class="section-label">Pets We've Loved</p>
@@ -155,13 +158,14 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
         </div>
       </div>
     </section>
+    )}
 
+    {platforms.length > 0 && (
     <section id="profiles" class="platforms-section">
       <div class="section-inner">
         <p class="section-label">Find Us Online</p>
-        <h2 class="section-title">Our Verified Profiles</h2>
+        <h2 class="section-title">Verified Profiles</h2>
         <div class="divider"></div>
-        <p class="platforms-intro">We're verified sitters on both major platforms — Rover for our UK sits and TrustedHouseSitters for Australia. Browse our full review histories below.</p>
         <div class="profiles-grid">
           {platforms.map(p => (
             <a href={p.url} target="_blank" rel="noopener noreferrer" class="platform-card">
@@ -174,6 +178,7 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
         </div>
       </div>
     </section>
+    )}
 
     <section id="enquiry" class="enquiry-section">
       <div class="section-inner enquiry-inner">
