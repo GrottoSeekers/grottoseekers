@@ -26,6 +26,21 @@ const gallery       = (profile.gallery_json       ?? []) as Photo[];
 const reviews       = (profile.reviews_json       ?? []) as Review[];
 const platforms     = (profile.platforms_json     ?? []) as Platform[];
 const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boolean);
+
+const h = (profile.headings_json ?? {}) as Record<string, string>;
+const heading = {
+  aboutLabel:     h.about_label     || 'Who We Are',
+  aboutTitle:     h.about_title     || 'A home away from home — for you and your pets.',
+  reviewsLabel:   h.reviews_label   || 'What People Say',
+  reviewsTitle:   h.reviews_title   || '',
+  galleryLabel:   h.gallery_label   || 'Pets We\'ve Loved',
+  galleryTitle:   h.gallery_title   || 'Our Sits',
+  platformsLabel: h.platforms_label || 'Find Us Online',
+  platformsTitle: h.platforms_title || 'Verified Profiles',
+  enquiryLabel:   h.enquiry_label   || 'Get In Touch',
+  enquiryTitle:   h.enquiry_title   || `Book ${profile.name}`,
+};
+const reviewsHeading = heading.reviewsTitle || (reviews.length === 1 ? '1 five-star review.' : `${reviews.length} five-star reviews.`);
 ---
 
 <!doctype html>
@@ -93,8 +108,8 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
           </div>
         </div>
         <div class="about-text">
-          <p class="section-label">Who We Are</p>
-          <h2 class="section-title">A home away from home — for you and your pets.</h2>
+          <p class="section-label">{heading.aboutLabel}</p>
+          <h2 class="section-title">{heading.aboutTitle}</h2>
           <div class="divider"></div>
           {bioParagraphs.map(para => <p>{para}</p>)}
         </div>
@@ -104,8 +119,8 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
     {reviews.length > 0 && (
     <section id="reviews" class="reviews-section">
       <div class="section-inner">
-        <p class="section-label">What People Say</p>
-        <h2 class="section-title">{reviews.length === 1 ? '1 five-star review.' : `${reviews.length} five-star reviews.`}</h2>
+        <p class="section-label">{heading.reviewsLabel}</p>
+        <h2 class="section-title">{reviewsHeading}</h2>
         <div class="divider"></div>
         <div class="stars-row">
           <span class="star">&#9733;</span><span class="star">&#9733;</span>
@@ -146,8 +161,8 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
     {gallery.length > 0 && (
     <section id="gallery" class="gallery-section">
       <div class="section-inner">
-        <p class="section-label">Pets We've Loved</p>
-        <h2 class="section-title">Our Sits</h2>
+        <p class="section-label">{heading.galleryLabel}</p>
+        <h2 class="section-title">{heading.galleryTitle}</h2>
         <div class="divider"></div>
         <div class="gallery-grid">
           {gallery.map(img => (
@@ -163,8 +178,8 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
     {platforms.length > 0 && (
     <section id="profiles" class="platforms-section">
       <div class="section-inner">
-        <p class="section-label">Find Us Online</p>
-        <h2 class="section-title">Verified Profiles</h2>
+        <p class="section-label">{heading.platformsLabel}</p>
+        <h2 class="section-title">{heading.platformsTitle}</h2>
         <div class="divider"></div>
         <div class="profiles-grid">
           {platforms.map(p => (
@@ -183,8 +198,8 @@ const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boole
     <section id="enquiry" class="enquiry-section">
       <div class="section-inner enquiry-inner">
         <div class="enquiry-text">
-          <p class="section-label">Get In Touch</p>
-          <h2 class="section-title">Book {profile.name}</h2>
+          <p class="section-label">{heading.enquiryLabel}</p>
+          <h2 class="section-title">{heading.enquiryTitle}</h2>
           <div class="divider"></div>
           <p>Tell us about your home, your pets, and your dates and we'll get back to you within 24 hours.</p>
         </div>

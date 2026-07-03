@@ -22,6 +22,8 @@ const gallery: any[] = Array.isArray(profile.gallery_json) ? profile.gallery_jso
 const reviews: any[] = Array.isArray(profile.reviews_json) ? profile.reviews_json : [];
 const platforms: any[] = Array.isArray(profile.platforms_json) ? profile.platforms_json : [];
 
+const h = (profile.headings_json ?? {}) as Record<string, string>;
+
 const saved = Astro.url.searchParams.get('saved');
 const errorKey = Astro.url.searchParams.get('error') ?? '';
 const detail = Astro.url.searchParams.get('detail');
@@ -74,6 +76,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <!-- Section nav -->
         <div class="section-nav">
           <a href="#details">Details</a>
+          <a href="#headings">Section headings</a>
           <a href="#hero">Hero slideshow</a>
           <a href="#about">About photos</a>
           <a href="#gallery">Gallery</a>
@@ -119,6 +122,82 @@ const savedMsg = saved ? 'Changes saved!' : '';
             </div>
             <div class="form-actions">
               <button type="submit" class="btn-primary btn-sm">Save details</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- SECTION HEADINGS -->
+        <section class="edit-card" id="headings">
+          <h2>Section headings</h2>
+          <p class="card-desc">Customise the labels and titles for each section of your public page. Leave blank to use the defaults.</p>
+          <form action="/api/profile/headings" method="POST" class="edit-form">
+            <div class="headings-group">
+              <h3 class="headings-group-title">About section</h3>
+              <div class="field-row">
+                <div class="field">
+                  <label>Label</label>
+                  <input type="text" name="about_label" value={h.about_label ?? ''} placeholder="Who We Are" />
+                </div>
+                <div class="field">
+                  <label>Title</label>
+                  <input type="text" name="about_title" value={h.about_title ?? ''} placeholder="A home away from home — for you and your pets." />
+                </div>
+              </div>
+            </div>
+            <div class="headings-group">
+              <h3 class="headings-group-title">Reviews section</h3>
+              <div class="field-row">
+                <div class="field">
+                  <label>Label</label>
+                  <input type="text" name="reviews_label" value={h.reviews_label ?? ''} placeholder="What People Say" />
+                </div>
+                <div class="field">
+                  <label>Title</label>
+                  <input type="text" name="reviews_title" value={h.reviews_title ?? ''} placeholder="Leave blank for auto count (e.g. 5 five-star reviews.)" />
+                </div>
+              </div>
+            </div>
+            <div class="headings-group">
+              <h3 class="headings-group-title">Gallery section</h3>
+              <div class="field-row">
+                <div class="field">
+                  <label>Label</label>
+                  <input type="text" name="gallery_label" value={h.gallery_label ?? ''} placeholder="Pets We've Loved" />
+                </div>
+                <div class="field">
+                  <label>Title</label>
+                  <input type="text" name="gallery_title" value={h.gallery_title ?? ''} placeholder="Our Sits" />
+                </div>
+              </div>
+            </div>
+            <div class="headings-group">
+              <h3 class="headings-group-title">Platforms section</h3>
+              <div class="field-row">
+                <div class="field">
+                  <label>Label</label>
+                  <input type="text" name="platforms_label" value={h.platforms_label ?? ''} placeholder="Find Us Online" />
+                </div>
+                <div class="field">
+                  <label>Title</label>
+                  <input type="text" name="platforms_title" value={h.platforms_title ?? ''} placeholder="Verified Profiles" />
+                </div>
+              </div>
+            </div>
+            <div class="headings-group">
+              <h3 class="headings-group-title">Enquiry section</h3>
+              <div class="field-row">
+                <div class="field">
+                  <label>Label</label>
+                  <input type="text" name="enquiry_label" value={h.enquiry_label ?? ''} placeholder="Get In Touch" />
+                </div>
+                <div class="field">
+                  <label>Title</label>
+                  <input type="text" name="enquiry_title" value={h.enquiry_title ?? ''} placeholder={`Book ${profile.name}`} />
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary btn-sm">Save headings</button>
             </div>
           </form>
         </section>
@@ -579,6 +658,13 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .add-form h3 {
         font-family: "Playfair Display", serif; font-size: 1rem;
         color: var(--brown-dark); margin-bottom: 16px;
+      }
+
+      .headings-group { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(44,26,14,0.06); }
+      .headings-group:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+      .headings-group-title {
+        font-family: "Playfair Display", serif; font-size: 0.95rem;
+        color: var(--brown-mid); margin-bottom: 12px;
       }
 
       @media (max-width: 768px) {
