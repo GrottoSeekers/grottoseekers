@@ -63,48 +63,54 @@ const savedMsg = saved ? 'Changes saved!' : '';
             <p class="section-label">Sitter Portal</p>
             <h1 class="section-title">Edit your profile</h1>
             <div class="divider"></div>
+            <p class="edit-intro">Everything you change here updates your public page. Hit "Save" on each section after making changes.</p>
           </div>
           <div class="header-actions">
-            <a href="/dashboard" class="btn-back">← Dashboard</a>
-            <a href={`/${profile.slug}`} target="_blank" class="btn-primary btn-sm">View public page ↗</a>
+            <a href="/dashboard" class="btn-back">&larr; Dashboard</a>
+            <a href={`/${profile.slug}`} target="_blank" class="btn-primary btn-sm">View my page &nearr;</a>
           </div>
         </header>
 
         {savedMsg && <div class="success-banner" id="success-banner">{savedMsg}</div>}
         {errorMsg && <div class="error-banner">{errorMsg}</div>}
 
-        <!-- Section nav -->
+        <!-- Jump-to links -->
         <div class="section-nav">
-          <a href="#details">Details</a>
-          <a href="#headings">Section headings</a>
-          <a href="#hero">Hero slideshow</a>
-          <a href="#about">About photos</a>
+          <a href="#details">Name & bio</a>
+          <a href="#hero">Banner photos</a>
+          <a href="#about">Bio photos</a>
           <a href="#gallery">Gallery</a>
           <a href="#reviews">Reviews</a>
-          <a href="#platforms">Platform links</a>
+          <a href="#platforms">Other profiles</a>
+          <a href="#headings">Headings</a>
         </div>
 
-        <!-- DETAILS -->
+        <!-- ─────────────────────────────────────────── -->
+        <!-- 1. NAME & BIO                               -->
+        <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="details">
-          <h2>Your details</h2>
+          <h2>Your name & bio</h2>
+          <p class="card-desc">The basics — your name, a short description, and the text people read when they visit your page.</p>
           <form action="/api/profile/update" method="POST" enctype="multipart/form-data" class="edit-form" id="details-form">
             <div class="field">
-              <label for="name">Display name <span class="req">*</span></label>
+              <label for="name">Your name <span class="req">*</span></label>
               <input type="text" id="name" name="name" value={profile.name} required />
+              <p class="field-hint">This is the name shown at the top of your page.</p>
             </div>
             <div class="field">
-              <label for="tagline">Tagline</label>
+              <label for="tagline">Short description</label>
               <input type="text" id="tagline" name="tagline" value={profile.tagline ?? ''} placeholder="e.g. Experienced pet sitters based in London" />
+              <p class="field-hint">One line that appears under your name on the banner.</p>
             </div>
             <div class="field">
-              <label for="badge_text">Badge text</label>
+              <label for="badge_text">Highlight badge</label>
               <input type="text" id="badge_text" name="badge_text" value={profile.badge_text ?? ''} placeholder="e.g. 5★ rated on TrustedHouseSitters" />
-              <p class="field-hint">Shown on the hero section of your page. Leave blank to hide.</p>
+              <p class="field-hint">A small badge shown on your banner photo. Great for awards or ratings. Leave blank to hide it.</p>
             </div>
             <div class="field">
               <label for="bio">About you</label>
-              <textarea id="bio" name="bio" rows="8" placeholder="Tell pet owners about yourselves…">{profile.bio ?? ''}</textarea>
-              <p class="field-hint">Use blank lines to separate paragraphs.</p>
+              <textarea id="bio" name="bio" rows="8" placeholder="Tell pet owners about yourselves — your experience, the services you offer, and what makes you great sitters.">{profile.bio ?? ''}</textarea>
+              <p class="field-hint">This text appears in the "About" section of your page. Leave a blank line between paragraphs.</p>
             </div>
             <div class="field">
               <label>Profile photo</label>
@@ -118,109 +124,37 @@ const savedMsg = saved ? 'Changes saved!' : '';
                   </div>
                 </div>
               </div>
-              <p class="field-hint">JPG or PNG, max 5 MB. Leave empty to keep current photo.</p>
+              <p class="field-hint">A photo of you shown on your dashboard. JPG or PNG, max 5 MB.</p>
             </div>
             <div class="form-actions">
-              <button type="submit" class="btn-primary btn-sm">Save details</button>
+              <button type="submit" class="btn-primary btn-sm">Save</button>
             </div>
           </form>
         </section>
 
-        <!-- SECTION HEADINGS -->
-        <section class="edit-card" id="headings">
-          <h2>Section headings</h2>
-          <p class="card-desc">Customise the labels and titles for each section of your public page. Leave blank to use the defaults.</p>
-          <form action="/api/profile/headings" method="POST" class="edit-form">
-            <div class="headings-group">
-              <h3 class="headings-group-title">About section</h3>
-              <div class="field-row">
-                <div class="field">
-                  <label>Label</label>
-                  <input type="text" name="about_label" value={h.about_label ?? ''} placeholder="Who We Are" />
-                </div>
-                <div class="field">
-                  <label>Title</label>
-                  <input type="text" name="about_title" value={h.about_title ?? ''} placeholder="A home away from home — for you and your pets." />
-                </div>
-              </div>
-            </div>
-            <div class="headings-group">
-              <h3 class="headings-group-title">Reviews section</h3>
-              <div class="field-row">
-                <div class="field">
-                  <label>Label</label>
-                  <input type="text" name="reviews_label" value={h.reviews_label ?? ''} placeholder="What People Say" />
-                </div>
-                <div class="field">
-                  <label>Title</label>
-                  <input type="text" name="reviews_title" value={h.reviews_title ?? ''} placeholder="Leave blank for auto count (e.g. 5 five-star reviews.)" />
-                </div>
-              </div>
-            </div>
-            <div class="headings-group">
-              <h3 class="headings-group-title">Gallery section</h3>
-              <div class="field-row">
-                <div class="field">
-                  <label>Label</label>
-                  <input type="text" name="gallery_label" value={h.gallery_label ?? ''} placeholder="Pets We've Loved" />
-                </div>
-                <div class="field">
-                  <label>Title</label>
-                  <input type="text" name="gallery_title" value={h.gallery_title ?? ''} placeholder="Our Sits" />
-                </div>
-              </div>
-            </div>
-            <div class="headings-group">
-              <h3 class="headings-group-title">Platforms section</h3>
-              <div class="field-row">
-                <div class="field">
-                  <label>Label</label>
-                  <input type="text" name="platforms_label" value={h.platforms_label ?? ''} placeholder="Find Us Online" />
-                </div>
-                <div class="field">
-                  <label>Title</label>
-                  <input type="text" name="platforms_title" value={h.platforms_title ?? ''} placeholder="Verified Profiles" />
-                </div>
-              </div>
-            </div>
-            <div class="headings-group">
-              <h3 class="headings-group-title">Enquiry section</h3>
-              <div class="field-row">
-                <div class="field">
-                  <label>Label</label>
-                  <input type="text" name="enquiry_label" value={h.enquiry_label ?? ''} placeholder="Get In Touch" />
-                </div>
-                <div class="field">
-                  <label>Title</label>
-                  <input type="text" name="enquiry_title" value={h.enquiry_title ?? ''} placeholder={`Book ${profile.name}`} />
-                </div>
-              </div>
-            </div>
-            <div class="form-actions">
-              <button type="submit" class="btn-primary btn-sm">Save headings</button>
-            </div>
-          </form>
-        </section>
-
-        <!-- HERO IMAGES -->
+        <!-- ─────────────────────────────────────────── -->
+        <!-- 2. BANNER PHOTOS                            -->
+        <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="hero">
-          <h2>Hero slideshow</h2>
-          <p class="card-desc">These images appear as a full-screen slideshow at the top of your page. Landscape photos work best (1600 x 900 or larger).</p>
+          <h2>Banner photos</h2>
+          <p class="card-desc">These are the big, full-width photos visitors see first when they open your page. They cycle through as a slideshow. Use wide landscape photos for the best result.</p>
 
-          {heroImages.length > 0 && (
+          {heroImages.length > 0 ? (
             <div class="image-grid">
               {heroImages.map((img: any, i: number) => (
                 <div class="image-thumb">
-                  <img src={img.src} alt={`Hero ${i + 1}`} />
+                  <img src={img.src} alt={`Banner ${i + 1}`} />
                   <form action="/api/profile/images" method="POST" class="delete-form">
                     <input type="hidden" name="_action" value="delete" />
                     <input type="hidden" name="category" value="hero" />
                     <input type="hidden" name="index" value={String(i)} />
-                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                    <button type="submit" class="delete-btn" title="Remove this photo">&times;</button>
                   </form>
                 </div>
               ))}
             </div>
+          ) : (
+            <p class="empty-hint">No banner photos yet. Add one below to make your page stand out.</p>
           )}
 
           <form action="/api/profile/images" method="POST" enctype="multipart/form-data" class="upload-form" data-category="hero">
@@ -231,41 +165,43 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 <input type="file" name="file" accept="image/*" required class="file-input" />
                 <div class="file-upload-label">
                   <span class="file-upload-icon">🖼️</span>
-                  <span class="file-upload-text">Choose hero image</span>
+                  <span class="file-upload-text">Choose a photo</span>
                 </div>
               </div>
-              <select name="pos" class="pos-select">
-                <option value="center">Center</option>
+              <select name="pos" class="pos-select" title="Focus point">
+                <option value="center">Centre</option>
                 <option value="top">Top</option>
                 <option value="bottom">Bottom</option>
-                <option value="left">Left</option>
-                <option value="right">Right</option>
               </select>
               <button type="submit" class="btn-primary btn-sm">Upload</button>
             </div>
-            <p class="field-hint">The position controls which part of the image stays visible on different screen sizes.</p>
+            <p class="field-hint">The focus point decides which part of the photo stays visible when the screen is narrow (e.g. on a phone).</p>
           </form>
         </section>
 
-        <!-- ABOUT IMAGES -->
+        <!-- ─────────────────────────────────────────── -->
+        <!-- 3. BIO PHOTOS                               -->
+        <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="about">
-          <h2>About section photos</h2>
-          <p class="card-desc">These appear as a carousel next to your bio text. Square or portrait photos work well.</p>
+          <h2>Photos next to your bio</h2>
+          <p class="card-desc">These appear beside your "About" text as a small slideshow. Good options: photos of you with pets, at a sit, or around the house.</p>
 
-          {aboutImages.length > 0 && (
+          {aboutImages.length > 0 ? (
             <div class="image-grid">
               {aboutImages.map((img: any, i: number) => (
                 <div class="image-thumb">
-                  <img src={img.src} alt={img.alt || `About ${i + 1}`} />
+                  <img src={img.src} alt={img.alt || `Bio photo ${i + 1}`} />
                   <form action="/api/profile/images" method="POST" class="delete-form">
                     <input type="hidden" name="_action" value="delete" />
                     <input type="hidden" name="category" value="about" />
                     <input type="hidden" name="index" value={String(i)} />
-                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                    <button type="submit" class="delete-btn" title="Remove this photo">&times;</button>
                   </form>
                 </div>
               ))}
             </div>
+          ) : (
+            <p class="empty-hint">No photos here yet. These really help pet owners get to know you.</p>
           )}
 
           <form action="/api/profile/images" method="POST" enctype="multipart/form-data" class="upload-form" data-category="about">
@@ -276,34 +212,37 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 <input type="file" name="file" accept="image/*" required class="file-input" />
                 <div class="file-upload-label">
                   <span class="file-upload-icon">📸</span>
-                  <span class="file-upload-text">Choose about photo</span>
+                  <span class="file-upload-text">Choose a photo</span>
                 </div>
               </div>
-              <input type="text" name="alt" placeholder="Describe the photo (optional)" class="alt-input" />
               <button type="submit" class="btn-primary btn-sm">Upload</button>
             </div>
           </form>
         </section>
 
-        <!-- GALLERY -->
+        <!-- ─────────────────────────────────────────── -->
+        <!-- 4. GALLERY                                  -->
+        <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="gallery">
           <h2>Photo gallery</h2>
-          <p class="card-desc">A grid of your best photos — pets you've looked after, places you've stayed, happy owners.</p>
+          <p class="card-desc">A grid of your best photos further down your page. Show off the pets you've looked after, places you've stayed, or anything that makes you a great sitter.</p>
 
-          {gallery.length > 0 && (
+          {gallery.length > 0 ? (
             <div class="image-grid">
               {gallery.map((img: any, i: number) => (
                 <div class="image-thumb">
-                  <img src={img.src} alt={img.alt || `Gallery ${i + 1}`} />
+                  <img src={img.src} alt={img.alt || `Gallery photo ${i + 1}`} />
                   <form action="/api/profile/images" method="POST" class="delete-form">
                     <input type="hidden" name="_action" value="delete" />
                     <input type="hidden" name="category" value="gallery" />
                     <input type="hidden" name="index" value={String(i)} />
-                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                    <button type="submit" class="delete-btn" title="Remove this photo">&times;</button>
                   </form>
                 </div>
               ))}
             </div>
+          ) : (
+            <p class="empty-hint">No gallery photos yet. This section won't show on your page until you add some.</p>
           )}
 
           <form action="/api/profile/images" method="POST" enctype="multipart/form-data" class="upload-form" data-category="gallery">
@@ -314,32 +253,33 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 <input type="file" name="file" accept="image/*" required class="file-input" />
                 <div class="file-upload-label">
                   <span class="file-upload-icon">📷</span>
-                  <span class="file-upload-text">Choose gallery photo</span>
+                  <span class="file-upload-text">Choose a photo</span>
                 </div>
               </div>
-              <input type="text" name="alt" placeholder="Describe the photo (optional)" class="alt-input" />
               <button type="submit" class="btn-primary btn-sm">Upload</button>
             </div>
           </form>
         </section>
 
-        <!-- REVIEWS -->
+        <!-- ─────────────────────────────────────────── -->
+        <!-- 5. REVIEWS                                  -->
+        <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="reviews">
           <h2>Reviews</h2>
-          <p class="card-desc">Add reviews from pet owners or other platforms. These show as a scrollable card section on your page.</p>
+          <p class="card-desc">Copy in reviews from pet owners or other platforms. These appear as scrollable cards on your page. This section won't show until you add at least one.</p>
 
           {reviews.length > 0 && (
             <div class="item-list">
               {reviews.map((rev: any, i: number) => (
                 <div class="item-card">
                   <div class="item-content">
-                    <p class="item-quote">"{rev.text}"</p>
-                    <p class="item-meta">— {rev.name}{rev.platform ? ` on ${rev.platform}` : ''}</p>
+                    <p class="item-quote">&ldquo;{rev.text}&rdquo;</p>
+                    <p class="item-meta">&mdash; {rev.name}{rev.platform ? ` on ${rev.platform}` : ''}</p>
                   </div>
                   <form action="/api/profile/reviews" method="POST" class="delete-form">
                     <input type="hidden" name="_action" value="delete" />
                     <input type="hidden" name="index" value={String(i)} />
-                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                    <button type="submit" class="delete-btn" title="Remove this review">&times;</button>
                   </form>
                 </div>
               ))}
@@ -350,27 +290,30 @@ const savedMsg = saved ? 'Changes saved!' : '';
             <h3>Add a review</h3>
             <input type="hidden" name="_action" value="add" />
             <div class="field">
-              <label>Review text <span class="req">*</span></label>
-              <textarea name="text" rows="3" required placeholder="What did the pet owner say?"></textarea>
+              <label>What did they say? <span class="req">*</span></label>
+              <textarea name="text" rows="3" required placeholder="Paste or type the review here"></textarea>
             </div>
             <div class="field-row">
               <div class="field">
-                <label>Reviewer name <span class="req">*</span></label>
+                <label>Their name <span class="req">*</span></label>
                 <input type="text" name="name" required placeholder="e.g. Sarah M." />
               </div>
               <div class="field">
-                <label>Platform</label>
+                <label>Where was the review?</label>
                 <input type="text" name="platform" placeholder="e.g. TrustedHouseSitters" />
+                <p class="field-hint">The website or app they left the review on.</p>
               </div>
             </div>
             <button type="submit" class="btn-primary btn-sm">Add review</button>
           </form>
         </section>
 
-        <!-- PLATFORMS -->
+        <!-- ─────────────────────────────────────────── -->
+        <!-- 6. OTHER PROFILES                           -->
+        <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="platforms">
-          <h2>Platform links</h2>
-          <p class="card-desc">Link to your profiles on pet sitting platforms (Rover, TrustedHouseSitters, etc.).</p>
+          <h2>Your profiles on other sites</h2>
+          <p class="card-desc">Link to your profiles on pet sitting websites like Rover or TrustedHouseSitters. These show as clickable cards on your page so visitors can check your reviews there. This section won't show until you add at least one.</p>
 
           {platforms.length > 0 && (
             <div class="item-list">
@@ -384,7 +327,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
                   <form action="/api/profile/platforms" method="POST" class="delete-form">
                     <input type="hidden" name="_action" value="delete" />
                     <input type="hidden" name="index" value={String(i)} />
-                    <button type="submit" class="delete-btn" title="Remove">✕</button>
+                    <button type="submit" class="delete-btn" title="Remove this link">&times;</button>
                   </form>
                 </div>
               ))}
@@ -392,27 +335,112 @@ const savedMsg = saved ? 'Changes saved!' : '';
           )}
 
           <form action="/api/profile/platforms" method="POST" class="add-form">
-            <h3>Add a platform</h3>
+            <h3>Add a site</h3>
             <input type="hidden" name="_action" value="add" />
             <div class="field-row">
               <div class="field">
-                <label>Platform name <span class="req">*</span></label>
+                <label>Site name <span class="req">*</span></label>
                 <input type="text" name="name" required placeholder="e.g. TrustedHouseSitters" />
               </div>
               <div class="field field-sm">
-                <label>Emoji</label>
+                <label>Icon</label>
                 <input type="text" name="emoji" placeholder="🏠" maxlength="4" />
               </div>
             </div>
             <div class="field">
-              <label>Profile URL <span class="req">*</span></label>
-              <input type="url" name="url" required placeholder="https://www.trustedhousesitters.com/…" />
+              <label>Link to your profile <span class="req">*</span></label>
+              <input type="url" name="url" required placeholder="https://www.trustedhousesitters.com/your-profile" />
+              <p class="field-hint">Copy the full URL from your browser when you're on your profile page.</p>
             </div>
             <div class="field">
-              <label>Short description</label>
+              <label>Short note</label>
               <input type="text" name="description" placeholder="e.g. 10 five-star reviews" />
+              <p class="field-hint">A quick summary visitors will see on the card.</p>
             </div>
-            <button type="submit" class="btn-primary btn-sm">Add platform</button>
+            <button type="submit" class="btn-primary btn-sm">Add site</button>
+          </form>
+        </section>
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- 7. CUSTOMISE HEADINGS                       -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="edit-card" id="headings">
+          <h2>Customise section headings</h2>
+          <p class="card-desc">Each section on your page has a small label and a big title. You can change them here to match your style. Leave any field blank to keep the default.</p>
+          <form action="/api/profile/headings" method="POST" class="edit-form">
+            <div class="headings-group">
+              <h3 class="headings-group-title">About section</h3>
+              <p class="headings-group-where">The section with your bio text and photos.</p>
+              <div class="field-row">
+                <div class="field">
+                  <label>Small label</label>
+                  <input type="text" name="about_label" value={h.about_label ?? ''} placeholder="Who We Are" />
+                </div>
+                <div class="field">
+                  <label>Big title</label>
+                  <input type="text" name="about_title" value={h.about_title ?? ''} placeholder="A home away from home — for you and your pets." />
+                </div>
+              </div>
+            </div>
+            <div class="headings-group">
+              <h3 class="headings-group-title">Reviews section</h3>
+              <p class="headings-group-where">The section showing your review cards.</p>
+              <div class="field-row">
+                <div class="field">
+                  <label>Small label</label>
+                  <input type="text" name="reviews_label" value={h.reviews_label ?? ''} placeholder="What People Say" />
+                </div>
+                <div class="field">
+                  <label>Big title</label>
+                  <input type="text" name="reviews_title" value={h.reviews_title ?? ''} placeholder="Leave blank to auto-show your review count" />
+                </div>
+              </div>
+            </div>
+            <div class="headings-group">
+              <h3 class="headings-group-title">Gallery section</h3>
+              <p class="headings-group-where">The photo grid section.</p>
+              <div class="field-row">
+                <div class="field">
+                  <label>Small label</label>
+                  <input type="text" name="gallery_label" value={h.gallery_label ?? ''} placeholder="Pets We've Loved" />
+                </div>
+                <div class="field">
+                  <label>Big title</label>
+                  <input type="text" name="gallery_title" value={h.gallery_title ?? ''} placeholder="Our Sits" />
+                </div>
+              </div>
+            </div>
+            <div class="headings-group">
+              <h3 class="headings-group-title">Other profiles section</h3>
+              <p class="headings-group-where">The cards linking to your profiles on other sites.</p>
+              <div class="field-row">
+                <div class="field">
+                  <label>Small label</label>
+                  <input type="text" name="platforms_label" value={h.platforms_label ?? ''} placeholder="Find Us Online" />
+                </div>
+                <div class="field">
+                  <label>Big title</label>
+                  <input type="text" name="platforms_title" value={h.platforms_title ?? ''} placeholder="Verified Profiles" />
+                </div>
+              </div>
+            </div>
+            <div class="headings-group">
+              <h3 class="headings-group-title">Contact section</h3>
+              <p class="headings-group-where">The enquiry form at the bottom of your page.</p>
+              <div class="field-row">
+                <div class="field">
+                  <label>Small label</label>
+                  <input type="text" name="enquiry_label" value={h.enquiry_label ?? ''} placeholder="Get In Touch" />
+                </div>
+                <div class="field">
+                  <label>Big title</label>
+                  <input type="text" name="enquiry_title" value={h.enquiry_title ?? ''} placeholder={`Book ${profile.name}`} />
+                </div>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="submit" class="btn-primary btn-sm">Save headings</button>
+            </div>
           </form>
         </section>
 
@@ -448,7 +476,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         });
       }
 
-      // Handle file input labels
       document.querySelectorAll('.file-input').forEach(input => {
         input.addEventListener('change', () => {
           const fi = input as HTMLInputElement;
@@ -457,12 +484,11 @@ const savedMsg = saved ? 'Changes saved!' : '';
         });
       });
 
-      // Intercept all forms with file uploads to compress images
       document.querySelectorAll<HTMLFormElement>('form[enctype="multipart/form-data"]').forEach(form => {
         form.addEventListener('submit', async (e) => {
           const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
           const file = fileInput?.files?.[0];
-          if (!file) return; // no file selected, let regular submit happen (for details form without new photo)
+          if (!file) return;
 
           e.preventDefault();
           const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
@@ -484,7 +510,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         });
       });
 
-      // Auto-hide success banner
       const banner = document.getElementById('success-banner');
       if (banner) setTimeout(() => { banner.style.opacity = '0'; setTimeout(() => banner.remove(), 300); }, 3000);
     </script>
@@ -512,6 +537,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
         display: flex; justify-content: space-between; align-items: flex-start;
         flex-wrap: wrap; gap: 20px; margin-bottom: 32px;
       }
+      .edit-intro { font-size: 0.9rem; color: var(--text-soft); line-height: 1.6; margin-top: 12px; max-width: 500px; }
       .header-actions { display: flex; gap: 12px; align-items: center; }
       .btn-back {
         font-size: 0.85rem; color: var(--text-soft); text-decoration: none;
@@ -575,18 +601,14 @@ const savedMsg = saved ? 'Changes saved!' : '';
       input:focus, textarea:focus, select:focus { border-color: var(--gold); }
       textarea { resize: vertical; line-height: 1.6; }
 
-      .field-row {
-        display: flex; gap: 16px;
-      }
+      .field-row { display: flex; gap: 16px; }
       .field-row .field { flex: 1; }
 
       .form-actions { padding-top: 8px; }
 
-      /* Profile pic row */
       .pic-row { display: flex; align-items: center; gap: 20px; }
       .current-pic { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(200,150,62,0.3); }
 
-      /* File upload */
       .file-upload-wrap { position: relative; flex: 1; }
       .file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
       .file-upload-label {
@@ -599,19 +621,17 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .file-upload-icon { font-size: 1.2rem; }
       .file-upload-text { font-size: 0.85rem; color: var(--text-soft); }
 
-      .upload-row {
-        display: flex; gap: 12px; align-items: stretch;
-      }
+      .upload-row { display: flex; gap: 12px; align-items: stretch; }
       .upload-wide { flex: 1; }
-      .pos-select {
-        width: auto; min-width: 100px; flex-shrink: 0;
-      }
-      .alt-input {
-        flex: 1; min-width: 160px;
-      }
+      .pos-select { width: auto; min-width: 100px; flex-shrink: 0; }
       .upload-row .btn-primary { flex-shrink: 0; white-space: nowrap; height: auto; }
 
-      /* Image grid */
+      .empty-hint {
+        font-size: 0.88rem; color: var(--text-soft); font-style: italic;
+        padding: 20px; background: rgba(44,26,14,0.03); border-radius: 8px;
+        margin-bottom: 20px; text-align: center; line-height: 1.6;
+      }
+
       .image-grid {
         display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
         gap: 12px; margin-bottom: 24px;
@@ -620,11 +640,8 @@ const savedMsg = saved ? 'Changes saved!' : '';
         position: relative; border-radius: 8px; overflow: hidden;
         aspect-ratio: 4/3; background: rgba(44,26,14,0.05);
       }
-      .image-thumb img {
-        width: 100%; height: 100%; object-fit: cover; display: block;
-      }
+      .image-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-      /* Item list (reviews, platforms) */
       .item-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
       .item-card {
         display: flex; gap: 16px; align-items: flex-start;
@@ -637,7 +654,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .item-title { font-size: 0.92rem; font-weight: 700; color: var(--brown-dark); margin-bottom: 4px; }
       .item-desc { font-size: 0.82rem; color: var(--text-soft); margin-top: 4px; }
 
-      /* Delete button */
       .delete-form { flex-shrink: 0; }
       .delete-btn {
         width: 28px; height: 28px; border-radius: 50%;
@@ -651,10 +667,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .image-thumb .delete-btn { background: rgba(0,0,0,0.6); }
       .image-thumb .delete-btn:hover { background: rgba(185,28,28,0.9); }
 
-      .add-form {
-        border-top: 1px solid rgba(44,26,14,0.08);
-        padding-top: 24px;
-      }
+      .add-form { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 24px; }
       .add-form h3 {
         font-family: "Playfair Display", serif; font-size: 1rem;
         color: var(--brown-dark); margin-bottom: 16px;
@@ -664,7 +677,10 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .headings-group:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
       .headings-group-title {
         font-family: "Playfair Display", serif; font-size: 0.95rem;
-        color: var(--brown-mid); margin-bottom: 12px;
+        color: var(--brown-mid); margin-bottom: 4px;
+      }
+      .headings-group-where {
+        font-size: 0.78rem; color: var(--text-soft); margin-bottom: 12px; font-style: italic;
       }
 
       @media (max-width: 768px) {
