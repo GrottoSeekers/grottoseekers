@@ -31,7 +31,7 @@ const h = (profile.headings_json ?? {}) as Record<string, string>;
 const heading = {
   aboutLabel:     h.about_label     || 'Who We Are',
   aboutTitle:     h.about_title     || 'A home away from home — for you and your pets.',
-  reviewsLabel:   h.reviews_label   || 'What People Say',
+  reviewsLabel:   h.reviews_label   || 'What Pet Owners Say',
   reviewsTitle:   h.reviews_title   || '',
   galleryLabel:   h.gallery_label   || 'Pets We\'ve Loved',
   galleryTitle:   h.gallery_title   || 'Our Sits',
@@ -41,10 +41,26 @@ const heading = {
   enquiryTitle:   h.enquiry_title   || `Book ${profile.name}`,
 };
 const reviewsHeading = heading.reviewsTitle || (reviews.length === 1 ? '1 five-star review.' : `${reviews.length} five-star reviews.`);
+
+const t = (profile.theme_json ?? {}) as Record<string, string>;
+const theme = {
+  background:  t.background   || '',
+  accent:      t.accent       || '',
+  accentLight: t.accent_light || '',
+  text:        t.text         || '',
+  textSoft:    t.text_soft    || '',
+};
+const vars: string[] = [];
+if (theme.background)  { vars.push(`--cream:${theme.background}`, `--warm-white:${theme.background}`); }
+if (theme.accent)      { vars.push(`--gold:${theme.accent}`); }
+if (theme.accentLight) { vars.push(`--gold-light:${theme.accentLight}`); }
+if (theme.text)        { vars.push(`--brown-dark:${theme.text}`, `--text:${theme.text}`, `--brown-mid:${theme.text}`); }
+if (theme.textSoft)    { vars.push(`--text-soft:${theme.textSoft}`); }
+const themeStyle = vars.length ? vars.join(';') : undefined;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" style={themeStyle ?? ''}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

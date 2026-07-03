@@ -23,6 +23,7 @@ const reviews: any[] = Array.isArray(profile.reviews_json) ? profile.reviews_jso
 const platforms: any[] = Array.isArray(profile.platforms_json) ? profile.platforms_json : [];
 
 const h = (profile.headings_json ?? {}) as Record<string, string>;
+const t = (profile.theme_json ?? {}) as Record<string, string>;
 
 const saved = Astro.url.searchParams.get('saved');
 const errorKey = Astro.url.searchParams.get('error') ?? '';
@@ -77,6 +78,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <!-- Jump-to links -->
         <div class="section-nav">
           <a href="#details">Name & bio</a>
+          <a href="#colours">Colours</a>
           <a href="#hero">Banner photos</a>
           <a href="#about">Bio photos</a>
           <a href="#gallery">Gallery</a>
@@ -90,7 +92,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="details">
           <h2>Your name & bio</h2>
-          <p class="card-desc">The basics — your name, a short description, and the text people read when they visit your page.</p>
+          <p class="card-desc">The basics — your name, a short description, and the text pet owners read when they visit your page.</p>
           <form action="/api/profile/update" method="POST" enctype="multipart/form-data" class="edit-form" id="details-form">
             <div class="field">
               <label for="name">Your name <span class="req">*</span></label>
@@ -133,11 +135,62 @@ const savedMsg = saved ? 'Changes saved!' : '';
         </section>
 
         <!-- ─────────────────────────────────────────── -->
-        <!-- 2. BANNER PHOTOS                            -->
+        <!-- 2. COLOURS                                  -->
+        <!-- ─────────────────────────────────────────── -->
+        <section class="edit-card" id="colours">
+          <h2>Colours</h2>
+          <p class="card-desc">Pick the colours for your public page. Leave any blank to use the default Grotto Sitters colours. Click the colour circle to open a picker.</p>
+          <form action="/api/profile/theme" method="POST" class="edit-form">
+            <div class="colour-grid">
+              <div class="colour-field">
+                <label>Background</label>
+                <div class="colour-input-row">
+                  <input type="color" name="background" value={t.background || '#faf6ee'} class="colour-picker" />
+                  <span class="colour-label">Page background</span>
+                </div>
+              </div>
+              <div class="colour-field">
+                <label>Main accent</label>
+                <div class="colour-input-row">
+                  <input type="color" name="accent" value={t.accent || '#c8963e'} class="colour-picker" />
+                  <span class="colour-label">Buttons, links, stars</span>
+                </div>
+              </div>
+              <div class="colour-field">
+                <label>Light accent</label>
+                <div class="colour-input-row">
+                  <input type="color" name="accent_light" value={t.accent_light || '#e8b96a'} class="colour-picker" />
+                  <span class="colour-label">Hover effects, highlights</span>
+                </div>
+              </div>
+              <div class="colour-field">
+                <label>Text colour</label>
+                <div class="colour-input-row">
+                  <input type="color" name="text" value={t.text || '#2c1a0e'} class="colour-picker" />
+                  <span class="colour-label">Headings & body text</span>
+                </div>
+              </div>
+              <div class="colour-field">
+                <label>Soft text colour</label>
+                <div class="colour-input-row">
+                  <input type="color" name="text_soft" value={t.text_soft || '#6b4e35'} class="colour-picker" />
+                  <span class="colour-label">Hints, captions, labels</span>
+                </div>
+              </div>
+            </div>
+            <div class="form-actions" style="display:flex;gap:12px;align-items:center;">
+              <button type="submit" class="btn-primary btn-sm">Save colours</button>
+              <button type="button" class="btn-reset-colours" id="resetColours">Reset to defaults</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- ─────────────────────────────────────────── -->
+        <!-- 3. BANNER PHOTOS                            -->
         <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="hero">
           <h2>Banner photos</h2>
-          <p class="card-desc">These are the big, full-width photos visitors see first when they open your page. They cycle through as a slideshow. Use wide landscape photos for the best result.</p>
+          <p class="card-desc">These are the big, full-width photos pet owners see first when they open your page. They cycle through as a slideshow. Use wide landscape photos for the best result.</p>
 
           {heroImages.length > 0 ? (
             <div class="image-grid">
@@ -313,7 +366,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="platforms">
           <h2>Your profiles on other sites</h2>
-          <p class="card-desc">Link to your profiles on pet sitting websites like Rover or TrustedHouseSitters. These show as clickable cards on your page so visitors can check your reviews there. This section won't show until you add at least one.</p>
+          <p class="card-desc">Link to your profiles on pet sitting websites like Rover or TrustedHouseSitters. These show as clickable cards on your page so pet owners can check your reviews there. This section won't show until you add at least one.</p>
 
           {platforms.length > 0 && (
             <div class="item-list">
@@ -355,7 +408,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
             <div class="field">
               <label>Short note</label>
               <input type="text" name="description" placeholder="e.g. 10 five-star reviews" />
-              <p class="field-hint">A quick summary visitors will see on the card.</p>
+              <p class="field-hint">A quick summary pet owners will see on the card.</p>
             </div>
             <button type="submit" class="btn-primary btn-sm">Add site</button>
           </form>
@@ -388,7 +441,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
               <div class="field-row">
                 <div class="field">
                   <label>Small label</label>
-                  <input type="text" name="reviews_label" value={h.reviews_label ?? ''} placeholder="What People Say" />
+                  <input type="text" name="reviews_label" value={h.reviews_label ?? ''} placeholder="What Pet Owners Say" />
                 </div>
                 <div class="field">
                   <label>Big title</label>
@@ -512,6 +565,17 @@ const savedMsg = saved ? 'Changes saved!' : '';
 
       const banner = document.getElementById('success-banner');
       if (banner) setTimeout(() => { banner.style.opacity = '0'; setTimeout(() => banner.remove(), 300); }, 3000);
+
+      document.getElementById('resetColours')?.addEventListener('click', () => {
+        const defaults: Record<string, string> = {
+          background: '#faf6ee', accent: '#c8963e', accent_light: '#e8b96a',
+          text: '#2c1a0e', text_soft: '#6b4e35',
+        };
+        for (const [key, val] of Object.entries(defaults)) {
+          const input = document.querySelector<HTMLInputElement>(`input[name="${key}"]`);
+          if (input) input.value = val;
+        }
+      });
     </script>
 
     <style>
@@ -672,6 +736,25 @@ const savedMsg = saved ? 'Changes saved!' : '';
         font-family: "Playfair Display", serif; font-size: 1rem;
         color: var(--brown-dark); margin-bottom: 16px;
       }
+
+      .colour-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 8px; }
+      .colour-field { display: flex; flex-direction: column; gap: 6px; }
+      .colour-input-row { display: flex; align-items: center; gap: 12px; }
+      .colour-picker {
+        width: 44px; height: 44px; border: 2px solid rgba(44,26,14,0.15);
+        border-radius: 50%; cursor: pointer; padding: 2px; background: var(--cream);
+        flex-shrink: 0;
+      }
+      .colour-picker::-webkit-color-swatch-wrapper { padding: 0; }
+      .colour-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+      .colour-picker::-moz-color-swatch { border: none; border-radius: 50%; }
+      .colour-label { font-size: 0.78rem; color: var(--text-soft); }
+      .btn-reset-colours {
+        background: none; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
+        padding: 10px 20px; font-size: 0.82rem; font-weight: 600; color: var(--text-soft);
+        cursor: pointer; font-family: "Lato", sans-serif; transition: all 0.2s;
+      }
+      .btn-reset-colours:hover { border-color: var(--gold); color: var(--brown-dark); }
 
       .headings-group { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(44,26,14,0.06); }
       .headings-group:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
