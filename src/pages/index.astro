@@ -39,11 +39,18 @@ import '../styles/global.css';
     <!-- ── HERO ──────────────────────────────────────────────────── -->
     <section class="hero">
       <div class="hero-image-wrap">
-        <img
-          src="https://grottositters.com/images/couple-bw-1.jpg"
-          alt="Callum and Niamh — professional pet sitters"
-          class="hero-photo"
-        />
+        <img src="/images/slideshow-cockapoo-window.jpeg" alt="Cockapoo by the window" class="hero-slide active" />
+        <img src="/images/slideshow-dogs-couch.jpeg" alt="Two dogs relaxing on the couch" class="hero-slide" />
+        <img src="/images/slideshow-labrador-puppy.jpeg" alt="Labrador puppy" class="hero-slide" />
+        <img src="/images/slideshow-spaniel-walk.jpeg" alt="Spaniel on a walk" class="hero-slide" />
+        <img src="/images/slideshow-dogs-lake.jpeg" alt="Dogs by the lake" class="hero-slide" />
+        <img src="/images/slideshow-springer-beach.jpeg" alt="Springer spaniel on the beach" class="hero-slide" />
+        <img src="/images/slideshow-garden-conservatory.jpeg" alt="Beautiful garden conservatory" class="hero-slide" />
+        <img src="/images/slideshow-cat-bag.jpeg" alt="Cat in a paper bag" class="hero-slide" />
+        <img src="/images/slideshow-living-room.jpeg" alt="Bright living room" class="hero-slide" />
+        <img src="/images/slideshow-sunset-palms.jpeg" alt="Sunset with palm trees" class="hero-slide" />
+        <img src="/images/slideshow-ocean-sunset.jpeg" alt="Ocean sunset from the balcony" class="hero-slide" />
+        <img src="/images/slideshow-spaniel-bed.jpeg" alt="Spaniel cosy in bed" class="hero-slide" />
         <div class="hero-gradient"></div>
       </div>
       <div class="hero-text">
@@ -340,8 +347,16 @@ import '../styles/global.css';
     grid-column: 1; grid-row: 1 / 3;
     position: relative;
     min-height: 100vh;
+    overflow: hidden;
+    background: var(--brown-dark);
   }
-  .hero-photo { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; display: block; }
+  .hero-slide {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover; object-position: center 30%;
+    opacity: 0;
+    transition: opacity 1.2s ease-in-out;
+  }
+  .hero-slide.active { opacity: 1; }
   .hero-gradient {
     position: absolute; inset: 0;
     background: linear-gradient(to right, rgba(44,26,14,0.35) 0%, rgba(44,26,14,0) 60%),
@@ -523,4 +538,15 @@ import '../styles/global.css';
       }
     });
   });
+
+  // Hero slideshow
+  const slides = document.querySelectorAll('.hero-slide');
+  let current = 0;
+  if (slides.length > 1) {
+    setInterval(() => {
+      slides[current].classList.remove('active');
+      current = (current + 1) % slides.length;
+      slides[current].classList.add('active');
+    }, 4500);
+  }
 </script>
