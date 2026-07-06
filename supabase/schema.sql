@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   gallery_json      JSONB NOT NULL DEFAULT '[]',   -- [{src, alt}]
   reviews_json      JSONB NOT NULL DEFAULT '[]',   -- [{text, name, initials, platform}]
   platforms_json    JSONB NOT NULL DEFAULT '[]',   -- [{name, url, emoji, description}]
+  review_requests_json JSONB NOT NULL DEFAULT '[]', -- [{token, created_at, status, reviewer_name?}]
   headings_json     JSONB NOT NULL DEFAULT '{}',   -- {about_label, about_title, reviews_label, ...}
   theme_json        JSONB NOT NULL DEFAULT '{}',   -- {background, accent, accent_light, text, text_soft}
 

@@ -1,0 +1,197 @@
+---
+export const prerender = false;
+
+import '../../styles/global.css';
+import { supabase } from '../../lib/supabase';
+
+const { token } = Astro.params;
+
+const success = Astro.url.searchParams.get('success') === 'true';
+const errorKey = Astro.url.searchParams.get('error') ?? '';
+const errorMap: Record<string, string> = {
+  missing: 'Please fill in your name and review.',
+  invalid: 'This review link has already been used or is no longer valid.',
+  server: 'Something went wrong. Please try again.',
+};
+const errorMsg = errorMap[errorKey] ?? '';
+
+let sitterName = '';
+let sitterPhoto = '';
+let valid = false;
+
+if (token) {
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('name, profile_pic, review_requests_json')
+    .not('review_requests_json', 'is', null);
+
+  if (profiles) {
+    for (const p of profiles) {
+      const reqs: any[] = Array.isArray(p.review_requests_json) ? p.review_requests_json : [];
+      const match = reqs.find((r: any) => r.token === token && r.status === 'pending');
+      if (match) {
+        sitterName = p.name;
+        sitterPhoto = p.profile_pic ?? '';
+        valid = true;
+        break;
+      }
+    }
+  }
+}
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>{success ? 'Thank you!' : `Leave a review for ${sitterName || 'this sitter'}`} — Grotto Sitters</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
+    </nav>
+
+    <main class="review-wrap">
+      {success ? (
+        <div class="review-card success-card">
+          <div class="success-icon">&#10003;</div>
+          <h1>Thank you!</h1>
+          <p>Your review has been submitted and will appear on {sitterName ? `${sitterName}'s` : 'their'} profile.</p>
+          <a href="/" class="btn-primary">Visit Grotto Sitters</a>
+        </div>
+      ) : !valid ? (
+        <div class="review-card invalid-card">
+          <h1>Link not valid</h1>
+          <p>{errorMsg || 'This review link has already been used or is no longer valid. If you think this is a mistake, ask your sitter to send you a new link.'}</p>
+          <a href="/" class="btn-primary">Visit Grotto Sitters</a>
+        </div>
+      ) : (
+        <div class="review-card">
+          <div class="sitter-info">
+            {sitterPhoto && <img src={sitterPhoto} alt={sitterName} class="sitter-photo" />}
+            <div>
+              <p class="review-label">Leave a review for</p>
+              <h1>{sitterName}</h1>
+            </div>
+          </div>
+
+          <p class="review-intro">
+            {sitterName} has asked you to share your experience. Your review will appear on their Grotto Sitters profile page.
+          </p>
+
+          {errorMsg && <div class="error-banner">{errorMsg}</div>}
+
+          <form action="/api/review/submit" method="POST" class="review-form">
+            <input type="hidden" name="token" value={token} />
+
+            <div class="field">
+              <label for="name">Your name <span class="req">*</span></label>
+              <input type="text" id="name" name="name" required placeholder="e.g. Sarah & Tom" autocomplete="name" />
+              <p class="field-hint">This will be shown alongside your review.</p>
+            </div>
+
+            <div class="field">
+              <label for="text">Your review <span class="req">*</span></label>
+              <textarea id="text" name="text" rows="5" required placeholder="What was your experience like? How did they look after your pets and home?"></textarea>
+              <p class="field-hint">Be as detailed as you like — pet owners love reading real experiences.</p>
+            </div>
+
+            <button type="submit" class="btn-primary btn-submit">Submit review</button>
+          </form>
+        </div>
+      )}
+    </main>
+
+    <style>
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+
+      nav {
+        position: static;
+        border-bottom: 1px solid rgba(200,150,62,0.2);
+        padding: 18px 48px;
+        display: flex; justify-content: center; align-items: center;
+      }
+
+      .review-wrap {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        padding: 60px 24px;
+      }
+
+      .review-card {
+        background: #fff; border-radius: 16px; padding: 48px;
+        box-shadow: 0 4px 24px rgba(44,26,14,0.08);
+        max-width: 560px; width: 100%;
+      }
+
+      .sitter-info { display: flex; gap: 20px; align-items: center; margin-bottom: 24px; }
+      .sitter-photo {
+        width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
+        border: 3px solid rgba(200,150,62,0.3); flex-shrink: 0;
+      }
+      .review-label {
+        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
+        text-transform: uppercase; color: var(--gold); margin-bottom: 4px;
+      }
+      .sitter-info h1 {
+        font-family: "Playfair Display", serif; font-size: 1.8rem;
+        color: var(--brown-dark); line-height: 1.2;
+      }
+
+      .review-intro {
+        font-size: 0.92rem; color: var(--text-soft); line-height: 1.7;
+        margin-bottom: 28px; padding-bottom: 24px;
+        border-bottom: 1px solid rgba(44,26,14,0.08);
+      }
+
+      .error-banner {
+        background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
+        padding: 14px 18px; color: #b91c1c; font-size: 0.9rem; margin-bottom: 20px;
+      }
+
+      .review-form { display: flex; flex-direction: column; gap: 20px; }
+
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      label { font-size: 0.85rem; font-weight: 700; color: var(--brown-dark); letter-spacing: 0.02em; }
+      .req { color: var(--gold); }
+      .field-hint { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
+
+      input[type="text"], textarea {
+        width: 100%; box-sizing: border-box;
+        border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px;
+        padding: 12px 16px; font-size: 0.95rem; font-family: "Lato", sans-serif;
+        color: var(--text); background: var(--cream); outline: none;
+        transition: border-color 0.2s;
+      }
+      input:focus, textarea:focus { border-color: var(--gold); }
+      textarea { resize: vertical; line-height: 1.6; }
+
+      .btn-submit { padding: 14px 36px; font-size: 0.95rem; align-self: flex-start; }
+
+      .success-card, .invalid-card { text-align: center; }
+      .success-icon {
+        width: 64px; height: 64px; border-radius: 50%;
+        background: #dcfce7; color: #166534; font-size: 2rem;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 20px;
+      }
+      .success-card h1, .invalid-card h1 {
+        font-family: "Playfair Display", serif; font-size: 1.8rem;
+        color: var(--brown-dark); margin-bottom: 12px;
+      }
+      .success-card p, .invalid-card p {
+        font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 28px;
+      }
+
+      @media (max-width: 768px) {
+        nav { padding: 14px 24px; }
+        .review-wrap { padding: 40px 16px; }
+        .review-card { padding: 32px 24px; }
+        .sitter-info h1 { font-size: 1.4rem; }
+      }
+    </style>
+  </body>
+</html>

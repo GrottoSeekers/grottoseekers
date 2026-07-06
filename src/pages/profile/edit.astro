@@ -22,10 +22,12 @@ const gallery: any[] = Array.isArray(profile.gallery_json) ? profile.gallery_jso
 const reviews: any[] = Array.isArray(profile.reviews_json) ? profile.reviews_json : [];
 const platforms: any[] = Array.isArray(profile.platforms_json) ? profile.platforms_json : [];
 
+const reviewRequests: any[] = Array.isArray(profile.review_requests_json) ? profile.review_requests_json : [];
 const h = (profile.headings_json ?? {}) as Record<string, string>;
 const t = (profile.theme_json ?? {}) as Record<string, string>;
 
 const saved = Astro.url.searchParams.get('saved');
+const newToken = Astro.url.searchParams.get('new_token') ?? '';
 const errorKey = Astro.url.searchParams.get('error') ?? '';
 const detail = Astro.url.searchParams.get('detail');
 const errorMap: Record<string, string> = {
@@ -319,7 +321,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="reviews">
           <h2>Reviews</h2>
-          <p class="card-desc">Copy in reviews from pet owners or other platforms. These appear as scrollable cards on your page. This section won't show until you add at least one.</p>
+          <p class="card-desc">Reviews are written by real pet owners. Generate a unique link and send it to a pet owner — they'll fill in the review themselves. This section won't show on your page until you have at least one.</p>
 
           {reviews.length > 0 && (
             <div class="item-list">
@@ -327,7 +329,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 <div class="item-card">
                   <div class="item-content">
                     <p class="item-quote">&ldquo;{rev.text}&rdquo;</p>
-                    <p class="item-meta">&mdash; {rev.name}{rev.platform ? ` on ${rev.platform}` : ''}</p>
+                    <p class="item-meta">&mdash; {rev.name}</p>
                   </div>
                   <form action="/api/profile/reviews" method="POST" class="delete-form">
                     <input type="hidden" name="_action" value="delete" />
@@ -339,26 +341,48 @@ const savedMsg = saved ? 'Changes saved!' : '';
             </div>
           )}
 
-          <form action="/api/profile/reviews" method="POST" class="add-form">
-            <h3>Add a review</h3>
-            <input type="hidden" name="_action" value="add" />
-            <div class="field">
-              <label>What did they say? <span class="req">*</span></label>
-              <textarea name="text" rows="3" required placeholder="Paste or type the review here"></textarea>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label>Their name <span class="req">*</span></label>
-                <input type="text" name="name" required placeholder="e.g. Sarah M." />
+          {reviews.length === 0 && !newToken && (
+            <p class="empty-hint">No reviews yet. Generate a link below and send it to a pet owner to request one.</p>
+          )}
+
+          <!-- Generate new review link -->
+          <div class="add-form">
+            <h3>Request a review</h3>
+            <p class="card-desc" style="margin-bottom:16px;">Click the button below to generate a unique link. Send it to a pet owner and they'll be able to write a review for you.</p>
+
+            {newToken && (
+              <div class="new-link-box">
+                <p class="new-link-label">Your new review link (copy and send to a pet owner):</p>
+                <div class="share-url">
+                  <input type="text" readonly value={`https://grottositters.com/review/${newToken}`} id="reviewUrl" class="review-link-input" />
+                  <button type="button" onclick="copyReviewUrl()" class="btn-primary btn-sm copy-review-btn">Copy</button>
+                </div>
               </div>
-              <div class="field">
-                <label>Where was the review?</label>
-                <input type="text" name="platform" placeholder="e.g. TrustedHouseSitters" />
-                <p class="field-hint">The website or app they left the review on.</p>
+            )}
+
+            <form action="/api/profile/review-request" method="POST">
+              <button type="submit" class="btn-primary btn-sm">Generate review link</button>
+            </form>
+          </div>
+
+          <!-- Pending requests -->
+          {reviewRequests.filter((r: any) => r.status === 'pending').length > 0 && (
+            <div class="pending-requests">
+              <h3>Pending review links</h3>
+              <p class="card-desc">These links have been generated but haven't been used yet. Send them to your pet owners.</p>
+              <div class="item-list">
+                {reviewRequests.filter((r: any) => r.status === 'pending').map((req: any) => (
+                  <div class="item-card pending-card">
+                    <div class="item-content">
+                      <p class="item-meta pending-url">grottositters.com/review/{req.token}</p>
+                      <p class="item-desc">Created {new Date(req.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    </div>
+                    <button type="button" class="btn-copy-small" data-url={`https://grottositters.com/review/${req.token}`} onclick={`navigator.clipboard.writeText(this.dataset.url);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)`}>Copy</button>
+                  </div>
+                ))}
               </div>
             </div>
-            <button type="submit" class="btn-primary btn-sm">Add review</button>
-          </form>
+          )}
         </section>
 
         <!-- ─────────────────────────────────────────── -->
@@ -566,6 +590,16 @@ const savedMsg = saved ? 'Changes saved!' : '';
       const banner = document.getElementById('success-banner');
       if (banner) setTimeout(() => { banner.style.opacity = '0'; setTimeout(() => banner.remove(), 300); }, 3000);
 
+      function copyReviewUrl() {
+        const input = document.getElementById('reviewUrl') as HTMLInputElement;
+        input?.select();
+        navigator.clipboard?.writeText(input?.value ?? '').then(() => {
+          const btn = document.querySelector('.copy-review-btn') as HTMLButtonElement;
+          if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
+        });
+      }
+      (window as any).copyReviewUrl = copyReviewUrl;
+
       document.getElementById('resetColours')?.addEventListener('click', () => {
         const defaults: Record<string, string> = {
           background: '#faf6ee', accent: '#c8963e', accent_light: '#e8b96a',
@@ -755,6 +789,33 @@ const savedMsg = saved ? 'Changes saved!' : '';
         cursor: pointer; font-family: "Lato", sans-serif; transition: all 0.2s;
       }
       .btn-reset-colours:hover { border-color: var(--gold); color: var(--brown-dark); }
+
+      .new-link-box {
+        background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px;
+        padding: 20px; margin-bottom: 20px;
+      }
+      .new-link-label { font-size: 0.85rem; font-weight: 700; color: #166534; margin-bottom: 10px; }
+      .share-url { display: flex; gap: 10px; }
+      .review-link-input {
+        flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
+        padding: 10px 14px; font-size: 0.85rem; font-family: "Lato", sans-serif;
+        color: var(--text); background: #fff; outline: none;
+      }
+
+      .pending-requests { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 24px; margin-top: 24px; }
+      .pending-requests h3 {
+        font-family: "Playfair Display", serif; font-size: 1rem;
+        color: var(--brown-dark); margin-bottom: 4px;
+      }
+      .pending-requests .card-desc { margin-bottom: 12px; }
+      .pending-card { background: rgba(200,150,62,0.04); }
+      .pending-url { font-family: monospace; font-size: 0.82rem; color: var(--brown-mid); word-break: break-all; }
+      .btn-copy-small {
+        background: var(--gold); color: #fff; border: none; border-radius: 6px;
+        padding: 8px 16px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
+        white-space: nowrap; transition: background 0.2s; flex-shrink: 0; align-self: center;
+      }
+      .btn-copy-small:hover { background: var(--gold-light); }
 
       .headings-group { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(44,26,14,0.06); }
       .headings-group:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
