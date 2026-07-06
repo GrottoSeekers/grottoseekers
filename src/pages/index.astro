@@ -176,6 +176,12 @@ import '../styles/global.css';
         <div class="mosaic-item reveal reveal-delay-3">
           <img src="/images/solomon-4.jpg" alt="Solomon in the snow" />
         </div>
+        <div class="mosaic-item reveal">
+          <img src="/images/orca-1.jpg" alt="Orca" />
+        </div>
+        <div class="mosaic-item reveal reveal-delay-1">
+          <img src="/images/bailey-3.jpg" alt="Bailey" />
+        </div>
       </div>
       <div class="mosaic-caption reveal">
         <p>Every sit tells a story</p>
@@ -425,7 +431,7 @@ import '../styles/global.css';
 
   /* ── MOSAIC ────────────────────────────────────────────────────── */
   .mosaic-section { position: relative; background: var(--cream); }
-  .mosaic { display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: 200px 200px; gap: 4px; }
+  .mosaic { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 200px 200px; gap: 4px; }
   .mosaic-item { overflow: hidden; background: var(--gold-pale); }
   .mosaic-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
   .mosaic-item:hover img { transform: scale(1.06); }
@@ -484,8 +490,8 @@ import '../styles/global.css';
     .example-section { padding: 60px 0 0; }
     .editorial-grid { padding: 0 24px; }
     .reviews-strip { grid-template-columns: 1fr; padding: 48px 24px; gap: 16px; }
-    .mosaic { grid-template-columns: repeat(3, 1fr); grid-template-rows: 140px 140px; }
-    .mosaic-item.mosaic-tall { grid-row: span 2; }
+    .mosaic { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 140px); }
+    .mosaic-item.mosaic-tall { grid-row: span 1; }
     .features-section { padding: 60px 0; }
     .features-grid { grid-template-columns: 1fr; gap: 16px; }
     .cta-content h2 { font-size: 2.2rem; }
