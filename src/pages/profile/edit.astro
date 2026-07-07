@@ -80,7 +80,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <!-- Jump-to links -->
         <div class="section-nav">
           <a href="#details">Name & bio</a>
-          <a href="#colours">Colours</a>
           <a href="#hero">Banner photos</a>
           <a href="#about">Bio photos</a>
           <a href="#gallery">Gallery</a>
@@ -188,6 +187,36 @@ const savedMsg = saved ? 'Changes saved!' : '';
               <span>{profile.name}</span>
             </div>
           </div>
+
+          <!-- Colour strip under preview -->
+          <form action="/api/profile/theme" method="POST" class="colour-strip" id="colours">
+            <div class="colour-strip-row">
+              <div class="colour-swatch">
+                <input type="color" name="background" value={t.background || '#faf6ee'} class="colour-picker" />
+                <span>Background</span>
+              </div>
+              <div class="colour-swatch">
+                <input type="color" name="accent" value={t.accent || '#c8963e'} class="colour-picker" />
+                <span>Accent</span>
+              </div>
+              <div class="colour-swatch">
+                <input type="color" name="accent_light" value={t.accent_light || '#e8b96a'} class="colour-picker" />
+                <span>Highlight</span>
+              </div>
+              <div class="colour-swatch">
+                <input type="color" name="text" value={t.text || '#2c1a0e'} class="colour-picker" />
+                <span>Text</span>
+              </div>
+              <div class="colour-swatch">
+                <input type="color" name="text_soft" value={t.text_soft || '#6b4e35'} class="colour-picker" />
+                <span>Soft text</span>
+              </div>
+            </div>
+            <div class="colour-strip-actions">
+              <button type="submit" class="btn-primary btn-sm">Save colours</button>
+              <button type="button" class="btn-reset-colours" id="resetColours">Reset</button>
+            </div>
+          </form>
         </div>
 
         <!-- ─────────────────────────────────────────── -->
@@ -253,57 +282,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
             </div>
             <div class="form-actions">
               <button type="submit" class="btn-primary btn-sm">Save</button>
-            </div>
-          </form>
-        </section>
-
-        <!-- ─────────────────────────────────────────── -->
-        <!-- 2. COLOURS                                  -->
-        <!-- ─────────────────────────────────────────── -->
-        <section class="edit-card" id="colours">
-          <h2>Colours</h2>
-          <p class="card-desc">Pick the colours for your public page. Leave any blank to use the default Grotto Sitters colours. Click the colour circle to open a picker.</p>
-          <form action="/api/profile/theme" method="POST" class="edit-form">
-            <div class="colour-grid">
-              <div class="colour-field">
-                <label>Background</label>
-                <div class="colour-input-row">
-                  <input type="color" name="background" value={t.background || '#faf6ee'} class="colour-picker" />
-                  <span class="colour-label">Page background</span>
-                </div>
-              </div>
-              <div class="colour-field">
-                <label>Main accent</label>
-                <div class="colour-input-row">
-                  <input type="color" name="accent" value={t.accent || '#c8963e'} class="colour-picker" />
-                  <span class="colour-label">Buttons, links, stars</span>
-                </div>
-              </div>
-              <div class="colour-field">
-                <label>Light accent</label>
-                <div class="colour-input-row">
-                  <input type="color" name="accent_light" value={t.accent_light || '#e8b96a'} class="colour-picker" />
-                  <span class="colour-label">Hover effects, highlights</span>
-                </div>
-              </div>
-              <div class="colour-field">
-                <label>Text colour</label>
-                <div class="colour-input-row">
-                  <input type="color" name="text" value={t.text || '#2c1a0e'} class="colour-picker" />
-                  <span class="colour-label">Headings & body text</span>
-                </div>
-              </div>
-              <div class="colour-field">
-                <label>Soft text colour</label>
-                <div class="colour-input-row">
-                  <input type="color" name="text_soft" value={t.text_soft || '#6b4e35'} class="colour-picker" />
-                  <span class="colour-label">Hints, captions, labels</span>
-                </div>
-              </div>
-            </div>
-            <div class="form-actions" style="display:flex;gap:12px;align-items:center;">
-              <button type="submit" class="btn-primary btn-sm">Save colours</button>
-              <button type="button" class="btn-reset-colours" id="resetColours">Reset to defaults</button>
             </div>
           </form>
         </section>
@@ -824,8 +802,9 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .preview-view-link:hover { text-decoration: underline; }
 
       .page-preview {
-        background: var(--pv-bg); border-radius: 12px; overflow: hidden;
+        background: var(--pv-bg); border-radius: 12px 12px 0 0; overflow: hidden;
         box-shadow: 0 4px 24px rgba(44,26,14,0.12); border: 1px solid rgba(44,26,14,0.08);
+        border-bottom: none;
       }
 
       .pv-hero { position: relative; height: 180px; overflow: hidden; }
@@ -976,21 +955,28 @@ const savedMsg = saved ? 'Changes saved!' : '';
         color: var(--brown-dark); margin-bottom: 16px;
       }
 
-      .colour-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 8px; }
-      .colour-field { display: flex; flex-direction: column; gap: 6px; }
-      .colour-input-row { display: flex; align-items: center; gap: 12px; }
-      .colour-picker {
-        width: 44px; height: 44px; border: 2px solid rgba(44,26,14,0.15);
-        border-radius: 50%; cursor: pointer; padding: 2px; background: var(--cream);
-        flex-shrink: 0;
+      .colour-strip {
+        background: #fff; border-radius: 0 0 12px 12px; padding: 16px 20px;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
+        border: 1px solid rgba(44,26,14,0.08); border-top: none;
+        margin-top: -2px;
       }
+      .colour-strip-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+      .colour-swatch { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .colour-swatch span { font-size: 0.65rem; font-weight: 600; color: var(--text-soft); letter-spacing: 0.02em; }
+      .colour-picker {
+        width: 38px; height: 38px; border: 2px solid rgba(44,26,14,0.15);
+        border-radius: 50%; cursor: pointer; padding: 2px; background: var(--cream);
+        flex-shrink: 0; transition: border-color 0.2s, transform 0.15s;
+      }
+      .colour-picker:hover { border-color: var(--gold); transform: scale(1.1); }
       .colour-picker::-webkit-color-swatch-wrapper { padding: 0; }
       .colour-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
       .colour-picker::-moz-color-swatch { border: none; border-radius: 50%; }
-      .colour-label { font-size: 0.78rem; color: var(--text-soft); }
+      .colour-strip-actions { display: flex; gap: 10px; justify-content: center; }
       .btn-reset-colours {
         background: none; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
-        padding: 10px 20px; font-size: 0.82rem; font-weight: 600; color: var(--text-soft);
+        padding: 8px 16px; font-size: 0.78rem; font-weight: 600; color: var(--text-soft);
         cursor: pointer; font-family: "Lato", sans-serif; transition: all 0.2s;
       }
       .btn-reset-colours:hover { border-color: var(--gold); color: var(--brown-dark); }
