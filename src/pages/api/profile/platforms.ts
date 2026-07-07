@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (action === 'add') {
       const name = (form.get('name') as string)?.trim() ?? '';
       const url = (form.get('url') as string)?.trim() ?? '';
-      const emoji = (form.get('emoji') as string)?.trim() || '🔗';
+      const emoji = '';
       const description = (form.get('description') as string)?.trim() ?? '';
 
       if (!name || !url) {

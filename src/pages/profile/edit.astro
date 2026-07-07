@@ -417,7 +417,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
               {platforms.map((plat: any, i: number) => (
                 <div class="item-card">
                   <div class="item-content">
-                    <p class="item-title">{plat.emoji} {plat.name}</p>
+                    <p class="item-title">{plat.name}</p>
                     <p class="item-meta">{plat.url}</p>
                     {plat.description && <p class="item-desc">{plat.description}</p>}
                   </div>
@@ -434,15 +434,9 @@ const savedMsg = saved ? 'Changes saved!' : '';
           <form action="/api/profile/platforms" method="POST" class="add-form">
             <h3>Add a site</h3>
             <input type="hidden" name="_action" value="add" />
-            <div class="field-row">
-              <div class="field">
-                <label>Site name <span class="req">*</span></label>
-                <input type="text" name="name" required placeholder="e.g. Instagram, Rover, TikTok" />
-              </div>
-              <div class="field field-sm">
-                <label>Icon</label>
-                <input type="text" name="emoji" placeholder="📷" maxlength="4" class="emoji-input" />
-              </div>
+            <div class="field">
+              <label>Site name <span class="req">*</span></label>
+              <input type="text" name="name" required placeholder="e.g. Instagram, Rover, TikTok" />
             </div>
             <div class="field">
               <label>Link <span class="req">*</span></label>
@@ -705,7 +699,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
 
       .field { display: flex; flex-direction: column; gap: 6px; }
       .field-sm { max-width: 100px; }
-      .emoji-input { font-size: 1.4rem; text-align: center; padding: 8px; }
+
       label { font-size: 0.82rem; font-weight: 700; color: var(--brown-dark); letter-spacing: 0.02em; }
       .req { color: var(--gold); }
       .field-hint { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
