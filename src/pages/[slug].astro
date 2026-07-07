@@ -33,15 +33,16 @@ const reviews       = (profile?.reviews_json       ?? []) as Review[];
 const platforms     = (profile?.platforms_json     ?? []) as Platform[];
 const bioParagraphs = ((profile?.bio as string) ?? '').split('\n\n').filter(Boolean);
 
+const isSolo = (profile?.account_type ?? 'solo') === 'solo';
 const h = (profile?.headings_json ?? {}) as Record<string, string>;
 const heading = {
-  aboutLabel:     h.about_label     || 'Who We Are',
+  aboutLabel:     h.about_label     || (isSolo ? 'Who I Am' : 'Who We Are'),
   aboutTitle:     h.about_title     || 'A home away from home — for you and your pets.',
   reviewsLabel:   h.reviews_label   || 'What Pet Owners Say',
   reviewsTitle:   h.reviews_title   || '',
-  galleryLabel:   h.gallery_label   || 'Pets We\'ve Loved',
-  galleryTitle:   h.gallery_title   || 'Our Sits',
-  platformsLabel: h.platforms_label || 'Find Us Online',
+  galleryLabel:   h.gallery_label   || (isSolo ? 'Pets I\'ve Loved' : 'Pets We\'ve Loved'),
+  galleryTitle:   h.gallery_title   || (isSolo ? 'My Sits' : 'Our Sits'),
+  platformsLabel: h.platforms_label || (isSolo ? 'Find Me Online' : 'Find Us Online'),
   platformsTitle: h.platforms_title || 'Verified Profiles',
   enquiryLabel:   h.enquiry_label   || 'Get In Touch',
   enquiryTitle:   h.enquiry_title   || (profile ? `Book ${profile.name}` : ''),
@@ -89,7 +90,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
         {reviews.length > 0 && <li><a href="#reviews">Reviews</a></li>}
         {gallery.length > 0 && <li><a href="#gallery">Gallery</a></li>}
         {platforms.length > 0 && <li><a href="#profiles">Profiles</a></li>}
-        <li><a href="#enquiry">Book Us</a></li>
+        <li><a href="#enquiry">{isSolo ? 'Book Me' : 'Book Us'}</a></li>
       </ul>
     </nav>
     <div class="nav-overlay" id="navOverlay"></div>
@@ -108,7 +109,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
         <h1>Grotto<br /><em>Sitters</em></h1>
         <p class="hero-names">{profile.name}</p>
         {profile.tagline && <p class="hero-tagline">{profile.tagline}</p>}
-        <a href="#enquiry" class="btn-primary">Book Us Today</a>
+        <a href="#enquiry" class="btn-primary">{isSolo ? 'Book Me Today' : 'Book Us Today'}</a>
       </div>
     </section>
 
@@ -224,7 +225,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
           <p class="section-label">{heading.enquiryLabel}</p>
           <h2 class="section-title">{heading.enquiryTitle}</h2>
           <div class="divider"></div>
-          <p>Tell us about your home, your pets, and your dates and we'll get back to you within 24 hours.</p>
+          <p>{isSolo ? 'Tell me about your home, your pets, and your dates and I\'ll get back to you within 24 hours.' : 'Tell us about your home, your pets, and your dates and we\'ll get back to you within 24 hours.'}</p>
         </div>
         <form class="enquiry-form" id="enquiryForm">
           <div class="form-row">
@@ -265,16 +266,16 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
         <div class="footer-top">
           <div class="footer-brand">
             <h2>Grotto <span>Sitters</span></h2>
-            <p>{profile.name} — experienced house and pet sitters.</p>
+            <p>{profile.name} — experienced house and pet {isSolo ? 'sitter' : 'sitters'}.</p>
           </div>
           <div class="footer-links">
             <h4>Quick Links</h4>
             <ul>
-              <li><a href="#about">About Us</a></li>
+              <li><a href="#about">{isSolo ? 'About Me' : 'About Us'}</a></li>
               <li><a href="#reviews">Reviews</a></li>
               <li><a href="#gallery">Gallery</a></li>
-              <li><a href="#profiles">Our Profiles</a></li>
-              <li><a href="#enquiry">Book Us</a></li>
+              <li><a href="#profiles">{isSolo ? 'My Profiles' : 'Our Profiles'}</a></li>
+              <li><a href="#enquiry">{isSolo ? 'Book Me' : 'Book Us'}</a></li>
             </ul>
           </div>
           <div class="footer-links">
