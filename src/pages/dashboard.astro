@@ -12,13 +12,18 @@ let profile: any = null;
 try {
   const { data } = await supabase
     .from('profiles')
-    .select('slug, name, tagline, profile_pic, reviews_json')
+    .select('*')
     .eq('user_id', session.userId)
     .single();
   profile = data;
 } catch {}
 
 const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.length : 0;
+const heroImages: any[] = Array.isArray(profile?.hero_images_json) ? profile.hero_images_json : [];
+const aboutImages: any[] = Array.isArray(profile?.about_images_json) ? profile.about_images_json : [];
+const gallery: any[] = Array.isArray(profile?.gallery_json) ? profile.gallery_json : [];
+const reviews: any[] = Array.isArray(profile?.reviews_json) ? profile.reviews_json : [];
+const platforms: any[] = Array.isArray(profile?.platforms_json) ? profile.platforms_json : [];
 ---
 
 <!doctype html>
@@ -96,6 +101,147 @@ const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.
                   id="shareUrl"
                 />
                 <button onclick="copyUrl()" class="copy-btn">Copy</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAGE PREVIEW -->
+          <div class="preview-header">
+            <h2 class="section-title preview-title">Your page preview</h2>
+            <p class="preview-sub">How each section of your public profile currently looks.</p>
+          </div>
+
+          <div class="preview-grid">
+            <!-- Hero preview -->
+            <div class="preview-card">
+              <div class="preview-label">
+                <span>Banner</span>
+                <a href="/profile/edit#hero" class="preview-edit">Edit</a>
+              </div>
+              <div class="preview-hero">
+                {heroImages.length > 0 ? (
+                  <img src={heroImages[0].src} alt="" class="preview-hero-img" style={`object-position:${heroImages[0].pos}`} />
+                ) : (
+                  <div class="preview-empty-bg"></div>
+                )}
+                <div class="preview-hero-overlay"></div>
+                <div class="preview-hero-content">
+                  <p class="preview-hero-brand">Grotto <em>Sitters</em></p>
+                  <p class="preview-hero-name">{profile.name}</p>
+                  {profile.tagline && <p class="preview-hero-tagline">{profile.tagline}</p>}
+                </div>
+              </div>
+            </div>
+
+            <!-- About preview -->
+            <div class="preview-card">
+              <div class="preview-label">
+                <span>About</span>
+                <a href="/profile/edit#about" class="preview-edit">Edit</a>
+              </div>
+              <div class="preview-about">
+                {aboutImages.length > 0 && (
+                  <img src={aboutImages[0].src} alt="" class="preview-about-img" />
+                )}
+                <div class="preview-about-text">
+                  {profile.bio ? (
+                    <p>{profile.bio.length > 120 ? profile.bio.slice(0, 120) + '...' : profile.bio}</p>
+                  ) : (
+                    <p class="preview-empty-text">No bio added yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <!-- Reviews preview -->
+            <div class="preview-card">
+              <div class="preview-label">
+                <span>Reviews</span>
+                <a href="/profile/edit#reviews" class="preview-edit">Edit</a>
+              </div>
+              {reviews.length > 0 ? (
+                <div class="preview-reviews">
+                  {reviews.slice(0, 2).map((r: any) => (
+                    <div class="preview-review">
+                      <div class="preview-review-stars">★★★★★</div>
+                      <p>"{r.text.length > 80 ? r.text.slice(0, 80) + '...' : r.text}"</p>
+                      <span class="preview-review-name">— {r.name}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div class="preview-empty">
+                  <span class="preview-empty-icon">⭐</span>
+                  <p>No reviews yet</p>
+                </div>
+              )}
+            </div>
+
+            <!-- Gallery preview -->
+            <div class="preview-card">
+              <div class="preview-label">
+                <span>Gallery</span>
+                <a href="/profile/edit#gallery" class="preview-edit">Edit</a>
+              </div>
+              {gallery.length > 0 ? (
+                <div class="preview-gallery">
+                  {gallery.slice(0, 6).map((img: any) => (
+                    <div class="preview-gallery-thumb">
+                      <img src={img.src} alt={img.alt || ''} />
+                    </div>
+                  ))}
+                  {gallery.length > 6 && (
+                    <div class="preview-gallery-more">+{gallery.length - 6}</div>
+                  )}
+                </div>
+              ) : (
+                <div class="preview-empty">
+                  <span class="preview-empty-icon">📸</span>
+                  <p>No photos yet</p>
+                </div>
+              )}
+            </div>
+
+            <!-- Platforms preview -->
+            <div class="preview-card">
+              <div class="preview-label">
+                <span>Other profiles</span>
+                <a href="/profile/edit#platforms" class="preview-edit">Edit</a>
+              </div>
+              {platforms.length > 0 ? (
+                <div class="preview-platforms">
+                  {platforms.map((p: any) => (
+                    <div class="preview-platform">
+                      <span class="preview-platform-emoji">{p.emoji}</span>
+                      <span>{p.name}</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div class="preview-empty">
+                  <span class="preview-empty-icon">🌐</span>
+                  <p>No linked profiles</p>
+                </div>
+              )}
+            </div>
+
+            <!-- Enquiry preview -->
+            <div class="preview-card">
+              <div class="preview-label">
+                <span>Contact form</span>
+                <a href="/profile/edit#headings" class="preview-edit">Edit</a>
+              </div>
+              <div class="preview-enquiry">
+                <div class="preview-enquiry-mock">
+                  <div class="mock-field"></div>
+                  <div class="mock-field-row">
+                    <div class="mock-field"></div>
+                    <div class="mock-field"></div>
+                  </div>
+                  <div class="mock-field mock-field-tall"></div>
+                  <div class="mock-btn">Send Enquiry</div>
+                </div>
+                <p class="preview-enquiry-note">Pet owners can contact you directly from your page.</p>
               </div>
             </div>
           </div>
@@ -230,6 +376,129 @@ const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.
       .no-profile h2 { font-family: "Playfair Display", serif; font-size: 1.6rem; color: var(--brown-dark); margin-bottom: 12px; }
       .no-profile p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 32px; }
 
+      /* ── PAGE PREVIEW ────────────────────────────────────────── */
+      .preview-header { margin-top: 56px; margin-bottom: 28px; }
+      .preview-title { font-size: 1.6rem; margin-bottom: 8px; }
+      .preview-sub { font-size: 0.9rem; color: var(--text-soft); line-height: 1.6; }
+
+      .preview-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+
+      .preview-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
+      }
+
+      .preview-label {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 14px 20px;
+        border-bottom: 1px solid rgba(44,26,14,0.06);
+      }
+      .preview-label span {
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--text-soft);
+      }
+      .preview-edit {
+        font-size: 0.75rem; font-weight: 700; color: var(--gold);
+        text-decoration: none; letter-spacing: 0.06em; text-transform: uppercase;
+      }
+      .preview-edit:hover { text-decoration: underline; }
+
+      /* Hero preview */
+      .preview-hero {
+        position: relative; height: 180px; overflow: hidden; background: var(--brown-dark);
+      }
+      .preview-hero-img { width: 100%; height: 100%; object-fit: cover; }
+      .preview-hero-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(44,26,14,0.7) 0%, rgba(44,26,14,0.2) 100%);
+      }
+      .preview-empty-bg { width: 100%; height: 100%; background: linear-gradient(135deg, var(--brown-dark) 0%, #4a3525 100%); }
+      .preview-hero-content {
+        position: absolute; bottom: 16px; left: 20px; right: 20px; z-index: 2;
+      }
+      .preview-hero-brand {
+        font-family: "Playfair Display", serif; font-size: 0.85rem;
+        color: rgba(255,255,255,0.7); margin-bottom: 4px;
+      }
+      .preview-hero-brand em { color: var(--gold); font-style: italic; }
+      .preview-hero-name {
+        font-family: "Playfair Display", serif; font-size: 1.1rem;
+        color: #fff; font-weight: 700;
+      }
+      .preview-hero-tagline { font-size: 0.75rem; color: rgba(255,255,255,0.7); margin-top: 2px; }
+
+      /* About preview */
+      .preview-about { display: flex; gap: 16px; padding: 20px; min-height: 100px; }
+      .preview-about-img {
+        width: 80px; height: 80px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+      }
+      .preview-about-text p {
+        font-size: 0.82rem; color: var(--text-soft); line-height: 1.65;
+      }
+      .preview-empty-text { color: var(--text-soft); opacity: 0.5; font-style: italic; }
+
+      /* Reviews preview */
+      .preview-reviews { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+      .preview-review {
+        padding: 12px 14px; background: var(--cream); border-radius: 8px;
+        border: 1px solid rgba(200,150,62,0.1);
+      }
+      .preview-review-stars { color: var(--gold); font-size: 0.7rem; margin-bottom: 6px; }
+      .preview-review p { font-size: 0.78rem; color: var(--text-soft); line-height: 1.6; font-style: italic; margin-bottom: 6px; }
+      .preview-review-name { font-size: 0.72rem; font-weight: 700; color: var(--gold); }
+
+      /* Gallery preview */
+      .preview-gallery {
+        padding: 16px 20px;
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+      }
+      .preview-gallery-thumb {
+        aspect-ratio: 1; border-radius: 6px; overflow: hidden; background: var(--gold-pale);
+      }
+      .preview-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .preview-gallery-more {
+        aspect-ratio: 1; border-radius: 6px; background: var(--gold-pale);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; font-weight: 700; color: var(--text-soft);
+      }
+
+      /* Platforms preview */
+      .preview-platforms { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
+      .preview-platform {
+        display: flex; align-items: center; gap: 10px;
+        padding: 10px 14px; background: var(--cream); border-radius: 8px;
+        font-size: 0.82rem; color: var(--brown-dark); font-weight: 600;
+      }
+      .preview-platform-emoji { font-size: 1.1rem; }
+
+      /* Enquiry preview */
+      .preview-enquiry { padding: 16px 20px; }
+      .preview-enquiry-mock { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+      .mock-field {
+        height: 28px; background: var(--cream); border-radius: 4px;
+        border: 1px solid rgba(44,26,14,0.08);
+      }
+      .mock-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .mock-field-tall { height: 44px; }
+      .mock-btn {
+        background: var(--gold); color: #fff; text-align: center;
+        padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+      }
+      .preview-enquiry-note { font-size: 0.75rem; color: var(--text-soft); text-align: center; }
+
+      /* Empty state */
+      .preview-empty {
+        padding: 28px 20px; text-align: center;
+      }
+      .preview-empty-icon { font-size: 1.6rem; display: block; margin-bottom: 8px; }
+      .preview-empty p { font-size: 0.82rem; color: var(--text-soft); }
+
       @media (max-width: 768px) {
         nav { padding: 14px 24px; }
         .nav-email { display: none; }
@@ -239,6 +508,7 @@ const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.
         .share-card { grid-column: 1; grid-row: 3; }
         .share-url { flex-direction: column; }
         .no-profile { padding: 48px 24px; }
+        .preview-grid { grid-template-columns: 1fr; }
       }
     </style>
   </body>
