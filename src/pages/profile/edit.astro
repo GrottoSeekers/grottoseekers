@@ -89,28 +89,113 @@ const savedMsg = saved ? 'Changes saved!' : '';
           <a href="#headings">Headings</a>
         </div>
 
+        <!-- ── FULL PAGE PREVIEW ────────────────────── -->
+        <div class="page-preview-wrap">
+          <div class="page-preview-header">
+            <h2>Page preview</h2>
+            <a href={`/${profile.slug}`} target="_blank" class="preview-view-link">Open full page</a>
+          </div>
+          <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#c8963e'};--pv-accent-light:${t.accent_light || '#e8b96a'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
+            <!-- Hero -->
+            <div class="pv-hero">
+              {heroImages.length > 0 ? (
+                <img src={heroImages[0].src} alt="" class="pv-hero-img" style={`object-position:${heroImages[0].pos}`} />
+              ) : (
+                <div class="pv-hero-img pv-hero-empty"></div>
+              )}
+              <div class="pv-hero-overlay"></div>
+              <div class="pv-hero-content">
+                {profile.badge_text && <span class="pv-badge">{profile.badge_text}</span>}
+                <p class="pv-brand">Grotto <em>Sitters</em></p>
+                <p class="pv-name">{profile.name}</p>
+                {profile.tagline && <p class="pv-tagline">{profile.tagline}</p>}
+                <span class="pv-btn">Book {profile.account_type === 'joint' ? 'Us' : 'Me'} Today</span>
+              </div>
+            </div>
+
+            <!-- About -->
+            <div class="pv-section" style="background:var(--pv-bg);">
+              <p class="pv-label">{h.about_label || (profile.account_type === 'joint' ? 'Who We Are' : 'Who I Am')}</p>
+              <div class="pv-about-row">
+                {aboutImages.length > 0 && <img src={aboutImages[0].src} alt="" class="pv-about-img" />}
+                <div class="pv-about-text">
+                  {profile.bio ? (
+                    <p>{profile.bio.length > 100 ? profile.bio.slice(0, 100) + '...' : profile.bio}</p>
+                  ) : (
+                    <p class="pv-empty">No bio yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <!-- Reviews -->
+            {reviews.length > 0 && (
+              <div class="pv-section" style="background:var(--pv-bg);">
+                <p class="pv-label">{h.reviews_label || 'What Pet Owners Say'}</p>
+                <div class="pv-reviews-row">
+                  {reviews.slice(0, 3).map((r: any) => (
+                    <div class="pv-review-card">
+                      <span class="pv-stars">★★★★★</span>
+                      <p>"{r.text.length > 50 ? r.text.slice(0, 50) + '...' : r.text}"</p>
+                      <span class="pv-reviewer">— {r.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Gallery -->
+            {gallery.length > 0 && (
+              <div class="pv-section pv-gallery-section">
+                <p class="pv-label">{h.gallery_label || (profile.account_type === 'joint' ? "Pets We've Loved" : "Pets I've Loved")}</p>
+                <div class="pv-gallery-grid">
+                  {gallery.slice(0, 8).map((img: any) => (
+                    <div class="pv-gallery-item"><img src={img.src} alt="" /></div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Platforms -->
+            {platforms.length > 0 && (
+              <div class="pv-section" style="background:var(--pv-bg);">
+                <p class="pv-label">{h.platforms_label || (profile.account_type === 'joint' ? 'Find Us Online' : 'Find Me Online')}</p>
+                <div class="pv-platforms-row">
+                  {platforms.map((p: any) => (
+                    <div class="pv-platform-chip">
+                      <span class="pv-platform-letter">{p.name.charAt(0).toUpperCase()}</span>
+                      <span>{p.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Enquiry -->
+            <div class="pv-section" style="background:var(--pv-bg);">
+              <p class="pv-label">{h.enquiry_label || 'Get In Touch'}</p>
+              <div class="pv-enquiry-mock">
+                <div class="pv-mock-field"></div>
+                <div class="pv-mock-field"></div>
+                <div class="pv-mock-field pv-mock-tall"></div>
+                <div class="pv-mock-btn">Send Enquiry</div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pv-footer">
+              <p>Grotto <em>Sitters</em></p>
+              <span>{profile.name}</span>
+            </div>
+          </div>
+        </div>
+
         <!-- ─────────────────────────────────────────── -->
         <!-- 1. NAME & BIO                               -->
         <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="details">
           <h2>Your name & bio</h2>
           <p class="card-desc">The basics — your name, a short description, and the text pet owners read when they visit your page.</p>
-          <div class="section-preview">
-            <div class="sp-label">Current preview</div>
-            <div class="sp-hero-mini">
-              {heroImages.length > 0 ? (
-                <img src={heroImages[0].src} alt="" class="sp-hero-bg" style={`object-position:${heroImages[0].pos}`} />
-              ) : (
-                <div class="sp-hero-bg sp-hero-placeholder"></div>
-              )}
-              <div class="sp-hero-overlay"></div>
-              <div class="sp-hero-text">
-                <p class="sp-brand">Grotto <em>Sitters</em></p>
-                <p class="sp-name">{profile.name}</p>
-                {profile.tagline && <p class="sp-tagline">{profile.tagline}</p>}
-              </div>
-            </div>
-          </div>
           <form action="/api/profile/update" method="POST" enctype="multipart/form-data" class="edit-form" id="details-form">
             <div class="field">
               <label>Profile type</label>
@@ -229,18 +314,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <section class="edit-card" id="hero">
           <h2>Banner photos</h2>
           <p class="card-desc">These are the big, full-width photos pet owners see first when they open your page. They cycle through as a slideshow. Use wide landscape photos for the best result.</p>
-          {heroImages.length > 0 && (
-            <div class="section-preview">
-              <div class="sp-label">Current preview</div>
-              <div class="sp-slideshow">
-                {heroImages.slice(0, 4).map((img: any) => (
-                  <img src={img.src} alt="" class="sp-slide-thumb" style={`object-position:${img.pos}`} />
-                ))}
-                {heroImages.length > 4 && <span class="sp-more">+{heroImages.length - 4}</span>}
-              </div>
-            </div>
-          )}
-
           {heroImages.length > 0 ? (
             <div class="image-grid">
               {heroImages.map((img: any, i: number) => (
@@ -287,16 +360,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <section class="edit-card" id="about">
           <h2>Photos next to your bio</h2>
           <p class="card-desc">These appear beside your "About" text as a small slideshow. Good options: photos of you with pets, at a sit, or around the house.</p>
-          {(aboutImages.length > 0 || profile.bio) && (
-            <div class="section-preview">
-              <div class="sp-label">Current preview</div>
-              <div class="sp-about">
-                {aboutImages.length > 0 && <img src={aboutImages[0].src} alt="" class="sp-about-img" />}
-                {profile.bio && <p class="sp-about-text">{profile.bio.length > 150 ? profile.bio.slice(0, 150) + '...' : profile.bio}</p>}
-              </div>
-            </div>
-          )}
-
           {aboutImages.length > 0 ? (
             <div class="image-grid">
               {aboutImages.map((img: any, i: number) => (
@@ -337,18 +400,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <section class="edit-card" id="gallery">
           <h2>Photo gallery</h2>
           <p class="card-desc">A grid of your best photos further down your page. Show off the pets you've looked after, places you've stayed, or anything that makes you a great sitter.</p>
-          {gallery.length > 0 && (
-            <div class="section-preview">
-              <div class="sp-label">Current preview</div>
-              <div class="sp-gallery">
-                {gallery.slice(0, 6).map((img: any) => (
-                  <div class="sp-gallery-thumb"><img src={img.src} alt={img.alt || ''} /></div>
-                ))}
-                {gallery.length > 6 && <div class="sp-gallery-more">+{gallery.length - 6}</div>}
-              </div>
-            </div>
-          )}
-
           {gallery.length > 0 ? (
             <div class="image-grid">
               {gallery.map((img: any, i: number) => (
@@ -389,22 +440,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <section class="edit-card" id="reviews">
           <h2>Reviews</h2>
           <p class="card-desc">Reviews are written by real pet owners. Generate a unique link and send it to a pet owner — they'll fill in the review themselves. This section won't show on your page until you have at least one.</p>
-          {reviews.length > 0 && (
-            <div class="section-preview">
-              <div class="sp-label">Current preview</div>
-              <div class="sp-reviews">
-                {reviews.slice(0, 2).map((r: any) => (
-                  <div class="sp-review">
-                    <div class="sp-stars">★★★★★</div>
-                    <p>"{r.text.length > 80 ? r.text.slice(0, 80) + '...' : r.text}"</p>
-                    <span class="sp-reviewer">— {r.name}</span>
-                  </div>
-                ))}
-                {reviews.length > 2 && <p class="sp-more-text">+ {reviews.length - 2} more</p>}
-              </div>
-            </div>
-          )}
-
           {reviews.length > 0 && (
             <div class="item-list">
               {reviews.map((rev: any, i: number) => (
@@ -473,20 +508,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <section class="edit-card" id="platforms">
           <h2>Your profiles &amp; social media</h2>
           <p class="card-desc">Link to your profiles on pet sitting websites, social media, or anywhere else pet owners can find you. These show as clickable cards on your page. This section won't show until you add at least one.</p>
-          {platforms.length > 0 && (
-            <div class="section-preview">
-              <div class="sp-label">Current preview</div>
-              <div class="sp-platforms">
-                {platforms.map((p: any) => (
-                  <div class="sp-platform">
-                    <span class="sp-platform-letter">{p.name.charAt(0).toUpperCase()}</span>
-                    <span>{p.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           {platforms.length > 0 && (
             <div class="item-list">
               {platforms.map((plat: any, i: number) => (
@@ -770,50 +791,69 @@ const savedMsg = saved ? 'Changes saved!' : '';
         margin-bottom: 24px;
       }
 
-      /* ── SECTION PREVIEWS ──────────────────────────────────── */
-      .section-preview {
-        background: var(--cream); border: 1px solid rgba(200,150,62,0.12);
-        border-radius: 10px; overflow: hidden; margin-bottom: 24px;
+      /* ── FULL PAGE PREVIEW ────────────────────────────────── */
+      .page-preview-wrap { margin-bottom: 32px; }
+      .page-preview-header {
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
       }
-      .sp-label {
-        padding: 10px 16px; font-size: 0.7rem; font-weight: 700;
-        letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-soft);
-        border-bottom: 1px solid rgba(200,150,62,0.1);
+      .page-preview-header h2 {
+        font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark);
+      }
+      .preview-view-link {
+        font-size: 0.78rem; font-weight: 700; color: var(--gold);
+        text-decoration: none; letter-spacing: 0.04em;
+      }
+      .preview-view-link:hover { text-decoration: underline; }
+
+      .page-preview {
+        background: var(--pv-bg); border-radius: 12px; overflow: hidden;
+        box-shadow: 0 4px 24px rgba(44,26,14,0.12); border: 1px solid rgba(44,26,14,0.08);
       }
 
-      .sp-hero-mini { position: relative; height: 140px; overflow: hidden; background: var(--brown-dark); }
-      .sp-hero-bg { width: 100%; height: 100%; object-fit: cover; display: block; }
-      .sp-hero-placeholder { background: linear-gradient(135deg, #2c1a0e 0%, #4a3525 100%); }
-      .sp-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(44,26,14,0.7) 0%, rgba(44,26,14,0.15) 100%); }
-      .sp-hero-text { position: absolute; bottom: 14px; left: 16px; right: 16px; z-index: 2; }
-      .sp-brand { font-family: "Playfair Display", serif; font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 2px; }
-      .sp-brand em { color: var(--gold); font-style: italic; }
-      .sp-name { font-family: "Playfair Display", serif; font-size: 1rem; color: #fff; font-weight: 700; }
-      .sp-tagline { font-size: 0.72rem; color: rgba(255,255,255,0.65); margin-top: 2px; }
+      .pv-hero { position: relative; height: 180px; overflow: hidden; }
+      .pv-hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .pv-hero-empty { background: linear-gradient(135deg, #2c1a0e 0%, #4a3525 100%); height: 100%; }
+      .pv-hero-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.5); }
+      .pv-hero-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; text-align: center; padding: 16px; }
+      .pv-badge { font-size: 0.55rem; background: rgba(255,255,255,0.15); color: #fff; padding: 4px 10px; border-radius: 50px; margin-bottom: 8px; font-weight: 700; letter-spacing: 0.06em; }
+      .pv-brand { font-family: "Playfair Display", serif; font-size: 1.6rem; color: #fff; line-height: 1; }
+      .pv-brand em { color: var(--pv-accent); font-style: italic; }
+      .pv-name { font-size: 0.7rem; color: rgba(255,255,255,0.85); font-weight: 700; letter-spacing: 0.06em; margin-top: 6px; }
+      .pv-tagline { font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+      .pv-btn { display: inline-block; margin-top: 10px; background: var(--pv-accent); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 5px 14px; border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
 
-      .sp-slideshow { display: flex; gap: 6px; padding: 12px 16px; overflow-x: auto; }
-      .sp-slide-thumb { width: 100px; height: 60px; border-radius: 6px; object-fit: cover; flex-shrink: 0; }
-      .sp-more { font-size: 0.82rem; font-weight: 700; color: var(--text-soft); display: flex; align-items: center; padding: 0 8px; }
+      .pv-section { padding: 16px 20px; }
+      .pv-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pv-accent); margin-bottom: 8px; }
 
-      .sp-about { display: flex; gap: 14px; padding: 14px 16px; align-items: flex-start; }
-      .sp-about-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-      .sp-about-text { font-size: 0.78rem; color: var(--text-soft); line-height: 1.6; }
+      .pv-about-row { display: flex; gap: 12px; align-items: flex-start; }
+      .pv-about-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+      .pv-about-text p { font-size: 0.65rem; color: var(--pv-text-soft); line-height: 1.6; }
+      .pv-empty { font-style: italic; opacity: 0.4; }
 
-      .sp-gallery { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; padding: 12px 16px; }
-      .sp-gallery-thumb { aspect-ratio: 1; border-radius: 4px; overflow: hidden; }
-      .sp-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-      .sp-gallery-more { aspect-ratio: 1; border-radius: 4px; background: rgba(200,150,62,0.15); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; color: var(--text-soft); }
+      .pv-reviews-row { display: flex; gap: 8px; overflow: hidden; }
+      .pv-review-card { flex: 1; min-width: 0; background: var(--pv-bg); border: 1px solid rgba(200,150,62,0.1); border-radius: 8px; padding: 10px; }
+      .pv-stars { color: var(--pv-accent); font-size: 0.5rem; display: block; margin-bottom: 4px; }
+      .pv-review-card p { font-size: 0.58rem; color: var(--pv-text-soft); line-height: 1.5; font-style: italic; margin-bottom: 4px; }
+      .pv-reviewer { font-size: 0.52rem; font-weight: 700; color: var(--pv-accent); }
 
-      .sp-reviews { display: flex; gap: 10px; padding: 12px 16px; overflow-x: auto; }
-      .sp-review { min-width: 200px; padding: 12px; background: #fff; border-radius: 8px; border: 1px solid rgba(200,150,62,0.1); flex-shrink: 0; }
-      .sp-stars { color: var(--gold); font-size: 0.65rem; margin-bottom: 6px; }
-      .sp-review p { font-size: 0.75rem; color: var(--text-soft); line-height: 1.55; font-style: italic; margin-bottom: 6px; }
-      .sp-reviewer { font-size: 0.7rem; font-weight: 700; color: var(--gold); }
-      .sp-more-text { font-size: 0.78rem; color: var(--text-soft); display: flex; align-items: center; padding: 0 8px; white-space: nowrap; }
+      .pv-gallery-section { background: var(--pv-bg); }
+      .pv-gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+      .pv-gallery-item { aspect-ratio: 1; border-radius: 4px; overflow: hidden; }
+      .pv-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-      .sp-platforms { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
-      .sp-platform { display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: #fff; border-radius: 8px; font-size: 0.78rem; color: var(--brown-dark); font-weight: 600; }
-      .sp-platform-letter { font-family: "Playfair Display", serif; font-size: 0.75rem; font-weight: 700; width: 24px; height: 24px; border-radius: 50%; background: var(--gold); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+      .pv-platforms-row { display: flex; flex-wrap: wrap; gap: 6px; }
+      .pv-platform-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(200,150,62,0.08); border-radius: 6px; font-size: 0.6rem; font-weight: 600; color: var(--pv-text); }
+      .pv-platform-letter { font-family: "Playfair Display", serif; font-size: 0.55rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; background: var(--pv-accent); color: #fff; display: flex; align-items: center; justify-content: center; }
+
+      .pv-enquiry-mock { display: flex; flex-direction: column; gap: 5px; max-width: 200px; }
+      .pv-mock-field { height: 16px; background: rgba(44,26,14,0.04); border: 1px solid rgba(44,26,14,0.08); border-radius: 3px; }
+      .pv-mock-tall { height: 28px; }
+      .pv-mock-btn { background: var(--pv-accent); color: #fff; text-align: center; padding: 5px; border-radius: 4px; font-size: 0.5rem; font-weight: 700; }
+
+      .pv-footer { background: var(--pv-text, #2c1a0e); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+      .pv-footer p { font-family: "Playfair Display", serif; font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+      .pv-footer p em { color: var(--pv-accent); font-style: italic; }
+      .pv-footer span { font-size: 0.55rem; color: rgba(255,255,255,0.4); }
 
       .edit-form, .add-form { display: flex; flex-direction: column; gap: 20px; }
 
@@ -979,7 +1019,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
         .nav-email { display: none; }
         .edit-wrap { padding: 32px 16px; }
         .edit-card { padding: 24px 18px; }
-        .sp-gallery { grid-template-columns: repeat(3, 1fr); }
         .edit-header { flex-direction: column; gap: 12px; }
         .header-actions { width: 100%; justify-content: space-between; }
         .upload-row { flex-direction: column; }
