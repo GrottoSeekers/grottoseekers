@@ -4,6 +4,6 @@ import vercel from "@astrojs/vercel";
 export default defineConfig({
   site: "https://grottositters.com",
   base: "/",
-  output: "hybrid",
+  output: "static",
   adapter: vercel(),
 });
