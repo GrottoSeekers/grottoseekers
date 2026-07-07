@@ -208,7 +208,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
         <div class="profiles-grid">
           {platforms.map(p => (
             <a href={p.url} target="_blank" rel="noopener noreferrer" class="platform-card">
-              <span class="platform-logo">{p.emoji}</span>
+              <span class="platform-logo">{p.name.charAt(0).toUpperCase()}</span>
               <h3>{p.name}</h3>
               <p>{p.description}</p>
               <span class="platform-link-text">View Profile &rarr;</span>
@@ -373,7 +373,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
   .profiles-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 28px; }
   .platform-card { display: block; background: var(--cream); border: 1px solid rgba(200,150,62,0.15); border-radius: 12px; padding: 36px 28px; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; }
   .platform-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(44,26,14,0.08); }
-  .platform-logo { font-size: 2rem; display: block; margin-bottom: 14px; }
+  .platform-logo { font-family: "Playfair Display", serif; font-size: 1.6rem; font-weight: 700; width: 44px; height: 44px; border-radius: 50%; background: var(--gold); color: #fff; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
   .platform-card h3 { font-family: "Playfair Display", serif; font-size: 1.25rem; color: var(--brown-dark); margin-bottom: 10px; }
   .platform-card p { color: var(--text-soft); line-height: 1.7; font-size: 0.9rem; margin-bottom: 16px; }
   .platform-link-text { color: var(--gold); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.04em; }

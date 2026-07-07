@@ -212,7 +212,7 @@ const platforms: any[] = Array.isArray(profile?.platforms_json) ? profile.platfo
                 <div class="preview-platforms">
                   {platforms.map((p: any) => (
                     <div class="preview-platform">
-                      <span class="preview-platform-emoji">{p.emoji}</span>
+                      <span class="preview-platform-letter">{p.name.charAt(0).toUpperCase()}</span>
                       <span>{p.name}</span>
                     </div>
                   ))}
@@ -475,7 +475,7 @@ const platforms: any[] = Array.isArray(profile?.platforms_json) ? profile.platfo
         padding: 10px 14px; background: var(--cream); border-radius: 8px;
         font-size: 0.82rem; color: var(--brown-dark); font-weight: 600;
       }
-      .preview-platform-emoji { font-size: 1.1rem; }
+      .preview-platform-letter { font-family: "Playfair Display", serif; font-size: 0.85rem; font-weight: 700; width: 28px; height: 28px; border-radius: 50%; background: var(--gold); color: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
       /* Enquiry preview */
       .preview-enquiry { padding: 16px 20px; }
