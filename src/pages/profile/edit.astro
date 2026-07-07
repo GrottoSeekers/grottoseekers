@@ -409,8 +409,8 @@ const savedMsg = saved ? 'Changes saved!' : '';
         <!-- 6. OTHER PROFILES                           -->
         <!-- ─────────────────────────────────────────── -->
         <section class="edit-card" id="platforms">
-          <h2>Your profiles on other sites</h2>
-          <p class="card-desc">Link to your profiles on pet sitting websites like Rover or TrustedHouseSitters. These show as clickable cards on your page so pet owners can check your reviews there. This section won't show until you add at least one.</p>
+          <h2>Your profiles &amp; social media</h2>
+          <p class="card-desc">Link to your profiles on pet sitting websites, social media, or anywhere else pet owners can find you. These show as clickable cards on your page. This section won't show until you add at least one.</p>
 
           {platforms.length > 0 && (
             <div class="item-list">
@@ -431,27 +431,40 @@ const savedMsg = saved ? 'Changes saved!' : '';
             </div>
           )}
 
-          <form action="/api/profile/platforms" method="POST" class="add-form">
+          <form action="/api/profile/platforms" method="POST" class="add-form" id="platform-form">
             <h3>Add a site</h3>
             <input type="hidden" name="_action" value="add" />
+
+            <p class="quick-pick-label">Quick add:</p>
+            <div class="quick-picks">
+              <button type="button" class="quick-pick" data-name="Instagram" data-emoji="📷" data-url="https://instagram.com/">📷 Instagram</button>
+              <button type="button" class="quick-pick" data-name="Facebook" data-emoji="👤" data-url="https://facebook.com/">👤 Facebook</button>
+              <button type="button" class="quick-pick" data-name="TikTok" data-emoji="🎵" data-url="https://tiktok.com/@">🎵 TikTok</button>
+              <button type="button" class="quick-pick" data-name="YouTube" data-emoji="🎬" data-url="https://youtube.com/@">🎬 YouTube</button>
+              <button type="button" class="quick-pick" data-name="TrustedHouseSitters" data-emoji="🏠" data-url="https://www.trustedhousesitters.com/">🏠 TrustedHouseSitters</button>
+              <button type="button" class="quick-pick" data-name="Rover" data-emoji="🐕" data-url="https://www.rover.com/">🐕 Rover</button>
+              <button type="button" class="quick-pick" data-name="HouseSitMatch" data-emoji="🏡" data-url="https://www.housesitmatch.com/">🏡 HouseSitMatch</button>
+            </div>
+
             <div class="field-row">
               <div class="field">
                 <label>Site name <span class="req">*</span></label>
-                <input type="text" name="name" required placeholder="e.g. TrustedHouseSitters" />
+                <input type="text" name="name" id="plat-name" required placeholder="e.g. Instagram" />
               </div>
               <div class="field field-sm">
                 <label>Icon</label>
-                <input type="text" name="emoji" placeholder="🏠" maxlength="4" />
+                <input type="text" name="emoji" id="plat-emoji" placeholder="🏠" maxlength="4" class="emoji-input" />
+                <p class="field-hint">Type or paste any emoji.</p>
               </div>
             </div>
             <div class="field">
               <label>Link to your profile <span class="req">*</span></label>
-              <input type="url" name="url" required placeholder="https://www.trustedhousesitters.com/your-profile" />
+              <input type="url" name="url" id="plat-url" required placeholder="https://instagram.com/yourname" />
               <p class="field-hint">Copy the full URL from your browser when you're on your profile page.</p>
             </div>
             <div class="field">
               <label>Short note</label>
-              <input type="text" name="description" placeholder="e.g. 10 five-star reviews" />
+              <input type="text" name="description" id="plat-desc" placeholder="e.g. Follow us for daily dog pics" />
               <p class="field-hint">A quick summary pet owners will see on the card.</p>
             </div>
             <button type="submit" class="btn-primary btn-sm">Add site</button>
@@ -545,6 +558,18 @@ const savedMsg = saved ? 'Changes saved!' : '';
     </main>
 
     <script>
+      document.querySelectorAll('.quick-pick').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const el = btn as HTMLElement;
+          const nameInput = document.getElementById('plat-name') as HTMLInputElement;
+          const emojiInput = document.getElementById('plat-emoji') as HTMLInputElement;
+          const urlInput = document.getElementById('plat-url') as HTMLInputElement;
+          if (nameInput) nameInput.value = el.dataset.name ?? '';
+          if (emojiInput) emojiInput.value = el.dataset.emoji ?? '';
+          if (urlInput) { urlInput.value = el.dataset.url ?? ''; urlInput.focus(); }
+        });
+      });
+
       function compressImage(file: File, maxW: number, maxH: number, quality: number): Promise<File> {
         return new Promise((resolve, reject) => {
           const img = new Image();
@@ -705,6 +730,16 @@ const savedMsg = saved ? 'Changes saved!' : '';
 
       .field { display: flex; flex-direction: column; gap: 6px; }
       .field-sm { max-width: 100px; }
+      .emoji-input { font-size: 1.4rem; text-align: center; padding: 8px; }
+
+      .quick-pick-label { font-size: 0.78rem; font-weight: 700; color: var(--text-soft); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; }
+      .quick-picks { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+      .quick-pick {
+        background: var(--cream); border: 1.5px solid rgba(44,26,14,0.1); border-radius: 50px;
+        padding: 7px 14px; font-size: 0.78rem; font-weight: 600; color: var(--brown-dark);
+        cursor: pointer; transition: border-color 0.2s, background 0.2s; font-family: "Lato", sans-serif;
+      }
+      .quick-pick:hover { border-color: var(--gold); background: rgba(200,150,62,0.08); }
       label { font-size: 0.82rem; font-weight: 700; color: var(--brown-dark); letter-spacing: 0.02em; }
       .req { color: var(--gold); }
       .field-hint { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
