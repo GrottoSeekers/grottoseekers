@@ -10,10 +10,11 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     if (!session) return redirect('/login');
 
     const form = await request.formData();
-    const name    = (form.get('name') as string | null)?.trim() ?? '';
-    const slug    = (form.get('slug') as string | null)?.trim().toLowerCase() ?? '';
-    const tagline = (form.get('tagline') as string | null)?.trim() || null;
-    const bio     = (form.get('bio') as string | null)?.trim() || null;
+    const name         = (form.get('name') as string | null)?.trim() ?? '';
+    const slug         = (form.get('slug') as string | null)?.trim().toLowerCase() ?? '';
+    const tagline      = (form.get('tagline') as string | null)?.trim() || null;
+    const bio          = (form.get('bio') as string | null)?.trim() || null;
+    const accountType  = form.get('account_type') === 'joint' ? 'joint' : 'solo';
 
     if (!name || !slug) return redirect('/profile/create?error=missing');
 
@@ -62,6 +63,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       tagline,
       profile_pic:       profilePicUrl,
       bio,
+      account_type:      accountType,
       hero_images_json:  [],
       about_images_json: [],
       gallery_json:      [],

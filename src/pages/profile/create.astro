@@ -64,6 +64,29 @@ const errorMsg = errorMap[errorKey] ?? '';
             <h2>Your details</h2>
 
             <div class="field">
+              <label>Profile type <span class="req">*</span></label>
+              <div class="type-toggle">
+                <label class="type-option">
+                  <input type="radio" name="account_type" value="solo" checked />
+                  <div class="type-card">
+                    <span class="type-icon">👤</span>
+                    <span class="type-label">Solo sitter</span>
+                    <span class="type-desc">Just me</span>
+                  </div>
+                </label>
+                <label class="type-option">
+                  <input type="radio" name="account_type" value="joint" />
+                  <div class="type-card">
+                    <span class="type-icon">👥</span>
+                    <span class="type-label">Joint / couple</span>
+                    <span class="type-desc">Two of us</span>
+                  </div>
+                </label>
+              </div>
+              <p class="field-hint">This adjusts the default wording on your profile (e.g. "Book me" vs "Book us").</p>
+            </div>
+
+            <div class="field">
               <label for="name">Your name <span class="req">*</span></label>
               <input type="text" id="name" name="name" placeholder="e.g. Callum & Niamh" required autocomplete="name" />
               <p class="field-hint">This is how you'll appear on your profile.</p>
@@ -98,7 +121,7 @@ const errorMsg = errorMap[errorKey] ?? '';
 
             <div class="field">
               <label for="bio">About you</label>
-              <textarea id="bio" name="bio" rows="6" placeholder="Tell pet owners about yourselves — your experience, the services you offer, and what makes you great sitters."></textarea>
+              <textarea id="bio" name="bio" rows="6" placeholder="Tell pet owners about yourself — your experience, the services you offer, and what makes you a great sitter."></textarea>
               <p class="field-hint">Use blank lines to separate paragraphs.</p>
             </div>
           </div>
@@ -265,6 +288,19 @@ const errorMsg = errorMap[errorKey] ?? '';
       .file-upload-icon { font-size: 1.4rem; }
       .file-upload-text { font-size: 0.9rem; color: var(--text-soft); }
       .file-upload-label.has-file .file-upload-text { color: var(--brown-dark); font-weight: 600; }
+
+      .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .type-option input { position: absolute; opacity: 0; pointer-events: none; }
+      .type-card {
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+        padding: 20px 16px; border: 2px solid rgba(44,26,14,0.12); border-radius: 10px;
+        cursor: pointer; transition: border-color 0.2s, background 0.2s; text-align: center;
+      }
+      .type-card:hover { border-color: var(--gold); background: rgba(200,150,62,0.04); }
+      .type-option input:checked + .type-card { border-color: var(--gold); background: rgba(200,150,62,0.08); }
+      .type-icon { font-size: 1.6rem; }
+      .type-label { font-size: 0.9rem; font-weight: 700; color: var(--brown-dark); }
+      .type-desc { font-size: 0.78rem; color: var(--text-soft); }
 
       .field-hint { font-size: 0.8rem; color: var(--text-soft); margin-top: 6px; line-height: 1.5; }
 

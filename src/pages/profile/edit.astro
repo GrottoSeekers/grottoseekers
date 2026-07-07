@@ -97,6 +97,26 @@ const savedMsg = saved ? 'Changes saved!' : '';
           <p class="card-desc">The basics — your name, a short description, and the text pet owners read when they visit your page.</p>
           <form action="/api/profile/update" method="POST" enctype="multipart/form-data" class="edit-form" id="details-form">
             <div class="field">
+              <label>Profile type</label>
+              <div class="type-toggle">
+                <label class="type-option">
+                  <input type="radio" name="account_type" value="solo" checked={profile.account_type !== 'joint'} />
+                  <div class="type-card">
+                    <span class="type-icon">👤</span>
+                    <span class="type-label">Solo sitter</span>
+                  </div>
+                </label>
+                <label class="type-option">
+                  <input type="radio" name="account_type" value="joint" checked={profile.account_type === 'joint'} />
+                  <div class="type-card">
+                    <span class="type-icon">👥</span>
+                    <span class="type-label">Joint / couple</span>
+                  </div>
+                </label>
+              </div>
+              <p class="field-hint">Changes default wording on your page (e.g. "Book me" vs "Book us").</p>
+            </div>
+            <div class="field">
               <label for="name">Your name <span class="req">*</span></label>
               <input type="text" id="name" name="name" value={profile.name} required />
               <p class="field-hint">This is the name shown at the top of your page.</p>
@@ -451,7 +471,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
               <div class="field-row">
                 <div class="field">
                   <label>Small label</label>
-                  <input type="text" name="about_label" value={h.about_label ?? ''} placeholder="Who We Are" />
+                  <input type="text" name="about_label" value={h.about_label ?? ''} placeholder={profile.account_type === 'joint' ? 'Who We Are' : 'Who I Am'} />
                 </div>
                 <div class="field">
                   <label>Big title</label>
@@ -479,11 +499,11 @@ const savedMsg = saved ? 'Changes saved!' : '';
               <div class="field-row">
                 <div class="field">
                   <label>Small label</label>
-                  <input type="text" name="gallery_label" value={h.gallery_label ?? ''} placeholder="Pets We've Loved" />
+                  <input type="text" name="gallery_label" value={h.gallery_label ?? ''} placeholder={profile.account_type === 'joint' ? "Pets We've Loved" : "Pets I've Loved"} />
                 </div>
                 <div class="field">
                   <label>Big title</label>
-                  <input type="text" name="gallery_title" value={h.gallery_title ?? ''} placeholder="Our Sits" />
+                  <input type="text" name="gallery_title" value={h.gallery_title ?? ''} placeholder={profile.account_type === 'joint' ? 'Our Sits' : 'My Sits'} />
                 </div>
               </div>
             </div>
@@ -493,7 +513,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
               <div class="field-row">
                 <div class="field">
                   <label>Small label</label>
-                  <input type="text" name="platforms_label" value={h.platforms_label ?? ''} placeholder="Find Us Online" />
+                  <input type="text" name="platforms_label" value={h.platforms_label ?? ''} placeholder={profile.account_type === 'joint' ? 'Find Us Online' : 'Find Me Online'} />
                 </div>
                 <div class="field">
                   <label>Big title</label>
@@ -688,6 +708,18 @@ const savedMsg = saved ? 'Changes saved!' : '';
       label { font-size: 0.82rem; font-weight: 700; color: var(--brown-dark); letter-spacing: 0.02em; }
       .req { color: var(--gold); }
       .field-hint { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
+
+      .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .type-option input { position: absolute; opacity: 0; pointer-events: none; }
+      .type-card {
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+        padding: 16px 12px; border: 2px solid rgba(44,26,14,0.12); border-radius: 10px;
+        cursor: pointer; transition: border-color 0.2s, background 0.2s; text-align: center;
+      }
+      .type-card:hover { border-color: var(--gold); background: rgba(200,150,62,0.04); }
+      .type-option input:checked + .type-card { border-color: var(--gold); background: rgba(200,150,62,0.08); }
+      .type-icon { font-size: 1.4rem; }
+      .type-label { font-size: 0.85rem; font-weight: 700; color: var(--brown-dark); }
 
       input[type="text"], input[type="url"], textarea, select {
         width: 100%; box-sizing: border-box;

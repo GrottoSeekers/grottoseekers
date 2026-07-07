@@ -14,6 +14,7 @@ export const POST: APIRoute = async ({ request }) => {
     const tagline = (form.get('tagline') as string | null)?.trim() || null;
     const badge_text = (form.get('badge_text') as string | null)?.trim() || null;
     const bio = (form.get('bio') as string | null)?.trim() || null;
+    const account_type = form.get('account_type') === 'joint' ? 'joint' : 'solo';
 
     if (!name) {
       return new Response(null, { status: 302, headers: { Location: '/profile/edit?error=missing#details' } });
@@ -48,7 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
-    const updates: Record<string, any> = { name, tagline, badge_text, bio };
+    const updates: Record<string, any> = { name, tagline, badge_text, bio, account_type };
     if (profilePicUrl !== undefined) updates.profile_pic = profilePicUrl;
 
     const { error } = await supabase
