@@ -710,6 +710,20 @@ const savedMsg = saved ? 'Changes saved!' : '';
       }
       (window as any).copyReviewUrl = copyReviewUrl;
 
+      const colourVarMap: Record<string, string> = {
+        background: '--pv-bg', accent: '--pv-accent', accent_light: '--pv-accent-light',
+        text: '--pv-text', text_soft: '--pv-text-soft',
+      };
+      const pvEl = document.querySelector<HTMLElement>('.page-preview');
+      if (pvEl) {
+        document.querySelectorAll<HTMLInputElement>('.colour-picker').forEach(picker => {
+          picker.addEventListener('input', () => {
+            const v = colourVarMap[picker.name];
+            if (v) pvEl.style.setProperty(v, picker.value);
+          });
+        });
+      }
+
       document.getElementById('resetColours')?.addEventListener('click', () => {
         const defaults: Record<string, string> = {
           background: '#faf6ee', accent: '#c8963e', accent_light: '#e8b96a',
@@ -718,6 +732,10 @@ const savedMsg = saved ? 'Changes saved!' : '';
         for (const [key, val] of Object.entries(defaults)) {
           const input = document.querySelector<HTMLInputElement>(`input[name="${key}"]`);
           if (input) input.value = val;
+          if (pvEl) {
+            const v = colourVarMap[key];
+            if (v) pvEl.style.setProperty(v, val);
+          }
         }
       });
     </script>
