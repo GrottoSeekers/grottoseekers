@@ -10,24 +10,30 @@ interface Review    { text: string; name: string; initials: string; platform: st
 interface Platform  { name: string; url: string; emoji: string; description: string }
 
 const { slug } = Astro.params;
-if (!slug) return new Response(null, { status: 404 });
+if (!slug) return Astro.redirect('/');
 
-const { data: profile, error } = await supabase
-  .from('profiles')
-  .select('*')
-  .eq('slug', slug)
-  .single();
+let profile: any = null;
+try {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+  if (!error) profile = data;
+} catch {}
 
-if (!profile || error) return new Response(null, { status: 404 });
+if (!profile) {
+  Astro.response.status = 404;
+}
 
-const heroImages    = (profile.hero_images_json  ?? []) as HeroImage[];
-const aboutImages   = (profile.about_images_json ?? []) as Photo[];
-const gallery       = (profile.gallery_json       ?? []) as Photo[];
-const reviews       = (profile.reviews_json       ?? []) as Review[];
-const platforms     = (profile.platforms_json     ?? []) as Platform[];
-const bioParagraphs = ((profile.bio as string) ?? '').split('\n\n').filter(Boolean);
+const heroImages    = (profile?.hero_images_json  ?? []) as HeroImage[];
+const aboutImages   = (profile?.about_images_json ?? []) as Photo[];
+const gallery       = (profile?.gallery_json       ?? []) as Photo[];
+const reviews       = (profile?.reviews_json       ?? []) as Review[];
+const platforms     = (profile?.platforms_json     ?? []) as Platform[];
+const bioParagraphs = ((profile?.bio as string) ?? '').split('\n\n').filter(Boolean);
 
-const h = (profile.headings_json ?? {}) as Record<string, string>;
+const h = (profile?.headings_json ?? {}) as Record<string, string>;
 const heading = {
   aboutLabel:     h.about_label     || 'Who We Are',
   aboutTitle:     h.about_title     || 'A home away from home — for you and your pets.',
@@ -38,11 +44,11 @@ const heading = {
   platformsLabel: h.platforms_label || 'Find Us Online',
   platformsTitle: h.platforms_title || 'Verified Profiles',
   enquiryLabel:   h.enquiry_label   || 'Get In Touch',
-  enquiryTitle:   h.enquiry_title   || `Book ${profile.name}`,
+  enquiryTitle:   h.enquiry_title   || (profile ? `Book ${profile.name}` : ''),
 };
 const reviewsHeading = heading.reviewsTitle || (reviews.length === 1 ? '1 five-star review.' : `${reviews.length} five-star reviews.`);
 
-const t = (profile.theme_json ?? {}) as Record<string, string>;
+const t = (profile?.theme_json ?? {}) as Record<string, string>;
 const theme = {
   background:  t.background   || '',
   accent:      t.accent       || '',
@@ -60,6 +66,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
 ---
 
 <!doctype html>
+{profile ? (
 <html lang="en" style={themeStyle ?? ''}>
   <head>
     <meta charset="UTF-8" />
@@ -287,6 +294,23 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
     </footer>
   </body>
 </html>
+) : (
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>Profile not found — Grotto Sitters</title>
+  </head>
+  <body style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#faf6ee;font-family:Lato,sans-serif;text-align:center;padding:48px;">
+    <h1 style="font-family:Playfair Display,serif;font-size:2rem;color:#2c1a0e;margin-bottom:12px;">Profile not found</h1>
+    <p style="color:#6b4e35;font-size:1rem;line-height:1.7;margin-bottom:28px;max-width:400px;">We couldn't find a sitter with that URL. They may not have created their profile yet.</p>
+    <a href="/" style="background:#c8963e;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.9rem;">Go to Grotto Sitters</a>
+  </body>
+</html>
+)}
 
 <style>
   .hero { min-height: 70vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; padding: 100px 48px 60px; text-align: center; }
