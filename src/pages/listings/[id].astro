@@ -1,0 +1,305 @@
+---
+export const prerender = false;
+
+import '../../styles/global.css';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { supabase } from '../../lib/supabase';
+
+const { id } = Astro.params;
+
+const { data: listing } = await supabase
+  .from('listings')
+  .select('*, profiles!inner(*)')
+  .eq('id', id)
+  .single();
+
+if (!listing || listing.status !== 'active') {
+  return Astro.redirect('/listings');
+}
+
+const profile = listing.profiles as any;
+const pets: any[] = Array.isArray(profile?.pets_json) ? profile.pets_json : [];
+const amenities: string[] = Array.isArray(profile?.amenities_json) ? profile.amenities_json : [];
+const heroImages: any[] = Array.isArray(profile?.hero_images_json) ? profile.hero_images_json : [];
+const gallery: any[] = Array.isArray(profile?.gallery_json) ? profile.gallery_json : [];
+const allPhotos = [...heroImages, ...gallery];
+
+function formatDate(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function daysBetween(from: string, to: string) {
+  const ms = new Date(to + 'T00:00:00').getTime() - new Date(from + 'T00:00:00').getTime();
+  return Math.ceil(ms / 86400000);
+}
+
+const duration = daysBetween(listing.date_from, listing.date_to);
+const contactEmail = profile?.contact_email ?? '';
+const whatsappNumber = profile?.whatsapp_number ?? '';
+
+const SUPABASE_URL = 'https://vutlmqzvakbmosrpicre.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1dGxtcXp2YWtibW9zcnBpY3JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5NTMyNjAsImV4cCI6MjA5ODUyOTI2MH0.tlRIu1ESOsQ_z1MLXVVjeA_IaqRcPeUVs3i09SGDT8c';
+---
+
+<BaseLayout title={`${listing.title} — Grotto Sitters`}>
+  <main class="detail-page">
+    <div class="section-inner">
+      <a href="/listings" class="back-link">&larr; Back to all sits</a>
+
+      <div class="detail-hero">
+        <div class="detail-hero-content">
+          <h1 class="detail-title">{listing.title}</h1>
+          <div class="detail-meta-row">
+            {profile?.profile_pic && (
+              <img src={profile.profile_pic} alt={profile.name} class="detail-avatar" />
+            )}
+            <div>
+              <p class="detail-owner">
+                <a href={`/${profile.slug}`}>{profile.name}</a>
+              </p>
+              {profile?.location && <p class="detail-location">📍 {profile.location}</p>}
+            </div>
+          </div>
+          <div class="detail-dates">
+            <div class="date-badge">
+              <span class="date-label">From</span>
+              <span class="date-value">{formatDate(listing.date_from)}</span>
+            </div>
+            <div class="date-badge">
+              <span class="date-label">To</span>
+              <span class="date-value">{formatDate(listing.date_to)}</span>
+            </div>
+            <div class="duration-badge">{duration} day{duration !== 1 ? 's' : ''}</div>
+          </div>
+        </div>
+      </div>
+
+      {listing.description && (
+        <section class="detail-section">
+          <h2>About this sit</h2>
+          <div class="detail-text">{listing.description.split('\n\n').map((p: string) => <p>{p}</p>)}</div>
+        </section>
+      )}
+
+      {pets.length > 0 && (
+        <section class="detail-section">
+          <h2>Meet the pets</h2>
+          <div class="pets-grid">
+            {pets.map((pet: any) => (
+              <div class="pet-card">
+                {pet.photo_url && <img src={pet.photo_url} alt={pet.name} class="pet-photo" />}
+                <div class="pet-info">
+                  <h3>{pet.name}</h3>
+                  <p class="pet-meta">{pet.type}{pet.breed ? ` · ${pet.breed}` : ''}{pet.age ? ` · ${pet.age}` : ''}</p>
+                  {pet.temperament && <p class="pet-detail">{pet.temperament}</p>}
+                  {pet.special_needs && <p class="pet-needs">⚠ {pet.special_needs}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {amenities.length > 0 && (
+        <section class="detail-section">
+          <h2>Home amenities</h2>
+          <div class="amenities-row">
+            {amenities.map((a: string) => <span class="amenity-tag">{a}</span>)}
+          </div>
+        </section>
+      )}
+
+      {profile?.looking_for && (
+        <section class="detail-section">
+          <h2>What they're looking for</h2>
+          <div class="detail-text">{profile.looking_for.split('\n\n').map((p: string) => <p>{p}</p>)}</div>
+        </section>
+      )}
+
+      {allPhotos.length > 0 && (
+        <section class="detail-section">
+          <h2>Photos</h2>
+          <div class="photo-grid">
+            {allPhotos.map((img: any) => (
+              <img src={img.src} alt={img.alt ?? ''} class="photo-thumb" />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {profile?.bio && (
+        <section class="detail-section">
+          <h2>About the home</h2>
+          <div class="detail-text">{profile.bio.split('\n\n').map((p: string) => <p>{p}</p>)}</div>
+        </section>
+      )}
+
+      <section class="detail-section enquiry-section" id="enquiry">
+        <h2>Interested? Get in touch</h2>
+        <p class="enquiry-intro">Send a message to {profile.name} about this sit.</p>
+
+        <form class="enquiry-form" id="enquiryForm">
+          <input type="hidden" name="profileId" value={profile.id} />
+          <div class="form-grid">
+            <div class="field">
+              <label for="eq_name">Your name <span class="req">*</span></label>
+              <input type="text" id="eq_name" name="name" required />
+            </div>
+            <div class="field">
+              <label for="eq_email">Your email <span class="req">*</span></label>
+              <input type="email" id="eq_email" name="email" required />
+            </div>
+            <div class="field span-2">
+              <label for="eq_message">Message <span class="req">*</span></label>
+              <textarea id="eq_message" name="message" rows="5" required placeholder="Tell them about your experience, availability, and why you'd be a great fit for this sit."></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn-primary">Send message</button>
+          <p class="form-status" id="formStatus"></p>
+        </form>
+
+        {whatsappNumber && (
+          <div class="alt-contact">
+            <span>or</span>
+            <a href={`https://wa.me/${whatsappNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${profile.name}! I'm interested in your sit listing "${listing.title}" (${formatDate(listing.date_from)} – ${formatDate(listing.date_to)}). I'd love to chat about it!`)}`} target="_blank" rel="noopener noreferrer" class="whatsapp-btn">
+              Message on WhatsApp
+            </a>
+          </div>
+        )}
+      </section>
+    </div>
+  </main>
+
+  <script define:vars={{ contactEmail, SUPABASE_URL, SUPABASE_KEY, profileId: profile.id }}>
+    document.getElementById('enquiryForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const status = document.getElementById('formStatus');
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      status.textContent = '';
+      status.className = 'form-status';
+
+      const body = new FormData(form);
+
+      try {
+        const res = await fetch('/api/enquiry', { method: 'POST', body });
+        if (res.ok) {
+          status.textContent = 'Message sent! They\'ll be in touch soon.';
+          status.classList.add('success');
+          form.reset();
+        } else {
+          throw new Error();
+        }
+      } catch {
+        status.textContent = 'Could not send — please try again or use the WhatsApp link.';
+        status.classList.add('error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send message';
+      }
+    });
+  </script>
+
+  <style>
+    .detail-page { padding: 40px 48px 100px; }
+    .back-link {
+      display: inline-block; margin-bottom: 32px; font-size: 0.85rem; color: var(--gold);
+      font-weight: 700; text-decoration: none; letter-spacing: 0.04em;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .detail-hero {
+      background: #fff; border-radius: 16px; padding: 40px;
+      box-shadow: 0 4px 32px rgba(44,26,14,0.08); margin-bottom: 32px;
+    }
+    .detail-title { font-family: "Playfair Display", serif; font-size: 2rem; color: var(--brown-dark); margin-bottom: 20px; }
+    .detail-meta-row { display: flex; gap: 16px; align-items: center; margin-bottom: 24px; }
+    .detail-avatar { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+    .detail-owner a { font-size: 1rem; color: var(--gold); font-weight: 700; text-decoration: none; }
+    .detail-owner a:hover { text-decoration: underline; }
+    .detail-location { font-size: 0.85rem; color: var(--text-soft); margin-top: 2px; }
+
+    .detail-dates { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+    .date-badge {
+      background: var(--cream); border-radius: 10px; padding: 14px 20px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .date-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-soft); }
+    .date-value { font-size: 0.95rem; font-weight: 600; color: var(--brown-dark); }
+    .duration-badge {
+      background: rgba(200,150,62,0.12); color: var(--gold); font-weight: 700;
+      padding: 10px 20px; border-radius: 24px; font-size: 0.9rem;
+    }
+
+    .detail-section {
+      background: #fff; border-radius: 12px; padding: 36px;
+      box-shadow: 0 2px 16px rgba(44,26,14,0.06); margin-bottom: 24px;
+    }
+    .detail-section h2 { font-family: "Playfair Display", serif; font-size: 1.4rem; color: var(--brown-dark); margin-bottom: 20px; }
+    .detail-text p { font-size: 0.95rem; color: var(--text); line-height: 1.8; margin-bottom: 12px; }
+
+    .pets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .pet-card {
+      display: flex; gap: 16px; align-items: flex-start; background: var(--cream);
+      border-radius: 12px; padding: 20px;
+    }
+    .pet-photo { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+    .pet-info h3 { font-family: "Playfair Display", serif; font-size: 1.1rem; color: var(--brown-dark); margin-bottom: 4px; }
+    .pet-meta { font-size: 0.82rem; color: var(--gold); font-weight: 600; margin-bottom: 6px; }
+    .pet-detail { font-size: 0.85rem; color: var(--text-soft); line-height: 1.5; }
+    .pet-needs { font-size: 0.82rem; color: #b45309; line-height: 1.5; margin-top: 4px; }
+
+    .amenities-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .amenity-tag {
+      background: rgba(200,150,62,0.08); color: var(--brown-mid); border: 1px solid rgba(200,150,62,0.2);
+      padding: 8px 16px; border-radius: 24px; font-size: 0.85rem; font-weight: 500;
+    }
+
+    .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+    .photo-thumb { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; }
+
+    .enquiry-section { border: 2px solid rgba(200,150,62,0.2); }
+    .enquiry-intro { font-size: 0.95rem; color: var(--text-soft); margin-bottom: 24px; line-height: 1.6; }
+    .enquiry-form { display: flex; flex-direction: column; gap: 16px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .span-2 { grid-column: 1 / -1; }
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: var(--brown-mid); text-transform: uppercase; }
+    .req { color: var(--gold); }
+    .field input, .field textarea {
+      border: 1.5px solid rgba(44,26,14,0.2); border-radius: 6px; padding: 10px 14px;
+      font-size: 0.95rem; font-family: "Lato", sans-serif; color: var(--text);
+      background: var(--cream); outline: none; transition: border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--gold); }
+    .field textarea { resize: vertical; }
+
+    .form-status { font-size: 0.88rem; min-height: 1.4em; }
+    .form-status.success { color: #166534; }
+    .form-status.error { color: #b91c1c; }
+
+    .alt-contact {
+      display: flex; align-items: center; gap: 16px; margin-top: 20px;
+      padding-top: 20px; border-top: 1px solid rgba(44,26,14,0.08);
+    }
+    .alt-contact span { font-size: 0.85rem; color: var(--text-soft); }
+    .whatsapp-btn {
+      background: #25D366; color: #fff; text-decoration: none; padding: 10px 24px;
+      border-radius: 8px; font-size: 0.88rem; font-weight: 700;
+    }
+    .whatsapp-btn:hover { background: #1da851; }
+
+    @media (max-width: 768px) {
+      .detail-page { padding: 24px 16px 80px; }
+      .detail-hero { padding: 28px 24px; }
+      .detail-title { font-size: 1.5rem; }
+      .detail-section { padding: 28px 24px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .span-2 { grid-column: 1; }
+      .pets-grid { grid-template-columns: 1fr; }
+      .photo-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</BaseLayout>

@@ -35,7 +35,7 @@ const errorMsg = errorMap[error ?? ''] ?? '';
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Create listing — Grotto Sitters</title>
+    <title>Create profile — Grotto Sitters</title>
   </head>
   <body>
     <nav>
@@ -45,9 +45,9 @@ const errorMsg = errorMap[error ?? ''] ?? '';
     <main class="create-wrap">
       <div class="create-card">
         <p class="section-label">Owner Portal</p>
-        <h1 class="section-title">Create your listing</h1>
+        <h1 class="section-title">Create your profile</h1>
         <div class="divider"></div>
-        <p class="create-intro">Set up your home and pet profile so trusted sitters can find you.</p>
+        <p class="create-intro">Set up your profile — you'll add your home details, pets, and sit listings next.</p>
 
         {errorMsg && <p class="create-error">{errorMsg}</p>}
 
@@ -55,11 +55,11 @@ const errorMsg = errorMap[error ?? ''] ?? '';
           <div class="field">
             <label for="name">Your name <span class="req">*</span></label>
             <input type="text" id="name" name="name" placeholder="e.g. Sarah & James" required autocomplete="name" />
-            <p class="field-hint">How you'll appear on your listing.</p>
+            <p class="field-hint">How you'll appear on your profile.</p>
           </div>
 
           <div class="field">
-            <label for="slug">Your listing URL <span class="req">*</span></label>
+            <label for="slug">Your profile URL <span class="req">*</span></label>
             <div class="slug-wrap">
               <span class="slug-prefix">grottositters.com/</span>
               <input type="text" id="slug" name="slug" placeholder="yourname" required pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$" />
@@ -83,7 +83,7 @@ const errorMsg = errorMap[error ?? ''] ?? '';
             <textarea id="bio" name="bio" rows="5" placeholder="Tell sitters about your home, neighbourhood, and what makes it a great place to stay."></textarea>
           </div>
 
-          <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Create listing</button>
+          <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Create profile</button>
         </form>
       </div>
     </main>
