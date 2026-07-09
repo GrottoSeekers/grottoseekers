@@ -33,9 +33,23 @@ const reviews       = (profile?.reviews_json       ?? []) as Review[];
 const platforms     = (profile?.platforms_json     ?? []) as Platform[];
 const bioParagraphs = ((profile?.bio as string) ?? '').split('\n\n').filter(Boolean);
 
+const isOwner = profile?.profile_type === 'owner';
 const isSolo = (profile?.account_type ?? 'solo') === 'solo';
+const pets: any[] = (profile?.pets_json ?? []) as any[];
+const amenities: string[] = (profile?.amenities_json ?? []) as string[];
 const h = (profile?.headings_json ?? {}) as Record<string, string>;
-const heading = {
+const heading = isOwner ? {
+  aboutLabel:     h.about_label     || 'About Our Home',
+  aboutTitle:     h.about_title     || 'A great place to stay — for you and the pets.',
+  reviewsLabel:   h.reviews_label   || 'What Sitters Say',
+  reviewsTitle:   h.reviews_title   || '',
+  galleryLabel:   h.gallery_label   || 'Meet the Pets',
+  galleryTitle:   h.gallery_title   || 'Our Pets',
+  platformsLabel: h.platforms_label || 'Our Home',
+  platformsTitle: h.platforms_title || 'Gallery',
+  enquiryLabel:   h.enquiry_label   || 'Get In Touch',
+  enquiryTitle:   h.enquiry_title   || (profile ? `Contact ${profile.name}` : ''),
+} : {
   aboutLabel:     h.about_label     || (isSolo ? 'Who I Am' : 'Who We Are'),
   aboutTitle:     h.about_title     || 'A home away from home — for you and your pets.',
   reviewsLabel:   h.reviews_label   || 'What Pet Owners Say',
@@ -72,7 +86,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content={`${profile.name} — trusted house & pet sitters.`} />
+    <meta name="description" content={isOwner ? `${profile.name} — looking for a trusted pet sitter.` : `${profile.name} — trusted house & pet sitters.`} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
@@ -86,11 +100,12 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
       </button>
       <ul>
         <li class="nav-panel-brand"><a href="/">Grotto <span>Sitters</span></a></li>
-        <li><a href="#about">About</a></li>
+        <li><a href="#about">{isOwner ? 'Home' : 'About'}</a></li>
+        {isOwner && pets.length > 0 && <li><a href="#pets">Pets</a></li>}
         {reviews.length > 0 && <li><a href="#reviews">Reviews</a></li>}
         {gallery.length > 0 && <li><a href="#gallery">Gallery</a></li>}
-        {platforms.length > 0 && <li><a href="#profiles">Profiles</a></li>}
-        <li><a href="#enquiry">{isSolo ? 'Book Me' : 'Book Us'}</a></li>
+        {!isOwner && platforms.length > 0 && <li><a href="#profiles">Profiles</a></li>}
+        <li><a href="#enquiry">{isOwner ? 'Contact' : (isSolo ? 'Book Me' : 'Book Us')}</a></li>
       </ul>
     </nav>
     <div class="nav-overlay" id="navOverlay"></div>
@@ -105,11 +120,12 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
       </div>
       <div class="hero-overlay"></div>
       <div class="hero-content">
+        {isOwner && profile.location && !profile.badge_text && <p class="hero-badge">📍 {profile.location}</p>}
         {profile.badge_text && <p class="hero-badge">{profile.badge_text}</p>}
         <h1>Grotto<br /><em>Sitters</em></h1>
         <p class="hero-names">{profile.name}</p>
         {profile.tagline && <p class="hero-tagline">{profile.tagline}</p>}
-        <a href="#enquiry" class="btn-primary">{isSolo ? 'Book Me Today' : 'Book Us Today'}</a>
+        <a href="#enquiry" class="btn-primary">{isOwner ? 'Get In Touch' : (isSolo ? 'Book Me Today' : 'Book Us Today')}</a>
       </div>
     </section>
 
@@ -219,13 +235,64 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
     </section>
     )}
 
+    {isOwner && pets.length > 0 && (
+    <section id="pets" class="pets-section">
+      <div class="section-inner">
+        <p class="section-label">{heading.galleryLabel}</p>
+        <h2 class="section-title">{heading.galleryTitle}</h2>
+        <div class="divider"></div>
+        <div class="pets-grid">
+          {pets.map((pet: any) => (
+            <div class="pet-public-card">
+              {pet.photo_url && <img src={pet.photo_url} alt={pet.name} class="pet-public-photo" loading="lazy" />}
+              <div class="pet-public-info">
+                <h3>{pet.name}</h3>
+                <p class="pet-public-meta">{pet.type}{pet.breed ? ` · ${pet.breed}` : ''}{pet.age ? ` · ${pet.age}` : ''}</p>
+                {pet.temperament && <p class="pet-public-trait">{pet.temperament}</p>}
+                {pet.special_needs && <p class="pet-public-needs">{pet.special_needs}</p>}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+    )}
+
+    {isOwner && amenities.length > 0 && (
+    <section id="amenities" class="amenities-section">
+      <div class="section-inner">
+        <p class="section-label">Home Amenities</p>
+        <h2 class="section-title">What's included</h2>
+        <div class="divider"></div>
+        <div class="amenities-public-grid">
+          {amenities.map((a: string) => (
+            <span class="amenity-tag">✓ {a}</span>
+          ))}
+        </div>
+      </div>
+    </section>
+    )}
+
+    {isOwner && profile.looking_for && (
+    <section id="looking-for" class="looking-for-section">
+      <div class="section-inner">
+        <p class="section-label">What We're Looking For</p>
+        <h2 class="section-title">The ideal sitter</h2>
+        <div class="divider"></div>
+        <div class="looking-for-text">
+          {profile.looking_for.split('\n\n').filter(Boolean).map((para: string) => <p>{para}</p>)}
+        </div>
+      </div>
+    </section>
+    )}
+
     <section id="enquiry" class="enquiry-section">
       <div class="section-inner enquiry-inner">
         <div class="enquiry-text">
           <p class="section-label">{heading.enquiryLabel}</p>
           <h2 class="section-title">{heading.enquiryTitle}</h2>
           <div class="divider"></div>
-          <p>{isSolo ? 'Tell me about your home, your pets, and your dates and I\'ll get back to you within 24 hours.' : 'Tell us about your home, your pets, and your dates and we\'ll get back to you within 24 hours.'}</p>
+          <p>{isOwner ? 'Tell us about your experience, availability, and why you\'d be a great fit for our home and pets.' : (isSolo ? 'Tell me about your home, your pets, and your dates and I\'ll get back to you within 24 hours.' : 'Tell us about your home, your pets, and your dates and we\'ll get back to you within 24 hours.')}</p>
           {profile.whatsapp_number && (
             <a href={`https://wa.me/${profile.whatsapp_number.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${profile.name}! I found you on Grotto Sitters and I'm interested in your pet sitting services.`)}`} target="_blank" rel="noopener" class="whatsapp-btn">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -259,7 +326,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
             </div>
           </div>
           <div class="form-group">
-            <label for="message">{isSolo ? 'Tell me about your pets & home' : 'Tell us about your pets & home'}</label>
+            <label for="message">{isOwner ? 'Tell us about your experience' : (isSolo ? 'Tell me about your pets & home' : 'Tell us about your pets & home')}</label>
             <textarea id="message" name="message" rows="4" placeholder="Breed, age, any special needs..."></textarea>
           </div>
           <button type="submit" class="btn-primary" id="sendEnquiryBtn" style="width:100%">Send Enquiry</button>
@@ -273,7 +340,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
         <div class="footer-top">
           <div class="footer-brand">
             <h2>Grotto <span>Sitters</span></h2>
-            <p>{profile.name} — experienced house and pet {isSolo ? 'sitter' : 'sitters'}.</p>
+            <p>{isOwner ? `${profile.name} — looking for a trusted pet sitter.` : `${profile.name} — experienced house and pet ${isSolo ? 'sitter' : 'sitters'}.`}</p>
           </div>
           <div class="footer-links">
             <h4>Quick Links</h4>
@@ -314,7 +381,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
   </head>
   <body style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#faf6ee;font-family:Lato,sans-serif;text-align:center;padding:48px;">
     <h1 style="font-family:Playfair Display,serif;font-size:2rem;color:#2c1a0e;margin-bottom:12px;">Profile not found</h1>
-    <p style="color:#6b4e35;font-size:1rem;line-height:1.7;margin-bottom:28px;max-width:400px;">We couldn't find a sitter with that URL. They may not have created their profile yet.</p>
+    <p style="color:#6b4e35;font-size:1rem;line-height:1.7;margin-bottom:28px;max-width:400px;">We couldn't find a profile with that URL. It may not have been created yet.</p>
     <a href="/" style="background:#c8963e;color:#fff;padding:12px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:0.9rem;">Go to Grotto Sitters</a>
   </body>
 </html>
@@ -412,13 +479,41 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
   .enquiry-success { color: #166534; font-weight: 600; }
   .enquiry-error { color: #b91c1c; font-weight: 600; }
 
+  .pets-section { padding: 80px 48px; background: var(--warm-white); }
+  .pets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+  .pet-public-card {
+    background: var(--cream); border: 1px solid rgba(200,150,62,0.12); border-radius: 12px;
+    overflow: hidden; transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .pet-public-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(44,26,14,0.08); }
+  .pet-public-photo { width: 100%; height: 200px; object-fit: cover; display: block; }
+  .pet-public-info { padding: 20px; }
+  .pet-public-info h3 { font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark); margin-bottom: 6px; }
+  .pet-public-meta { font-size: 0.85rem; color: var(--gold); font-weight: 600; margin-bottom: 10px; }
+  .pet-public-trait { font-size: 0.88rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 6px; }
+  .pet-public-needs { font-size: 0.85rem; color: var(--text-soft); line-height: 1.6; font-style: italic; }
+
+  .amenities-section { padding: 80px 48px; background: var(--cream); }
+  .amenities-public-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+  .amenity-tag {
+    display: inline-block; padding: 10px 18px; background: var(--warm-white);
+    border: 1px solid rgba(200,150,62,0.15); border-radius: 8px;
+    font-size: 0.88rem; color: var(--text); font-weight: 500;
+  }
+
+  .looking-for-section { padding: 80px 48px; background: var(--warm-white); }
+  .looking-for-text { max-width: 680px; }
+  .looking-for-text p { color: var(--text-soft); line-height: 1.8; font-size: 0.95rem; margin-bottom: 16px; }
+
   @media (max-width: 768px) {
     .hero { padding: 100px 24px 60px; }
     .hero-content h1 { font-size: 3.2rem; }
-    .about-section, .reviews-section, .gallery-section, .platforms-section, .enquiry-section { padding: 60px 24px; }
+    .about-section, .reviews-section, .gallery-section, .platforms-section, .enquiry-section,
+    .pets-section, .amenities-section, .looking-for-section { padding: 60px 24px; }
     .about-grid { grid-template-columns: 1fr; gap: 40px; }
     .review-card { min-width: 280px; max-width: 280px; }
     .gallery-grid { grid-template-columns: repeat(2, 1fr); }
+    .pets-grid { grid-template-columns: 1fr; }
     .profiles-grid, .enquiry-inner { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
   }

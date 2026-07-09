@@ -6,19 +6,20 @@
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ── USERS ────────────────────────────────────────────────────────────────────
--- Stores login credentials for sitters.
+-- Stores login credentials for sitters and owners.
 -- IMPORTANT: Always bcrypt-hash passwords before inserting. Never store
 -- plaintext. Use bcrypt cost factor ≥ 12.
 CREATE TABLE IF NOT EXISTS users (
   id         UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   email      TEXT        UNIQUE NOT NULL,
   password   TEXT        NOT NULL,          -- bcrypt hash only
+  role       TEXT        NOT NULL DEFAULT 'sitter',  -- 'sitter' or 'owner'
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- ── PROFILES ─────────────────────────────────────────────────────────────────
--- One profile per sitter (or sitter pair).
--- Each profile maps to a public page at /profile/[slug].
+-- One profile per user (sitter or owner).
+-- Each profile maps to a public page at /[slug].
 CREATE TABLE IF NOT EXISTS profiles (
   id                UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id           UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -44,6 +45,13 @@ CREATE TABLE IF NOT EXISTS profiles (
   platforms_json    JSONB NOT NULL DEFAULT '[]',   -- [{name, url, emoji, description}]
   review_requests_json JSONB NOT NULL DEFAULT '[]', -- [{token, created_at, status, reviewer_name?}]
   account_type      TEXT  NOT NULL DEFAULT 'solo',  -- 'solo' or 'joint'
+  profile_type      TEXT  NOT NULL DEFAULT 'sitter', -- 'sitter' or 'owner'
+  location          TEXT,                           -- city/area for owner listings
+  pets_json         JSONB NOT NULL DEFAULT '[]',   -- [{name, type, breed, age, temperament, special_needs, photo_url}]
+  amenities_json    JSONB NOT NULL DEFAULT '[]',   -- ["WiFi", "Parking", ...]
+  looking_for       TEXT,                           -- what owner wants in a sitter
+  contact_email     TEXT,                           -- where enquiries go
+  whatsapp_number   TEXT,                           -- optional WhatsApp
   headings_json     JSONB NOT NULL DEFAULT '{}',   -- {about_label, about_title, reviews_label, ...}
   theme_json        JSONB NOT NULL DEFAULT '{}',   -- {background, accent, accent_light, text, text_soft}
 

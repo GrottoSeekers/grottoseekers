@@ -1,0 +1,510 @@
+---
+export const prerender = false;
+
+import '../../styles/global.css';
+import { getSession } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('user_id', session.userId)
+  .single();
+
+if (!profile) return Astro.redirect('/owner/create');
+
+const heroImages: any[] = Array.isArray(profile.hero_images_json) ? profile.hero_images_json : [];
+const aboutImages: any[] = Array.isArray(profile.about_images_json) ? profile.about_images_json : [];
+const gallery: any[] = Array.isArray(profile.gallery_json) ? profile.gallery_json : [];
+const pets: any[] = Array.isArray(profile.pets_json) ? profile.pets_json : [];
+const amenities: string[] = Array.isArray(profile.amenities_json) ? profile.amenities_json : [];
+const h = (profile.headings_json ?? {}) as Record<string, string>;
+const t = (profile.theme_json ?? {}) as Record<string, string>;
+
+const saved = Astro.url.searchParams.get('saved');
+const errorKey = Astro.url.searchParams.get('error') ?? '';
+const detail = Astro.url.searchParams.get('detail');
+const errorMap: Record<string, string> = {
+  missing: 'Please fill in the required fields.',
+  file_too_large: 'Image must be under 5 MB.',
+  upload: `Upload error: ${detail ?? 'unknown'}`,
+  server: 'Something went wrong. Please try again.',
+};
+const errorMsg = errorMap[errorKey] ?? '';
+const savedMsg = saved ? 'Changes saved!' : '';
+
+const allAmenities = [
+  'WiFi', 'Parking', 'Garden', 'Pool', 'Gym', 'Air Conditioning',
+  'Heating', 'Washer/Dryer', 'Dishwasher', 'TV/Streaming',
+  'Workspace', 'Near Public Transport', 'Near Shops',
+  'Rural/Countryside', 'Beach Nearby', 'Pet-Friendly Area',
+];
+
+const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'Other'];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>Edit listing — Grotto Sitters</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
+      <div class="nav-right">
+        <a href="/owner/dashboard" class="nav-back">← Dashboard</a>
+        <a href="/api/auth/logout" class="nav-logout">Log out</a>
+      </div>
+    </nav>
+
+    <main class="edit-wrap">
+      <div class="section-inner">
+        <header class="edit-header">
+          <div>
+            <p class="section-label">Owner Portal</p>
+            <h1 class="section-title">Edit your listing</h1>
+            <div class="divider"></div>
+          </div>
+          <a href={`/${profile.slug}`} target="_blank" class="btn-view">View public page →</a>
+        </header>
+
+        {errorMsg && <p class="toast toast-error">{errorMsg}</p>}
+        {savedMsg && <p class="toast toast-success">{savedMsg}</p>}
+
+        <div class="section-nav">
+          <a href="#details">Details</a>
+          <a href="#home">Home Photos</a>
+          <a href="#pets">Pets</a>
+          <a href="#amenities">Amenities</a>
+          <a href="#gallery">Gallery</a>
+          <a href="#looking-for">Looking For</a>
+          <a href="#headings">Headings</a>
+        </div>
+
+        <!-- ─── DETAILS ──────────────────────────────────── -->
+        <section id="details" class="edit-section">
+          <h2 class="edit-section-title">Details</h2>
+          <form method="POST" action="/api/owner/update" enctype="multipart/form-data" class="edit-form">
+            <div class="form-grid">
+              <div class="field span-2">
+                <label for="name">Your name <span class="req">*</span></label>
+                <input type="text" id="name" name="name" value={profile.name} required />
+              </div>
+              <div class="field">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value={profile.location ?? ''} placeholder="e.g. Sydney, NSW" />
+              </div>
+              <div class="field">
+                <label for="tagline">Tagline</label>
+                <input type="text" id="tagline" name="tagline" value={profile.tagline ?? ''} placeholder="e.g. Cosy home with two friendly dogs" />
+              </div>
+              <div class="field">
+                <label for="badge_text">Badge text</label>
+                <input type="text" id="badge_text" name="badge_text" value={profile.badge_text ?? ''} placeholder="e.g. Available December 2026" />
+              </div>
+              <div class="field">
+                <label for="profile_pic">Profile photo</label>
+                <input type="file" id="profile_pic" name="profile_pic" accept="image/*" />
+              </div>
+              <div class="field span-2">
+                <label for="bio">About your home</label>
+                <textarea id="bio" name="bio" rows="6" placeholder="Tell sitters about your home, neighbourhood, and what makes it a great place to stay.">{profile.bio ?? ''}</textarea>
+              </div>
+
+              <div class="field span-2">
+                <div class="contact-divider"><span>Where enquiries go</span></div>
+              </div>
+              <div class="field">
+                <label for="contact_email">Enquiry email <span class="req">*</span></label>
+                <input type="email" id="contact_email" name="contact_email" value={profile.contact_email ?? ''} placeholder="e.g. hello@example.com" required />
+              </div>
+              <div class="field">
+                <label for="whatsapp_number">WhatsApp number</label>
+                <input type="tel" id="whatsapp_number" name="whatsapp_number" value={profile.whatsapp_number ?? ''} placeholder="e.g. +447700900000" />
+              </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Save changes</button>
+          </form>
+        </section>
+
+        <!-- ─── HOME PHOTOS ──────────────────────────────── -->
+        <section id="home" class="edit-section">
+          <h2 class="edit-section-title">Home Photos</h2>
+
+          <h3 class="edit-sub-title">Main photos (hero banner)</h3>
+          <div class="image-grid">
+            {heroImages.map((img: any, i: number) => (
+              <div class="image-thumb">
+                <img src={img.src} alt="" />
+                <form method="POST" action="/api/owner/images">
+                  <input type="hidden" name="_action" value="delete" />
+                  <input type="hidden" name="category" value="hero" />
+                  <input type="hidden" name="index" value={String(i)} />
+                  <button type="submit" class="thumb-delete">×</button>
+                </form>
+              </div>
+            ))}
+          </div>
+          <form method="POST" action="/api/owner/images" enctype="multipart/form-data" class="upload-row">
+            <input type="hidden" name="_action" value="upload" />
+            <input type="hidden" name="category" value="hero" />
+            <input type="file" name="file" accept="image/*" required />
+            <select name="pos">
+              <option value="center">Centre</option>
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+            </select>
+            <button type="submit" class="btn-primary btn-sm">Upload</button>
+          </form>
+
+          <h3 class="edit-sub-title" style="margin-top:32px;">Interior / lifestyle photos</h3>
+          <div class="image-grid">
+            {aboutImages.map((img: any, i: number) => (
+              <div class="image-thumb">
+                <img src={img.src} alt="" />
+                <form method="POST" action="/api/owner/images">
+                  <input type="hidden" name="_action" value="delete" />
+                  <input type="hidden" name="category" value="about" />
+                  <input type="hidden" name="index" value={String(i)} />
+                  <button type="submit" class="thumb-delete">×</button>
+                </form>
+              </div>
+            ))}
+          </div>
+          <form method="POST" action="/api/owner/images" enctype="multipart/form-data" class="upload-row">
+            <input type="hidden" name="_action" value="upload" />
+            <input type="hidden" name="category" value="about" />
+            <input type="file" name="file" accept="image/*" required />
+            <input type="text" name="alt" placeholder="Describe the photo" />
+            <button type="submit" class="btn-primary btn-sm">Upload</button>
+          </form>
+        </section>
+
+        <!-- ─── PETS ─────────────────────────────────────── -->
+        <section id="pets" class="edit-section">
+          <h2 class="edit-section-title">Your Pets</h2>
+
+          {pets.length > 0 && (
+            <div class="pet-list">
+              {pets.map((pet: any, i: number) => (
+                <div class="pet-card">
+                  {pet.photo_url && <img src={pet.photo_url} alt={pet.name} class="pet-card-photo" />}
+                  <div class="pet-card-info">
+                    <h3>{pet.name}</h3>
+                    <p class="pet-meta">{pet.type}{pet.breed ? ` · ${pet.breed}` : ''}{pet.age ? ` · ${pet.age}` : ''}</p>
+                    {pet.temperament && <p class="pet-detail">Temperament: {pet.temperament}</p>}
+                    {pet.special_needs && <p class="pet-detail">Special needs: {pet.special_needs}</p>}
+                  </div>
+                  <form method="POST" action="/api/owner/pets">
+                    <input type="hidden" name="_action" value="delete" />
+                    <input type="hidden" name="index" value={String(i)} />
+                    <button type="submit" class="thumb-delete pet-delete">×</button>
+                  </form>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <details class="add-pet-toggle">
+            <summary class="btn-outline">+ Add a pet</summary>
+            <form method="POST" action="/api/owner/pets" enctype="multipart/form-data" class="edit-form" style="margin-top:16px;">
+              <input type="hidden" name="_action" value="add" />
+              <div class="form-grid">
+                <div class="field">
+                  <label for="pet_name">Pet name <span class="req">*</span></label>
+                  <input type="text" id="pet_name" name="pet_name" placeholder="e.g. Buddy" required />
+                </div>
+                <div class="field">
+                  <label for="pet_type">Type <span class="req">*</span></label>
+                  <select id="pet_type" name="pet_type" required>
+                    <option value="">Select...</option>
+                    {petTypes.map(t => <option value={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="pet_breed">Breed</label>
+                  <input type="text" id="pet_breed" name="pet_breed" placeholder="e.g. Golden Retriever" />
+                </div>
+                <div class="field">
+                  <label for="pet_age">Age</label>
+                  <input type="text" id="pet_age" name="pet_age" placeholder="e.g. 3 years" />
+                </div>
+                <div class="field span-2">
+                  <label for="pet_temperament">Temperament</label>
+                  <input type="text" id="pet_temperament" name="pet_temperament" placeholder="e.g. Friendly, loves walks, great with strangers" />
+                </div>
+                <div class="field span-2">
+                  <label for="pet_special_needs">Special needs</label>
+                  <textarea id="pet_special_needs" name="pet_special_needs" rows="3" placeholder="e.g. Needs medication twice daily, afraid of thunderstorms"></textarea>
+                </div>
+                <div class="field span-2">
+                  <label for="pet_photo">Photo</label>
+                  <input type="file" id="pet_photo" name="pet_photo" accept="image/*" />
+                </div>
+              </div>
+              <button type="submit" class="btn-primary">Add pet</button>
+            </form>
+          </details>
+        </section>
+
+        <!-- ─── AMENITIES ────────────────────────────────── -->
+        <section id="amenities" class="edit-section">
+          <h2 class="edit-section-title">Amenities</h2>
+          <p class="section-hint">Select what your home offers. This helps sitters know what to expect.</p>
+          <form method="POST" action="/api/owner/update" class="edit-form">
+            <input type="hidden" name="name" value={profile.name} />
+            <div class="amenities-grid">
+              {allAmenities.map(a => (
+                <label class="amenity-check">
+                  <input type="checkbox" name="amenities" value={a} checked={amenities.includes(a)} />
+                  <span>{a}</span>
+                </label>
+              ))}
+            </div>
+            <button type="submit" class="btn-primary">Save amenities</button>
+          </form>
+        </section>
+
+        <!-- ─── GALLERY ──────────────────────────────────── -->
+        <section id="gallery" class="edit-section">
+          <h2 class="edit-section-title">Gallery</h2>
+          <p class="section-hint">Additional photos of your home, garden, neighbourhood, or pets.</p>
+          <div class="image-grid">
+            {gallery.map((img: any, i: number) => (
+              <div class="image-thumb">
+                <img src={img.src} alt={img.alt} />
+                <form method="POST" action="/api/owner/images">
+                  <input type="hidden" name="_action" value="delete" />
+                  <input type="hidden" name="category" value="gallery" />
+                  <input type="hidden" name="index" value={String(i)} />
+                  <button type="submit" class="thumb-delete">×</button>
+                </form>
+              </div>
+            ))}
+          </div>
+          <form method="POST" action="/api/owner/images" enctype="multipart/form-data" class="upload-row">
+            <input type="hidden" name="_action" value="upload" />
+            <input type="hidden" name="category" value="gallery" />
+            <input type="file" name="file" accept="image/*" required />
+            <input type="text" name="alt" placeholder="Describe the photo" />
+            <button type="submit" class="btn-primary btn-sm">Upload</button>
+          </form>
+        </section>
+
+        <!-- ─── LOOKING FOR ──────────────────────────────── -->
+        <section id="looking-for" class="edit-section">
+          <h2 class="edit-section-title">What you're looking for</h2>
+          <p class="section-hint">Describe the ideal sitter — experience, dates, expectations, house rules.</p>
+          <form method="POST" action="/api/owner/update" class="edit-form">
+            <input type="hidden" name="name" value={profile.name} />
+            <div class="field">
+              <textarea id="looking_for" name="looking_for" rows="6" placeholder="e.g. We're looking for an experienced sitter who's comfortable with large dogs. Must be happy staying in a rural area with limited public transport...">{profile.looking_for ?? ''}</textarea>
+            </div>
+            <button type="submit" class="btn-primary">Save changes</button>
+          </form>
+        </section>
+
+        <!-- ─── HEADINGS ─────────────────────────────────── -->
+        <section id="headings" class="edit-section">
+          <h2 class="edit-section-title">Section Headings</h2>
+          <p class="section-hint">Customise the labels and titles on your public page.</p>
+          <form method="POST" action="/api/profile/headings" class="edit-form">
+            <div class="form-grid">
+              <div class="field">
+                <label>About label</label>
+                <input type="text" name="about_label" value={h.about_label ?? ''} placeholder="About Our Home" />
+              </div>
+              <div class="field">
+                <label>About title</label>
+                <input type="text" name="about_title" value={h.about_title ?? ''} placeholder="A great place to stay — for you and the pets." />
+              </div>
+              <div class="field">
+                <label>Pets label</label>
+                <input type="text" name="gallery_label" value={h.gallery_label ?? ''} placeholder="Meet the Pets" />
+              </div>
+              <div class="field">
+                <label>Gallery label</label>
+                <input type="text" name="platforms_label" value={h.platforms_label ?? ''} placeholder="Our Home" />
+              </div>
+              <div class="field">
+                <label>Contact label</label>
+                <input type="text" name="enquiry_label" value={h.enquiry_label ?? ''} placeholder="Get In Touch" />
+              </div>
+              <div class="field">
+                <label>Contact title</label>
+                <input type="text" name="enquiry_title" value={h.enquiry_title ?? ''} placeholder={`Contact ${profile.name}`} />
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">Save headings</button>
+          </form>
+        </section>
+
+        <!-- ─── THEME ────────────────────────────────────── -->
+        <section id="theme" class="edit-section">
+          <h2 class="edit-section-title">Theme Colours</h2>
+          <form method="POST" action="/api/profile/theme" class="edit-form">
+            <div class="colour-strip-row">
+              <label class="colour-swatch">
+                <span>Background</span>
+                <input type="color" name="background" value={t.background || '#faf6ee'} class="colour-picker" />
+              </label>
+              <label class="colour-swatch">
+                <span>Accent</span>
+                <input type="color" name="accent" value={t.accent || '#c8963e'} class="colour-picker" />
+              </label>
+              <label class="colour-swatch">
+                <span>Accent Light</span>
+                <input type="color" name="accent_light" value={t.accent_light || '#e8b96a'} class="colour-picker" />
+              </label>
+              <label class="colour-swatch">
+                <span>Text</span>
+                <input type="color" name="text" value={t.text || '#2c1a0e'} class="colour-picker" />
+              </label>
+              <label class="colour-swatch">
+                <span>Text Soft</span>
+                <input type="color" name="text_soft" value={t.text_soft || '#6b4e35'} class="colour-picker" />
+              </label>
+            </div>
+            <button type="submit" class="btn-primary">Save colours</button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <style>
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+      nav {
+        position: static; border-bottom: 1px solid rgba(200,150,62,0.2); padding: 18px 48px;
+        display: flex; justify-content: space-between; align-items: center;
+      }
+      .nav-right { display: flex; align-items: center; gap: 20px; }
+      .nav-back { font-size: 0.85rem; color: var(--text-soft); text-decoration: none; font-weight: 600; }
+      .nav-back:hover { color: var(--gold); }
+      .nav-logout { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); text-decoration: none; }
+
+      .edit-wrap { flex: 1; padding: 60px 48px; }
+      .edit-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
+      .btn-view { font-size: 0.82rem; color: var(--gold); font-weight: 700; text-decoration: none; letter-spacing: 0.04em; margin-top: 6px; }
+      .btn-view:hover { text-decoration: underline; }
+
+      .toast { padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 20px; }
+      .toast-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+      .toast-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+      .section-nav {
+        display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px;
+        border-bottom: 1px solid rgba(44,26,14,0.08); padding-bottom: 16px;
+      }
+      .section-nav a {
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--text-soft); text-decoration: none; padding: 6px 14px;
+        border-radius: 6px; transition: background 0.2s;
+      }
+      .section-nav a:hover { background: rgba(200,150,62,0.08); color: var(--gold); }
+
+      .edit-section {
+        background: #fff; border-radius: 12px; padding: 36px; margin-bottom: 24px;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
+      }
+      .edit-section-title { font-family: "Playfair Display", serif; font-size: 1.3rem; color: var(--brown-dark); margin-bottom: 20px; }
+      .edit-sub-title { font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-soft); margin-bottom: 12px; }
+      .section-hint { font-size: 0.88rem; color: var(--text-soft); margin-bottom: 20px; line-height: 1.6; }
+
+      .edit-form { display: flex; flex-direction: column; gap: 20px; }
+      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      .span-2 { grid-column: 1 / -1; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field label { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.06em; color: var(--brown-mid); text-transform: uppercase; }
+      .req { color: var(--gold); }
+      .field input[type="text"], .field input[type="email"], .field input[type="tel"],
+      .field input[type="file"], .field textarea, .field select {
+        border: 1.5px solid rgba(44,26,14,0.2); border-radius: 6px; padding: 10px 14px;
+        font-size: 0.95rem; font-family: "Lato", sans-serif; color: var(--text);
+        background: var(--cream); outline: none; transition: border-color 0.2s;
+      }
+      .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--gold); }
+      .field textarea { resize: vertical; }
+
+      .contact-divider { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 8px; margin-top: 4px; }
+      .contact-divider span { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-soft); }
+
+      .image-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+      .image-thumb { position: relative; width: 120px; height: 90px; border-radius: 8px; overflow: hidden; }
+      .image-thumb img { width: 100%; height: 100%; object-fit: cover; }
+      .thumb-delete {
+        position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.6); color: #fff;
+        border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 14px;
+        cursor: pointer; display: flex; align-items: center; justify-content: center; line-height: 1;
+      }
+
+      .upload-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+      .upload-row input[type="file"] {
+        border: 1.5px solid rgba(44,26,14,0.2); border-radius: 6px; padding: 8px 12px;
+        font-size: 0.85rem; background: var(--cream);
+      }
+      .upload-row input[type="text"], .upload-row select {
+        border: 1.5px solid rgba(44,26,14,0.2); border-radius: 6px; padding: 8px 12px;
+        font-size: 0.85rem; background: var(--cream); color: var(--text);
+      }
+      .btn-sm { padding: 8px 16px !important; font-size: 0.8rem !important; }
+
+      .pet-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+      .pet-card {
+        display: flex; gap: 16px; align-items: flex-start; padding: 20px;
+        background: var(--cream); border-radius: 10px; position: relative;
+      }
+      .pet-card-photo { width: 80px; height: 80px; border-radius: 10px; object-fit: cover; flex-shrink: 0; }
+      .pet-card-info h3 { font-family: "Playfair Display", serif; font-size: 1.1rem; color: var(--brown-dark); margin-bottom: 4px; }
+      .pet-meta { font-size: 0.85rem; color: var(--gold); font-weight: 600; margin-bottom: 6px; }
+      .pet-detail { font-size: 0.82rem; color: var(--text-soft); line-height: 1.5; }
+      .pet-delete { position: absolute; top: 12px; right: 12px; }
+
+      .btn-outline {
+        display: inline-block; padding: 10px 20px; border: 2px solid var(--gold); border-radius: 8px;
+        font-size: 0.85rem; font-weight: 700; color: var(--gold); background: none; cursor: pointer;
+        letter-spacing: 0.04em; transition: background 0.2s;
+      }
+      .btn-outline:hover { background: rgba(200,150,62,0.08); }
+      .add-pet-toggle { margin-top: 8px; }
+      .add-pet-toggle summary { list-style: none; }
+      .add-pet-toggle summary::-webkit-details-marker { display: none; }
+
+      .amenities-grid {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;
+        margin-bottom: 20px;
+      }
+      .amenity-check {
+        display: flex; align-items: center; gap: 8px; padding: 10px 14px;
+        background: var(--cream); border-radius: 8px; cursor: pointer;
+        font-size: 0.88rem; color: var(--text); transition: background 0.2s;
+      }
+      .amenity-check:has(input:checked) { background: rgba(200,150,62,0.12); }
+      .amenity-check input { accent-color: var(--gold); width: 16px; height: 16px; }
+
+      .colour-strip-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
+      .colour-swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+      .colour-swatch span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-soft); }
+      .colour-picker { width: 48px; height: 32px; border: 2px solid rgba(44,26,14,0.15); border-radius: 6px; padding: 0; cursor: pointer; background: none; }
+
+      @media (max-width: 768px) {
+        nav { padding: 14px 24px; }
+        .edit-wrap { padding: 32px 16px; }
+        .edit-header { flex-direction: column; gap: 8px; }
+        .form-grid { grid-template-columns: 1fr; }
+        .span-2 { grid-column: 1; }
+        .edit-section { padding: 24px 20px; }
+        .upload-row { flex-direction: column; align-items: stretch; }
+        .amenities-grid { grid-template-columns: 1fr 1fr; }
+      }
+    </style>
+  </body>
+</html>

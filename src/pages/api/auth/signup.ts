@@ -11,6 +11,7 @@ export const POST: APIRoute = async ({ request }) => {
     const email = (form.get('email') as string ?? '').trim().toLowerCase();
     const password = (form.get('password') as string) ?? '';
     const confirm = (form.get('confirm') as string) ?? '';
+    const role = form.get('role') === 'owner' ? 'owner' : 'sitter';
 
     if (!email || !password) {
       return new Response(null, { status: 302, headers: { Location: '/signup?error=missing' } });
@@ -39,15 +40,15 @@ export const POST: APIRoute = async ({ request }) => {
     const hash = await bcrypt.hash(password, 12);
     const { data: newUser, error } = await supabase
       .from('users')
-      .insert({ email, password: hash })
-      .select('id, email')
+      .insert({ email, password: hash, role })
+      .select('id, email, role')
       .single();
 
     if (error || !newUser) {
       return new Response(null, { status: 302, headers: { Location: `/signup?error=db&detail=${encodeURIComponent(error?.message ?? 'Insert failed')}` } });
     }
 
-    const token = await signSession(newUser.id, newUser.email);
+    const token = await signSession(newUser.id, newUser.email, newUser.role);
 
     return new Response(null, {
       status: 302,

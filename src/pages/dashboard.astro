@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabase';
 
 const session = await getSession(Astro.request);
 if (!session) return Astro.redirect('/login');
+if ((session.role ?? 'sitter') === 'owner') return Astro.redirect('/owner/dashboard');
 
 let profile: any = null;
 try {
