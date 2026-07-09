@@ -7,11 +7,11 @@ import '../styles/global.css';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Grotto Sitters — The platform that connects trusted pet sitters with pet owners. Create a stunning profile page in minutes." />
+    <meta name="description" content="Grotto Sitters — The platform that connects trusted house & pet sitters with home owners. Create a stunning profile page in minutes." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Grotto Sitters — Connecting pet sitters and pet owners</title>
+    <title>Grotto Sitters — Trusted house & pet sitting</title>
   </head>
   <body>
 
@@ -21,6 +21,7 @@ import '../styles/global.css';
       <nav class="header-nav">
         <a href="#how-it-works">How it works</a>
         <a href="#example">See an example</a>
+        <a href="/listings">Browse sits</a>
         <a href="/login" class="nav-login">Log in</a>
         <a href="/signup" class="btn-primary btn-sm">Get started</a>
       </nav>
@@ -29,11 +30,63 @@ import '../styles/global.css';
       </button>
     </header>
 
+    <div class="mm-overlay" id="mmOverlay"></div>
     <div class="mobile-menu" id="mobileMenu">
-      <a href="#how-it-works" class="mm-link">How it works</a>
-      <a href="#example" class="mm-link">See an example</a>
-      <a href="/login" class="mm-link">Log in</a>
-      <a href="/signup" class="mm-cta btn-primary">Get started</a>
+      <div class="mm-header">
+        <a href="/" class="mm-logo">Grotto <span>Sitters</span></a>
+        <button class="mm-close" id="mmClose" aria-label="Close menu">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+      <div class="mm-body">
+        <a href="#how-it-works" class="mm-item">
+          <div class="mm-item-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="mm-item-text">
+            <span class="mm-item-title">How it works</span>
+            <span class="mm-item-desc">Get started in minutes</span>
+          </div>
+          <span class="mm-chevron">&#8250;</span>
+        </a>
+        <a href="#example" class="mm-item">
+          <div class="mm-item-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          </div>
+          <div class="mm-item-text">
+            <span class="mm-item-title">See an example</span>
+            <span class="mm-item-desc">View a live profile</span>
+          </div>
+          <span class="mm-chevron">&#8250;</span>
+        </a>
+        <a href="/listings" class="mm-item">
+          <div class="mm-item-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="mm-item-text">
+            <span class="mm-item-title">Browse sits</span>
+            <span class="mm-item-desc">Find homes that need a sitter</span>
+          </div>
+          <span class="mm-chevron">&#8250;</span>
+        </a>
+        <div class="mm-divider"></div>
+        <a href="/login" class="mm-item">
+          <div class="mm-item-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          </div>
+          <div class="mm-item-text">
+            <span class="mm-item-title">Log in</span>
+            <span class="mm-item-desc">Access your dashboard</span>
+          </div>
+          <span class="mm-chevron">&#8250;</span>
+        </a>
+      </div>
+      <div class="mm-footer">
+        <a href="/signup" class="btn-primary mm-cta">Get started free</a>
+        <p class="mm-footer-note">First 3 months free, then just &pound;4.99/mo</p>
+      </div>
     </div>
 
     <!-- ── HERO ──────────────────────────────────────────────────── -->
@@ -54,10 +107,10 @@ import '../styles/global.css';
         <div class="hero-gradient"></div>
       </div>
       <div class="hero-text">
-        <p class="eyebrow reveal">For pet sitters &amp; pet owners</p>
+        <p class="eyebrow reveal">For house &amp; pet sitters &amp; home owners</p>
         <h1 class="reveal reveal-delay-1">
-          Where pet lovers<br />
-          <em>find each other.</em>
+          Trusted house &amp; pet<br />
+          <em>sitting made simple.</em>
         </h1>
         <p class="hero-body reveal reveal-delay-2">
           Sitters — create a stunning profile to showcase your experience, reviews, and photos. Owners — list your home and pets to find the perfect sitter. One platform, one link, everything in one place.
@@ -78,7 +131,7 @@ import '../styles/global.css';
           <div class="step reveal">
             <div class="step-num">01</div>
             <h3>Create an account</h3>
-            <p>Sign up as a sitter or pet owner. No credit card required.</p>
+            <p>Sign up as a house &amp; pet sitter or home owner. No credit card required.</p>
           </div>
           <div class="step-arrow reveal">→</div>
           <div class="step reveal">
@@ -101,7 +154,7 @@ import '../styles/global.css';
       <div class="container">
         <p class="label reveal">Live example</p>
         <h2 class="h2 reveal">Meet Callum &amp; Niamh</h2>
-        <p class="section-sub reveal">See what a Grotto Sitters profile looks like — experienced sitters who have looked after pets and homes all over the world.</p>
+        <p class="section-sub reveal">See what a Grotto Sitters profile looks like — experienced house &amp; pet sitters who have looked after homes and animals all over the world.</p>
       </div>
 
       <div class="editorial-grid">
@@ -118,7 +171,7 @@ import '../styles/global.css';
         <div class="editorial-right reveal reveal-delay-1">
           <div class="ed-badge">Experienced sitters worldwide</div>
           <h3 class="ed-name">Callum &amp; Niamh</h3>
-          <p class="ed-tagline">Experienced house &amp; pet sitters available worldwide — passionate about caring for pets and homes wherever they go.</p>
+          <p class="ed-tagline">Experienced house &amp; pet sitters available worldwide — passionate about caring for homes and animals wherever they go.</p>
           <blockquote class="ed-quote">
             "We treat every sit like it's our own home — daily walks, feeding routines, garden care, and plenty of love for your animals."
           </blockquote>
@@ -208,7 +261,7 @@ import '../styles/global.css';
           <div class="feature reveal reveal-delay-2">
             <div class="feature-icon">📸</div>
             <h3>Photo gallery</h3>
-            <p>Show off your pets, your home, or your experience — a gallery that tells your story.</p>
+            <p>Show off the homes you've cared for, the pets you've loved, or your own home — a gallery that tells your story.</p>
           </div>
           <div class="feature reveal">
             <div class="feature-icon">✉️</div>
@@ -238,7 +291,7 @@ import '../styles/global.css';
       <div class="cta-content reveal">
         <p class="eyebrow" style="color:var(--gold-light)">Join Grotto Sitters</p>
         <h2>Ready to create your<br /><em>perfect page?</em></h2>
-        <p class="cta-body">Whether you sit pets or need a sitter — get started free for 3 months. It takes less than five minutes.</p>
+        <p class="cta-body">Whether you're a house &amp; pet sitter or a home owner looking for one — get started free for 3 months. It takes less than five minutes.</p>
         <a href="/signup" class="btn-primary btn-lg">Start your free trial</a>
         <p class="cta-login">Already have an account? <a href="/login">Log in</a></p>
       </div>
@@ -250,7 +303,7 @@ import '../styles/global.css';
         <div class="footer-top">
           <div class="footer-brand">
             <h2>Grotto <span>Sitters</span></h2>
-            <p>Connecting trusted pet sitters and pet owners worldwide.</p>
+            <p>Connecting trusted house &amp; pet sitters with home owners worldwide.</p>
           </div>
           <div class="footer-links">
             <h4>Platform</h4>
@@ -258,6 +311,7 @@ import '../styles/global.css';
               <li><a href="/signup">Get started</a></li>
               <li><a href="/login">Log in</a></li>
               <li><a href="/dashboard">Dashboard</a></li>
+              <li><a href="/listings">Browse sits</a></li>
             </ul>
           </div>
           <div class="footer-links">
@@ -269,7 +323,7 @@ import '../styles/global.css';
         </div>
         <div class="footer-bottom">
           <span>&copy; {new Date().getFullYear()} Grotto Sitters</span>
-          <span>Made with &#128062; for pet lovers everywhere</span>
+          <span>Made with &#128062; for house &amp; pet sitters everywhere</span>
         </div>
       </div>
     </footer>
@@ -296,7 +350,7 @@ import '../styles/global.css';
 
   /* ── HEADER ────────────────────────────────────────────────────── */
   .site-header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 210;
     padding: 20px 48px;
     display: flex; justify-content: space-between; align-items: center;
     transition: background 0.3s, box-shadow 0.3s, padding 0.3s;
@@ -314,26 +368,83 @@ import '../styles/global.css';
   }
   .site-header.scrolled .header-nav a:not(.btn-primary) { color: var(--brown-mid); }
   .header-nav a:not(.btn-primary):hover { color: var(--gold); }
-  .nav-logo { font-family: "Playfair Display", serif; font-size: 1.4rem; color: #fff; letter-spacing: 0.02em; text-decoration: none; transition: color 0.3s; }
+  .nav-logo {
+    font-family: "Playfair Display", serif; font-size: 1.4rem; color: #fff;
+    letter-spacing: 0.02em; text-decoration: none; transition: color 0.3s;
+    white-space: nowrap; flex-shrink: 0;
+  }
   .nav-logo span { color: var(--gold); }
   .site-header.scrolled .nav-logo { color: var(--brown-dark); }
-  .burger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 4px; }
+  .burger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 4px; z-index: 215; }
   .burger span { display: block; width: 24px; height: 2px; background: #fff; transition: background 0.3s; border-radius: 2px; }
   .site-header.scrolled .burger span { background: var(--brown-dark); }
 
-  /* MOBILE MENU */
-  .mobile-menu {
-    display: none;
+  /* MOBILE MENU — Airbnb-style slide-out drawer */
+  .mm-overlay {
     position: fixed; inset: 0; z-index: 190;
-    background: #fff;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 32px;
+    background: rgba(0,0,0,0.45);
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
-  .mobile-menu.open { display: flex; }
-  .mm-link { font-size: 1.3rem; font-family: "Playfair Display", serif; color: var(--brown-dark); text-decoration: none; }
-  .mm-cta { margin-top: 8px; }
+  .mm-overlay.open { opacity: 1; visibility: visible; }
+
+  .mobile-menu {
+    position: fixed; top: 0; right: 0; bottom: 0;
+    width: 320px; max-width: 85vw;
+    z-index: 200;
+    background: #fff;
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+  }
+  .mobile-menu.open { transform: translateX(0); }
+
+  .mm-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 20px 24px; border-bottom: 1px solid rgba(44,26,14,0.08);
+    flex-shrink: 0;
+  }
+  .mm-logo {
+    font-family: "Playfair Display", serif; font-size: 1.25rem;
+    color: var(--brown-dark); text-decoration: none;
+  }
+  .mm-logo span { color: var(--gold); }
+  .mm-close {
+    width: 36px; height: 36px; border-radius: 50%;
+    border: 1px solid rgba(44,26,14,0.12); background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--brown-dark); transition: background 0.2s;
+  }
+  .mm-close:hover { background: var(--cream); }
+
+  .mm-body {
+    flex: 1; overflow-y: auto; padding: 12px 0;
+  }
+  .mm-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px; text-decoration: none; color: var(--text);
+    transition: background 0.15s;
+  }
+  .mm-item:hover { background: rgba(200,150,62,0.05); }
+  .mm-item:active { background: rgba(200,150,62,0.1); }
+  .mm-item-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--cream); display: flex; align-items: center;
+    justify-content: center; flex-shrink: 0; color: var(--gold);
+  }
+  .mm-item-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .mm-item-title { font-size: 0.95rem; font-weight: 700; color: var(--brown-dark); }
+  .mm-item-desc { font-size: 0.78rem; color: var(--text-soft); }
+  .mm-chevron { font-size: 1.4rem; color: rgba(44,26,14,0.2); font-weight: 300; }
+  .mm-divider { height: 1px; background: rgba(44,26,14,0.08); margin: 8px 24px; }
+
+  .mm-footer {
+    padding: 20px 24px; border-top: 1px solid rgba(44,26,14,0.08);
+    flex-shrink: 0;
+  }
+  .mm-footer .mm-cta { display: block; width: 100%; text-align: center; padding: 16px; font-size: 0.9rem; border-radius: 10px; }
+  .mm-footer-note { font-size: 0.75rem; color: var(--text-soft); text-align: center; margin-top: 10px; }
 
   /* ── HERO ──────────────────────────────────────────────────────── */
   .hero {
@@ -478,10 +589,16 @@ import '../styles/global.css';
   }
 
   @media (max-width: 768px) {
-    .site-header { padding: 16px 24px; }
+    .site-header {
+      padding: 16px 24px;
+      background: rgba(250,246,238,0.97);
+      backdrop-filter: blur(12px);
+    }
+    .site-header .nav-logo { color: var(--brown-dark); }
     .site-header.scrolled { padding: 12px 24px; }
     .header-nav { display: none; }
     .burger { display: flex; }
+    .burger span { background: var(--brown-dark); }
     .container { padding: 0 24px; }
     .hero-text { padding: 48px 24px; }
     .hero-text h1 { font-size: 2.2rem; }
@@ -508,11 +625,19 @@ import '../styles/global.css';
     header?.classList.toggle('scrolled', window.scrollY > 60);
   }, { passive: true });
 
-  // Mobile menu
+  // Mobile menu (Airbnb-style drawer)
   const burger = document.getElementById('burger');
   const menu = document.getElementById('mobileMenu');
-  burger?.addEventListener('click', () => menu?.classList.toggle('open'));
-  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => menu.classList.remove('open')));
+  const mmOverlay = document.getElementById('mmOverlay');
+  const mmClose = document.getElementById('mmClose');
+
+  function openMenu() { menu?.classList.add('open'); mmOverlay?.classList.add('open'); }
+  function closeMenu() { menu?.classList.remove('open'); mmOverlay?.classList.remove('open'); }
+
+  burger?.addEventListener('click', openMenu);
+  mmClose?.addEventListener('click', closeMenu);
+  mmOverlay?.addEventListener('click', closeMenu);
+  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
 
   // Scroll reveal
   const observer = new IntersectionObserver(
