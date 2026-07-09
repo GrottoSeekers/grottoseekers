@@ -578,16 +578,26 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
 
         if (previewEl) {
           previewEl.innerHTML = '';
+          Object.assign(previewEl.style, { display: files.length ? 'flex' : 'none', flexWrap: 'wrap', gap: '8px', margin: '12px 0' });
           files.forEach((file, idx) => {
             const thumb = document.createElement('div');
-            thumb.className = 'upload-preview-thumb';
+            Object.assign(thumb.style, {
+              position: 'relative', width: '80px', height: '60px', borderRadius: '6px',
+              overflow: 'hidden', border: '2px solid rgba(200,150,62,0.3)', flexShrink: '0',
+            });
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
+            Object.assign(img.style, { width: '100%', height: '100%', objectFit: 'cover', display: 'block' });
             thumb.appendChild(img);
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
-            removeBtn.className = 'preview-remove';
             removeBtn.innerHTML = '&times;';
+            Object.assign(removeBtn.style, {
+              position: 'absolute', top: '-6px', right: '-6px', width: '22px', height: '22px',
+              borderRadius: '50%', background: 'rgba(185,28,28,0.9)', color: '#fff',
+              border: '2px solid #fff', fontSize: '12px', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: '1',
+            });
             removeBtn.addEventListener('click', () => {
               files.splice(idx, 1);
               pendingFiles.set(form, files);
