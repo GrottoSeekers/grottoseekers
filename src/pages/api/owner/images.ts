@@ -39,35 +39,40 @@ export const POST: APIRoute = async ({ request }) => {
     const anchor = category === 'hero' ? 'home' : category === 'about' ? 'home' : 'gallery';
 
     if (action === 'upload') {
-      const file = form.get('file');
-      if (!(file instanceof File) || file.size === 0) {
+      const files = form.getAll('files').filter((f): f is File => f instanceof File && f.size > 0);
+      if (files.length === 0) {
         return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=missing#${anchor}` } });
       }
-      if (file.size > 5 * 1024 * 1024) {
-        return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=file_too_large#${anchor}` } });
+
+      for (const file of files) {
+        if (file.size > 5 * 1024 * 1024) {
+          return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=file_too_large#${anchor}` } });
+        }
       }
 
-      const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-      const path = `${session.userId}/${category}-${Date.now()}.${ext}`;
+      const pos = (form.get('pos') as string)?.trim() || 'center';
 
-      const buffer = new Uint8Array(await file.arrayBuffer());
-      const { error: uploadError } = await supabase.storage
-        .from('profile-pics')
-        .upload(path, buffer, { contentType: file.type, upsert: true });
+      for (const file of files) {
+        const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
+        const path = `${session.userId}/${category}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
 
-      if (uploadError) {
-        return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=upload&detail=${encodeURIComponent(uploadError.message)}#${anchor}` } });
-      }
+        const buffer = new Uint8Array(await file.arrayBuffer());
+        const { error: uploadError } = await supabase.storage
+          .from('profile-pics')
+          .upload(path, buffer, { contentType: file.type, upsert: true });
 
-      const { data: urlData } = supabase.storage.from('profile-pics').getPublicUrl(path);
-      const url = urlData.publicUrl;
+        if (uploadError) {
+          return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=upload&detail=${encodeURIComponent(uploadError.message)}#${anchor}` } });
+        }
 
-      if (category === 'hero') {
-        const pos = (form.get('pos') as string)?.trim() || 'center';
-        images.push({ src: url, pos });
-      } else {
-        const alt = (form.get('alt') as string)?.trim() || '';
-        images.push({ src: url, alt });
+        const { data: urlData } = supabase.storage.from('profile-pics').getPublicUrl(path);
+        const url = urlData.publicUrl;
+
+        if (category === 'hero') {
+          images.push({ src: url, pos });
+        } else {
+          images.push({ src: url, alt: '' });
+        }
       }
 
       const { error } = await supabase

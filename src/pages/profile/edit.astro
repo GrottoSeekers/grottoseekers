@@ -331,10 +331,10 @@ const savedMsg = saved ? 'Changes saved!' : '';
             <input type="hidden" name="category" value="hero" />
             <div class="upload-row">
               <div class="file-upload-wrap upload-wide">
-                <input type="file" name="file" accept="image/*" required class="file-input" />
+                <input type="file" name="files" accept="image/*" multiple required class="file-input" />
                 <div class="file-upload-label">
                   <span class="file-upload-icon">🖼️</span>
-                  <span class="file-upload-text">Choose a photo</span>
+                  <span class="file-upload-text">Choose photos</span>
                 </div>
               </div>
               <select name="pos" class="pos-select" title="Focus point">
@@ -342,9 +342,10 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 <option value="top">Top</option>
                 <option value="bottom">Bottom</option>
               </select>
-              <button type="submit" class="btn-primary btn-sm">Upload</button>
             </div>
-            <p class="field-hint">The focus point decides which part of the photo stays visible when the screen is narrow (e.g. on a phone).</p>
+            <div class="upload-preview" data-for="hero"></div>
+            <p class="field-hint">Select as many photos as you like. The focus point applies to all photos in this batch.</p>
+            <button type="submit" class="btn-primary btn-sm upload-save-btn" style="display:none;">Save photos</button>
           </form>
         </section>
 
@@ -377,14 +378,15 @@ const savedMsg = saved ? 'Changes saved!' : '';
             <input type="hidden" name="category" value="about" />
             <div class="upload-row">
               <div class="file-upload-wrap upload-wide">
-                <input type="file" name="file" accept="image/*" required class="file-input" />
+                <input type="file" name="files" accept="image/*" multiple required class="file-input" />
                 <div class="file-upload-label">
                   <span class="file-upload-icon">📸</span>
-                  <span class="file-upload-text">Choose a photo</span>
+                  <span class="file-upload-text">Choose photos</span>
                 </div>
               </div>
-              <button type="submit" class="btn-primary btn-sm">Upload</button>
             </div>
+            <div class="upload-preview" data-for="about"></div>
+            <button type="submit" class="btn-primary btn-sm upload-save-btn" style="display:none;">Save photos</button>
           </form>
         </section>
 
@@ -417,14 +419,15 @@ const savedMsg = saved ? 'Changes saved!' : '';
             <input type="hidden" name="category" value="gallery" />
             <div class="upload-row">
               <div class="file-upload-wrap upload-wide">
-                <input type="file" name="file" accept="image/*" required class="file-input" />
+                <input type="file" name="files" accept="image/*" multiple required class="file-input" />
                 <div class="file-upload-label">
                   <span class="file-upload-icon">📷</span>
-                  <span class="file-upload-text">Choose a photo</span>
+                  <span class="file-upload-text">Choose photos</span>
                 </div>
               </div>
-              <button type="submit" class="btn-primary btn-sm">Upload</button>
             </div>
+            <div class="upload-preview" data-for="gallery"></div>
+            <button type="submit" class="btn-primary btn-sm upload-save-btn" style="display:none;">Save photos</button>
           </form>
         </section>
 
@@ -657,36 +660,109 @@ const savedMsg = saved ? 'Changes saved!' : '';
         });
       }
 
+      const pendingFiles = new Map<HTMLFormElement, File[]>();
+
+      function renderPreview(form: HTMLFormElement) {
+        const files = pendingFiles.get(form) ?? [];
+        const previewEl = form.querySelector<HTMLElement>('.upload-preview');
+        const saveBtn = form.querySelector<HTMLButtonElement>('.upload-save-btn');
+        const label = form.querySelector<HTMLElement>('.file-upload-text');
+
+        if (previewEl) {
+          previewEl.innerHTML = '';
+          files.forEach((file, idx) => {
+            const thumb = document.createElement('div');
+            thumb.className = 'upload-preview-thumb';
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(file);
+            thumb.appendChild(img);
+            const removeBtn = document.createElement('button');
+            removeBtn.type = 'button';
+            removeBtn.className = 'preview-remove';
+            removeBtn.innerHTML = '&times;';
+            removeBtn.addEventListener('click', () => {
+              files.splice(idx, 1);
+              pendingFiles.set(form, files);
+              renderPreview(form);
+            });
+            thumb.appendChild(removeBtn);
+            previewEl.appendChild(thumb);
+          });
+        }
+
+        if (saveBtn) saveBtn.style.display = files.length > 0 ? 'inline-block' : 'none';
+        if (label) label.textContent = files.length > 0 ? `${files.length} photo${files.length > 1 ? 's' : ''} selected` : 'Choose photos';
+      }
+
       document.querySelectorAll('.file-input').forEach(input => {
         input.addEventListener('change', () => {
           const fi = input as HTMLInputElement;
-          const label = fi.closest('.file-upload-wrap')?.querySelector('.file-upload-text');
-          if (fi.files?.[0] && label) label.textContent = fi.files[0].name;
+          const form = fi.closest<HTMLFormElement>('form');
+          if (!form) return;
+
+          if (form.classList.contains('upload-form') && fi.files && fi.files.length > 0) {
+            const existing = pendingFiles.get(form) ?? [];
+            existing.push(...Array.from(fi.files));
+            pendingFiles.set(form, existing);
+            fi.value = '';
+            renderPreview(form);
+          } else {
+            const label = fi.closest('.file-upload-wrap')?.querySelector('.file-upload-text');
+            if (fi.files?.[0] && label) label.textContent = fi.files[0].name;
+          }
         });
       });
 
       document.querySelectorAll<HTMLFormElement>('form[enctype="multipart/form-data"]').forEach(form => {
         form.addEventListener('submit', async (e) => {
-          const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
-          const file = fileInput?.files?.[0];
-          if (!file) return;
+          if (form.classList.contains('upload-form')) {
+            const files = pendingFiles.get(form) ?? [];
+            if (files.length === 0) return;
 
-          e.preventDefault();
-          const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-          const origText = btn?.textContent ?? '';
-          if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+            e.preventDefault();
+            const btn = form.querySelector<HTMLButtonElement>('.upload-save-btn');
+            const origText = btn?.textContent ?? '';
+            if (btn) { btn.disabled = true; btn.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}…`; }
 
-          try {
-            const maxDim = form.dataset.category === 'hero' ? 1920 : 1200;
-            const compressed = await compressImage(file, maxDim, maxDim, 0.85);
-            const fd = new FormData(form);
-            const fieldName = fileInput!.name;
-            fd.set(fieldName, compressed, compressed.name);
-            const res = await fetch(form.action, { method: 'POST', body: fd, redirect: 'follow' });
-            window.location.href = res.url;
-          } catch {
-            if (btn) { btn.disabled = false; btn.textContent = origText; }
-            alert('Upload failed. Please try again.');
+            try {
+              const maxDim = form.dataset.category === 'hero' ? 1920 : 1200;
+              const fd = new FormData();
+              fd.set('_action', 'upload');
+              fd.set('category', form.querySelector<HTMLInputElement>('[name="category"]')!.value);
+              const posSelect = form.querySelector<HTMLSelectElement>('[name="pos"]');
+              if (posSelect) fd.set('pos', posSelect.value);
+
+              for (const file of files) {
+                const compressed = await compressImage(file, maxDim, maxDim, 0.85);
+                fd.append('files', compressed, compressed.name);
+              }
+
+              const res = await fetch(form.action, { method: 'POST', body: fd, redirect: 'follow' });
+              window.location.href = res.url;
+            } catch {
+              if (btn) { btn.disabled = false; btn.textContent = origText; }
+              alert('Upload failed. Please try again.');
+            }
+          } else {
+            const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
+            const file = fileInput?.files?.[0];
+            if (!file) return;
+
+            e.preventDefault();
+            const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+            const origText = btn?.textContent ?? '';
+            if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+            try {
+              const compressed = await compressImage(file, 1200, 1200, 0.85);
+              const fd = new FormData(form);
+              fd.set(fileInput!.name, compressed, compressed.name);
+              const res = await fetch(form.action, { method: 'POST', body: fd, redirect: 'follow' });
+              window.location.href = res.url;
+            } catch {
+              if (btn) { btn.disabled = false; btn.textContent = origText; }
+              alert('Upload failed. Please try again.');
+            }
           }
         });
       });
@@ -931,6 +1007,25 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .upload-wide { flex: 1; }
       .pos-select { width: auto; min-width: 100px; flex-shrink: 0; }
       .upload-row .btn-primary { flex-shrink: 0; white-space: nowrap; height: auto; }
+
+      .upload-preview {
+        display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0;
+      }
+      .upload-preview:empty { display: none; }
+      .upload-preview-thumb {
+        width: 80px; height: 60px; border-radius: 6px; overflow: hidden;
+        border: 2px solid rgba(200,150,62,0.3);
+      }
+      .upload-preview-thumb { position: relative; }
+      .upload-preview-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .preview-remove {
+        position: absolute; top: -6px; right: -6px; width: 22px; height: 22px;
+        border-radius: 50%; background: rgba(185,28,28,0.9); color: #fff;
+        border: 2px solid #fff; font-size: 12px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; line-height: 1;
+      }
+      .preview-remove:hover { background: #991b1b; }
+      .upload-save-btn { margin-top: 4px; }
 
       .empty-hint {
         font-size: 0.88rem; color: var(--text-soft); font-style: italic;
