@@ -75,3 +75,31 @@ DROP TRIGGER IF EXISTS profiles_updated_at ON profiles;
 CREATE TRIGGER profiles_updated_at
   BEFORE UPDATE ON profiles
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+-- ── LISTINGS ─────────────────────────────────────────────────────────────────
+-- Date-based sit requests posted by owners.
+-- Each listing references the owner's profile (which holds the reusable
+-- home / pets "master") and adds dates + description for a specific sit.
+CREATE TABLE IF NOT EXISTS listings (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id  UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+
+  title       TEXT        NOT NULL,               -- "2 weeks in Sydney with 2 dogs"
+  description TEXT,                               -- sit-specific details
+  date_from   DATE        NOT NULL,
+  date_to     DATE        NOT NULL,
+  status      TEXT        NOT NULL DEFAULT 'active'
+                          CHECK (status IN ('active', 'filled', 'cancelled')),
+
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS listings_profile_id_idx ON listings (profile_id);
+CREATE INDEX IF NOT EXISTS listings_status_idx     ON listings (status);
+CREATE INDEX IF NOT EXISTS listings_dates_idx      ON listings (date_from, date_to);
+
+DROP TRIGGER IF EXISTS listings_updated_at ON listings;
+CREATE TRIGGER listings_updated_at
+  BEFORE UPDATE ON listings
+  FOR EACH ROW EXECUTE FUNCTION set_updated_at();
