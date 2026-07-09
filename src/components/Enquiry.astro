@@ -19,15 +19,15 @@
         </p>
 
         <div class="contact-options">
-          <a href="mailto:grottositters@outlook.com" class="contact-option">
+          <a href="mailto:hello@example.com" class="contact-option">
             <span class="contact-option-icon">&#9993;&#65039;</span>
             <div class="contact-option-text">
               <strong>Email Us</strong>
-              <span>grottositters@outlook.com</span>
+              <span>hello@example.com</span>
             </div>
           </a>
           <a
-            href="https://wa.me/447306100251"
+            href="https://wa.me/440000000000"
             target="_blank"
             rel="noopener noreferrer"
             class="contact-option"
@@ -412,13 +412,13 @@
           `House Sit Enquiry — ${d.dateFrom} to ${d.dateTo}`
         );
         const body = encodeURIComponent(
-          `Hi Callum & Niamh,\n\nI'd love to book a sit. Here are my details:\n\n` +
+          `Hi there,\n\nI'd love to book a sit. Here are my details:\n\n` +
             `Name: ${d.fname} ${d.lname}\nEmail: ${d.email}\nPhone: ${d.phone}\n` +
             `Address: ${d.address}\nDates: ${d.dateFrom} → ${d.dateTo}\n\n` +
             `Pet Details:\nName(s): ${d.petName}\nType: ${d.petType}\nBreed: ${d.petBreed}\nAge: ${d.petAge}\n\n` +
             `Additional info:\n${d.message}\n\nLooking forward to hearing from you!`
         );
-        window.location.href = `mailto:grottositters@outlook.com?subject=${subject}&body=${body}`;
+        window.location.href = `mailto:hello@example.com?subject=${subject}&body=${body}`;
       });
 
     document
@@ -427,12 +427,12 @@
         if (!validateForm()) return;
         const d = getFormData();
         const msg = encodeURIComponent(
-          `Hi Callum & Niamh! I found you through your website and would love to book a sit.\n\n` +
+          `Hi there! I found you through your website and would love to book a sit.\n\n` +
             `*Name:* ${d.fname} ${d.lname}\n*Dates:* ${d.dateFrom} → ${d.dateTo}\n*Address:* ${d.address}\n\n` +
             `*Pet Details:*\nName(s): ${d.petName}\nType: ${d.petType}\nBreed: ${d.petBreed}\nAge: ${d.petAge}\n\n` +
             `*Additional info:*\n${d.message}`
         );
-        window.open(`https://wa.me/447306100251?text=${msg}`, "_blank");
+        window.open(`https://wa.me/440000000000?text=${msg}`, "_blank");
       });
   }
 
