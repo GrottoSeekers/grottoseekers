@@ -37,14 +37,35 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
 
     <main class="auth-wrap">
       <div class="auth-card">
-        <p class="section-label">Sitter Portal</p>
+        <p class="section-label">Grotto Sitters</p>
         <h1 class="section-title">Create your account</h1>
         <div class="divider"></div>
-        <p class="auth-intro">Build your professional sitter profile and share it with pet owners worldwide.</p>
+        <p class="auth-intro">Join Grotto Sitters — whether you're offering pet sitting services or looking for a trusted sitter.</p>
 
         {errorText && <p class="auth-error">{errorText}</p>}
 
         <form method="POST" action="/api/auth/signup" class="auth-form">
+          <div class="role-picker">
+            <p class="role-label">I am a...</p>
+            <div class="role-options">
+              <label class="role-option">
+                <input type="radio" name="role" value="sitter" checked />
+                <div class="role-card">
+                  <span class="role-icon">🐾</span>
+                  <span class="role-name">Pet Sitter</span>
+                  <span class="role-desc">I look after pets & homes</span>
+                </div>
+              </label>
+              <label class="role-option">
+                <input type="radio" name="role" value="owner" />
+                <div class="role-card">
+                  <span class="role-icon">🏠</span>
+                  <span class="role-name">Pet Owner</span>
+                  <span class="role-desc">I need a trusted sitter</span>
+                </div>
+              </label>
+            </div>
+          </div>
           <label>
             Email address
             <input type="email" name="email" required autocomplete="email" />
@@ -134,6 +155,21 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
       }
       .auth-footer a { color: var(--gold); font-weight: 700; text-decoration: none; }
       .auth-footer a:hover { text-decoration: underline; }
+
+      .role-picker { margin-bottom: 4px; }
+      .role-label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--brown-mid); text-transform: uppercase; margin-bottom: 10px; }
+      .role-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .role-option { cursor: pointer; }
+      .role-option input { display: none; }
+      .role-card {
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+        padding: 20px 12px; border: 2px solid rgba(44,26,14,0.12); border-radius: 10px;
+        text-align: center; transition: border-color 0.2s, background 0.2s;
+      }
+      .role-option input:checked + .role-card { border-color: var(--gold); background: rgba(200,150,62,0.06); }
+      .role-icon { font-size: 1.6rem; }
+      .role-name { font-family: "Playfair Display", serif; font-size: 1rem; font-weight: 700; color: var(--brown-dark); }
+      .role-desc { font-size: 0.75rem; color: var(--text-soft); }
     </style>
   </body>
 </html>

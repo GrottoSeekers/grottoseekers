@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const { data: user } = await supabase
       .from('users')
-      .select('id, email, password')
+      .select('id, email, password, role')
       .eq('email', email)
       .single();
 
@@ -27,7 +27,7 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(null, { status: 302, headers: { Location: '/login?error=invalid' } });
     }
 
-    const token = await signSession(user.id, user.email);
+    const token = await signSession(user.id, user.email, user.role ?? 'sitter');
 
     return new Response(null, {
       status: 302,

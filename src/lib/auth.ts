@@ -5,6 +5,7 @@ const MAX_AGE = 7 * 24 * 60 * 60; // 7 days in seconds
 interface SessionPayload {
   userId: string;
   email: string;
+  role: string;
   iat: number;
 }
 
@@ -18,8 +19,8 @@ async function getKey(): Promise<CryptoKey> {
   );
 }
 
-export async function signSession(userId: string, email: string): Promise<string> {
-  const payload = JSON.stringify({ userId, email, iat: Date.now() });
+export async function signSession(userId: string, email: string, role: string = 'sitter'): Promise<string> {
+  const payload = JSON.stringify({ userId, email, role, iat: Date.now() });
   const key = await getKey();
   const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload));
   const sigB64 = btoa(String.fromCharCode(...new Uint8Array(sig)));

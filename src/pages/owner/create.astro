@@ -1,0 +1,133 @@
+---
+export const prerender = false;
+
+import '../../styles/global.css';
+import { getSession } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: existing } = await supabase
+  .from('profiles')
+  .select('slug')
+  .eq('user_id', session.userId)
+  .maybeSingle();
+
+if (existing) return Astro.redirect('/owner/dashboard');
+
+const error = Astro.url.searchParams.get('error');
+const errorMap: Record<string, string> = {
+  missing: 'Please fill in all required fields.',
+  slug_invalid: 'URL can only contain lowercase letters, numbers, and hyphens.',
+  slug_taken: 'That URL is already taken — try another.',
+  file_too_large: 'Image must be under 5 MB.',
+  server: 'Something went wrong. Please try again.',
+};
+const errorMsg = errorMap[error ?? ''] ?? '';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>Create listing — Grotto Sitters</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
+    </nav>
+
+    <main class="create-wrap">
+      <div class="create-card">
+        <p class="section-label">Owner Portal</p>
+        <h1 class="section-title">Create your listing</h1>
+        <div class="divider"></div>
+        <p class="create-intro">Set up your home and pet profile so trusted sitters can find you.</p>
+
+        {errorMsg && <p class="create-error">{errorMsg}</p>}
+
+        <form method="POST" action="/api/owner/create" enctype="multipart/form-data" class="create-form">
+          <div class="field">
+            <label for="name">Your name <span class="req">*</span></label>
+            <input type="text" id="name" name="name" placeholder="e.g. Sarah & James" required autocomplete="name" />
+            <p class="field-hint">How you'll appear on your listing.</p>
+          </div>
+
+          <div class="field">
+            <label for="slug">Your listing URL <span class="req">*</span></label>
+            <div class="slug-wrap">
+              <span class="slug-prefix">grottositters.com/</span>
+              <input type="text" id="slug" name="slug" placeholder="yourname" required pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$" />
+            </div>
+            <p class="field-hint">Lowercase letters, numbers, and hyphens only.</p>
+          </div>
+
+          <div class="field">
+            <label for="location">Location <span class="req">*</span></label>
+            <input type="text" id="location" name="location" placeholder="e.g. Sydney, NSW" required />
+            <p class="field-hint">City or area — helps sitters find you.</p>
+          </div>
+
+          <div class="field">
+            <label for="profile_pic">Profile photo</label>
+            <input type="file" id="profile_pic" name="profile_pic" accept="image/*" />
+          </div>
+
+          <div class="field">
+            <label for="bio">About your home</label>
+            <textarea id="bio" name="bio" rows="5" placeholder="Tell sitters about your home, neighbourhood, and what makes it a great place to stay."></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Create listing</button>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      const nameInput = document.getElementById('name') as HTMLInputElement;
+      const slugInput = document.getElementById('slug') as HTMLInputElement;
+      let slugEdited = false;
+      slugInput?.addEventListener('input', () => { slugEdited = true; });
+      nameInput?.addEventListener('input', () => {
+        if (slugEdited) return;
+        slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      });
+    </script>
+
+    <style>
+      body { min-height: 100vh; display: flex; flex-direction: column; }
+      nav { position: static; border-bottom: 1px solid rgba(200,150,62,0.2); padding: 18px 48px; }
+      .create-wrap { flex: 1; display: flex; justify-content: center; padding: 60px 24px; }
+      .create-card {
+        background: #fff; border-radius: 12px; padding: 48px; width: 100%; max-width: 520px;
+        box-shadow: 0 4px 32px rgba(44,26,14,0.08); align-self: flex-start;
+      }
+      .create-intro { font-size: 0.95rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 24px; }
+      .create-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; font-size: 0.9rem; margin-bottom: 20px; }
+      .create-form { display: flex; flex-direction: column; gap: 20px; }
+      .field { display: flex; flex-direction: column; gap: 6px; }
+      .field label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--brown-mid); text-transform: uppercase; }
+      .req { color: var(--gold); }
+      .field input[type="text"], .field input[type="file"], .field textarea {
+        border: 1.5px solid rgba(44,26,14,0.2); border-radius: 6px; padding: 11px 14px;
+        font-size: 1rem; font-family: "Lato", sans-serif; color: var(--text); background: var(--cream);
+        outline: none; transition: border-color 0.2s;
+      }
+      .field input:focus, .field textarea:focus { border-color: var(--gold); }
+      .field textarea { resize: vertical; }
+      .field-hint { font-size: 0.78rem; color: var(--text-soft); }
+      .slug-wrap { display: flex; align-items: center; gap: 0; }
+      .slug-prefix {
+        background: rgba(44,26,14,0.06); border: 1.5px solid rgba(44,26,14,0.2); border-right: none;
+        border-radius: 6px 0 0 6px; padding: 11px 12px; font-size: 0.85rem; color: var(--text-soft);
+        white-space: nowrap;
+      }
+      .slug-wrap input { border-radius: 0 6px 6px 0 !important; flex: 1; }
+    </style>
+  </body>
+</html>
