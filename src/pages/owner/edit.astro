@@ -387,6 +387,27 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
       </div>
     </main>
 
+    <style is:global>
+      .upload-preview {
+        display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0;
+      }
+      .upload-preview:empty { display: none; }
+      .upload-preview-thumb {
+        position: relative; width: 80px; height: 60px; border-radius: 6px;
+        overflow: hidden; border: 2px solid rgba(200,150,62,0.3); flex-shrink: 0;
+      }
+      .upload-preview-thumb img {
+        width: 100%; height: 100%; object-fit: cover; display: block;
+      }
+      .preview-remove {
+        position: absolute; top: -6px; right: -6px; width: 22px; height: 22px;
+        border-radius: 50%; background: rgba(185,28,28,0.9); color: #fff;
+        border: 2px solid #fff; font-size: 12px; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; line-height: 1;
+        padding: 0;
+      }
+      .preview-remove:hover { background: #991b1b; }
+    </style>
     <style>
       body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
       nav {
@@ -502,23 +523,6 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
       .colour-swatch span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-soft); }
       .colour-picker { width: 48px; height: 32px; border: 2px solid rgba(44,26,14,0.15); border-radius: 6px; padding: 0; cursor: pointer; background: none; }
 
-      .upload-preview {
-        display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0;
-      }
-      .upload-preview:empty { display: none; }
-      .upload-preview-thumb {
-        width: 80px; height: 60px; border-radius: 6px; overflow: hidden;
-        border: 2px solid rgba(200,150,62,0.3);
-      }
-      .upload-preview-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-      .preview-remove {
-        position: absolute; top: -6px; right: -6px; width: 22px; height: 22px;
-        border-radius: 50%; background: rgba(185,28,28,0.9); color: #fff;
-        border: 2px solid #fff; font-size: 12px; cursor: pointer;
-        display: flex; align-items: center; justify-content: center; line-height: 1;
-      }
-      .preview-remove:hover { background: #991b1b; }
-      .upload-preview-thumb { position: relative; }
       .upload-save-btn { margin-top: 4px; }
       .file-count { font-size: 0.82rem; color: var(--text-soft); margin-top: 4px; }
 
@@ -578,26 +582,20 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
 
         if (previewEl) {
           previewEl.innerHTML = '';
-          Object.assign(previewEl.style, { display: files.length ? 'flex' : 'none', flexWrap: 'wrap', gap: '8px', margin: '12px 0' });
+          previewEl.style.cssText = files.length ? 'display:flex;flex-wrap:wrap;gap:8px;margin:12px 0' : 'display:none';
           files.forEach((file, idx) => {
             const thumb = document.createElement('div');
-            Object.assign(thumb.style, {
-              position: 'relative', width: '80px', height: '60px', borderRadius: '6px',
-              overflow: 'hidden', border: '2px solid rgba(200,150,62,0.3)', flexShrink: '0',
-            });
+            thumb.className = 'upload-preview-thumb';
+            thumb.style.cssText = 'position:relative;width:80px;height:60px;border-radius:6px;overflow:hidden;border:2px solid rgba(200,150,62,0.3);flex-shrink:0';
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
-            Object.assign(img.style, { width: '100%', height: '100%', objectFit: 'cover', display: 'block' });
+            img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
             thumb.appendChild(img);
             const removeBtn = document.createElement('button');
             removeBtn.type = 'button';
+            removeBtn.className = 'preview-remove';
             removeBtn.innerHTML = '&times;';
-            Object.assign(removeBtn.style, {
-              position: 'absolute', top: '-6px', right: '-6px', width: '22px', height: '22px',
-              borderRadius: '50%', background: 'rgba(185,28,28,0.9)', color: '#fff',
-              border: '2px solid #fff', fontSize: '12px', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: '1',
-            });
+            removeBtn.style.cssText = 'position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:rgba(185,28,28,0.9);color:#fff;border:2px solid #fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0';
             removeBtn.addEventListener('click', () => {
               files.splice(idx, 1);
               pendingFiles.set(form, files);
