@@ -52,22 +52,24 @@ export const POST: APIRoute = async ({ request }) => {
 
       const pos = (form.get('pos') as string)?.trim() || 'center';
 
-      for (const file of files) {
+      const uploads = await Promise.all(files.map(async (file, i) => {
         const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
-        const path = `${session.userId}/${category}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
-
+        const path = `${session.userId}/${category}-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
         const buffer = new Uint8Array(await file.arrayBuffer());
         const { error: uploadError } = await supabase.storage
           .from('profile-pics')
           .upload(path, buffer, { contentType: file.type, upsert: true });
-
-        if (uploadError) {
-          return new Response(null, { status: 302, headers: { Location: `/profile/edit?error=upload&detail=${encodeURIComponent(uploadError.message)}#${anchor}` } });
-        }
-
+        if (uploadError) return null;
         const { data: urlData } = supabase.storage.from('profile-pics').getPublicUrl(path);
-        const url = urlData.publicUrl;
+        return urlData.publicUrl;
+      }));
 
+      const failed = uploads.some(u => u === null);
+      if (failed) {
+        return new Response(null, { status: 302, headers: { Location: `/profile/edit?error=upload&detail=Some+files+failed#${anchor}` } });
+      }
+
+      for (const url of uploads) {
         if (category === 'hero') {
           images.push({ src: url, pos });
         } else {
