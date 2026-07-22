@@ -92,6 +92,17 @@ const t = (profile?.theme_json ?? {}) as Record<string, string>;
               </div>
             </div>
 
+            <!-- Browse sits -->
+            <div class="dash-card browse-card">
+              <div class="browse-card-inner">
+                <div>
+                  <h3>Browse available sits</h3>
+                  <p>Find homes looking for trusted sitters. View dates, meet the pets, and get in touch with owners.</p>
+                </div>
+                <a href="/listings" class="btn-primary">View sits</a>
+              </div>
+            </div>
+
             <!-- Share card -->
             <div class="dash-card share-card">
               <h3>Share your profile</h3>
@@ -293,7 +304,12 @@ const t = (profile?.theme_json ?? {}) as Record<string, string>;
       .stat-number { font-family: "Playfair Display", serif; font-size: 2rem; color: var(--gold); font-weight: 700; }
       .stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); }
 
-      .share-card { grid-column: 1 / -1; grid-row: 2; }
+      .browse-card { grid-column: 1 / -1; grid-row: 2; }
+      .browse-card-inner { display: flex; justify-content: space-between; align-items: center; gap: 24px; }
+      .browse-card h3 { font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark); margin-bottom: 8px; }
+      .browse-card p { font-size: 0.9rem; color: var(--text-soft); line-height: 1.6; }
+
+      .share-card { grid-column: 1 / -1; grid-row: 3; }
       .share-card h3 { font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark); margin-bottom: 8px; }
       .share-card p { font-size: 0.9rem; color: var(--text-soft); margin-bottom: 16px; line-height: 1.6; }
       .share-url { display: flex; gap: 10px; }
@@ -404,7 +420,9 @@ const t = (profile?.theme_json ?? {}) as Record<string, string>;
         .dash-wrap { padding: 40px 24px; }
         .dash-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
         .stats-grid { grid-column: 1; grid-row: 2; flex-direction: row; }
-        .share-card { grid-column: 1; grid-row: 3; }
+        .browse-card { grid-column: 1; grid-row: 3; }
+        .browse-card-inner { flex-direction: column; align-items: flex-start; }
+        .share-card { grid-column: 1; grid-row: 4; }
         .share-url { flex-direction: column; }
         .no-profile { padding: 48px 24px; }
         .page-preview-header { flex-direction: column; gap: 8px; }
