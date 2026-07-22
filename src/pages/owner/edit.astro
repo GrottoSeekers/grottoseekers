@@ -60,11 +60,27 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
   <body>
     <nav>
       <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
-      <div class="nav-right">
-        <a href="/owner/dashboard" class="nav-back">← Dashboard</a>
-        <a href="/api/auth/logout" class="nav-logout">Log out</a>
-      </div>
+      <a href="/api/auth/logout" class="nav-logout">Log out</a>
     </nav>
+
+    <div class="nav-strip">
+      <a href="/owner/dashboard" class="nav-tab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href="/owner/dashboard?tab=sits" class="nav-tab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>My Sits</span>
+      </a>
+      <a href="/messages" class="nav-tab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        <span>Messages</span>
+      </a>
+      <a href="/owner/edit" class="nav-tab active">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+      </a>
+    </div>
 
     <main class="edit-wrap">
       <div class="section-inner">
@@ -519,16 +535,43 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
       }
       .preview-remove:hover { background: #991b1b; }
     </style>
-    <style>
+    <style is:global>
       body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
       nav {
-        position: static; border-bottom: 1px solid rgba(200,150,62,0.2); padding: 18px 48px;
+        position: static; border-bottom: 1px solid rgba(200,150,62,0.15); padding: 14px 48px;
         display: flex; justify-content: space-between; align-items: center;
+        background: #fff; backdrop-filter: none;
       }
-      .nav-right { display: flex; align-items: center; gap: 20px; }
-      .nav-back { font-size: 0.85rem; color: var(--text-soft); text-decoration: none; font-weight: 600; }
-      .nav-back:hover { color: var(--gold); }
-      .nav-logout { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); text-decoration: none; }
+      .nav-logout {
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--gold); text-decoration: none;
+      }
+      .nav-logout:hover { color: var(--brown-dark); }
+
+      .nav-strip {
+        display: flex; background: #fff;
+        border-bottom: 1px solid rgba(44,26,14,0.08);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        position: sticky; top: 0; z-index: 10;
+      }
+      .nav-tab {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: center; gap: 3px;
+        padding: 10px 4px 8px;
+        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.02em;
+        color: #aaa; text-decoration: none;
+        border: none; background: none; cursor: pointer;
+        position: relative; transition: color 0.2s;
+        font-family: "Lato", sans-serif;
+      }
+      .nav-tab:hover { color: var(--gold); }
+      .nav-tab.active { color: var(--gold); }
+      .nav-tab.active::after {
+        content: ''; position: absolute;
+        bottom: 0; left: 20%; right: 20%;
+        height: 3px; background: var(--gold);
+        border-radius: 3px 3px 0 0;
+      }
 
       .edit-wrap { flex: 1; padding: 60px 48px; }
       .edit-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; }
@@ -738,7 +781,9 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
       .save-all-btn { padding: 14px 48px !important; font-size: 1rem !important; letter-spacing: 0.04em; }
 
       @media (max-width: 768px) {
-        nav { padding: 14px 24px; }
+        nav { padding: 10px 16px; }
+        .nav-tab { padding: 7px 4px 6px; font-size: 0.62rem; }
+        .nav-tab svg { width: 18px; height: 18px; }
         .edit-wrap { padding: 32px 16px; }
         .edit-header { flex-direction: column; gap: 8px; }
         .form-grid { grid-template-columns: 1fr; }
