@@ -410,9 +410,11 @@ function daysBetween(from: string, to: string) {
       body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
 
       nav {
+        position: static;
         display: flex; justify-content: space-between; align-items: center;
         padding: 14px 48px; background: #fff;
         border-bottom: 1px solid rgba(200,150,62,0.15);
+        backdrop-filter: none;
       }
       .nav-logout {
         font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
