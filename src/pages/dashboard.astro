@@ -64,101 +64,32 @@ function daysBetween(from: string, to: string) {
   <body>
     <nav>
       <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
-
-      <div class="tab-toggle">
-        <button class="toggle-btn active" data-tab="dashboard">Dashboard</button>
-        <button class="toggle-btn" data-tab="sits">Available Sits</button>
-      </div>
-
-      <div class="nav-actions">
-        <a href="/messages" class="nav-msg-btn" title="Messages" id="navMsgBtn">
-          <div class="nav-msg-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-          </div>
-          <span class="nav-msg-badge" id="navMsgBadge" style="display:none">0</span>
-        </a>
-        <button class="burger" id="burger" aria-label="Menu">
-          <span></span><span></span><span></span>
-        </button>
-      </div>
-
-      <div class="nav-right">
-        <span class="nav-email">{session.email}</span>
-        <a href="/api/auth/logout" class="nav-logout">Log out</a>
-      </div>
+      <a href="/api/auth/logout" class="nav-logout">Log out</a>
     </nav>
 
-    <div id="msgToasts" class="msg-toast-container"></div>
-    <div class="mm-overlay" id="mmOverlay"></div>
-    <div class="mobile-menu" id="mobileMenu">
-      <div class="mm-header">
-        <a href="/" class="mm-logo">Grotto <span>Sitters</span></a>
-        <button class="mm-close" id="mmClose" aria-label="Close menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-      </div>
-      <div class="mm-body">
-        {profile && (
-          <div class="mm-profile">
-            {profile.profile_pic && <img src={profile.profile_pic} alt="" class="mm-avatar" />}
-            <div>
-              <p class="mm-profile-name">{profile.name}</p>
-              <p class="mm-profile-email">{session.email}</p>
-            </div>
-          </div>
-        )}
-        <a href="#" class="mm-item" data-tab-link="dashboard">
-          <div class="mm-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg></div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">Dashboard</span>
-            <span class="mm-item-desc">Your profile overview</span>
-          </div>
-          <span class="mm-chevron">&#8250;</span>
-        </a>
-        <a href="#" class="mm-item" data-tab-link="sits">
-          <div class="mm-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">Available Sits</span>
-            <span class="mm-item-desc">Browse homes that need a sitter</span>
-          </div>
-          <span class="mm-chevron">&#8250;</span>
-        </a>
-        <a href="/messages" class="mm-item">
-          <div class="mm-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">Messages <span class="mm-badge" id="mmMsgBadge" style="display:none">0</span></span>
-            <span class="mm-item-desc">Chat with pet owners</span>
-          </div>
-          <span class="mm-chevron">&#8250;</span>
-        </a>
-        <div class="mm-divider"></div>
-        <a href="/profile/edit" class="mm-item">
-          <div class="mm-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">Edit Profile</span>
-            <span class="mm-item-desc">Update your bio, photos & colours</span>
-          </div>
-          <span class="mm-chevron">&#8250;</span>
-        </a>
-        {profile && (
-          <a href={`/${profile.slug}`} class="mm-item">
-            <div class="mm-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></div>
-            <div class="mm-item-text">
-              <span class="mm-item-title">View Public Page</span>
-              <span class="mm-item-desc">See how others see you</span>
-            </div>
-            <span class="mm-chevron">&#8250;</span>
-          </a>
-        )}
-        <div class="mm-divider"></div>
-        <a href="/api/auth/logout" class="mm-item mm-item-logout">
-          <div class="mm-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg></div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">Log Out</span>
-          </div>
-        </a>
-      </div>
+    <div class="nav-strip">
+      <button class="nav-tab active" data-tab="dashboard">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        <span>Dashboard</span>
+      </button>
+      <button class="nav-tab" data-tab="sits">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Sits</span>
+      </button>
+      <a href="/messages" class="nav-tab">
+        <div class="nav-tab-icon-wrap">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          <span class="nav-tab-badge" id="navMsgBadge" style="display:none">0</span>
+        </div>
+        <span>Messages</span>
+      </a>
+      <a href="/profile/edit" class="nav-tab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+      </a>
     </div>
+
+    <div id="msgToasts" class="msg-toast-container"></div>
 
     <main class="dash-wrap">
       <div class="section-inner">
@@ -386,42 +317,17 @@ function daysBetween(from: string, to: string) {
       }
 
       function switchTab(tab: string) {
-        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.nav-tab[data-tab]').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.querySelector(`.toggle-btn[data-tab="${tab}"]`)?.classList.add('active');
+        document.querySelector(`.nav-tab[data-tab="${tab}"]`)?.classList.add('active');
         document.getElementById(`panel-${tab}`)?.classList.add('active');
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      document.querySelectorAll('.toggle-btn').forEach(btn => {
+      document.querySelectorAll('.nav-tab[data-tab]').forEach(btn => {
         btn.addEventListener('click', () => {
           switchTab((btn as HTMLElement).dataset.tab!);
         });
-      });
-
-      // Mobile menu
-      const burger = document.getElementById('burger');
-      const menu = document.getElementById('mobileMenu');
-      const mmOverlay = document.getElementById('mmOverlay');
-      const mmClose = document.getElementById('mmClose');
-
-      function openMenu() { menu?.classList.add('open'); mmOverlay?.classList.add('open'); }
-      function closeMenu() { menu?.classList.remove('open'); mmOverlay?.classList.remove('open'); }
-
-      burger?.addEventListener('click', openMenu);
-      mmClose?.addEventListener('click', closeMenu);
-      mmOverlay?.addEventListener('click', closeMenu);
-
-      document.querySelectorAll('[data-tab-link]').forEach(link => {
-        link.addEventListener('click', (e) => {
-          e.preventDefault();
-          switchTab((link as HTMLElement).dataset.tabLink!);
-          closeMenu();
-        });
-      });
-
-      menu?.querySelectorAll('a:not([data-tab-link])').forEach(a => {
-        a.addEventListener('click', closeMenu);
       });
 
       // ── MESSAGE NOTIFICATIONS ──
@@ -470,13 +376,10 @@ function daysBetween(from: string, to: string) {
 
         function updateBadge(count) {
           const nav = document.getElementById('navMsgBadge');
-          const mm = document.getElementById('mmMsgBadge');
           const label = count > 99 ? '99+' : String(count);
-          [nav, mm].forEach(el => {
-            if (!el) return;
-            if (count > 0) { el.textContent = label; el.style.display = 'inline-flex'; }
-            else { el.style.display = 'none'; }
-          });
+          if (!nav) return;
+          if (count > 0) { nav.textContent = label; nav.style.display = 'inline-flex'; }
+          else { nav.style.display = 'none'; }
         }
 
         async function checkUnread() {
@@ -507,37 +410,49 @@ function daysBetween(from: string, to: string) {
       body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
 
       nav {
-        position: static;
-        border-bottom: 1px solid rgba(200,150,62,0.2);
-        padding: 14px 48px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #fff;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 14px 48px; background: #fff;
+        border-bottom: 1px solid rgba(200,150,62,0.15);
       }
-
-      .nav-actions { display: flex; align-items: center; gap: 8px; }
-      .nav-right { display: flex; align-items: center; gap: 20px; }
-
-      /* ── NAV MESSAGE BUTTON (always visible) ──────────────── */
-      .nav-msg-btn {
-        position: relative; text-decoration: none;
-        display: flex; align-items: center; justify-content: center;
-        width: 42px; height: 42px; border-radius: 50%;
-        background: rgba(200,150,62,0.08);
-        transition: all 0.2s;
+      .nav-logout {
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--gold); text-decoration: none;
       }
-      .nav-msg-btn:hover { background: rgba(200,150,62,0.18); transform: scale(1.05); }
-      .nav-msg-icon { color: var(--gold, #c8963e); display: flex; align-items: center; justify-content: center; }
-      .nav-msg-badge {
-        position: absolute; top: -2px; right: -2px;
-        background: #ef4444; color: #fff; font-size: 0.6rem; font-weight: 700;
-        min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
+      .nav-logout:hover { color: var(--brown-dark); }
+
+      /* ── NAV STRIP ──────────────────────────────────────── */
+      .nav-strip {
+        display: flex; background: #fff;
+        border-bottom: 1px solid rgba(44,26,14,0.08);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        position: sticky; top: 0; z-index: 10;
+      }
+      .nav-tab {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: center; gap: 3px;
+        padding: 10px 4px 8px;
+        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.02em;
+        color: #aaa; text-decoration: none;
+        border: none; background: none; cursor: pointer;
+        position: relative; transition: color 0.2s;
+        font-family: "Lato", sans-serif;
+      }
+      .nav-tab:hover { color: var(--gold); }
+      .nav-tab.active { color: var(--gold); }
+      .nav-tab.active::after {
+        content: ''; position: absolute;
+        bottom: 0; left: 20%; right: 20%;
+        height: 3px; background: var(--gold);
+        border-radius: 3px 3px 0 0;
+      }
+      .nav-tab-icon-wrap { position: relative; display: flex; }
+      .nav-tab-badge {
+        position: absolute; top: -5px; right: -10px;
+        background: #ef4444; color: #fff; font-size: 0.55rem; font-weight: 700;
+        min-width: 16px; height: 16px; border-radius: 8px; padding: 0 4px;
         display: inline-flex; align-items: center; justify-content: center;
-        line-height: 1; box-shadow: 0 2px 6px rgba(239,68,68,0.4);
-        animation: badge-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+        line-height: 1; box-shadow: 0 1px 4px rgba(239,68,68,0.4);
       }
-      @keyframes badge-pop { from { transform: scale(0); } to { transform: scale(1); } }
 
       /* ── TOAST NOTIFICATIONS ──────────────────────────────── */
       .msg-toast-container {
@@ -566,101 +481,6 @@ function daysBetween(from: string, to: string) {
       .msg-toast-body { flex: 1; min-width: 0; }
       .msg-toast-name { font-weight: 700; font-size: 0.88rem; color: var(--brown-dark, #2c1a0e); }
       .msg-toast-preview { font-size: 0.82rem; color: var(--text-soft, #6b4e35); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-      /* ── HAMBURGER BADGE ──────────────────────────────────── */
-      .mm-badge {
-        display: inline-flex; align-items: center; justify-content: center;
-        background: #ef4444; color: #fff; font-size: 0.6rem; font-weight: 700;
-        min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
-        margin-left: 6px; vertical-align: middle;
-      }
-      .nav-email { font-size: 0.85rem; color: var(--text-soft); }
-      .nav-logout {
-        font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--gold); text-decoration: none;
-      }
-      .nav-logout:hover { color: var(--brown-dark); }
-
-      /* ── SEGMENTED TOGGLE ─────────────────────────────────── */
-      .tab-toggle {
-        display: flex;
-        background: var(--cream); border-radius: 10px; padding: 4px;
-        border: 1px solid rgba(44,26,14,0.08);
-      }
-      .toggle-btn {
-        background: none; border: none; cursor: pointer;
-        padding: 10px 24px; font-family: "Lato", sans-serif;
-        font-size: 0.88rem; font-weight: 600; color: var(--text-soft);
-        border-radius: 8px; transition: all 0.2s;
-        white-space: nowrap;
-      }
-      .toggle-btn:hover { color: var(--brown-dark); }
-      .toggle-btn.active {
-        background: #fff; color: var(--brown-dark); font-weight: 700;
-        box-shadow: 0 1px 4px rgba(44,26,14,0.1);
-      }
-
-      /* ── BURGER ───────────────────────────────────────────── */
-      .burger {
-        display: none; background: none; border: none; cursor: pointer;
-        flex-direction: column; gap: 5px; padding: 4px;
-      }
-      .burger span {
-        display: block; width: 22px; height: 2px;
-        background: var(--brown-dark); border-radius: 2px;
-        transition: transform 0.3s, opacity 0.3s;
-      }
-
-      /* ── MOBILE MENU DRAWER ───────────────────────────────── */
-      .mm-overlay {
-        position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-        z-index: 200; opacity: 0; pointer-events: none;
-        transition: opacity 0.3s;
-      }
-      .mm-overlay.open { opacity: 1; pointer-events: auto; }
-
-      .mobile-menu {
-        position: fixed; top: 0; right: 0; bottom: 0;
-        width: 320px; max-width: 85vw; background: #fff; z-index: 201;
-        transform: translateX(100%); transition: transform 0.3s ease;
-        display: flex; flex-direction: column;
-      }
-      .mobile-menu.open { transform: translateX(0); }
-
-      .mm-header {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 20px 24px; border-bottom: 1px solid rgba(200,150,62,0.15);
-      }
-      .mm-logo { font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark); text-decoration: none; }
-      .mm-logo span { color: var(--gold); font-style: italic; }
-      .mm-close { background: none; border: none; cursor: pointer; color: var(--text-soft); padding: 4px; }
-      .mm-close:hover { color: var(--brown-dark); }
-
-      .mm-body { flex: 1; overflow-y: auto; padding: 16px 0; }
-
-      .mm-profile {
-        display: flex; gap: 14px; align-items: center;
-        padding: 12px 24px 20px; margin-bottom: 4px;
-      }
-      .mm-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
-      .mm-profile-name { font-family: "Playfair Display", serif; font-size: 1rem; color: var(--brown-dark); font-weight: 700; }
-      .mm-profile-email { font-size: 0.78rem; color: var(--text-soft); margin-top: 2px; }
-
-      .mm-item {
-        display: flex; align-items: center; gap: 14px;
-        padding: 14px 24px; text-decoration: none; color: var(--text);
-        transition: background 0.15s;
-      }
-      .mm-item:hover { background: var(--cream); }
-      .mm-item-icon { color: var(--gold); flex-shrink: 0; }
-      .mm-item-text { flex: 1; }
-      .mm-item-title { display: block; font-size: 0.92rem; font-weight: 600; color: var(--brown-dark); }
-      .mm-item-desc { display: block; font-size: 0.78rem; color: var(--text-soft); margin-top: 2px; }
-      .mm-chevron { font-size: 1.2rem; color: rgba(44,26,14,0.2); font-weight: 300; }
-      .mm-item-logout { margin-top: auto; }
-      .mm-item-logout .mm-item-title { color: #b91c1c; }
-      .mm-item-logout .mm-item-icon { color: #b91c1c; }
-      .mm-divider { height: 1px; background: rgba(44,26,14,0.08); margin: 8px 24px; }
 
       /* ── TAB PANELS ───────────────────────────────────────── */
       .tab-panel { display: none; }
@@ -868,12 +688,9 @@ function daysBetween(from: string, to: string) {
 
       @media (max-width: 768px) {
         nav { padding: 12px 20px; }
-        .nav-right { display: none; }
-        .nav-actions { order: 3; }
-        .nav-msg-btn { width: 38px; height: 38px; }
-        .tab-toggle { display: flex; }
-        .toggle-btn { padding: 8px 16px; font-size: 0.82rem; }
-        .burger { display: flex; }
+        .nav-strip { position: sticky; top: 0; }
+        .nav-tab { padding: 8px 4px 6px; font-size: 0.64rem; }
+        .nav-tab svg { width: 20px; height: 20px; }
         .dash-wrap { padding: 28px 20px; }
         .dash-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
         .stats-grid { grid-column: 1; grid-row: 2; flex-direction: row; }
