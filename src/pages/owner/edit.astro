@@ -21,6 +21,7 @@ const aboutImages: any[] = Array.isArray(profile.about_images_json) ? profile.ab
 const gallery: any[] = Array.isArray(profile.gallery_json) ? profile.gallery_json : [];
 const pets: any[] = Array.isArray(profile.pets_json) ? profile.pets_json : [];
 const amenities: string[] = Array.isArray(profile.amenities_json) ? profile.amenities_json : [];
+const reviews: any[] = Array.isArray(profile.reviews_json) ? profile.reviews_json : [];
 const h = (profile.headings_json ?? {}) as Record<string, string>;
 const t = (profile.theme_json ?? {}) as Record<string, string>;
 
@@ -87,6 +88,148 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
           <a href="#gallery">Gallery</a>
           <a href="#looking-for">Looking For</a>
           <a href="#headings">Headings</a>
+        </div>
+
+        <!-- ── FULL PAGE PREVIEW ────────────────────── -->
+        <div class="page-preview-wrap">
+          <div class="page-preview-header">
+            <h2>Page preview</h2>
+            <a href={`/${profile.slug}`} target="_blank" class="preview-view-link">Open full page</a>
+          </div>
+          <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#c8963e'};--pv-accent-light:${t.accent_light || '#e8b96a'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
+            <!-- Hero -->
+            <div class="pv-hero">
+              {heroImages.length > 0 ? (
+                <img src={heroImages[0].src} alt="" class="pv-hero-img" style={`object-position:${heroImages[0].pos}`} />
+              ) : (
+                <div class="pv-hero-img pv-hero-empty"></div>
+              )}
+              <div class="pv-hero-overlay"></div>
+              <div class="pv-hero-content">
+                {profile.location && <span class="pv-badge">{profile.location}</span>}
+                <p class="pv-brand">Grotto <em>Sitters</em></p>
+                <p class="pv-name">{profile.name}</p>
+                {profile.tagline && <p class="pv-tagline">{profile.tagline}</p>}
+                <span class="pv-btn">Get In Touch</span>
+              </div>
+            </div>
+
+            <!-- About -->
+            <div class="pv-section" style="background:var(--pv-bg);">
+              <p class="pv-label">{h.about_label || 'About Our Home'}</p>
+              <div class="pv-about-row">
+                {aboutImages.length > 0 && <img src={aboutImages[0].src} alt="" class="pv-about-img" />}
+                <div class="pv-about-text">
+                  {profile.bio ? (
+                    <p>{profile.bio.length > 100 ? profile.bio.slice(0, 100) + '...' : profile.bio}</p>
+                  ) : (
+                    <p class="pv-empty">No bio yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <!-- Reviews -->
+            {reviews.length > 0 && (
+              <div class="pv-section" style="background:var(--pv-bg);">
+                <p class="pv-label">{h.reviews_label || 'What Sitters Say'}</p>
+                <div class="pv-reviews-row">
+                  {reviews.slice(0, 3).map((r: any) => (
+                    <div class="pv-review-card">
+                      <span class="pv-stars">★★★★★</span>
+                      <p>"{r.text.length > 50 ? r.text.slice(0, 50) + '...' : r.text}"</p>
+                      <span class="pv-reviewer">— {r.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Pets -->
+            {pets.length > 0 && (
+              <div class="pv-section" style="background:var(--pv-bg);">
+                <p class="pv-label">Meet the Pets</p>
+                <div class="pv-pets-row">
+                  {pets.slice(0, 4).map((pet: any) => (
+                    <div class="pv-pet-chip">
+                      {pet.photo_url && <img src={pet.photo_url} alt="" class="pv-pet-img" />}
+                      <span>{pet.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Amenities -->
+            {amenities.length > 0 && (
+              <div class="pv-section" style="background:var(--pv-bg);">
+                <p class="pv-label">Home Amenities</p>
+                <div class="pv-amenities-row">
+                  {amenities.slice(0, 6).map((a: string) => (
+                    <span class="pv-amenity-tag">✓ {a}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Gallery -->
+            {gallery.length > 0 && (
+              <div class="pv-section pv-gallery-section">
+                <p class="pv-label">{h.gallery_label || 'Our Home'}</p>
+                <div class="pv-gallery-grid">
+                  {gallery.slice(0, 8).map((img: any) => (
+                    <div class="pv-gallery-item"><img src={img.src} alt="" /></div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <!-- Enquiry -->
+            <div class="pv-section" style="background:var(--pv-bg);">
+              <p class="pv-label">{h.enquiry_label || 'Get In Touch'}</p>
+              <div class="pv-enquiry-mock">
+                <div class="pv-mock-field"></div>
+                <div class="pv-mock-field"></div>
+                <div class="pv-mock-field pv-mock-tall"></div>
+                <div class="pv-mock-btn">Send Enquiry</div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pv-footer">
+              <p>Grotto <em>Sitters</em></p>
+              <span>{profile.name}</span>
+            </div>
+          </div>
+
+          <!-- Colour strip under preview -->
+          <form action="/api/profile/theme" method="POST" class="colour-strip" id="colours">
+            <div class="colour-strip-row">
+              <div class="colour-swatch">
+                <input type="color" name="background" value={t.background || '#faf6ee'} class="colour-picker" />
+                <span>Background</span>
+              </div>
+              <div class="colour-swatch">
+                <input type="color" name="accent" value={t.accent || '#c8963e'} class="colour-picker" />
+                <span>Accent</span>
+              </div>
+              <div class="colour-swatch">
+                <input type="color" name="accent_light" value={t.accent_light || '#e8b96a'} class="colour-picker" />
+                <span>Highlight</span>
+              </div>
+              <div class="colour-swatch">
+                <input type="color" name="text" value={t.text || '#2c1a0e'} class="colour-picker" />
+                <span>Text</span>
+              </div>
+              <div class="colour-swatch">
+                <input type="color" name="text_soft" value={t.text_soft || '#6b4e35'} class="colour-picker" />
+                <span>Soft text</span>
+              </div>
+            </div>
+            <div class="colour-strip-actions">
+              <button type="button" class="btn-reset-colours" id="resetColours">Reset</button>
+            </div>
+          </form>
         </div>
 
         <!-- ─── DETAILS ──────────────────────────────────── -->
@@ -348,35 +491,6 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
           </form>
         </section>
 
-        <!-- ─── THEME ────────────────────────────────────── -->
-        <section id="theme" class="edit-section">
-          <h2 class="edit-section-title">Theme Colours</h2>
-          <form method="POST" action="/api/profile/theme" class="edit-form">
-            <div class="colour-strip-row">
-              <label class="colour-swatch">
-                <span>Background</span>
-                <input type="color" name="background" value={t.background || '#faf6ee'} class="colour-picker" />
-              </label>
-              <label class="colour-swatch">
-                <span>Accent</span>
-                <input type="color" name="accent" value={t.accent || '#c8963e'} class="colour-picker" />
-              </label>
-              <label class="colour-swatch">
-                <span>Accent Light</span>
-                <input type="color" name="accent_light" value={t.accent_light || '#e8b96a'} class="colour-picker" />
-              </label>
-              <label class="colour-swatch">
-                <span>Text</span>
-                <input type="color" name="text" value={t.text || '#2c1a0e'} class="colour-picker" />
-              </label>
-              <label class="colour-swatch">
-                <span>Text Soft</span>
-                <input type="color" name="text_soft" value={t.text_soft || '#6b4e35'} class="colour-picker" />
-              </label>
-            </div>
-          </form>
-        </section>
-
         <!-- ─── SAVE ALL ─────────────────────────────────── -->
         <div class="save-bar">
           <button type="button" id="save-all" class="btn-primary save-all-btn">Save changes</button>
@@ -515,12 +629,99 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
       .amenity-check:has(input:checked) { background: rgba(200,150,62,0.12); }
       .amenity-check input { accent-color: var(--gold); width: 16px; height: 16px; }
 
-      .colour-strip-row { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }
-      .colour-swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
-      .colour-swatch span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-soft); }
-      .colour-picker { width: 48px; height: 32px; border: 2px solid rgba(44,26,14,0.15); border-radius: 6px; padding: 0; cursor: pointer; background: none; }
+      /* ── FULL PAGE PREVIEW ────────────────────────────────── */
+      .page-preview-wrap { margin-bottom: 32px; }
+      .page-preview-header {
+        display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+      }
+      .page-preview-header h2 {
+        font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark);
+      }
+      .preview-view-link {
+        font-size: 0.78rem; font-weight: 700; color: var(--gold);
+        text-decoration: none; letter-spacing: 0.04em;
+      }
+      .preview-view-link:hover { text-decoration: underline; }
 
-      .upload-save-btn { margin-top: 4px; }
+      .page-preview {
+        background: var(--pv-bg); border-radius: 12px 12px 0 0; overflow: hidden;
+        box-shadow: 0 4px 24px rgba(44,26,14,0.12); border: 1px solid rgba(44,26,14,0.08);
+        border-bottom: none;
+      }
+
+      .pv-hero { position: relative; height: 180px; overflow: hidden; }
+      .pv-hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .pv-hero-empty { background: linear-gradient(135deg, #2c1a0e 0%, #4a3525 100%); height: 100%; }
+      .pv-hero-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.5); }
+      .pv-hero-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; text-align: center; padding: 16px; }
+      .pv-badge { font-size: 0.55rem; background: rgba(255,255,255,0.15); color: #fff; padding: 4px 10px; border-radius: 50px; margin-bottom: 8px; font-weight: 700; letter-spacing: 0.06em; }
+      .pv-brand { font-family: "Playfair Display", serif; font-size: 1.6rem; color: #fff; line-height: 1; }
+      .pv-brand em { color: var(--pv-accent); font-style: italic; }
+      .pv-name { font-size: 0.7rem; color: rgba(255,255,255,0.85); font-weight: 700; letter-spacing: 0.06em; margin-top: 6px; }
+      .pv-tagline { font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+      .pv-btn { display: inline-block; margin-top: 10px; background: var(--pv-accent); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 5px 14px; border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+
+      .pv-section { padding: 16px 20px; }
+      .pv-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pv-accent); margin-bottom: 8px; }
+
+      .pv-about-row { display: flex; gap: 12px; align-items: flex-start; }
+      .pv-about-img { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+      .pv-about-text p { font-size: 0.65rem; color: var(--pv-text-soft); line-height: 1.6; }
+      .pv-empty { font-style: italic; opacity: 0.4; }
+
+      .pv-reviews-row { display: flex; gap: 8px; overflow: hidden; }
+      .pv-review-card { flex: 1; min-width: 0; background: var(--pv-bg); border: 1px solid rgba(200,150,62,0.1); border-radius: 8px; padding: 10px; }
+      .pv-stars { color: var(--pv-accent); font-size: 0.5rem; display: block; margin-bottom: 4px; }
+      .pv-review-card p { font-size: 0.58rem; color: var(--pv-text-soft); line-height: 1.5; font-style: italic; margin-bottom: 4px; }
+      .pv-reviewer { font-size: 0.52rem; font-weight: 700; color: var(--pv-accent); }
+
+      .pv-pets-row { display: flex; flex-wrap: wrap; gap: 8px; }
+      .pv-pet-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(200,150,62,0.08); border-radius: 6px; font-size: 0.6rem; font-weight: 600; color: var(--pv-text); }
+      .pv-pet-img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+
+      .pv-amenities-row { display: flex; flex-wrap: wrap; gap: 6px; }
+      .pv-amenity-tag { font-size: 0.55rem; padding: 3px 8px; background: rgba(200,150,62,0.08); border-radius: 4px; color: var(--pv-text-soft); font-weight: 600; }
+
+      .pv-gallery-section { background: var(--pv-bg); }
+      .pv-gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+      .pv-gallery-item { aspect-ratio: 1; border-radius: 4px; overflow: hidden; }
+      .pv-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+      .pv-enquiry-mock { display: flex; flex-direction: column; gap: 5px; max-width: 200px; }
+      .pv-mock-field { height: 16px; background: rgba(44,26,14,0.04); border: 1px solid rgba(44,26,14,0.08); border-radius: 3px; }
+      .pv-mock-tall { height: 28px; }
+      .pv-mock-btn { background: var(--pv-accent); color: #fff; text-align: center; padding: 5px; border-radius: 4px; font-size: 0.5rem; font-weight: 700; }
+
+      .pv-footer { background: var(--pv-text, #2c1a0e); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
+      .pv-footer p { font-family: "Playfair Display", serif; font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+      .pv-footer p em { color: var(--pv-accent); font-style: italic; }
+      .pv-footer span { font-size: 0.55rem; color: rgba(255,255,255,0.4); }
+
+      .colour-strip {
+        background: #fff; border-radius: 0 0 12px 12px; padding: 16px 20px;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
+        border: 1px solid rgba(44,26,14,0.08); border-top: none;
+        margin-top: -2px;
+      }
+      .colour-strip-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+      .colour-swatch { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+      .colour-swatch span { font-size: 0.65rem; font-weight: 600; color: var(--text-soft); letter-spacing: 0.02em; }
+      .colour-picker {
+        width: 38px; height: 38px; border: 2px solid rgba(44,26,14,0.15);
+        border-radius: 50%; cursor: pointer; padding: 2px; background: var(--cream);
+        flex-shrink: 0; transition: border-color 0.2s, transform 0.15s;
+      }
+      .colour-picker:hover { border-color: var(--gold); transform: scale(1.1); }
+      .colour-picker::-webkit-color-swatch-wrapper { padding: 0; }
+      .colour-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
+      .colour-picker::-moz-color-swatch { border: none; border-radius: 50%; }
+      .colour-strip-actions { display: flex; gap: 10px; justify-content: center; }
+      .btn-reset-colours {
+        background: none; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
+        padding: 8px 16px; font-size: 0.78rem; font-weight: 600; color: var(--text-soft);
+        cursor: pointer; font-family: "Lato", sans-serif; transition: all 0.2s;
+      }
+      .btn-reset-colours:hover { border-color: var(--gold); color: var(--brown-dark); }
       .file-count { font-size: 0.82rem; color: var(--text-soft); margin-top: 4px; }
 
       .file-input-multi {
@@ -625,7 +826,7 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
         });
       });
 
-      document.querySelectorAll<HTMLFormElement>('#details form, #amenities form, #looking-for form, #headings form, #theme form').forEach(f => {
+      document.querySelectorAll<HTMLFormElement>('#details form, #amenities form, #looking-for form, #headings form, #colours').forEach(f => {
         f.addEventListener('submit', e => e.preventDefault());
       });
 
@@ -683,7 +884,7 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
           }
 
           btn.textContent = 'Saving colours…';
-          const themeForm = document.querySelector<HTMLFormElement>('#theme form');
+          const themeForm = document.getElementById('colours') as HTMLFormElement;
           if (themeForm) {
             const r3 = await fetch('/api/profile/theme', { method: 'POST', body: new FormData(themeForm) });
             if (r3.url.includes('error=')) errors.push('Failed to save colours.');
@@ -700,6 +901,35 @@ const petTypes = ['Dog', 'Cat', 'Bird', 'Fish', 'Rabbit', 'Reptile', 'Horse', 'O
           btn.disabled = false;
           btn.textContent = 'Save changes';
           alert('Something went wrong. Please try again.');
+        }
+      });
+
+      const colourVarMap: Record<string, string> = {
+        background: '--pv-bg', accent: '--pv-accent', accent_light: '--pv-accent-light',
+        text: '--pv-text', text_soft: '--pv-text-soft',
+      };
+      const pvEl = document.querySelector<HTMLElement>('.page-preview');
+      if (pvEl) {
+        document.querySelectorAll<HTMLInputElement>('.colour-picker').forEach(picker => {
+          picker.addEventListener('input', () => {
+            const v = colourVarMap[picker.name];
+            if (v) pvEl.style.setProperty(v, picker.value);
+          });
+        });
+      }
+
+      document.getElementById('resetColours')?.addEventListener('click', () => {
+        const defaults: Record<string, string> = {
+          background: '#faf6ee', accent: '#c8963e', accent_light: '#e8b96a',
+          text: '#2c1a0e', text_soft: '#6b4e35',
+        };
+        for (const [key, val] of Object.entries(defaults)) {
+          const input = document.querySelector<HTMLInputElement>(`input[name="${key}"]`);
+          if (input) input.value = val;
+          if (pvEl) {
+            const v = colourVarMap[key];
+            if (v) pvEl.style.setProperty(v, val);
+          }
         }
       });
     </script>
