@@ -1,0 +1,208 @@
+---
+export const prerender = false;
+
+import '../../styles/global.css';
+import { getSession } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('id, profile_type, name, profile_pic')
+  .eq('user_id', session.userId)
+  .single();
+
+if (!profile) return Astro.redirect(session.role === 'owner' ? '/owner/create' : '/profile/create');
+
+const dashUrl = profile.profile_type === 'owner' ? '/owner/dashboard' : '/dashboard';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>Messages — Grotto Sitters</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
+      <div class="nav-right">
+        <a href={dashUrl} class="nav-back">&larr; Dashboard</a>
+        <a href="/api/auth/logout" class="nav-logout">Log out</a>
+      </div>
+    </nav>
+
+    <main class="inbox-wrap">
+      <div class="inbox-container">
+        <header class="inbox-header">
+          <h1>Messages</h1>
+        </header>
+
+        <div class="conv-list" id="convList">
+          <div class="loading">Loading conversations...</div>
+        </div>
+      </div>
+    </main>
+
+    <script define:vars={{ myProfileId: profile.id }}>
+      async function loadConversations() {
+        const list = document.getElementById('convList');
+        try {
+          const res = await fetch('/api/messages/conversations');
+          const data = await res.json();
+
+          if (!Array.isArray(data) || data.length === 0) {
+            list.innerHTML = `
+              <div class="empty-inbox">
+                <div class="empty-icon">💬</div>
+                <h2>No messages yet</h2>
+                <p>When you start a conversation, it will appear here.</p>
+              </div>`;
+            return;
+          }
+
+          list.innerHTML = data.map(conv => {
+            const other = conv.other;
+            const lastMsg = conv.last_message;
+            const unread = conv.unread_count > 0;
+            const time = lastMsg ? formatTime(lastMsg.created_at) : '';
+            const preview = lastMsg
+              ? (lastMsg.sender_profile_id === myProfileId ? 'You: ' : '') + truncate(lastMsg.body, 60)
+              : 'No messages yet';
+            const listingLabel = conv.listing?.title ? conv.listing.title : '';
+
+            return `
+              <a href="/messages/${conv.id}" class="conv-item ${unread ? 'unread' : ''}">
+                <div class="conv-avatar-wrap">
+                  ${other?.profile_pic
+                    ? `<img src="${other.profile_pic}" alt="" class="conv-avatar" />`
+                    : `<div class="conv-avatar conv-avatar-placeholder">${(other?.name || '?').charAt(0).toUpperCase()}</div>`
+                  }
+                  ${unread ? '<span class="conv-badge"></span>' : ''}
+                </div>
+                <div class="conv-content">
+                  <div class="conv-top">
+                    <span class="conv-name">${other?.name || 'Unknown'}</span>
+                    <span class="conv-time">${time}</span>
+                  </div>
+                  ${listingLabel ? `<span class="conv-listing">${listingLabel}</span>` : ''}
+                  <p class="conv-preview">${preview}</p>
+                </div>
+              </a>`;
+          }).join('');
+        } catch {
+          list.innerHTML = '<p class="error-msg">Failed to load conversations.</p>';
+        }
+      }
+
+      function formatTime(iso) {
+        const d = new Date(iso);
+        const now = new Date();
+        const diff = now.getTime() - d.getTime();
+        if (diff < 60000) return 'Just now';
+        if (diff < 3600000) return Math.floor(diff / 60000) + 'm';
+        if (diff < 86400000) return Math.floor(diff / 3600000) + 'h';
+        if (diff < 604800000) return d.toLocaleDateString('en-GB', { weekday: 'short' });
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      }
+
+      function truncate(str, len) {
+        return str.length > len ? str.slice(0, len) + '...' : str;
+      }
+
+      loadConversations();
+    </script>
+
+    <style>
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+      nav {
+        position: static; border-bottom: 1px solid rgba(200,150,62,0.2);
+        padding: 14px 48px; display: flex; justify-content: space-between;
+        align-items: center; background: #fff;
+      }
+      .nav-right { display: flex; align-items: center; gap: 20px; }
+      .nav-back { font-size: 0.85rem; color: var(--text-soft); text-decoration: none; font-weight: 600; }
+      .nav-back:hover { color: var(--gold); }
+      .nav-logout { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); text-decoration: none; }
+
+      .inbox-wrap { flex: 1; display: flex; justify-content: center; padding: 24px; }
+      .inbox-container { width: 100%; max-width: 680px; }
+
+      .inbox-header {
+        padding: 16px 0 24px; display: flex; justify-content: space-between; align-items: center;
+      }
+      .inbox-header h1 {
+        font-family: "Playfair Display", serif; font-size: 1.8rem; color: var(--brown-dark);
+      }
+
+      .conv-list { display: flex; flex-direction: column; }
+
+      .conv-item {
+        display: flex; gap: 16px; align-items: center;
+        padding: 18px 20px; background: #fff; text-decoration: none; color: inherit;
+        border-bottom: 1px solid rgba(44,26,14,0.06);
+        transition: background 0.15s;
+      }
+      .conv-item:first-child { border-radius: 16px 16px 0 0; }
+      .conv-item:last-child { border-radius: 0 0 16px 16px; border-bottom: none; }
+      .conv-item:only-child { border-radius: 16px; }
+      .conv-item:hover { background: #faf6ee; }
+      .conv-item.unread { background: #fffdf5; }
+
+      .conv-avatar-wrap { position: relative; flex-shrink: 0; }
+      .conv-avatar {
+        width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
+      }
+      .conv-avatar-placeholder {
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(200,150,62,0.12); color: var(--gold);
+        font-family: "Playfair Display", serif; font-size: 1.2rem; font-weight: 700;
+      }
+      .conv-badge {
+        position: absolute; top: 0; right: 0;
+        width: 14px; height: 14px; border-radius: 50%;
+        background: var(--gold); border: 2.5px solid #fff;
+      }
+
+      .conv-content { flex: 1; min-width: 0; }
+      .conv-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+      .conv-name { font-weight: 700; font-size: 0.95rem; color: var(--brown-dark); }
+      .unread .conv-name { color: var(--brown-dark); }
+      .conv-time { font-size: 0.78rem; color: var(--text-soft); flex-shrink: 0; }
+      .conv-listing {
+        display: inline-block; font-size: 0.72rem; color: var(--gold); font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .conv-preview {
+        font-size: 0.85rem; color: var(--text-soft); line-height: 1.4;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      }
+      .unread .conv-preview { color: var(--brown-mid); font-weight: 600; }
+
+      .loading { padding: 60px; text-align: center; color: var(--text-soft); font-size: 0.9rem; }
+      .error-msg { padding: 40px; text-align: center; color: #b91c1c; font-size: 0.9rem; }
+
+      .empty-inbox {
+        background: #fff; border-radius: 16px; padding: 80px 40px; text-align: center;
+        box-shadow: 0 2px 12px rgba(44,26,14,0.05);
+      }
+      .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+      .empty-inbox h2 { font-family: "Playfair Display", serif; font-size: 1.4rem; color: var(--brown-dark); margin-bottom: 8px; }
+      .empty-inbox p { font-size: 0.92rem; color: var(--text-soft); }
+
+      @media (max-width: 768px) {
+        nav { padding: 12px 20px; }
+        .inbox-wrap { padding: 16px; }
+        .inbox-header h1 { font-size: 1.4rem; }
+        .conv-item { padding: 14px 16px; gap: 12px; }
+        .conv-avatar { width: 44px; height: 44px; }
+      }
+    </style>
+  </body>
+</html>
