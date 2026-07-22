@@ -40,10 +40,7 @@ const errorMsg = errorMap[errorKey] ?? '';
   <body>
     <nav>
       <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
-      <div class="nav-right">
-        <span class="nav-email">{session.email}</span>
-        <a href="/api/auth/logout" class="nav-logout">Log out</a>
-      </div>
+      <a href="/api/auth/logout" class="top-bar-logout">Log out</a>
     </nav>
 
     <main class="create-wrap">
@@ -216,21 +213,17 @@ const errorMsg = errorMap[errorKey] ?? '';
     </script>
 
     <style>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+      body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; background: #f7f7f7; }
 
       nav {
         position: static;
-        border-bottom: 1px solid rgba(200,150,62,0.2);
-        padding: 18px 48px;
+        border-bottom: 1px solid rgba(0,0,0,0.06);
+        padding: 14px 20px;
         display: flex; justify-content: space-between; align-items: center;
+        background: #fff; backdrop-filter: none;
       }
-      .nav-right { display: flex; align-items: center; gap: 20px; }
-      .nav-email { font-size: 0.85rem; color: var(--text-soft); }
-      .nav-logout {
-        font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--gold); text-decoration: none;
-      }
-      .nav-logout:hover { color: var(--brown-dark); }
+      .top-bar-logout { font-size: 0.82rem; font-weight: 600; color: #888; text-decoration: none; transition: color 0.2s; }
+      .top-bar-logout:hover { color: var(--brown-dark); }
 
       .create-wrap { flex: 1; padding: 60px 48px; }
       .create-header { margin-bottom: 40px; }
@@ -245,8 +238,8 @@ const errorMsg = errorMap[errorKey] ?? '';
       .create-form { max-width: 680px; }
 
       .form-section {
-        background: #fff; border-radius: 12px; padding: 36px;
-        box-shadow: 0 2px 16px rgba(44,26,14,0.06); margin-bottom: 24px;
+        background: #fff; border-radius: 16px; padding: 36px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04); margin-bottom: 24px;
       }
       .form-section h2 {
         font-family: "Playfair Display", serif; font-size: 1.15rem;
@@ -311,7 +304,6 @@ const errorMsg = errorMap[errorKey] ?? '';
 
       @media (max-width: 768px) {
         nav { padding: 14px 24px; }
-        .nav-email { display: none; }
         .create-wrap { padding: 40px 24px; }
         .form-section { padding: 24px; }
         .slug-prefix { font-size: 0.78rem; padding: 12px 10px; }

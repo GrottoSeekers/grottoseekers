@@ -57,48 +57,17 @@ const listingTitle = (conv.listings as any)?.title ?? '';
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
-      <a href="/api/auth/logout" class="nav-logout">Log out</a>
+      <a href="/messages" class="chat-back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </a>
+      <div class="chat-header-info">
+        <span class="chat-header-name">{other?.name}</span>
+        {listingTitle && <span class="chat-header-listing">{listingTitle}</span>}
+      </div>
+      {other?.profile_pic && <img src={other.profile_pic} alt="" class="chat-header-avatar" />}
     </nav>
 
-    <div class="nav-strip">
-      <a href={dashUrl} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
-        <span>Dashboard</span>
-      </a>
-      <a href={dashUrl + '?tab=sits'} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>{profile.profile_type === 'owner' ? 'My Sits' : 'Sits'}</span>
-      </a>
-      <a href="/messages" class="nav-tab active">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-        <span>Messages</span>
-      </a>
-      <a href={profileUrl} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Profile</span>
-      </a>
-    </div>
-
     <div class="chat-layout">
-      <!-- Chat header -->
-      <header class="chat-header">
-        <a href="/messages" class="chat-back">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </a>
-        <a href={`/${other?.slug}`} class="chat-user">
-          {other?.profile_pic ? (
-            <img src={other.profile_pic} alt="" class="chat-user-avatar" />
-          ) : (
-            <div class="chat-user-avatar chat-avatar-placeholder">{(other?.name || '?').charAt(0).toUpperCase()}</div>
-          )}
-          <div>
-            <p class="chat-user-name">{other?.name}</p>
-            {listingTitle && <p class="chat-listing-ref">{listingTitle}</p>}
-          </div>
-        </a>
-      </header>
-
       <!-- Messages area -->
       <div class="chat-messages" id="chatMessages">
         <div class="loading">Loading messages...</div>
@@ -254,94 +223,55 @@ const listingTitle = (conv.listings as any)?.title ?? '';
       setInterval(loadMessages, 3000);
     </script>
 
+    <div class="tab-bar">
+      <a href={dashUrl} class="tab-bar-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>Home</span>
+      </a>
+      <a href={dashUrl + '?tab=sits'} class="tab-bar-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <span>Sits</span>
+      </a>
+      <a href="/messages" class="tab-bar-item active">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span>Inbox</span>
+      </a>
+      <a href={profileUrl} class="tab-bar-item">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+      </a>
+    </div>
+
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: #e5ddd5; height: 100vh; height: 100dvh; overflow: hidden;
+      body { display: flex; flex-direction: column; min-height: 100vh; min-height: 100dvh; background: #f7f7f7; margin: 0;
         font-family: "Lato", -apple-system, BlinkMacSystemFont, sans-serif;
-        display: flex; flex-direction: column; }
+        overflow: hidden; }
 
       nav {
         position: static;
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 10px 48px; background: #fff;
-        border-bottom: 1px solid rgba(200,150,62,0.15);
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 16px; background: #fff;
+        border-bottom: 1px solid rgba(0,0,0,0.06);
         backdrop-filter: none; flex-shrink: 0;
       }
-      .nav-logout {
-        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--gold, #c8963e); text-decoration: none;
-      }
-      .nav-logout:hover { color: var(--brown-dark, #2c1a0e); }
+      .chat-back { display: flex; align-items: center; color: #666; text-decoration: none; padding: 4px; }
+      .chat-back:hover { color: var(--brown-dark, #2c1a0e); }
+      .chat-header-info { flex: 1; min-width: 0; text-align: center; }
+      .chat-header-name { display: block; font-weight: 700; font-size: 0.95rem; color: var(--brown-dark, #2c1a0e); }
+      .chat-header-listing { display: block; font-size: 0.75rem; color: var(--text-soft, #888); margin-top: 1px; }
+      .chat-header-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
 
-      .nav-strip {
-        display: flex; background: #fff;
-        border-bottom: 1px solid rgba(44,26,14,0.08);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        flex-shrink: 0;
-      }
-      .nav-tab {
-        flex: 1; display: flex; flex-direction: column;
-        align-items: center; gap: 2px;
-        padding: 8px 4px 6px;
-        font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em;
-        color: #aaa; text-decoration: none;
-        border: none; background: none; cursor: pointer;
-        position: relative; transition: color 0.2s;
-        font-family: "Lato", sans-serif;
-      }
-      .nav-tab:hover { color: var(--gold, #c8963e); }
-      .nav-tab.active { color: var(--gold, #c8963e); }
-      .nav-tab.active::after {
-        content: ''; position: absolute;
-        bottom: 0; left: 20%; right: 20%;
-        height: 3px; background: var(--gold, #c8963e);
-        border-radius: 3px 3px 0 0;
-      }
+      .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; display: flex; background: #fff; border-top: 1px solid rgba(0,0,0,0.08); padding-bottom: env(safe-area-inset-bottom, 0); }
+      .tab-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px 6px; font-size: 0.625rem; font-weight: 600; letter-spacing: 0.01em; color: #999; text-decoration: none; border: none; background: none; cursor: pointer; font-family: "Lato", sans-serif; -webkit-tap-highlight-color: transparent; transition: color 0.15s; }
+      .tab-bar-item svg { width: 24px; height: 24px; }
+      .tab-bar-item.active { color: var(--gold, #c8963e); }
 
       .chat-layout {
-        display: flex; flex-direction: column;
-        flex: 1; min-height: 0;
+        flex: 1; display: flex; flex-direction: column;
+        min-height: 0;
         max-width: 780px; margin: 0 auto; width: 100%;
-      }
-
-      /* ── HEADER ───────────────────────────────────────────── */
-      .chat-header {
-        display: flex; align-items: center; gap: 6px;
-        padding: 0 10px; height: 56px;
-        background: #ededed; flex-shrink: 0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        z-index: 2;
-      }
-      .chat-back {
-        color: #c8963e; text-decoration: none;
-        width: 36px; height: 36px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0; transition: background 0.15s;
-      }
-      .chat-back:hover { background: rgba(0,0,0,0.05); }
-      .chat-user {
-        display: flex; align-items: center; gap: 10px;
-        text-decoration: none; color: inherit; flex: 1; min-width: 0;
-        padding: 4px 6px; border-radius: 8px; transition: background 0.15s;
-      }
-      .chat-user:hover { background: rgba(0,0,0,0.04); }
-      .chat-user-avatar {
-        width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
-        border: 2px solid rgba(200,150,62,0.2);
-      }
-      .chat-avatar-placeholder {
-        display: flex; align-items: center; justify-content: center;
-        background: #ddd; color: #fff;
-        font-family: "Playfair Display", serif; font-size: 1.1rem; font-weight: 700;
-        border: none;
-      }
-      .chat-user-name {
-        font-weight: 700; font-size: 1rem; color: #111;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-      .chat-listing-ref {
-        font-size: 0.72rem; color: #c8963e; margin-top: 1px;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        margin-bottom: calc(52px + env(safe-area-inset-bottom, 0px));
       }
 
       /* ── MESSAGES ─────────────────────────────────────────── */
@@ -486,12 +416,7 @@ const listingTitle = (conv.listings as any)?.title ?? '';
       .send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
 
       @media (max-width: 768px) {
-        nav { padding: 8px 16px; }
-        .nav-tab { padding: 6px 4px 5px; font-size: 0.6rem; }
-        .nav-tab svg { width: 18px; height: 18px; }
-        .chat-header { padding: 0 6px; height: 48px; gap: 2px; }
-        .chat-user-avatar { width: 36px; height: 36px; }
-        .chat-user-name { font-size: 0.92rem; }
+        nav { padding: 10px 12px; }
         .chat-messages { padding: 4px 6px 8px; }
         .msg { padding: 0 4px; }
         .msg-bubble { max-width: 88%; }
