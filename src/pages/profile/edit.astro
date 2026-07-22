@@ -66,7 +66,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
             <p class="section-label">Sitter Portal</p>
             <h1 class="section-title">Edit your profile</h1>
             <div class="divider"></div>
-            <p class="edit-intro">Everything you change here updates your public page. Hit "Save" on each section after making changes.</p>
+            <p class="edit-intro">Everything you change here updates your public page. Make your changes, then hit "Save changes" at the bottom.</p>
           </div>
           <div class="header-actions">
             <a href="/dashboard" class="btn-back">Dashboard</a>
@@ -213,7 +213,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
               </div>
             </div>
             <div class="colour-strip-actions">
-              <button type="submit" class="btn-primary btn-sm">Save colours</button>
               <button type="button" class="btn-reset-colours" id="resetColours">Reset</button>
             </div>
           </form>
@@ -296,9 +295,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
               <p class="field-hint">Include country code. If set, a "Message on WhatsApp" button appears on your page. Leave blank to hide it.</p>
             </div>
 
-            <div class="form-actions">
-              <button type="submit" class="btn-primary btn-sm">Save</button>
-            </div>
           </form>
         </section>
 
@@ -345,7 +341,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
             </div>
             <div class="upload-preview" data-for="hero"></div>
             <p class="field-hint">Select as many photos as you like. The focus point applies to all photos in this batch.</p>
-            <button type="button" class="btn-primary btn-sm upload-save-btn" style="display:none;">Save photos</button>
           </form>
         </section>
 
@@ -386,7 +381,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
               </div>
             </div>
             <div class="upload-preview" data-for="about"></div>
-            <button type="button" class="btn-primary btn-sm upload-save-btn" style="display:none;">Save photos</button>
           </form>
         </section>
 
@@ -427,7 +421,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
               </div>
             </div>
             <div class="upload-preview" data-for="gallery"></div>
-            <button type="button" class="btn-primary btn-sm upload-save-btn" style="display:none;">Save photos</button>
           </form>
         </section>
 
@@ -622,11 +615,13 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 </div>
               </div>
             </div>
-            <div class="form-actions">
-              <button type="submit" class="btn-primary btn-sm">Save headings</button>
-            </div>
           </form>
         </section>
+
+        <!-- ─── SAVE ALL ─────────────────────────────────── -->
+        <div class="save-bar">
+          <button type="button" id="save-all" class="btn-primary save-all-btn">Save changes</button>
+        </div>
 
       </div>
     </main>
@@ -665,7 +660,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
       function renderPreview(form: HTMLFormElement) {
         const files = pendingFiles.get(form) ?? [];
         const previewEl = form.querySelector<HTMLElement>('.upload-preview');
-        const saveBtn = form.querySelector<HTMLButtonElement>('.upload-save-btn');
         const label = form.querySelector<HTMLElement>('.file-upload-text');
 
         if (previewEl) {
@@ -694,7 +688,6 @@ const savedMsg = saved ? 'Changes saved!' : '';
           });
         }
 
-        if (saveBtn) saveBtn.style.display = files.length > 0 ? 'inline-block' : 'none';
         if (label) label.textContent = files.length > 0 ? `${files.length} photo${files.length > 1 ? 's' : ''} selected` : 'Choose photos';
       }
 
@@ -717,62 +710,72 @@ const savedMsg = saved ? 'Changes saved!' : '';
         });
       });
 
-      document.querySelectorAll<HTMLButtonElement>('.upload-save-btn').forEach(btn => {
-        btn.addEventListener('click', async () => {
-          const form = btn.closest<HTMLFormElement>('form.upload-form');
-          if (!form) return;
-          const files = pendingFiles.get(form) ?? [];
-          if (files.length === 0) return;
-
-          const origText = btn.textContent ?? '';
-          btn.disabled = true;
-          btn.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}…`;
-
-          try {
-            const maxDim = form.dataset.category === 'hero' ? 1600 : 1000;
-            const fd = new FormData();
-            fd.set('_action', 'upload');
-            fd.set('category', form.querySelector<HTMLInputElement>('[name="category"]')!.value);
-            const posSelect = form.querySelector<HTMLSelectElement>('[name="pos"]');
-            if (posSelect) fd.set('pos', posSelect.value);
-
-            const compressed = await Promise.all(files.map(f => compressImage(f, maxDim, maxDim, 0.82)));
-            for (const file of compressed) {
-              fd.append('files', file, file.name);
-            }
-
-            const res = await fetch(form.action, { method: 'POST', body: fd, redirect: 'follow' });
-            window.location.href = res.url;
-          } catch {
-            btn.disabled = false;
-            btn.textContent = origText;
-            alert('Upload failed. Please try again.');
-          }
-        });
+      document.querySelectorAll<HTMLFormElement>('#details-form, #headings form, #colours').forEach(f => {
+        f.addEventListener('submit', e => e.preventDefault());
       });
 
-      document.querySelectorAll<HTMLFormElement>('form[enctype="multipart/form-data"]:not(.upload-form)').forEach(form => {
-        form.addEventListener('submit', async (e) => {
-          const fileInput = form.querySelector<HTMLInputElement>('input[type="file"]');
-          const file = fileInput?.files?.[0];
-          if (!file) return;
+      document.getElementById('save-all')?.addEventListener('click', async () => {
+        const btn = document.getElementById('save-all') as HTMLButtonElement;
+        btn.disabled = true;
+        btn.textContent = 'Saving…';
+        const errors: string[] = [];
 
-          e.preventDefault();
-          const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-          const origText = btn?.textContent ?? '';
-          if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-
-          try {
-            const compressed = await compressImage(file, 1200, 1200, 0.85);
-            const fd = new FormData(form);
-            fd.set(fileInput!.name, compressed, compressed.name);
-            const res = await fetch(form.action, { method: 'POST', body: fd, redirect: 'follow' });
-            window.location.href = res.url;
-          } catch {
-            if (btn) { btn.disabled = false; btn.textContent = origText; }
-            alert('Upload failed. Please try again.');
+        try {
+          const detailsForm = document.getElementById('details-form') as HTMLFormElement;
+          if (detailsForm) {
+            const fd = new FormData(detailsForm);
+            const picInput = detailsForm.querySelector<HTMLInputElement>('input[name="profile_pic"]');
+            if (picInput?.files?.[0]) {
+              const compressed = await compressImage(picInput.files[0], 1200, 1200, 0.85);
+              fd.set('profile_pic', compressed, compressed.name);
+            }
+            const r1 = await fetch('/api/profile/update', { method: 'POST', body: fd });
+            if (r1.url.includes('error=')) errors.push('Failed to save details.');
           }
-        });
+
+          for (const [form, files] of pendingFiles.entries()) {
+            if (files.length === 0) continue;
+            const category = form.dataset.category;
+            if (!category) continue;
+            btn.textContent = `Uploading ${category} photos…`;
+            const maxDim = category === 'hero' ? 1600 : 1000;
+            const photoFd = new FormData();
+            photoFd.set('_action', 'upload');
+            photoFd.set('category', category);
+            const posSelect = form.querySelector<HTMLSelectElement>('[name="pos"]');
+            if (posSelect) photoFd.set('pos', posSelect.value);
+            const compressed = await Promise.all(files.map(f => compressImage(f, maxDim, maxDim, 0.82)));
+            for (const file of compressed) photoFd.append('files', file, file.name);
+            const r = await fetch('/api/profile/images', { method: 'POST', body: photoFd });
+            if (r.url.includes('error=')) errors.push(`Failed to upload ${category} photos.`);
+          }
+
+          btn.textContent = 'Saving headings…';
+          const headingsForm = document.querySelector<HTMLFormElement>('#headings form');
+          if (headingsForm) {
+            const r2 = await fetch('/api/profile/headings', { method: 'POST', body: new FormData(headingsForm) });
+            if (r2.url.includes('error=')) errors.push('Failed to save headings.');
+          }
+
+          btn.textContent = 'Saving colours…';
+          const themeForm = document.getElementById('colours') as HTMLFormElement;
+          if (themeForm) {
+            const r3 = await fetch('/api/profile/theme', { method: 'POST', body: new FormData(themeForm) });
+            if (r3.url.includes('error=')) errors.push('Failed to save colours.');
+          }
+
+          if (errors.length > 0) {
+            alert(errors.join('\n'));
+            btn.disabled = false;
+            btn.textContent = 'Save changes';
+          } else {
+            window.location.href = '/profile/edit?saved=1';
+          }
+        } catch {
+          btn.disabled = false;
+          btn.textContent = 'Save changes';
+          alert('Something went wrong. Please try again.');
+        }
       });
 
       const banner = document.getElementById('success-banner');
@@ -1148,6 +1151,14 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .headings-group-where {
         font-size: 0.78rem; color: var(--text-soft); margin-bottom: 12px; font-style: italic;
       }
+
+      .save-bar {
+        position: sticky; bottom: 24px; background: #fff; padding: 20px 36px;
+        border-radius: 12px; margin-top: 8px; max-width: 780px;
+        box-shadow: 0 -2px 20px rgba(44,26,14,0.12);
+        display: flex; justify-content: center; z-index: 10;
+      }
+      .save-all-btn { padding: 14px 48px !important; font-size: 1rem !important; letter-spacing: 0.04em; }
 
       @media (max-width: 768px) {
         nav { padding: 14px 24px; }
