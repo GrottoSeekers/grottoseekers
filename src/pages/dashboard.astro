@@ -71,6 +71,10 @@ function daysBetween(from: string, to: string) {
       </div>
 
       <div class="nav-right">
+        <a href="/messages" class="nav-messages" title="Messages">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span class="nav-msg-badge" id="navMsgBadge" style="display:none">0</span>
+        </a>
         <span class="nav-email">{session.email}</span>
         <a href="/api/auth/logout" class="nav-logout">Log out</a>
       </div>
@@ -80,6 +84,7 @@ function daysBetween(from: string, to: string) {
       </button>
     </nav>
 
+    <div id="msgToasts" class="msg-toast-container"></div>
     <div class="mm-overlay" id="mmOverlay"></div>
     <div class="mobile-menu" id="mobileMenu">
       <div class="mm-header">
@@ -117,7 +122,7 @@ function daysBetween(from: string, to: string) {
         <a href="/messages" class="mm-item">
           <div class="mm-item-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></div>
           <div class="mm-item-text">
-            <span class="mm-item-title">Messages</span>
+            <span class="mm-item-title">Messages <span class="mm-badge" id="mmMsgBadge" style="display:none">0</span></span>
             <span class="mm-item-desc">Chat with pet owners</span>
           </div>
           <span class="mm-chevron">&#8250;</span>
@@ -414,6 +419,84 @@ function daysBetween(from: string, to: string) {
       menu?.querySelectorAll('a:not([data-tab-link])').forEach(a => {
         a.addEventListener('click', closeMenu);
       });
+
+      // ── MESSAGE NOTIFICATIONS ──
+      (function() {
+        const seenIds = new Set();
+        let isFirst = true;
+
+        function playNotifSound() {
+          try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.setValueAtTime(660, ctx.currentTime);
+            osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.08, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.4);
+          } catch {}
+        }
+
+        function esc(str) {
+          const d = document.createElement('div');
+          d.textContent = str;
+          return d.innerHTML;
+        }
+
+        function showToast(msg) {
+          const container = document.getElementById('msgToasts');
+          if (!container) return;
+          const sender = msg.sender || {};
+          const initial = (sender.name || '?').charAt(0).toUpperCase();
+          const avatar = sender.profile_pic
+            ? `<img src="${esc(sender.profile_pic)}" class="msg-toast-avatar" />`
+            : `<div class="msg-toast-avatar-ph">${initial}</div>`;
+          const toast = document.createElement('a');
+          toast.href = `/messages/${msg.conversation_id}`;
+          toast.className = 'msg-toast';
+          toast.innerHTML = `${avatar}<div class="msg-toast-body"><div class="msg-toast-name">${esc(sender.name || 'Someone')}</div><div class="msg-toast-preview">${esc((msg.body || '').slice(0, 80))}</div></div>`;
+          container.appendChild(toast);
+          setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 5000);
+        }
+
+        function updateBadge(count) {
+          const nav = document.getElementById('navMsgBadge');
+          const mm = document.getElementById('mmMsgBadge');
+          const label = count > 99 ? '99+' : String(count);
+          [nav, mm].forEach(el => {
+            if (!el) return;
+            if (count > 0) { el.textContent = label; el.style.display = 'inline-flex'; }
+            else { el.style.display = 'none'; }
+          });
+        }
+
+        async function checkUnread() {
+          try {
+            const res = await fetch('/api/messages/unread');
+            const data = await res.json();
+            updateBadge(data.count || 0);
+            if (data.messages) {
+              if (!isFirst) {
+                const fresh = data.messages.filter(m => !seenIds.has(m.id));
+                if (fresh.length > 0) {
+                  playNotifSound();
+                  fresh.slice(0, 3).forEach(showToast);
+                }
+              }
+              data.messages.forEach(m => seenIds.add(m.id));
+            }
+            isFirst = false;
+          } catch {}
+        }
+
+        checkUnread();
+        setInterval(checkUnread, 8000);
+      })();
     </script>
 
     <style>
@@ -430,6 +513,57 @@ function daysBetween(from: string, to: string) {
       }
 
       .nav-right { display: flex; align-items: center; gap: 20px; }
+
+      /* ── NAV MESSAGES ICON ────────────────────────────────── */
+      .nav-messages {
+        position: relative; color: var(--text-soft); text-decoration: none;
+        display: flex; align-items: center; padding: 4px;
+        transition: color 0.2s;
+      }
+      .nav-messages:hover { color: var(--gold); }
+      .nav-msg-badge {
+        position: absolute; top: -6px; right: -8px;
+        background: #ef4444; color: #fff; font-size: 0.6rem; font-weight: 700;
+        min-width: 16px; height: 16px; border-radius: 8px; padding: 0 4px;
+        display: inline-flex; align-items: center; justify-content: center;
+        line-height: 1;
+      }
+
+      /* ── TOAST NOTIFICATIONS ──────────────────────────────── */
+      .msg-toast-container {
+        position: fixed; top: 20px; right: 20px; z-index: 1000;
+        display: flex; flex-direction: column; gap: 10px;
+        pointer-events: none;
+      }
+      .msg-toast {
+        background: #fff; border-radius: 14px; padding: 14px 18px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
+        display: flex; gap: 12px; align-items: center;
+        pointer-events: auto; cursor: pointer; text-decoration: none; color: inherit;
+        transform: translateX(120%); animation: toast-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+        max-width: 380px; border-left: 4px solid var(--gold, #c8963e);
+      }
+      .msg-toast.toast-out { animation: toast-out 0.3s ease forwards; }
+      @keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      @keyframes toast-out { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+      .msg-toast-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+      .msg-toast-avatar-ph {
+        width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
+        background: rgba(200,150,62,0.12); color: var(--gold, #c8963e);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 1rem; font-family: "Playfair Display", serif;
+      }
+      .msg-toast-body { flex: 1; min-width: 0; }
+      .msg-toast-name { font-weight: 700; font-size: 0.88rem; color: var(--brown-dark, #2c1a0e); }
+      .msg-toast-preview { font-size: 0.82rem; color: var(--text-soft, #6b4e35); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      /* ── HAMBURGER BADGE ──────────────────────────────────── */
+      .mm-badge {
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #ef4444; color: #fff; font-size: 0.6rem; font-weight: 700;
+        min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
+        margin-left: 6px; vertical-align: middle;
+      }
       .nav-email { font-size: 0.85rem; color: var(--text-soft); }
       .nav-logout {
         font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
