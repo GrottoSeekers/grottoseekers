@@ -113,11 +113,51 @@ import '../styles/global.css';
           <em>sitting made simple.</em>
         </h1>
         <p class="hero-body reveal reveal-delay-2">
-          Sitters — create a stunning profile to showcase your experience, reviews, and photos. Owners — list your home and pets to find the perfect sitter. One platform, one link, everything in one place.
+          One platform for house &amp; pet sitters and home owners. Create your profile, share your link, and connect — all in one place.
         </p>
         <div class="hero-actions reveal reveal-delay-3">
           <a href="/signup" class="btn-primary">Get started free</a>
           <p class="hero-sub-note">First 3 months free, then just &pound;4.99/month.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FOR SITTERS & OWNERS ─────────────────────────────────────── -->
+    <section class="dual-section">
+      <div class="container">
+        <p class="label reveal">Two sides, one platform</p>
+        <h2 class="h2 reveal">Built for sitters <em>&amp;</em> owners</h2>
+        <div class="dual-grid">
+          <div class="dual-card reveal">
+            <div class="dual-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <h3 class="dual-title">For sitters</h3>
+            <p class="dual-desc">Showcase everything that makes you a great sitter — in one beautiful, shareable page.</p>
+            <ul class="dual-list">
+              <li>Create a stunning profile with your bio, photos &amp; experience</li>
+              <li>Collect and display five-star reviews from owners</li>
+              <li>Share one link — <strong>grottositters.com/yourname</strong></li>
+              <li>Get enquiries straight to your inbox or WhatsApp</li>
+              <li>Browse available sits and apply directly</li>
+            </ul>
+            <a href="/signup" class="dual-cta">Get started as a sitter &rarr;</a>
+          </div>
+          <div class="dual-card dual-card-alt reveal reveal-delay-1">
+            <div class="dual-icon">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <h3 class="dual-title">For owners</h3>
+            <p class="dual-desc">List your home and pets so trusted sitters can find you — and you can find them.</p>
+            <ul class="dual-list">
+              <li>Create a profile for your home with photos &amp; details</li>
+              <li>Add your pets — breed, temperament &amp; special needs</li>
+              <li>Post sit listings with dates you need covered</li>
+              <li>Sitters browse &amp; apply — you pick the perfect match</li>
+              <li>Receive enquiries via email or WhatsApp</li>
+            </ul>
+            <a href="/signup" class="dual-cta">Get started as an owner &rarr;</a>
+          </div>
         </div>
       </div>
     </section>
@@ -185,7 +225,7 @@ import '../styles/global.css';
               <span class="ed-stat-label">Average rating</span>
             </div>
           </div>
-          <a href="/niamh" class="btn-primary" target="_blank">View full profile →</a>
+          <a href="/callumandniamh" class="btn-primary" target="_blank">View full profile →</a>
         </div>
       </div>
 
@@ -317,7 +357,7 @@ import '../styles/global.css';
           <div class="footer-links">
             <h4>Example profile</h4>
             <ul>
-              <li><a href="/niamh">Callum &amp; Niamh</a></li>
+              <li><a href="/callumandniamh">Callum &amp; Niamh</a></li>
             </ul>
           </div>
         </div>
@@ -491,6 +531,46 @@ import '../styles/global.css';
   .hero-actions { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
   .hero-sub-note { font-size: 0.82rem; color: var(--text-soft); margin: 0; letter-spacing: 0.02em; }
 
+  /* ── DUAL SITTER / OWNER ────────────────────────────────────────── */
+  .dual-section { padding: 100px 0; background: #fff; }
+  .dual-section .h2 em { color: var(--gold); font-style: italic; }
+  .dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 48px; }
+  .dual-card {
+    background: var(--cream); border-radius: 16px; padding: 40px 36px;
+    display: flex; flex-direction: column; gap: 16px;
+    border: 1px solid rgba(200,150,62,0.15);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .dual-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(44,26,14,0.08); }
+  .dual-card-alt { background: var(--warm-white); }
+  .dual-icon {
+    width: 56px; height: 56px; border-radius: 14px;
+    background: rgba(200,150,62,0.12); color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .dual-title { font-family: "Playfair Display", serif; font-size: 1.5rem; color: var(--brown-dark); }
+  .dual-desc { color: var(--text-soft); font-size: 0.95rem; line-height: 1.7; }
+  .dual-list {
+    list-style: none; display: flex; flex-direction: column; gap: 12px;
+    padding: 16px 0; margin: 0; border-top: 1px solid rgba(44,26,14,0.08);
+  }
+  .dual-list li {
+    font-size: 0.9rem; color: var(--text); line-height: 1.6; padding-left: 24px;
+    position: relative;
+  }
+  .dual-list li::before {
+    content: ""; position: absolute; left: 0; top: 8px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--gold-pale); border: 2px solid var(--gold);
+  }
+  .dual-list li strong { color: var(--gold); font-weight: 700; }
+  .dual-cta {
+    font-size: 0.88rem; font-weight: 700; color: var(--gold); text-decoration: none;
+    letter-spacing: 0.04em; margin-top: auto; padding-top: 8px;
+    transition: color 0.2s;
+  }
+  .dual-cta:hover { color: var(--brown-dark); }
+
   /* ── STEPS ─────────────────────────────────────────────────────── */
   .steps-section { padding: 100px 0; background: #fff; }
   .steps-grid { display: flex; align-items: flex-start; gap: 0; margin-top: 56px; }
@@ -589,6 +669,9 @@ import '../styles/global.css';
   }
 
   @media (max-width: 768px) {
+    .dual-section { padding: 60px 0; }
+    .dual-grid { grid-template-columns: 1fr; gap: 20px; }
+    .dual-card { padding: 28px 24px; }
     .site-header {
       padding: 16px 24px;
       background: rgba(250,246,238,0.97);
