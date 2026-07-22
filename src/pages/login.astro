@@ -45,7 +45,10 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
           </label>
           <label>
             Password
-            <input type="password" name="password" required autocomplete="current-password" />
+            <div class="password-wrap">
+              <input type="password" name="password" required autocomplete="current-password" />
+              <button type="button" class="pw-toggle" aria-label="Show password">Show</button>
+            </div>
           </label>
           <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Log in</button>
         </form>
@@ -118,6 +121,25 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
       }
       .auth-footer a { color: var(--gold); font-weight: 700; text-decoration: none; }
       .auth-footer a:hover { text-decoration: underline; }
+      .password-wrap { position: relative; }
+      .password-wrap input { width: 100%; padding-right: 60px; }
+      .pw-toggle {
+        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; color: var(--gold); font-size: 0.78rem;
+        font-weight: 700; letter-spacing: 0.04em; cursor: pointer; padding: 4px 8px;
+        text-transform: uppercase; font-family: "Lato", sans-serif;
+      }
+      .pw-toggle:hover { color: var(--brown-dark); }
     </style>
+    <script>
+      document.querySelectorAll('.pw-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const input = btn.previousElementSibling as HTMLInputElement;
+          const showing = input.type === 'text';
+          input.type = showing ? 'password' : 'text';
+          btn.textContent = showing ? 'Show' : 'Hide';
+        });
+      });
+    </script>
   </body>
 </html>
