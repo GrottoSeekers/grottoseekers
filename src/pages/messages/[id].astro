@@ -16,6 +16,9 @@ const { data: profile } = await supabase
 
 if (!profile) return Astro.redirect('/login');
 
+const dashUrl = profile.profile_type === 'owner' ? '/owner/dashboard' : '/dashboard';
+const profileUrl = profile.profile_type === 'owner' ? '/owner/edit' : '/profile/edit';
+
 const convId = Astro.params.id;
 
 const { data: conv } = await supabase
@@ -53,6 +56,30 @@ const listingTitle = (conv.listings as any)?.title ?? '';
     <title>Chat with {other?.name} — Grotto Sitters</title>
   </head>
   <body>
+    <nav>
+      <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
+      <a href="/api/auth/logout" class="nav-logout">Log out</a>
+    </nav>
+
+    <div class="nav-strip">
+      <a href={dashUrl} class="nav-tab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+        <span>Dashboard</span>
+      </a>
+      <a href={dashUrl + '?tab=sits'} class="nav-tab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>{profile.profile_type === 'owner' ? 'My Sits' : 'Sits'}</span>
+      </a>
+      <a href="/messages" class="nav-tab active">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        <span>Messages</span>
+      </a>
+      <a href={profileUrl} class="nav-tab">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        <span>Profile</span>
+      </a>
+    </div>
+
     <div class="chat-layout">
       <!-- Chat header -->
       <header class="chat-header">
@@ -230,12 +257,51 @@ const listingTitle = (conv.listings as any)?.title ?? '';
     <style is:global>
       * { box-sizing: border-box; margin: 0; padding: 0; }
       body { background: #e5ddd5; height: 100vh; height: 100dvh; overflow: hidden;
-        font-family: "Lato", -apple-system, BlinkMacSystemFont, sans-serif; }
+        font-family: "Lato", -apple-system, BlinkMacSystemFont, sans-serif;
+        display: flex; flex-direction: column; }
+
+      nav {
+        position: static;
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 48px; background: #fff;
+        border-bottom: 1px solid rgba(200,150,62,0.15);
+        backdrop-filter: none; flex-shrink: 0;
+      }
+      .nav-logout {
+        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--gold, #c8963e); text-decoration: none;
+      }
+      .nav-logout:hover { color: var(--brown-dark, #2c1a0e); }
+
+      .nav-strip {
+        display: flex; background: #fff;
+        border-bottom: 1px solid rgba(44,26,14,0.08);
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        flex-shrink: 0;
+      }
+      .nav-tab {
+        flex: 1; display: flex; flex-direction: column;
+        align-items: center; gap: 2px;
+        padding: 8px 4px 6px;
+        font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em;
+        color: #aaa; text-decoration: none;
+        border: none; background: none; cursor: pointer;
+        position: relative; transition: color 0.2s;
+        font-family: "Lato", sans-serif;
+      }
+      .nav-tab:hover { color: var(--gold, #c8963e); }
+      .nav-tab.active { color: var(--gold, #c8963e); }
+      .nav-tab.active::after {
+        content: ''; position: absolute;
+        bottom: 0; left: 20%; right: 20%;
+        height: 3px; background: var(--gold, #c8963e);
+        border-radius: 3px 3px 0 0;
+      }
 
       .chat-layout {
         display: flex; flex-direction: column;
-        height: 100vh; height: 100dvh;
-        max-width: 780px; margin: 0 auto;
+        flex: 1; min-height: 0;
+        max-width: 780px; margin: 0 auto; width: 100%;
       }
 
       /* ── HEADER ───────────────────────────────────────────── */
@@ -420,7 +486,10 @@ const listingTitle = (conv.listings as any)?.title ?? '';
       .send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
 
       @media (max-width: 768px) {
-        .chat-header { padding: 0 6px; height: 52px; gap: 2px; }
+        nav { padding: 8px 16px; }
+        .nav-tab { padding: 6px 4px 5px; font-size: 0.6rem; }
+        .nav-tab svg { width: 18px; height: 18px; }
+        .chat-header { padding: 0 6px; height: 48px; gap: 2px; }
         .chat-user-avatar { width: 36px; height: 36px; }
         .chat-user-name { font-size: 0.92rem; }
         .chat-messages { padding: 4px 6px 8px; }
