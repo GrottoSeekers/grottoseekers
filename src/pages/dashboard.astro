@@ -70,18 +70,22 @@ function daysBetween(from: string, to: string) {
         <button class="toggle-btn" data-tab="sits">Available Sits</button>
       </div>
 
-      <div class="nav-right">
-        <a href="/messages" class="nav-messages" title="Messages">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <div class="nav-actions">
+        <a href="/messages" class="nav-msg-btn" title="Messages" id="navMsgBtn">
+          <div class="nav-msg-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+          </div>
           <span class="nav-msg-badge" id="navMsgBadge" style="display:none">0</span>
         </a>
+        <button class="burger" id="burger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+
+      <div class="nav-right">
         <span class="nav-email">{session.email}</span>
         <a href="/api/auth/logout" class="nav-logout">Log out</a>
       </div>
-
-      <button class="burger" id="burger" aria-label="Menu">
-        <span></span><span></span><span></span>
-      </button>
     </nav>
 
     <div id="msgToasts" class="msg-toast-container"></div>
@@ -512,22 +516,28 @@ function daysBetween(from: string, to: string) {
         background: #fff;
       }
 
+      .nav-actions { display: flex; align-items: center; gap: 8px; }
       .nav-right { display: flex; align-items: center; gap: 20px; }
 
-      /* ── NAV MESSAGES ICON ────────────────────────────────── */
-      .nav-messages {
-        position: relative; color: var(--text-soft); text-decoration: none;
-        display: flex; align-items: center; padding: 4px;
-        transition: color 0.2s;
+      /* ── NAV MESSAGE BUTTON (always visible) ──────────────── */
+      .nav-msg-btn {
+        position: relative; text-decoration: none;
+        display: flex; align-items: center; justify-content: center;
+        width: 42px; height: 42px; border-radius: 50%;
+        background: rgba(200,150,62,0.08);
+        transition: all 0.2s;
       }
-      .nav-messages:hover { color: var(--gold); }
+      .nav-msg-btn:hover { background: rgba(200,150,62,0.18); transform: scale(1.05); }
+      .nav-msg-icon { color: var(--gold, #c8963e); display: flex; align-items: center; justify-content: center; }
       .nav-msg-badge {
-        position: absolute; top: -6px; right: -8px;
+        position: absolute; top: -2px; right: -2px;
         background: #ef4444; color: #fff; font-size: 0.6rem; font-weight: 700;
-        min-width: 16px; height: 16px; border-radius: 8px; padding: 0 4px;
+        min-width: 18px; height: 18px; border-radius: 9px; padding: 0 5px;
         display: inline-flex; align-items: center; justify-content: center;
-        line-height: 1;
+        line-height: 1; box-shadow: 0 2px 6px rgba(239,68,68,0.4);
+        animation: badge-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
       }
+      @keyframes badge-pop { from { transform: scale(0); } to { transform: scale(1); } }
 
       /* ── TOAST NOTIFICATIONS ──────────────────────────────── */
       .msg-toast-container {
@@ -859,6 +869,8 @@ function daysBetween(from: string, to: string) {
       @media (max-width: 768px) {
         nav { padding: 12px 20px; }
         .nav-right { display: none; }
+        .nav-actions { order: 3; }
+        .nav-msg-btn { width: 38px; height: 38px; }
         .tab-toggle { display: flex; }
         .toggle-btn { padding: 8px 16px; font-size: 0.82rem; }
         .burger { display: flex; }
