@@ -197,18 +197,12 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 <span>Accent</span>
               </div>
               <div class="colour-swatch">
-                <input type="color" name="accent_light" value={t.accent_light || '#e8b96a'} class="colour-picker" />
-                <span>Highlight</span>
-              </div>
-              <div class="colour-swatch">
                 <input type="color" name="text" value={t.text || '#2c1a0e'} class="colour-picker" />
                 <span>Text</span>
               </div>
-              <div class="colour-swatch">
-                <input type="color" name="text_soft" value={t.text_soft || '#6b4e35'} class="colour-picker" />
-                <span>Soft text</span>
-              </div>
             </div>
+            <input type="hidden" name="accent_light" value={t.accent_light || '#e8b96a'} id="derivedAccentLight" />
+            <input type="hidden" name="text_soft" value={t.text_soft || '#6b4e35'} id="derivedTextSoft" />
             <div class="colour-strip-actions">
               <button type="button" class="btn-reset-colours" id="resetColours">Reset</button>
             </div>
@@ -807,33 +801,54 @@ const savedMsg = saved ? 'Changes saved!' : '';
       }
       (window as any).copyReviewUrl = copyReviewUrl;
 
-      const colourVarMap: Record<string, string> = {
-        background: '--pv-bg', accent: '--pv-accent', accent_light: '--pv-accent-light',
-        text: '--pv-text', text_soft: '--pv-text-soft',
-      };
+      function lightenHex(hex: string, amount: number): string {
+        const r = parseInt(hex.slice(1,3), 16);
+        const g = parseInt(hex.slice(3,5), 16);
+        const b = parseInt(hex.slice(5,7), 16);
+        return '#' + [r,g,b].map(c => Math.round(c + (255 - c) * amount).toString(16).padStart(2,'0')).join('');
+      }
+
       const pvEl = document.querySelector<HTMLElement>('.page-preview');
+
+      function updateDerived() {
+        const accent = (document.querySelector<HTMLInputElement>('input[name="accent"]'))?.value || '#c8963e';
+        const text = (document.querySelector<HTMLInputElement>('input[name="text"]'))?.value || '#2c1a0e';
+        const accentLight = lightenHex(accent, 0.35);
+        const textSoft = lightenHex(text, 0.5);
+        const alInput = document.getElementById('derivedAccentLight') as HTMLInputElement;
+        const tsInput = document.getElementById('derivedTextSoft') as HTMLInputElement;
+        if (alInput) alInput.value = accentLight;
+        if (tsInput) tsInput.value = textSoft;
+        if (pvEl) {
+          pvEl.style.setProperty('--pv-accent-light', accentLight);
+          pvEl.style.setProperty('--pv-text-soft', textSoft);
+        }
+      }
+
+      const colourVarMap: Record<string, string> = {
+        background: '--pv-bg', accent: '--pv-accent', text: '--pv-text',
+      };
       if (pvEl) {
         document.querySelectorAll<HTMLInputElement>('.colour-picker').forEach(picker => {
           picker.addEventListener('input', () => {
             const v = colourVarMap[picker.name];
             if (v) pvEl.style.setProperty(v, picker.value);
+            updateDerived();
           });
         });
       }
 
       document.getElementById('resetColours')?.addEventListener('click', () => {
         const defaults: Record<string, string> = {
-          background: '#faf6ee', accent: '#c8963e', accent_light: '#e8b96a',
-          text: '#2c1a0e', text_soft: '#6b4e35',
+          background: '#faf6ee', accent: '#c8963e', text: '#2c1a0e',
         };
         for (const [key, val] of Object.entries(defaults)) {
           const input = document.querySelector<HTMLInputElement>(`input[name="${key}"]`);
           if (input) input.value = val;
-          if (pvEl) {
-            const v = colourVarMap[key];
-            if (v) pvEl.style.setProperty(v, val);
-          }
+          const v = colourVarMap[key];
+          if (v && pvEl) pvEl.style.setProperty(v, val);
         }
+        updateDerived();
       });
     </script>
 
@@ -1112,12 +1127,12 @@ const savedMsg = saved ? 'Changes saved!' : '';
         border: 1px solid rgba(44,26,14,0.08); border-top: none;
         margin-top: -2px;
       }
-      .colour-strip-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
-      .colour-swatch { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-      .colour-swatch span { font-size: 0.65rem; font-weight: 600; color: var(--text-soft); letter-spacing: 0.02em; }
+      .colour-strip-row { display: flex; gap: 32px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
+      .colour-swatch { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+      .colour-swatch span { font-size: 0.72rem; font-weight: 600; color: var(--text-soft); letter-spacing: 0.02em; }
       .colour-picker {
-        width: 38px; height: 38px; border: 2px solid rgba(44,26,14,0.15);
-        border-radius: 50%; cursor: pointer; padding: 2px; background: var(--cream);
+        width: 48px; height: 48px; border: 2px solid rgba(44,26,14,0.12);
+        border-radius: 50%; cursor: pointer; padding: 2px; background: #fff;
         flex-shrink: 0; transition: border-color 0.2s, transform 0.15s;
       }
       .colour-picker:hover { border-color: var(--gold); transform: scale(1.1); }
