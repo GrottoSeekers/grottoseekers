@@ -93,7 +93,25 @@ const listingTitle = (conv.listings as any)?.title ?? '';
       const composeForm = document.getElementById('composeForm');
       const msgInput = document.getElementById('msgInput');
       const sendBtn = document.getElementById('sendBtn');
-      let lastMessageCount = 0;
+      const knownIds = new Set();
+      let firstLoad = true;
+
+      function playNotifSound() {
+        try {
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.frequency.setValueAtTime(660, ctx.currentTime);
+          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+          osc.type = 'sine';
+          gain.gain.setValueAtTime(0.08, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.4);
+        } catch {}
+      }
 
       async function loadMessages() {
         try {
@@ -110,13 +128,19 @@ const listingTitle = (conv.listings as any)?.title ?? '';
               <div class="chat-start">
                 <p>Start your conversation with <strong>${otherName}</strong></p>
               </div>`;
+            firstLoad = false;
             return;
           }
+
+          const newMsgIds = new Set();
+          data.forEach(m => { if (!knownIds.has(m.id)) newMsgIds.add(m.id); });
+
+          const newFromOther = data.filter(m => newMsgIds.has(m.id) && m.sender_profile_id !== myProfileId);
 
           let html = '';
           let lastDate = '';
 
-          data.forEach((msg, i) => {
+          data.forEach((msg) => {
             const d = new Date(msg.created_at);
             const dateStr = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
             if (dateStr !== lastDate) {
@@ -127,9 +151,10 @@ const listingTitle = (conv.listings as any)?.title ?? '';
             const mine = msg.sender_profile_id === myProfileId;
             const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
             const read = msg.read_at ? true : false;
+            const isNew = !firstLoad && newMsgIds.has(msg.id);
 
             html += `
-              <div class="msg ${mine ? 'msg-mine' : 'msg-theirs'}">
+              <div class="msg ${mine ? 'msg-mine' : 'msg-theirs'} ${isNew ? 'msg-new' : ''}">
                 <div class="msg-bubble">
                   <p class="msg-text">${escapeHtml(msg.body)}</p>
                   <span class="msg-time">${time}${mine ? (read ? ' ✓✓' : ' ✓') : ''}</span>
@@ -137,10 +162,16 @@ const listingTitle = (conv.listings as any)?.title ?? '';
               </div>`;
           });
 
-          const shouldScroll = data.length !== lastMessageCount;
-          lastMessageCount = data.length;
           chatMessages.innerHTML = html;
-          if (shouldScroll) scrollToBottom();
+
+          if (newMsgIds.size > 0 || firstLoad) scrollToBottom();
+
+          if (!firstLoad && newFromOther.length > 0) {
+            playNotifSound();
+          }
+
+          data.forEach(m => knownIds.add(m.id));
+          firstLoad = false;
         } catch {
           chatMessages.innerHTML = '<p class="error-msg">Failed to load messages.</p>';
         }
@@ -181,7 +212,7 @@ const listingTitle = (conv.listings as any)?.title ?? '';
 
       loadMessages();
 
-      setInterval(loadMessages, 5000);
+      setInterval(loadMessages, 3000);
     </script>
 
     <style>
@@ -237,6 +268,12 @@ const listingTitle = (conv.listings as any)?.title ?? '';
       }
 
       .msg { display: flex; margin-bottom: 2px; }
+      .msg-new { animation: msg-pop-in 0.35s ease; }
+      @keyframes msg-pop-in {
+        0% { opacity: 0; transform: translateY(16px) scale(0.95); }
+        60% { transform: translateY(-2px) scale(1.01); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+      }
       .msg-mine { justify-content: flex-end; }
       .msg-theirs { justify-content: flex-start; }
 
