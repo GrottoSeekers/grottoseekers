@@ -3,7 +3,19 @@ export const prerender = false;
 
 import '../../styles/global.css';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSession } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+let viewerProfile: any = null;
+if (session) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, profile_type')
+    .eq('user_id', session.userId)
+    .single();
+  viewerProfile = data;
+}
 
 const { id } = Astro.params;
 
@@ -36,6 +48,7 @@ function daysBetween(from: string, to: string) {
 const duration = daysBetween(listing.date_from, listing.date_to);
 const contactEmail = profile?.contact_email ?? '';
 const whatsappNumber = profile?.whatsapp_number ?? '';
+const canMessage = viewerProfile && viewerProfile.id !== profile.id;
 
 const SUPABASE_URL = 'https://vutlmqzvakbmosrpicre.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ1dGxtcXp2YWtibW9zcnBpY3JlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5NTMyNjAsImV4cCI6MjA5ODUyOTI2MH0.tlRIu1ESOsQ_z1MLXVVjeA_IaqRcPeUVs3i09SGDT8c';
@@ -138,25 +151,37 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
         <h2>Interested? Get in touch</h2>
         <p class="enquiry-intro">Send a message to {profile.name} about this sit.</p>
 
-        <form class="enquiry-form" id="enquiryForm">
-          <input type="hidden" name="profileId" value={profile.id} />
-          <div class="form-grid">
-            <div class="field">
-              <label for="eq_name">Your name <span class="req">*</span></label>
-              <input type="text" id="eq_name" name="name" required />
-            </div>
-            <div class="field">
-              <label for="eq_email">Your email <span class="req">*</span></label>
-              <input type="email" id="eq_email" name="email" required />
-            </div>
-            <div class="field span-2">
-              <label for="eq_message">Message <span class="req">*</span></label>
-              <textarea id="eq_message" name="message" rows="5" required placeholder="Tell them about your experience, availability, and why you'd be a great fit for this sit."></textarea>
-            </div>
+        {canMessage && (
+          <div class="inapp-msg-cta">
+            <button type="button" class="btn-message-owner" id="msgOwnerBtn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              Message {profile.name}
+            </button>
+            <p class="inapp-msg-hint">Chat directly on Grotto Sitters</p>
           </div>
-          <button type="submit" class="btn-primary">Send message</button>
-          <p class="form-status" id="formStatus"></p>
-        </form>
+        )}
+
+        {!canMessage && (
+          <form class="enquiry-form" id="enquiryForm">
+            <input type="hidden" name="profileId" value={profile.id} />
+            <div class="form-grid">
+              <div class="field">
+                <label for="eq_name">Your name <span class="req">*</span></label>
+                <input type="text" id="eq_name" name="name" required />
+              </div>
+              <div class="field">
+                <label for="eq_email">Your email <span class="req">*</span></label>
+                <input type="email" id="eq_email" name="email" required />
+              </div>
+              <div class="field span-2">
+                <label for="eq_message">Message <span class="req">*</span></label>
+                <textarea id="eq_message" name="message" rows="5" required placeholder="Tell them about your experience, availability, and why you'd be a great fit for this sit."></textarea>
+              </div>
+            </div>
+            <button type="submit" class="btn-primary">Send message</button>
+            <p class="form-status" id="formStatus"></p>
+          </form>
+        )}
 
         {whatsappNumber && (
           <div class="alt-contact">
@@ -170,7 +195,32 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
     </div>
   </main>
 
-  <script define:vars={{ contactEmail, SUPABASE_URL, SUPABASE_KEY, profileId: profile.id }}>
+  <script define:vars={{ contactEmail, SUPABASE_URL, SUPABASE_KEY, profileId: profile.id, listingId: listing.id, canMessage }}>
+    if (canMessage) {
+      document.getElementById('msgOwnerBtn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('msgOwnerBtn');
+        btn.disabled = true;
+        btn.textContent = 'Opening chat...';
+        try {
+          const res = await fetch('/api/messages/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipient_profile_id: profileId, listing_id: listingId }),
+          });
+          const data = await res.json();
+          if (data.conversation_id) {
+            window.location.href = `/messages/${data.conversation_id}`;
+          } else {
+            btn.textContent = 'Something went wrong';
+            btn.disabled = false;
+          }
+        } catch {
+          btn.textContent = 'Something went wrong';
+          btn.disabled = false;
+        }
+      });
+    }
+
     document.getElementById('enquiryForm')?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const form = e.target;
@@ -259,6 +309,19 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
     .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
     .photo-thumb { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; }
+
+    .inapp-msg-cta { text-align: center; padding: 16px 0 8px; }
+    .btn-message-owner {
+      display: inline-flex; align-items: center; gap: 10px;
+      background: var(--gold); color: #fff; border: none; border-radius: 10px;
+      padding: 16px 36px; font-size: 1rem; font-weight: 700;
+      font-family: "Lato", sans-serif; cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      box-shadow: 0 4px 16px rgba(200,150,62,0.3);
+    }
+    .btn-message-owner:hover { background: #b8862e; transform: translateY(-1px); }
+    .btn-message-owner:disabled { opacity: 0.6; cursor: default; transform: none; }
+    .inapp-msg-hint { font-size: 0.82rem; color: var(--text-soft); margin-top: 10px; }
 
     .enquiry-section { border: 2px solid rgba(200,150,62,0.2); }
     .enquiry-intro { font-size: 0.95rem; color: var(--text-soft); margin-bottom: 24px; line-height: 1.6; }

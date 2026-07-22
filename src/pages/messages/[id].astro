@@ -1,0 +1,307 @@
+---
+export const prerender = false;
+
+import '../../styles/global.css';
+import { getSession } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('id, profile_type, name, profile_pic')
+  .eq('user_id', session.userId)
+  .single();
+
+if (!profile) return Astro.redirect('/login');
+
+const convId = Astro.params.id;
+
+const { data: conv } = await supabase
+  .from('conversations')
+  .select(`
+    id, listing_id,
+    sitter:profiles!conversations_sitter_profile_id_fkey(id, name, profile_pic, slug),
+    owner:profiles!conversations_owner_profile_id_fkey(id, name, profile_pic, slug),
+    listings(title)
+  `)
+  .eq('id', convId)
+  .single();
+
+if (!conv) return Astro.redirect('/messages');
+
+const sitter = conv.sitter as any;
+const owner = conv.owner as any;
+
+if (sitter?.id !== profile.id && owner?.id !== profile.id) {
+  return Astro.redirect('/messages');
+}
+
+const other = sitter?.id === profile.id ? owner : sitter;
+const listingTitle = (conv.listings as any)?.title ?? '';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <title>Chat with {other?.name} — Grotto Sitters</title>
+  </head>
+  <body>
+    <div class="chat-layout">
+      <!-- Chat header -->
+      <header class="chat-header">
+        <a href="/messages" class="chat-back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+        <a href={`/${other?.slug}`} class="chat-user">
+          {other?.profile_pic ? (
+            <img src={other.profile_pic} alt="" class="chat-user-avatar" />
+          ) : (
+            <div class="chat-user-avatar chat-avatar-placeholder">{(other?.name || '?').charAt(0).toUpperCase()}</div>
+          )}
+          <div>
+            <p class="chat-user-name">{other?.name}</p>
+            {listingTitle && <p class="chat-listing-ref">{listingTitle}</p>}
+          </div>
+        </a>
+      </header>
+
+      <!-- Messages area -->
+      <div class="chat-messages" id="chatMessages">
+        <div class="loading">Loading messages...</div>
+      </div>
+
+      <!-- Compose bar -->
+      <div class="chat-compose">
+        <form id="composeForm" class="compose-form">
+          <input type="text" id="msgInput" placeholder="Type a message..." autocomplete="off" />
+          <button type="submit" class="send-btn" id="sendBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <script define:vars={{ convId, myProfileId: profile.id, otherName: other?.name || 'Unknown' }}>
+      const chatMessages = document.getElementById('chatMessages');
+      const composeForm = document.getElementById('composeForm');
+      const msgInput = document.getElementById('msgInput');
+      const sendBtn = document.getElementById('sendBtn');
+      let lastMessageCount = 0;
+
+      async function loadMessages() {
+        try {
+          const res = await fetch(`/api/messages/${convId}`);
+          const data = await res.json();
+
+          if (!Array.isArray(data)) {
+            chatMessages.innerHTML = '<p class="error-msg">Failed to load messages.</p>';
+            return;
+          }
+
+          if (data.length === 0) {
+            chatMessages.innerHTML = `
+              <div class="chat-start">
+                <p>Start your conversation with <strong>${otherName}</strong></p>
+              </div>`;
+            return;
+          }
+
+          let html = '';
+          let lastDate = '';
+
+          data.forEach((msg, i) => {
+            const d = new Date(msg.created_at);
+            const dateStr = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+            if (dateStr !== lastDate) {
+              html += `<div class="date-divider"><span>${dateStr}</span></div>`;
+              lastDate = dateStr;
+            }
+
+            const mine = msg.sender_profile_id === myProfileId;
+            const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            const read = msg.read_at ? true : false;
+
+            html += `
+              <div class="msg ${mine ? 'msg-mine' : 'msg-theirs'}">
+                <div class="msg-bubble">
+                  <p class="msg-text">${escapeHtml(msg.body)}</p>
+                  <span class="msg-time">${time}${mine ? (read ? ' ✓✓' : ' ✓') : ''}</span>
+                </div>
+              </div>`;
+          });
+
+          const shouldScroll = data.length !== lastMessageCount;
+          lastMessageCount = data.length;
+          chatMessages.innerHTML = html;
+          if (shouldScroll) scrollToBottom();
+        } catch {
+          chatMessages.innerHTML = '<p class="error-msg">Failed to load messages.</p>';
+        }
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      function scrollToBottom() {
+        requestAnimationFrame(() => {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+      }
+
+      composeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const body = msgInput.value.trim();
+        if (!body) return;
+
+        sendBtn.disabled = true;
+        msgInput.value = '';
+
+        try {
+          await fetch('/api/messages/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ conversation_id: convId, body }),
+          });
+          await loadMessages();
+        } catch {}
+
+        sendBtn.disabled = false;
+        msgInput.focus();
+      });
+
+      loadMessages();
+
+      setInterval(loadMessages, 5000);
+    </script>
+
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 0; background: #e8dcc8; height: 100vh; overflow: hidden; }
+
+      .chat-layout {
+        display: flex; flex-direction: column; height: 100vh; max-width: 780px;
+        margin: 0 auto; background: #ece5dd;
+      }
+
+      /* ── HEADER ───────────────────────────────────────────── */
+      .chat-header {
+        display: flex; align-items: center; gap: 12px;
+        padding: 10px 16px; background: #fff;
+        border-bottom: 1px solid rgba(44,26,14,0.08);
+        flex-shrink: 0;
+      }
+      .chat-back {
+        color: var(--gold); text-decoration: none; padding: 6px;
+        display: flex; align-items: center;
+      }
+      .chat-user {
+        display: flex; align-items: center; gap: 12px;
+        text-decoration: none; color: inherit; flex: 1;
+      }
+      .chat-user-avatar {
+        width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+      }
+      .chat-avatar-placeholder {
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(200,150,62,0.12); color: var(--gold);
+        font-family: "Playfair Display", serif; font-size: 1.1rem; font-weight: 700;
+      }
+      .chat-user-name { font-weight: 700; font-size: 0.95rem; color: var(--brown-dark); }
+      .chat-listing-ref { font-size: 0.75rem; color: var(--gold); margin-top: 1px; }
+
+      /* ── MESSAGES ─────────────────────────────────────────── */
+      .chat-messages {
+        flex: 1; overflow-y: auto; padding: 16px 20px;
+        display: flex; flex-direction: column; gap: 4px;
+        background: linear-gradient(180deg, #ece5dd 0%, #e8dcc8 100%);
+      }
+
+      .date-divider {
+        text-align: center; margin: 16px 0 8px;
+      }
+      .date-divider span {
+        background: rgba(255,255,255,0.85); color: var(--text-soft);
+        font-size: 0.72rem; font-weight: 600; padding: 5px 14px;
+        border-radius: 8px; display: inline-block;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      }
+
+      .msg { display: flex; margin-bottom: 2px; }
+      .msg-mine { justify-content: flex-end; }
+      .msg-theirs { justify-content: flex-start; }
+
+      .msg-bubble {
+        max-width: 75%; padding: 8px 12px 6px; border-radius: 12px;
+        position: relative; word-wrap: break-word;
+      }
+      .msg-mine .msg-bubble {
+        background: #dcf8c6; border-top-right-radius: 4px;
+      }
+      .msg-theirs .msg-bubble {
+        background: #fff; border-top-left-radius: 4px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+      }
+      .msg-text {
+        font-size: 0.92rem; line-height: 1.45; color: var(--brown-dark);
+        margin: 0; padding-right: 52px;
+      }
+      .msg-time {
+        float: right; font-size: 0.68rem; color: rgba(44,26,14,0.45);
+        margin-top: 2px; margin-left: 8px; white-space: nowrap;
+        position: relative; top: 4px;
+      }
+
+      .chat-start {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        text-align: center; padding: 40px;
+      }
+      .chat-start p { font-size: 0.9rem; color: var(--text-soft); background: rgba(255,255,255,0.7); padding: 12px 24px; border-radius: 12px; }
+
+      .loading { flex: 1; display: flex; align-items: center; justify-content: center; color: var(--text-soft); font-size: 0.9rem; }
+      .error-msg { text-align: center; color: #b91c1c; padding: 40px; }
+
+      /* ── COMPOSE ──────────────────────────────────────────── */
+      .chat-compose {
+        padding: 10px 16px; background: #fff;
+        border-top: 1px solid rgba(44,26,14,0.06);
+        flex-shrink: 0;
+      }
+      .compose-form { display: flex; gap: 10px; align-items: center; }
+      .compose-form input {
+        flex: 1; border: 1.5px solid rgba(44,26,14,0.12); border-radius: 24px;
+        padding: 12px 20px; font-size: 0.92rem; font-family: "Lato", sans-serif;
+        color: var(--text); background: var(--cream); outline: none;
+        transition: border-color 0.2s;
+      }
+      .compose-form input:focus { border-color: var(--gold); }
+      .send-btn {
+        width: 44px; height: 44px; border-radius: 50%; border: none;
+        background: var(--gold); color: #fff; cursor: pointer;
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0; transition: background 0.2s;
+      }
+      .send-btn:hover { background: #b8862e; }
+      .send-btn:disabled { opacity: 0.5; cursor: default; }
+
+      @media (max-width: 768px) {
+        .chat-header { padding: 8px 12px; }
+        .chat-user-avatar { width: 36px; height: 36px; }
+        .chat-messages { padding: 12px 10px; }
+        .msg-bubble { max-width: 85%; }
+        .chat-compose { padding: 8px 10px; }
+        .compose-form input { padding: 10px 16px; font-size: 0.88rem; }
+        .send-btn { width: 40px; height: 40px; }
+      }
+    </style>
+  </body>
+</html>
