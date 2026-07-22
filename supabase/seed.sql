@@ -16,8 +16,8 @@
 INSERT INTO users (id, email, password)
 VALUES (
   'a0000000-0000-0000-0000-000000000001'::uuid,
-  'example@outlook.com',
-  '$2b$12$REPLACE_THIS_WITH_YOUR_ACTUAL_BCRYPT_HASH'   -- ← update this
+  'callumandniamh@grottositters.com',
+  '$2b$12$XjBuQbeBujhYKXVS1fTuqueaY/Iwk3ykJB77Ttg/jMrW80Dn6U3Z6'
 )
 ON CONFLICT (email) DO NOTHING;
 
