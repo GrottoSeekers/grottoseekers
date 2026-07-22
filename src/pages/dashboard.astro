@@ -33,13 +33,16 @@ const { data: listings } = await supabase
   .select('id, title, description, date_from, date_to, profile_id, profiles!inner(name, location, slug, profile_pic, pets_json, hero_images_json)')
   .eq('status', 'active')
   .gte('date_to', new Date().toISOString().slice(0, 10))
-  .order('date_from', { ascending: true })
-  .limit(6);
+  .order('date_from', { ascending: true });
 
 const sits = (listings ?? []) as any[];
 
 function formatDate(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}
+
+function formatDateLong(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
 function daysBetween(from: string, to: string) {
@@ -67,224 +70,226 @@ function daysBetween(from: string, to: string) {
       </div>
     </nav>
 
+    <!-- Tab bar -->
+    <div class="tab-bar">
+      <div class="tab-bar-inner">
+        <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="sits">Available Sits</button>
+      </div>
+    </div>
+
     <main class="dash-wrap">
       <div class="section-inner">
-        <header class="dash-header">
-          <div>
-            <p class="section-label">Your Dashboard</p>
-            <h1 class="section-title">Your Dashboard</h1>
-            <div class="divider"></div>
-          </div>
-        </header>
 
-        {profile ? (
-          <div class="dash-grid">
-            <!-- Profile card -->
-            <div class="dash-card profile-card">
-              <div class="profile-card-inner">
-                {profile.profile_pic && (
-                  <img src={profile.profile_pic} alt={profile.name} class="profile-avatar" />
-                )}
-                <div class="profile-card-info">
-                  <h2 class="profile-name">{profile.name}</h2>
-                  {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
-                  <a href={`/${profile.slug}`} target="_blank" class="profile-link">
-                    grottositters.com/{profile.slug}
-                  </a>
-                </div>
-              </div>
-              <div class="profile-card-actions">
-                <a href="/profile/edit" class="btn-primary">Edit profile</a>
-                <a href={`/${profile.slug}`} target="_blank" class="btn-view">View public page</a>
-              </div>
-            </div>
-
-            <!-- Stats -->
-            <div class="stats-grid">
-              <div class="stat-card">
-                <span class="stat-number">{reviewCount}</span>
-                <span class="stat-label">Reviews</span>
-              </div>
-              <div class="stat-card">
-                <span class="stat-number">★ 5.0</span>
-                <span class="stat-label">Average Rating</span>
-              </div>
-            </div>
-
-            <!-- Share card -->
-            <div class="dash-card share-card">
-              <h3>Share your profile</h3>
-              <p>Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
-              <div class="share-url">
-                <input
-                  type="text"
-                  readonly
-                  value={`https://grottositters.com/${profile.slug}`}
-                  id="shareUrl"
-                />
-                <button onclick="copyUrl()" class="copy-btn">Copy</button>
-              </div>
-            </div>
-          </div>
-
-          <!-- BROWSE SITS -->
-          <div class="sits-section">
-            <div class="sits-header">
-              <div>
-                <p class="section-label">Available Sits</p>
-                <h2 class="section-title sits-title">Find your next sit</h2>
-              </div>
-              <a href="/listings" class="sits-view-all">View all</a>
-            </div>
-
-            {sits.length === 0 ? (
-              <div class="sits-empty">
-                <p>No sits available right now — check back soon.</p>
-              </div>
-            ) : (
-              <div class="sits-grid">
-                {sits.map((listing: any) => {
-                  const lp = listing.profiles;
-                  const pets: any[] = Array.isArray(lp?.pets_json) ? lp.pets_json : [];
-                  const lHero: any[] = Array.isArray(lp?.hero_images_json) ? lp.hero_images_json : [];
-                  const duration = daysBetween(listing.date_from, listing.date_to);
-                  return (
-                    <a href={`/listings/${listing.id}`} class="sit-card">
-                      <div class="sit-card-img">
-                        {lHero.length > 0 ? (
-                          <img src={lHero[0].src} alt="" />
-                        ) : lp?.profile_pic ? (
-                          <img src={lp.profile_pic} alt="" />
-                        ) : (
-                          <div class="sit-card-placeholder"></div>
-                        )}
-                        <span class="sit-card-duration">{duration} day{duration !== 1 ? 's' : ''}</span>
-                      </div>
-                      <div class="sit-card-body">
-                        <h3 class="sit-card-title">{listing.title}</h3>
-                        <p class="sit-card-owner">{lp?.name}</p>
-                        {lp?.location && <p class="sit-card-location">{lp.location}</p>}
-                        <p class="sit-card-dates">{formatDate(listing.date_from)} — {formatDate(listing.date_to)}</p>
-                        {pets.length > 0 && (
-                          <div class="sit-card-pets">
-                            {pets.slice(0, 3).map((p: any) => (
-                              <span class="sit-card-pet">{p.name}</span>
-                            ))}
-                            {pets.length > 3 && <span class="sit-card-pet">+{pets.length - 3} more</span>}
-                          </div>
-                        )}
-                      </div>
+        <!-- ═══ DASHBOARD TAB ═══ -->
+        <div class="tab-panel active" id="panel-dashboard">
+          {profile ? (
+            <div class="dash-grid">
+              <div class="dash-card profile-card">
+                <div class="profile-card-inner">
+                  {profile.profile_pic && (
+                    <img src={profile.profile_pic} alt={profile.name} class="profile-avatar" />
+                  )}
+                  <div class="profile-card-info">
+                    <h2 class="profile-name">{profile.name}</h2>
+                    {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
+                    <a href={`/${profile.slug}`} target="_blank" class="profile-link">
+                      grottositters.com/{profile.slug}
                     </a>
-                  );
-                })}
+                  </div>
+                </div>
+                <div class="profile-card-actions">
+                  <a href="/profile/edit" class="btn-primary">Edit profile</a>
+                  <a href={`/${profile.slug}`} target="_blank" class="btn-view">View public page</a>
+                </div>
               </div>
-            )}
-          </div>
 
-          <!-- PAGE PREVIEW -->
-          <div class="page-preview-wrap">
-            <div class="page-preview-header">
-              <div>
-                <h2 class="section-title preview-title">Your page preview</h2>
-                <p class="preview-sub">How your public profile currently looks with your colours applied.</p>
+              <div class="stats-grid">
+                <div class="stat-card">
+                  <span class="stat-number">{reviewCount}</span>
+                  <span class="stat-label">Reviews</span>
+                </div>
+                <div class="stat-card">
+                  <span class="stat-number">{sits.length}</span>
+                  <span class="stat-label">Sits Available</span>
+                </div>
               </div>
-              <a href="/profile/edit" class="preview-edit-link">Edit profile</a>
+
+              <div class="dash-card share-card">
+                <h3>Share your profile</h3>
+                <p>Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
+                <div class="share-url">
+                  <input type="text" readonly value={`https://grottositters.com/${profile.slug}`} id="shareUrl" />
+                  <button onclick="copyUrl()" class="copy-btn">Copy</button>
+                </div>
+              </div>
             </div>
-            <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#c8963e'};--pv-accent-light:${t.accent_light || '#e8b96a'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
-              <div class="pv-hero">
-                {heroImages.length > 0 ? (
-                  <img src={heroImages[0].src} alt="" class="pv-hero-img" style={`object-position:${heroImages[0].pos}`} />
-                ) : (
-                  <div class="pv-hero-img pv-hero-empty"></div>
+
+            <div class="page-preview-wrap">
+              <div class="page-preview-header">
+                <div>
+                  <h2 class="section-title preview-title">Your page preview</h2>
+                  <p class="preview-sub">How your public profile currently looks with your colours applied.</p>
+                </div>
+                <a href="/profile/edit" class="preview-edit-link">Edit profile</a>
+              </div>
+              <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#c8963e'};--pv-accent-light:${t.accent_light || '#e8b96a'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
+                <div class="pv-hero">
+                  {heroImages.length > 0 ? (
+                    <img src={heroImages[0].src} alt="" class="pv-hero-img" style={`object-position:${heroImages[0].pos}`} />
+                  ) : (
+                    <div class="pv-hero-img pv-hero-empty"></div>
+                  )}
+                  <div class="pv-hero-overlay"></div>
+                  <div class="pv-hero-content">
+                    {profile.badge_text && <span class="pv-badge">{profile.badge_text}</span>}
+                    <p class="pv-brand">Grotto <em>Sitters</em></p>
+                    <p class="pv-name">{profile.name}</p>
+                    {profile.tagline && <p class="pv-tagline">{profile.tagline}</p>}
+                    <span class="pv-btn">Book {profile.account_type === 'joint' ? 'Us' : 'Me'} Today</span>
+                  </div>
+                </div>
+
+                <div class="pv-section" style="background:var(--pv-bg);">
+                  <p class="pv-label">{h.about_label || (profile.account_type === 'joint' ? 'Who We Are' : 'Who I Am')}</p>
+                  <div class="pv-about-row">
+                    {aboutImages.length > 0 && <img src={aboutImages[0].src} alt="" class="pv-about-img" />}
+                    <div class="pv-about-text">
+                      {profile.bio ? (
+                        <p>{profile.bio.length > 100 ? profile.bio.slice(0, 100) + '...' : profile.bio}</p>
+                      ) : (
+                        <p class="pv-empty">No bio yet</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {reviews.length > 0 && (
+                  <div class="pv-section" style="background:var(--pv-bg);">
+                    <p class="pv-label">{h.reviews_label || 'What Pet Owners Say'}</p>
+                    <div class="pv-reviews-row">
+                      {reviews.slice(0, 3).map((r: any) => (
+                        <div class="pv-review-card">
+                          <span class="pv-stars">★★★★★</span>
+                          <p>"{r.text.length > 50 ? r.text.slice(0, 50) + '...' : r.text}"</p>
+                          <span class="pv-reviewer">— {r.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                <div class="pv-hero-overlay"></div>
-                <div class="pv-hero-content">
-                  {profile.badge_text && <span class="pv-badge">{profile.badge_text}</span>}
-                  <p class="pv-brand">Grotto <em>Sitters</em></p>
-                  <p class="pv-name">{profile.name}</p>
-                  {profile.tagline && <p class="pv-tagline">{profile.tagline}</p>}
-                  <span class="pv-btn">Book {profile.account_type === 'joint' ? 'Us' : 'Me'} Today</span>
-                </div>
-              </div>
 
-              <div class="pv-section" style="background:var(--pv-bg);">
-                <p class="pv-label">{h.about_label || (profile.account_type === 'joint' ? 'Who We Are' : 'Who I Am')}</p>
-                <div class="pv-about-row">
-                  {aboutImages.length > 0 && <img src={aboutImages[0].src} alt="" class="pv-about-img" />}
-                  <div class="pv-about-text">
-                    {profile.bio ? (
-                      <p>{profile.bio.length > 100 ? profile.bio.slice(0, 100) + '...' : profile.bio}</p>
-                    ) : (
-                      <p class="pv-empty">No bio yet</p>
-                    )}
+                {gallery.length > 0 && (
+                  <div class="pv-section pv-gallery-section">
+                    <p class="pv-label">{h.gallery_label || (profile.account_type === 'joint' ? "Pets We've Loved" : "Pets I've Loved")}</p>
+                    <div class="pv-gallery-grid">
+                      {gallery.slice(0, 8).map((img: any) => (
+                        <div class="pv-gallery-item"><img src={img.src} alt="" /></div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
+                )}
 
-              {reviews.length > 0 && (
+                {platforms.length > 0 && (
+                  <div class="pv-section" style="background:var(--pv-bg);">
+                    <p class="pv-label">{h.platforms_label || (profile.account_type === 'joint' ? 'Find Us Online' : 'Find Me Online')}</p>
+                    <div class="pv-platforms-row">
+                      {platforms.map((p: any) => (
+                        <div class="pv-platform-chip">
+                          <span class="pv-platform-letter">{p.name.charAt(0).toUpperCase()}</span>
+                          <span>{p.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div class="pv-section" style="background:var(--pv-bg);">
-                  <p class="pv-label">{h.reviews_label || 'What Pet Owners Say'}</p>
-                  <div class="pv-reviews-row">
-                    {reviews.slice(0, 3).map((r: any) => (
-                      <div class="pv-review-card">
-                        <span class="pv-stars">★★★★★</span>
-                        <p>"{r.text.length > 50 ? r.text.slice(0, 50) + '...' : r.text}"</p>
-                        <span class="pv-reviewer">— {r.name}</span>
-                      </div>
-                    ))}
+                  <p class="pv-label">{h.enquiry_label || 'Get In Touch'}</p>
+                  <div class="pv-enquiry-mock">
+                    <div class="pv-mock-field"></div>
+                    <div class="pv-mock-field"></div>
+                    <div class="pv-mock-field pv-mock-tall"></div>
+                    <div class="pv-mock-btn">Send Enquiry</div>
                   </div>
                 </div>
-              )}
 
-              {gallery.length > 0 && (
-                <div class="pv-section pv-gallery-section">
-                  <p class="pv-label">{h.gallery_label || (profile.account_type === 'joint' ? "Pets We've Loved" : "Pets I've Loved")}</p>
-                  <div class="pv-gallery-grid">
-                    {gallery.slice(0, 8).map((img: any) => (
-                      <div class="pv-gallery-item"><img src={img.src} alt="" /></div>
-                    ))}
-                  </div>
+                <div class="pv-footer">
+                  <p>Grotto <em>Sitters</em></p>
+                  <span>{profile.name}</span>
                 </div>
-              )}
-
-              {platforms.length > 0 && (
-                <div class="pv-section" style="background:var(--pv-bg);">
-                  <p class="pv-label">{h.platforms_label || (profile.account_type === 'joint' ? 'Find Us Online' : 'Find Me Online')}</p>
-                  <div class="pv-platforms-row">
-                    {platforms.map((p: any) => (
-                      <div class="pv-platform-chip">
-                        <span class="pv-platform-letter">{p.name.charAt(0).toUpperCase()}</span>
-                        <span>{p.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div class="pv-section" style="background:var(--pv-bg);">
-                <p class="pv-label">{h.enquiry_label || 'Get In Touch'}</p>
-                <div class="pv-enquiry-mock">
-                  <div class="pv-mock-field"></div>
-                  <div class="pv-mock-field"></div>
-                  <div class="pv-mock-field pv-mock-tall"></div>
-                  <div class="pv-mock-btn">Send Enquiry</div>
-                </div>
-              </div>
-
-              <div class="pv-footer">
-                <p>Grotto <em>Sitters</em></p>
-                <span>{profile.name}</span>
               </div>
             </div>
-          </div>
-        ) : (
-          <div class="no-profile">
-            <div class="no-profile-icon">🐾</div>
-            <h2>You don't have a profile yet</h2>
-            <p>Create your sitter profile to get a shareable page with your bio, photos, and reviews.</p>
-            <a href="/profile/create" class="btn-primary">Create your profile</a>
-          </div>
-        )}
+          ) : (
+            <div class="no-profile">
+              <div class="no-profile-icon">🐾</div>
+              <h2>You don't have a profile yet</h2>
+              <p>Create your sitter profile to get a shareable page with your bio, photos, and reviews.</p>
+              <a href="/profile/create" class="btn-primary">Create your profile</a>
+            </div>
+          )}
+        </div>
+
+        <!-- ═══ AVAILABLE SITS TAB ═══ -->
+        <div class="tab-panel" id="panel-sits">
+          <header class="sits-header">
+            <div>
+              <h1 class="sits-heading">Find your next sit</h1>
+              <p class="sits-sub">Browse homes looking for trusted sitters. Click any listing to see the full details, meet the pets, and get in touch.</p>
+            </div>
+          </header>
+
+          {sits.length === 0 ? (
+            <div class="sits-empty">
+              <div class="sits-empty-icon">🔍</div>
+              <h2>No sits available right now</h2>
+              <p>Check back soon — new listings are posted regularly.</p>
+            </div>
+          ) : (
+            <div class="sits-grid">
+              {sits.map((listing: any) => {
+                const lp = listing.profiles;
+                const pets: any[] = Array.isArray(lp?.pets_json) ? lp.pets_json : [];
+                const lHero: any[] = Array.isArray(lp?.hero_images_json) ? lp.hero_images_json : [];
+                const duration = daysBetween(listing.date_from, listing.date_to);
+                return (
+                  <a href={`/listings/${listing.id}`} class="sit-card">
+                    <div class="sit-card-img">
+                      {lHero.length > 0 ? (
+                        <img src={lHero[0].src} alt="" />
+                      ) : lp?.profile_pic ? (
+                        <img src={lp.profile_pic} alt="" />
+                      ) : (
+                        <div class="sit-card-placeholder"></div>
+                      )}
+                      <span class="sit-card-duration">{duration} day{duration !== 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="sit-card-body">
+                      <div class="sit-card-top">
+                        <h3 class="sit-card-title">{listing.title}</h3>
+                        {lp?.profile_pic && <img src={lp.profile_pic} alt="" class="sit-card-avatar" />}
+                      </div>
+                      <p class="sit-card-owner">{lp?.name}{lp?.location ? ` · ${lp.location}` : ''}</p>
+                      <p class="sit-card-dates">{formatDateLong(listing.date_from)} — {formatDateLong(listing.date_to)}</p>
+                      {pets.length > 0 && (
+                        <div class="sit-card-pets">
+                          {pets.slice(0, 3).map((p: any) => (
+                            <span class="sit-card-pet">{p.name}{p.type ? ` · ${p.type}` : ''}</span>
+                          ))}
+                          {pets.length > 3 && <span class="sit-card-pet">+{pets.length - 3} more</span>}
+                        </div>
+                      )}
+                      {listing.description && (
+                        <p class="sit-card-desc">{listing.description.slice(0, 100)}{listing.description.length > 100 ? '...' : ''}</p>
+                      )}
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
       </div>
     </main>
 
@@ -297,6 +302,17 @@ function daysBetween(from: string, to: string) {
           if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
         });
       }
+
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = (btn as HTMLElement).dataset.tab;
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+          document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          document.getElementById(`panel-${tab}`)?.classList.add('active');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
     </script>
 
     <style>
@@ -314,18 +330,43 @@ function daysBetween(from: string, to: string) {
       .nav-right { display: flex; align-items: center; gap: 20px; }
       .nav-email { font-size: 0.85rem; color: var(--text-soft); }
       .nav-logout {
-        font-size: 0.8rem;
-        font-weight: 700;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        color: var(--gold);
-        text-decoration: none;
+        font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
+        text-transform: uppercase; color: var(--gold); text-decoration: none;
       }
       .nav-logout:hover { color: var(--brown-dark); }
 
-      .dash-wrap { flex: 1; padding: 60px 48px; }
-      .dash-header { margin-bottom: 40px; }
+      /* ── TAB BAR ──────────────────────────────────────────── */
+      .tab-bar {
+        background: #fff;
+        border-bottom: 1px solid rgba(44,26,14,0.08);
+        padding: 0 48px;
+      }
+      .tab-bar-inner {
+        display: flex; gap: 0; max-width: 1200px; margin: 0 auto;
+      }
+      .tab-btn {
+        position: relative;
+        background: none; border: none; cursor: pointer;
+        padding: 18px 28px; font-family: "Lato", sans-serif;
+        font-size: 0.92rem; font-weight: 600; color: var(--text-soft);
+        transition: color 0.2s;
+      }
+      .tab-btn::after {
+        content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+        height: 3px; background: transparent; border-radius: 3px 3px 0 0;
+        transition: background 0.2s;
+      }
+      .tab-btn:hover { color: var(--brown-dark); }
+      .tab-btn.active { color: var(--brown-dark); font-weight: 700; }
+      .tab-btn.active::after { background: var(--gold); }
 
+      /* ── TAB PANELS ───────────────────────────────────────── */
+      .tab-panel { display: none; }
+      .tab-panel.active { display: block; }
+
+      .dash-wrap { flex: 1; padding: 40px 48px 60px; }
+
+      /* ── DASHBOARD TAB ────────────────────────────────────── */
       .dash-grid {
         display: grid;
         grid-template-columns: 1fr 260px;
@@ -334,9 +375,7 @@ function daysBetween(from: string, to: string) {
       }
 
       .dash-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 32px;
+        background: #fff; border-radius: 12px; padding: 32px;
         box-shadow: 0 2px 16px rgba(44,26,14,0.06);
       }
 
@@ -353,15 +392,9 @@ function daysBetween(from: string, to: string) {
 
       .stats-grid { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 16px; }
       .stat-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 24px;
+        background: #fff; border-radius: 12px; padding: 24px;
         box-shadow: 0 2px 16px rgba(44,26,14,0.06);
-        text-align: center;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
+        text-align: center; flex: 1; display: flex; flex-direction: column; gap: 6px;
       }
       .stat-number { font-family: "Playfair Display", serif; font-size: 2rem; color: var(--gold); font-weight: 700; }
       .stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); }
@@ -371,106 +404,101 @@ function daysBetween(from: string, to: string) {
       .share-card p { font-size: 0.9rem; color: var(--text-soft); margin-bottom: 16px; line-height: 1.6; }
       .share-url { display: flex; gap: 10px; }
       .share-url input {
-        flex: 1;
-        border: 1.5px solid rgba(44,26,14,0.15);
-        border-radius: 6px;
-        padding: 10px 14px;
-        font-size: 0.9rem;
-        font-family: "Lato", sans-serif;
-        color: var(--text);
-        background: var(--cream);
-        outline: none;
+        flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
+        padding: 10px 14px; font-size: 0.9rem; font-family: "Lato", sans-serif;
+        color: var(--text); background: var(--cream); outline: none;
       }
       .copy-btn {
-        background: var(--gold);
-        color: #fff;
-        border: none;
-        border-radius: 6px;
-        padding: 10px 20px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        cursor: pointer;
-        white-space: nowrap;
-        transition: background 0.2s;
+        background: var(--gold); color: #fff; border: none; border-radius: 6px;
+        padding: 10px 20px; font-size: 0.85rem; font-weight: 700;
+        cursor: pointer; white-space: nowrap; transition: background 0.2s;
       }
       .copy-btn:hover { background: var(--gold-light); }
 
       .no-profile {
-        background: #fff;
-        border-radius: 12px;
-        padding: 80px 48px;
-        text-align: center;
-        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
-        max-width: 520px;
-        margin: 0 auto;
+        background: #fff; border-radius: 12px; padding: 80px 48px; text-align: center;
+        box-shadow: 0 2px 16px rgba(44,26,14,0.06); max-width: 520px; margin: 0 auto;
       }
       .no-profile-icon { font-size: 3rem; margin-bottom: 20px; }
       .no-profile h2 { font-family: "Playfair Display", serif; font-size: 1.6rem; color: var(--brown-dark); margin-bottom: 12px; }
       .no-profile p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 32px; }
 
-      /* ── BROWSE SITS ─────────────────────────────────────── */
-      .sits-section { margin-top: 56px; }
-      .sits-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; }
-      .sits-title { font-size: 1.6rem; margin-top: 4px; }
-      .sits-view-all {
-        font-size: 0.88rem; font-weight: 700; color: var(--gold);
-        text-decoration: none; white-space: nowrap; padding-bottom: 2px;
-        border-bottom: 2px solid transparent; transition: border-color 0.2s;
+      /* ── AVAILABLE SITS TAB ───────────────────────────────── */
+      .sits-header { margin-bottom: 32px; }
+      .sits-heading {
+        font-family: "Playfair Display", serif; font-size: 2rem;
+        color: var(--brown-dark); margin-bottom: 8px;
       }
-      .sits-view-all:hover { border-bottom-color: var(--gold); }
+      .sits-sub { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; max-width: 600px; }
 
       .sits-empty {
-        background: #fff; border-radius: 16px; padding: 48px; text-align: center;
-        box-shadow: 0 2px 12px rgba(44,26,14,0.05);
+        background: #fff; border-radius: 16px; padding: 80px 48px; text-align: center;
+        box-shadow: 0 2px 12px rgba(44,26,14,0.05); max-width: 520px; margin: 0 auto;
       }
-      .sits-empty p { font-size: 0.95rem; color: var(--text-soft); }
+      .sits-empty-icon { font-size: 3rem; margin-bottom: 20px; }
+      .sits-empty h2 { font-family: "Playfair Display", serif; font-size: 1.5rem; color: var(--brown-dark); margin-bottom: 12px; }
+      .sits-empty p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; }
 
       .sits-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 24px;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 28px;
       }
 
       .sit-card {
         background: #fff; border-radius: 16px; overflow: hidden;
         text-decoration: none; color: inherit;
-        box-shadow: 0 2px 12px rgba(44,26,14,0.05);
+        box-shadow: 0 1px 6px rgba(44,26,14,0.06);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
       }
       .sit-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(44,26,14,0.12);
+        box-shadow: 0 12px 40px rgba(44,26,14,0.13);
       }
 
       .sit-card-img {
-        position: relative; width: 100%; aspect-ratio: 4/3; overflow: hidden;
+        position: relative; width: 100%; aspect-ratio: 16/10; overflow: hidden;
         background: linear-gradient(135deg, #e8dcc8 0%, #d4c4a8 100%);
       }
       .sit-card-img img {
         width: 100%; height: 100%; object-fit: cover; display: block;
-        transition: transform 0.3s ease;
+        transition: transform 0.4s ease;
       }
-      .sit-card:hover .sit-card-img img { transform: scale(1.05); }
-      .sit-card-placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, #e8dcc8 0%, #d4c4a8 100%); }
+      .sit-card:hover .sit-card-img img { transform: scale(1.06); }
+      .sit-card-placeholder {
+        width: 100%; height: 100%;
+        background: linear-gradient(135deg, #e8dcc8 0%, #d4c4a8 100%);
+      }
       .sit-card-duration {
-        position: absolute; top: 12px; right: 12px;
-        background: rgba(0,0,0,0.65); color: #fff; font-size: 0.75rem; font-weight: 700;
-        padding: 5px 12px; border-radius: 20px; backdrop-filter: blur(4px);
+        position: absolute; top: 14px; left: 14px;
+        background: #fff; color: var(--brown-dark); font-size: 0.75rem; font-weight: 700;
+        padding: 6px 14px; border-radius: 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
       }
 
-      .sit-card-body { padding: 16px 18px 20px; }
+      .sit-card-body { padding: 18px 20px 22px; }
+      .sit-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
       .sit-card-title {
-        font-family: "Playfair Display", serif; font-size: 1.05rem;
-        color: var(--brown-dark); margin-bottom: 4px; line-height: 1.3;
+        font-family: "Playfair Display", serif; font-size: 1.1rem;
+        color: var(--brown-dark); line-height: 1.3; flex: 1;
       }
-      .sit-card-owner { font-size: 0.82rem; color: var(--gold); font-weight: 600; margin-bottom: 8px; }
-      .sit-card-location { font-size: 0.82rem; color: var(--text-soft); margin-bottom: 4px; }
-      .sit-card-dates { font-size: 0.82rem; color: var(--text-soft); margin-bottom: 10px; }
-      .sit-card-pets { display: flex; flex-wrap: wrap; gap: 6px; }
+      .sit-card-avatar {
+        width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
+        flex-shrink: 0; border: 2px solid rgba(200,150,62,0.2);
+      }
+      .sit-card-owner { font-size: 0.82rem; color: var(--text-soft); margin-top: 4px; margin-bottom: 10px; }
+      .sit-card-dates {
+        font-size: 0.82rem; color: var(--brown-mid); font-weight: 600; margin-bottom: 12px;
+      }
+      .sit-card-pets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
       .sit-card-pet {
         background: rgba(200,150,62,0.08); color: var(--brown-mid);
-        font-size: 0.75rem; font-weight: 600; padding: 3px 10px;
+        font-size: 0.75rem; font-weight: 600; padding: 4px 12px;
         border-radius: 20px; border: 1px solid rgba(200,150,62,0.15);
+      }
+      .sit-card-desc {
+        font-size: 0.85rem; color: var(--text-soft); line-height: 1.6;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
       }
 
       /* ── FULL PAGE PREVIEW ────────────────────────────────── */
@@ -539,12 +567,15 @@ function daysBetween(from: string, to: string) {
       @media (max-width: 768px) {
         nav { padding: 14px 24px; }
         .nav-email { display: none; }
-        .dash-wrap { padding: 40px 24px; }
+        .tab-bar { padding: 0 24px; }
+        .tab-btn { padding: 14px 18px; font-size: 0.85rem; }
+        .dash-wrap { padding: 32px 24px; }
         .dash-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
         .stats-grid { grid-column: 1; grid-row: 2; flex-direction: row; }
         .share-card { grid-column: 1; grid-row: 3; }
-        .sits-grid { grid-template-columns: 1fr; }
         .share-url { flex-direction: column; }
+        .sits-grid { grid-template-columns: 1fr; }
+        .sits-heading { font-size: 1.5rem; }
         .no-profile { padding: 48px 24px; }
         .page-preview-header { flex-direction: column; gap: 8px; }
       }
