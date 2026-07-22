@@ -19,10 +19,11 @@ if (!profile) return Astro.redirect('/owner/create');
 const pets: any[] = Array.isArray(profile.pets_json) ? profile.pets_json : [];
 
 const error = Astro.url.searchParams.get('error');
+const detail = Astro.url.searchParams.get('detail');
 const errorMap: Record<string, string> = {
   missing: 'Please fill in all required fields.',
   dates: 'End date must be after start date.',
-  server: 'Something went wrong. Please try again.',
+  server: detail ? `Something went wrong: ${detail}` : 'Something went wrong. Please try again.',
 };
 const errorMsg = errorMap[error ?? ''] ?? '';
 ---

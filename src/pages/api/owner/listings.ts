@@ -42,10 +42,11 @@ export const POST: APIRoute = async ({ request }) => {
         description,
         date_from,
         date_to,
+        status: 'active',
       });
 
       if (error) {
-        return new Response(null, { status: 302, headers: { Location: '/owner/listings/new?error=server' } });
+        return new Response(null, { status: 302, headers: { Location: `/owner/listings/new?error=server&detail=${encodeURIComponent(error.message)}` } });
       }
 
       return new Response(null, { status: 302, headers: { Location: '/owner/dashboard?saved=listing' } });
