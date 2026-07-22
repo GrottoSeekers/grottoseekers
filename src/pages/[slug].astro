@@ -2,6 +2,7 @@
 export const prerender = false;
 
 import { supabase } from '../lib/supabase';
+import { getSession } from '../lib/auth';
 import '../styles/global.css';
 
 interface HeroImage { src: string; pos: string }
@@ -21,6 +22,20 @@ try {
     .single();
   if (!error) profile = data;
 } catch {}
+
+const session = await getSession(Astro.request);
+let viewerProfile: any = null;
+if (session) {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, profile_type')
+    .eq('user_id', session.userId)
+    .single();
+  viewerProfile = data;
+}
+
+const canMessage = !!(viewerProfile && profile && viewerProfile.id !== profile.id &&
+  viewerProfile.profile_type !== profile.profile_type);
 
 if (!profile) {
   Astro.response.status = 404;
@@ -92,7 +107,7 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
     <title>{profile.name} — Grotto Sitters</title>
   </head>
-  <body>
+  <body data-profile-id={profile.id}>
     <nav>
       <a href="/" class="nav-logo">Grotto <span>Sitters</span></a>
       <button class="nav-toggle" aria-label="Toggle navigation">
@@ -293,6 +308,15 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
           <h2 class="section-title">{heading.enquiryTitle}</h2>
           <div class="divider"></div>
           <p>{isOwner ? 'Tell us about your experience, availability, and why you\'d be a great fit for our home and pets.' : (isSolo ? 'Tell me about your home, your pets, and your dates and I\'ll get back to you within 24 hours.' : 'Tell us about your home, your pets, and your dates and we\'ll get back to you within 24 hours.')}</p>
+          {canMessage && (
+            <div class="inapp-msg-cta">
+              <button type="button" class="btn-message-profile" id="msgProfileBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Message {profile.name}
+              </button>
+              <p class="inapp-msg-hint">Chat directly on Grotto Sitters</p>
+            </div>
+          )}
           {profile.whatsapp_number && (
             <a href={`https://wa.me/${profile.whatsapp_number.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${profile.name}! I found you on Grotto Sitters and I'm interested in your pet sitting services.`)}`} target="_blank" rel="noopener" class="whatsapp-btn">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
@@ -300,38 +324,51 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
             </a>
           )}
         </div>
-        <form class="enquiry-form" id="enquiryForm" data-slug={profile.slug}>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="fname">First Name</label>
-              <input type="text" id="fname" name="first_name" placeholder="Jane" required />
-            </div>
-            <div class="form-group">
-              <label for="lname">Last Name</label>
-              <input type="text" id="lname" name="last_name" placeholder="Smith" required />
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="jane@example.com" required />
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="date-from">From</label>
-              <input type="date" id="date-from" name="date_from" required />
-            </div>
-            <div class="form-group">
-              <label for="date-to">To</label>
-              <input type="date" id="date-to" name="date_to" required />
+        {canMessage ? (
+          <div class="enquiry-form inapp-msg-panel">
+            <div class="inapp-msg-box">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <h3>Send a direct message</h3>
+              <p>Start a conversation with {profile.name} right here on Grotto Sitters. No email needed.</p>
+              <button type="button" class="btn-primary" id="msgProfileBtn2" style="width:100%">
+                Start conversation
+              </button>
             </div>
           </div>
-          <div class="form-group">
-            <label for="message">{isOwner ? 'Tell us about your experience' : (isSolo ? 'Tell me about your pets & home' : 'Tell us about your pets & home')}</label>
-            <textarea id="message" name="message" rows="4" placeholder="Breed, age, any special needs..."></textarea>
-          </div>
-          <button type="submit" class="btn-primary" id="sendEnquiryBtn" style="width:100%">Send Enquiry</button>
-          <p class="enquiry-status" id="enquiryStatus"></p>
-        </form>
+        ) : (
+          <form class="enquiry-form" id="enquiryForm" data-slug={profile.slug}>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="fname">First Name</label>
+                <input type="text" id="fname" name="first_name" placeholder="Jane" required />
+              </div>
+              <div class="form-group">
+                <label for="lname">Last Name</label>
+                <input type="text" id="lname" name="last_name" placeholder="Smith" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" name="email" placeholder="jane@example.com" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="date-from">From</label>
+                <input type="date" id="date-from" name="date_from" required />
+              </div>
+              <div class="form-group">
+                <label for="date-to">To</label>
+                <input type="date" id="date-to" name="date_to" required />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="message">{isOwner ? 'Tell us about your experience' : (isSolo ? 'Tell me about your pets & home' : 'Tell us about your pets & home')}</label>
+              <textarea id="message" name="message" rows="4" placeholder="Breed, age, any special needs..."></textarea>
+            </div>
+            <button type="submit" class="btn-primary" id="sendEnquiryBtn" style="width:100%">Send Enquiry</button>
+            <p class="enquiry-status" id="enquiryStatus"></p>
+          </form>
+        )}
       </div>
     </section>
 
@@ -465,6 +502,32 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
   }
   .form-group input:focus, .form-group textarea:focus { outline: none; border-color: var(--gold); }
   .form-group textarea { resize: vertical; min-height: 100px; }
+
+  .inapp-msg-cta { margin-top: 24px; }
+  .btn-message-profile {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 28px; background: var(--gold); color: #fff; border: none;
+    border-radius: 8px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    font-family: "Lato", sans-serif; transition: background 0.2s, transform 0.15s;
+  }
+  .btn-message-profile:hover { background: var(--gold-light, #e8b96a); transform: translateY(-1px); }
+  .btn-message-profile svg { flex-shrink: 0; }
+  .inapp-msg-hint { font-size: 0.8rem; color: var(--text-soft); margin-top: 8px; }
+
+  .inapp-msg-panel {
+    display: flex; align-items: center; justify-content: center;
+  }
+  .inapp-msg-box {
+    text-align: center; padding: 48px 32px; background: #fff;
+    border-radius: 12px; border: 1px solid rgba(200,150,62,0.15);
+    max-width: 380px; width: 100%;
+  }
+  .inapp-msg-box svg { margin-bottom: 16px; }
+  .inapp-msg-box h3 {
+    font-family: "Playfair Display", serif; font-size: 1.2rem;
+    color: var(--brown-dark); margin-bottom: 10px;
+  }
+  .inapp-msg-box p { font-size: 0.9rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 24px; }
 
   .whatsapp-btn {
     display: inline-flex; align-items: center; gap: 10px; margin-top: 20px;
@@ -659,4 +722,27 @@ const themeStyle = vars.length ? vars.join(';') : undefined;
     btn.disabled = false;
     btn.textContent = 'Send Enquiry';
   });
+
+  async function startConversation() {
+    const btns = document.querySelectorAll<HTMLButtonElement>('#msgProfileBtn, #msgProfileBtn2');
+    btns.forEach(b => { b.disabled = true; b.textContent = 'Opening chat...'; });
+    try {
+      const res = await fetch('/api/messages/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipient_profile_id: document.body.dataset.profileId }),
+      });
+      const data = await res.json();
+      if (data.conversation_id) {
+        window.location.href = `/messages/${data.conversation_id}`;
+      } else {
+        btns.forEach(b => { b.textContent = 'Something went wrong'; b.disabled = false; });
+      }
+    } catch {
+      btns.forEach(b => { b.textContent = 'Something went wrong'; b.disabled = false; });
+    }
+  }
+
+  document.getElementById('msgProfileBtn')?.addEventListener('click', startConversation);
+  document.getElementById('msgProfileBtn2')?.addEventListener('click', startConversation);
 </script>

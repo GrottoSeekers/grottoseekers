@@ -149,6 +149,16 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
                 </div>
               </div>
 
+              <div class="dash-card find-sitters-card">
+                <div class="find-sitters-inner">
+                  <div>
+                    <h3>Find a sitter</h3>
+                    <p>Browse sitter profiles and message them directly.</p>
+                  </div>
+                  <a href="/sitters" class="btn-primary">Browse sitters</a>
+                </div>
+              </div>
+
               <div class="dash-card share-card">
                 <h3>Share your profile</h3>
                 <p>Send this link so sitters can see your home, pets, and get in touch.</p>
@@ -457,6 +467,11 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
       .overview-card p { font-size: 0.88rem; color: var(--text-soft); line-height: 1.5; margin-bottom: 12px; }
       .overview-card a { font-size: 0.8rem; color: var(--gold); font-weight: 700; text-decoration: none; }
       .overview-card a:hover { text-decoration: underline; }
+
+      .find-sitters-card { margin-bottom: 16px; background: rgba(200,150,62,0.06); border: 1.5px solid rgba(200,150,62,0.15); }
+      .find-sitters-inner { display: flex; justify-content: space-between; align-items: center; gap: 20px; }
+      .find-sitters-card h3 { font-family: "Playfair Display", serif; font-size: 1.15rem; color: var(--brown-dark); margin-bottom: 6px; }
+      .find-sitters-card p { font-size: 0.9rem; color: var(--text-soft); line-height: 1.5; }
 
       .share-card { margin-bottom: 32px; }
       .share-card h3 { font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark); margin-bottom: 8px; }

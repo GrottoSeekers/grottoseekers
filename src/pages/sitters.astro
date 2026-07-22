@@ -1,0 +1,124 @@
+---
+export const prerender = false;
+
+import '../styles/global.css';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { supabase } from '../lib/supabase';
+
+const { data: sitters } = await supabase
+  .from('profiles')
+  .select('id, name, slug, tagline, location, profile_pic, bio, account_type, reviews_json, gallery_json')
+  .eq('profile_type', 'sitter')
+  .order('created_at', { ascending: false });
+
+const items = (sitters ?? []) as any[];
+---
+
+<BaseLayout title="Browse sitters — Grotto Sitters">
+  <main class="sitters-page">
+    <div class="section-inner">
+      <header class="sitters-header">
+        <p class="section-label">Trusted Sitters</p>
+        <h1 class="section-title">Find a sitter</h1>
+        <div class="divider"></div>
+        <p class="sitters-intro">Browse experienced house and pet sitters. View their profile to see reviews, photos, and get in touch.</p>
+      </header>
+
+      {items.length === 0 ? (
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h2>No sitters yet</h2>
+          <p>Check back soon — new sitters are joining regularly.</p>
+        </div>
+      ) : (
+        <div class="sitters-grid">
+          {items.map((sitter: any) => {
+            const reviews: any[] = Array.isArray(sitter.reviews_json) ? sitter.reviews_json : [];
+            const gallery: any[] = Array.isArray(sitter.gallery_json) ? sitter.gallery_json : [];
+            const bioSnippet = sitter.bio ? (sitter.bio.length > 120 ? sitter.bio.slice(0, 120) + '...' : sitter.bio) : '';
+            return (
+              <a href={`/${sitter.slug}`} class="sitter-card">
+                <div class="sitter-card-top">
+                  {sitter.profile_pic ? (
+                    <img src={sitter.profile_pic} alt={sitter.name} class="sitter-avatar" />
+                  ) : (
+                    <div class="sitter-avatar sitter-avatar-ph">
+                      {sitter.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div class="sitter-card-info">
+                    <h3 class="sitter-name">{sitter.name}</h3>
+                    {sitter.location && <p class="sitter-location">{sitter.location}</p>}
+                    {sitter.tagline && <p class="sitter-tagline">{sitter.tagline}</p>}
+                  </div>
+                </div>
+                <div class="sitter-card-meta">
+                  {reviews.length > 0 && (
+                    <span class="sitter-reviews">
+                      <span class="sitter-star">&#9733;</span>
+                      {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                    </span>
+                  )}
+                  {gallery.length > 0 && (
+                    <span class="sitter-photos">{gallery.length} photo{gallery.length !== 1 ? 's' : ''}</span>
+                  )}
+                </div>
+                {bioSnippet && <p class="sitter-bio">{bioSnippet}</p>}
+                <span class="sitter-view-link">View profile &rarr;</span>
+              </a>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  </main>
+
+  <style>
+    .sitters-page { padding: 80px 48px 100px; }
+    .sitters-header { text-align: center; margin-bottom: 48px; }
+    .sitters-intro { font-size: 1rem; color: var(--text-soft); line-height: 1.7; max-width: 600px; margin: 0 auto; }
+
+    .empty-state {
+      background: #fff; border-radius: 12px; padding: 80px 48px; text-align: center;
+      box-shadow: 0 2px 16px rgba(44,26,14,0.06); max-width: 520px; margin: 0 auto;
+    }
+    .empty-icon { font-size: 3rem; margin-bottom: 20px; }
+    .empty-state h2 { font-family: "Playfair Display", serif; font-size: 1.6rem; color: var(--brown-dark); margin-bottom: 12px; }
+    .empty-state p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; }
+
+    .sitters-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
+
+    .sitter-card {
+      background: #fff; border-radius: 12px; padding: 28px; text-decoration: none; color: inherit;
+      box-shadow: 0 2px 16px rgba(44,26,14,0.06); transition: transform 0.2s, box-shadow 0.2s;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .sitter-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(44,26,14,0.12); }
+
+    .sitter-card-top { display: flex; gap: 16px; align-items: flex-start; }
+    .sitter-avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+    .sitter-avatar-ph {
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(200,150,62,0.12); color: var(--gold);
+      font-family: "Playfair Display", serif; font-size: 1.4rem; font-weight: 700;
+    }
+    .sitter-card-info { flex: 1; min-width: 0; }
+    .sitter-name { font-family: "Playfair Display", serif; font-size: 1.15rem; color: var(--brown-dark); margin-bottom: 2px; }
+    .sitter-location { font-size: 0.85rem; color: var(--gold); font-weight: 600; margin-bottom: 4px; }
+    .sitter-tagline { font-size: 0.88rem; color: var(--text-soft); line-height: 1.5; }
+
+    .sitter-card-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.82rem; color: var(--text-soft); }
+    .sitter-star { color: var(--gold); }
+    .sitter-reviews { font-weight: 600; }
+    .sitter-photos { color: var(--text-soft); }
+
+    .sitter-bio { font-size: 0.88rem; color: var(--text-soft); line-height: 1.6; }
+
+    .sitter-view-link { font-size: 0.82rem; font-weight: 700; color: var(--gold); letter-spacing: 0.03em; }
+
+    @media (max-width: 768px) {
+      .sitters-page { padding: 60px 24px 80px; }
+      .sitters-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</BaseLayout>
