@@ -66,7 +66,7 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>Dashboard — Grotto Sitters</title>
   </head>
   <body>
@@ -385,7 +385,7 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
 
       /* ── BOTTOM TAB BAR ─────────────────────────────────── */
       .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; display: flex; background: #fff; border-top: 1px solid rgba(0,0,0,0.08); padding-bottom: env(safe-area-inset-bottom, 0); }
-      .tab-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px 6px; font-size: 0.625rem; font-weight: 600; letter-spacing: 0.01em; color: #999; text-decoration: none; border: none; background: none; cursor: pointer; font-family: "Lato", sans-serif; -webkit-tap-highlight-color: transparent; transition: color 0.15s; }
+      .tab-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px 6px; font-size: 0.625rem; font-weight: 600; letter-spacing: 0.01em; color: #999; text-decoration: none; border: none; background: none; cursor: pointer; font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; transition: color 0.15s; }
       .tab-bar-item svg { width: 24px; height: 24px; }
       .tab-bar-item.active { color: var(--gold); }
       .tab-bar-icon-wrap { position: relative; display: flex; }
@@ -478,11 +478,11 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
       .share-card p { font-size: 0.9rem; color: var(--text-soft); margin-bottom: 16px; line-height: 1.6; }
       .share-url { display: flex; gap: 10px; }
       .share-url input {
-        flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px; padding: 10px 14px;
-        font-size: 0.9rem; font-family: "Lato", sans-serif; color: var(--text); background: var(--cream); outline: none;
+        flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px; padding: 10px 14px;
+        font-size: 0.9rem; font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; color: var(--text); background: var(--cream); outline: none;
       }
       .copy-btn {
-        background: var(--gold); color: #fff; border: none; border-radius: 6px; padding: 10px 20px;
+        background: var(--gold); color: #fff; border: none; border-radius: 100px; padding: 10px 20px;
         font-size: 0.85rem; font-weight: 700; cursor: pointer; white-space: nowrap;
       }
 

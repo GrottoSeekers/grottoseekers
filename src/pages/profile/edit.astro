@@ -47,7 +47,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <title>Edit your profile — Grotto Sitters</title>
   </head>
   <body>
@@ -887,7 +887,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .top-bar-logout:hover { color: var(--brown-dark); }
 
       .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; display: flex; background: #fff; border-top: 1px solid rgba(0,0,0,0.08); padding-bottom: env(safe-area-inset-bottom, 0); }
-      .tab-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px 6px; font-size: 0.625rem; font-weight: 600; letter-spacing: 0.01em; color: #999; text-decoration: none; border: none; background: none; cursor: pointer; font-family: "Lato", sans-serif; -webkit-tap-highlight-color: transparent; transition: color 0.15s; }
+      .tab-bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 4px 6px; font-size: 0.625rem; font-weight: 600; letter-spacing: 0.01em; color: #999; text-decoration: none; border: none; background: none; cursor: pointer; font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; transition: color 0.15s; }
       .tab-bar-item svg { width: 24px; height: 24px; }
       .tab-bar-item.active { color: var(--gold); }
 
@@ -922,7 +922,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       }
       .section-nav a {
         background: #fff; border: 1.5px solid rgba(44,26,14,0.12);
-        border-radius: 6px; padding: 8px 16px; font-size: 0.8rem;
+        border-radius: 100px; padding: 8px 16px; font-size: 0.8rem;
         font-weight: 700; color: var(--brown-mid); text-decoration: none;
         letter-spacing: 0.04em; transition: all 0.2s;
       }
@@ -973,7 +973,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .pv-brand em { color: var(--pv-accent); font-style: italic; }
       .pv-name { font-size: 0.7rem; color: rgba(255,255,255,0.85); font-weight: 700; letter-spacing: 0.06em; margin-top: 6px; }
       .pv-tagline { font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
-      .pv-btn { display: inline-block; margin-top: 10px; background: var(--pv-accent); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 5px 14px; border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
+      .pv-btn { display: inline-block; margin-top: 10px; background: var(--pv-accent); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 5px 14px; border-radius: 100px; letter-spacing: 0.06em; text-transform: uppercase; }
 
       .pv-section { padding: 16px 20px; }
       .pv-label { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pv-accent); margin-bottom: 8px; }
@@ -995,7 +995,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .pv-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
       .pv-platforms-row { display: flex; flex-wrap: wrap; gap: 6px; }
-      .pv-platform-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(200,150,62,0.08); border-radius: 6px; font-size: 0.6rem; font-weight: 600; color: var(--pv-text); }
+      .pv-platform-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(200,150,62,0.08); border-radius: 100px; font-size: 0.6rem; font-weight: 600; color: var(--pv-text); }
       .pv-platform-letter { font-family: "Playfair Display", serif; font-size: 0.55rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; background: var(--pv-accent); color: #fff; display: flex; align-items: center; justify-content: center; }
 
       .pv-enquiry-mock { display: flex; flex-direction: column; gap: 5px; max-width: 200px; }
@@ -1040,7 +1040,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       input[type="text"], input[type="url"], input[type="email"], input[type="tel"], textarea, select {
         width: 100%; box-sizing: border-box;
         border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px;
-        padding: 11px 14px; font-size: 0.93rem; font-family: "Lato", sans-serif;
+        padding: 11px 14px; font-size: 0.93rem; font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
         color: var(--text); background: var(--cream); outline: none;
         transition: border-color 0.2s;
       }
@@ -1141,9 +1141,9 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .colour-picker::-moz-color-swatch { border: none; border-radius: 50%; }
       .colour-strip-actions { display: flex; gap: 10px; justify-content: center; }
       .btn-reset-colours {
-        background: none; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
+        background: none; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 100px;
         padding: 8px 16px; font-size: 0.78rem; font-weight: 600; color: var(--text-soft);
-        cursor: pointer; font-family: "Lato", sans-serif; transition: all 0.2s;
+        cursor: pointer; font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; transition: all 0.2s;
       }
       .btn-reset-colours:hover { border-color: var(--gold); color: var(--brown-dark); }
 
@@ -1154,8 +1154,8 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .new-link-label { font-size: 0.85rem; font-weight: 700; color: #166534; margin-bottom: 10px; }
       .share-url { display: flex; gap: 10px; }
       .review-link-input {
-        flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
-        padding: 10px 14px; font-size: 0.85rem; font-family: "Lato", sans-serif;
+        flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px;
+        padding: 10px 14px; font-size: 0.85rem; font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
         color: var(--text); background: #fff; outline: none;
       }
 
@@ -1168,7 +1168,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .pending-card { background: rgba(200,150,62,0.04); }
       .pending-url { font-family: monospace; font-size: 0.82rem; color: var(--brown-mid); word-break: break-all; }
       .btn-copy-small {
-        background: var(--gold); color: #fff; border: none; border-radius: 6px;
+        background: var(--gold); color: #fff; border: none; border-radius: 100px;
         padding: 8px 16px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
         white-space: nowrap; transition: background 0.2s; flex-shrink: 0; align-self: center;
       }

@@ -1,15 +1,24 @@
 :root {
-  --cream: #faf6ee;
-  --warm-white: #fff9f0;
+  --cream: #f9f9f9;
+  --warm-white: #ffffff;
   --gold: #c8963e;
-  --gold-light: #e8b96a;
+  --gold-light: #d4a656;
   --gold-pale: #f5e4c3;
-  --brown-dark: #2c1a0e;
-  --brown-mid: #5c3d20;
+  --brown-dark: #15171a;
+  --brown-mid: #394047;
   --brown-light: #8b5e3c;
   --sage: #7a8c6a;
-  --text: #2c1a0e;
-  --text-soft: #6b4e35;
+  --text: #15171a;
+  --text-soft: rgba(0, 0, 0, 0.55);
+  --border: rgba(0, 0, 0, 0.08);
+  --card-shadow: 0 0 0 1px rgb(0 0 0 / 0.04), 0 7px 20px -5px rgb(0 0 0 / 0.08);
+  --card-shadow-hover: 0 0 0 1px rgb(0 0 0 / 0.04), 0 14px 32px -8px rgb(0 0 0 / 0.14);
+  --container-width: 1200px;
+  --content-width: 720px;
+  --radius: 6px;
+  --radius-lg: 12px;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
 }
 
 *,
@@ -25,38 +34,41 @@ html {
 }
 
 body {
-  font-family: "Lato", sans-serif;
+  font-family: var(--font-sans);
   background: var(--cream);
   color: var(--text);
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ── TYPOGRAPHY ── */
 .section-label {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--gold);
   margin-bottom: 12px;
 }
 
 .section-title {
-  font-family: "Playfair Display", serif;
-  font-size: 2.2rem;
+  font-family: var(--font-serif);
+  font-size: 2.4rem;
   color: var(--brown-dark);
-  line-height: 1.25;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
 }
 
 .divider {
-  width: 48px;
+  width: 40px;
   height: 2px;
   background: var(--gold);
-  margin: 20px 0 28px;
+  margin: 16px 0 24px;
 }
 
 .section-inner {
-  max-width: 1100px;
+  max-width: var(--container-width);
   margin: 0 auto;
 }
 
@@ -65,21 +77,22 @@ body {
   display: inline-block;
   background: var(--gold);
   color: #fff;
-  padding: 14px 36px;
+  padding: 12px 32px;
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  border-radius: 100px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   text-decoration: none;
   cursor: pointer;
-  transition: background 0.2s, transform 0.2s;
+  font-family: var(--font-sans);
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 
 .btn-primary:hover {
   background: var(--gold-light);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(200, 150, 62, 0.3);
 }
 
 /* ── NAV ── */
@@ -89,45 +102,48 @@ nav {
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 18px 48px;
+  padding: 0 clamp(24px, 4vw, 48px);
+  height: 64px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(250, 246, 238, 0.92);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(200, 150, 62, 0.15);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
 }
 
 .nav-logo {
-  font-family: "Playfair Display", serif;
-  font-size: 1.4rem;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
   color: var(--brown-dark);
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
   text-decoration: none;
+  font-weight: 700;
 }
 
 .nav-logo span {
   color: var(--gold);
+  font-style: italic;
 }
 
 nav ul {
   list-style: none;
   display: flex;
-  gap: 36px;
+  gap: 32px;
+  align-items: center;
 }
 
 nav ul a {
   text-decoration: none;
-  color: var(--brown-mid);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  font-weight: 500;
   transition: color 0.2s;
 }
 
 nav ul a:hover {
-  color: var(--gold);
+  color: var(--text);
 }
 
 /* Brand item inside mobile panel — hidden on desktop */
@@ -143,13 +159,15 @@ nav ul a:hover {
   cursor: pointer;
   flex-direction: column;
   gap: 5px;
+  padding: 4px;
 }
 
 .nav-toggle span {
   display: block;
-  width: 24px;
+  width: 22px;
   height: 2px;
   background: var(--brown-dark);
+  border-radius: 2px;
   transition: transform 0.3s, opacity 0.3s;
 }
 
@@ -160,10 +178,11 @@ nav ul a:hover {
 
 @media (max-width: 768px) {
   nav {
-    padding: 14px 24px;
+    padding: 0 20px;
+    height: 56px;
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgba(250, 246, 238, 0.98);
+    background: rgba(255, 255, 255, 0.98);
   }
 
   .nav-toggle {
@@ -176,15 +195,16 @@ nav ul a:hover {
     top: 0;
     right: 0;
     bottom: 0;
-    width: 270px;
+    width: 280px;
     flex-direction: column;
     background: #ffffff;
-    padding: 0 32px 32px;
-    gap: 20px;
+    padding: 0 28px 32px;
+    gap: 0;
     transform: translateX(100%);
     transition: transform 0.3s ease;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.2);
+    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.12);
     z-index: 110;
+    align-items: stretch;
   }
 
   nav ul.open {
@@ -194,29 +214,31 @@ nav ul a:hover {
   .nav-panel-brand {
     display: flex;
     align-items: center;
-    height: 62px;
-    border-bottom: 2px solid #c8963e;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
     padding-right: 44px;
     flex-shrink: 0;
+    margin-bottom: 8px;
   }
 
   .nav-panel-brand a {
-    font-family: "Playfair Display", serif;
-    font-size: 1.35rem;
-    font-weight: 400;
-    color: #2c1a0e;
+    font-family: var(--font-serif);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--brown-dark);
     text-transform: none;
-    letter-spacing: 0.02em;
+    letter-spacing: -0.01em;
     display: block;
     padding: 0;
   }
 
   .nav-panel-brand a span {
-    color: #c8963e;
+    color: var(--gold);
+    font-style: italic;
   }
 
   nav ul li:not(.nav-panel-brand) {
-    border-bottom: 1px solid rgba(44, 26, 14, 0.1);
+    border-bottom: 1px solid var(--border);
   }
 
   nav ul li:last-child {
@@ -224,46 +246,44 @@ nav ul a:hover {
   }
 
   nav ul a {
-    color: #2c1a0e;
-    font-size: 1.05rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 500;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 0;
+    padding: 14px 0;
   }
 
   nav ul li:not(.nav-panel-brand) a::after {
     content: '›';
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     font-weight: 300;
-    color: #c8963e;
-    opacity: 0.5;
+    color: rgba(0, 0, 0, 0.2);
     line-height: 1;
-    transition: opacity 0.2s, transform 0.2s;
+    transition: color 0.2s, transform 0.2s;
   }
 
   nav ul a:active,
   nav ul a:hover {
-    color: #c8963e;
+    color: var(--gold);
   }
 
   nav ul a:active::after,
   nav ul a:hover::after {
-    opacity: 1;
+    color: var(--gold);
     transform: translateX(4px);
   }
 
   .nav-toggle.open span {
-    background: #2c1a0e;
+    background: var(--brown-dark);
   }
 
   .nav-overlay {
     display: block;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.4);
     z-index: 90;
     opacity: 0;
     visibility: hidden;
@@ -279,12 +299,12 @@ nav ul a:hover {
 /* ── FOOTER ── */
 footer {
   background: var(--brown-dark);
-  color: rgba(255, 255, 255, 0.7);
-  padding: 60px 48px 30px;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 72px clamp(24px, 4vw, 48px) 32px;
 }
 
 .footer-inner {
-  max-width: 1100px;
+  max-width: var(--container-width);
   margin: 0 auto;
 }
 
@@ -292,18 +312,20 @@ footer {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr;
   gap: 48px;
-  margin-bottom: 40px;
+  margin-bottom: 48px;
 }
 
 .footer-brand h2 {
-  font-family: "Playfair Display", serif;
-  font-size: 1.6rem;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
   color: #fff;
   margin-bottom: 12px;
+  font-weight: 700;
 }
 
 .footer-brand h2 span {
   color: var(--gold);
+  font-style: italic;
 }
 
 .footer-brand p {
@@ -313,8 +335,9 @@ footer {
 
 .footer-links h4 {
   color: #fff;
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 16px;
 }
@@ -328,22 +351,23 @@ footer {
 }
 
 .footer-links a {
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   transition: color 0.2s;
 }
 
 .footer-links a:hover {
-  color: var(--gold);
+  color: #fff;
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   padding-top: 24px;
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.35);
 }
 
 @media (max-width: 768px) {
@@ -356,9 +380,5 @@ footer {
     flex-direction: column;
     gap: 8px;
     text-align: center;
-  }
-
-  footer {
-    padding: 40px 24px 24px;
   }
 }
