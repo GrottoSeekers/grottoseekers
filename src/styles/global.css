@@ -104,6 +104,15 @@ nav {
   color: var(--brown-dark);
   letter-spacing: 0.02em;
   text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo-img {
+  height: 38px;
+  width: 38px;
+  flex-shrink: 0;
 }
 
 .nav-logo span {
