@@ -1,4 +1,5 @@
 ---
+import LoadingOverlay from '../../components/LoadingOverlay.astro';
 export const prerender = false;
 
 import '../../styles/global.css';
@@ -603,5 +604,6 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
         .no-profile { padding: 48px 24px; }
       }
     </style>
-  </body>
+    <LoadingOverlay />
+</body>
 </html>

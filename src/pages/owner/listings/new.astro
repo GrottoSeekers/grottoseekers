@@ -1,4 +1,5 @@
 ---
+import LoadingOverlay from '../../../components/LoadingOverlay.astro';
 export const prerender = false;
 
 import '../../../styles/global.css';
@@ -144,5 +145,6 @@ const errorMsg = errorMap[error ?? ''] ?? '';
         .date-row { grid-template-columns: 1fr; }
       }
     </style>
-  </body>
+    <LoadingOverlay />
+</body>
 </html>

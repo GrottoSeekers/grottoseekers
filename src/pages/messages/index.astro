@@ -1,4 +1,5 @@
 ---
+import LoadingOverlay from '../../components/LoadingOverlay.astro';
 export const prerender = false;
 
 import '../../styles/global.css';
@@ -345,5 +346,6 @@ const profileUrl = profile.profile_type === 'owner' ? '/owner/edit' : '/profile/
         .conv-avatar { width: 44px; height: 44px; }
       }
     </style>
-  </body>
+    <LoadingOverlay />
+</body>
 </html>

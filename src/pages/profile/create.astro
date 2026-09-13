@@ -1,4 +1,5 @@
 ---
+import LoadingOverlay from '../../components/LoadingOverlay.astro';
 export const prerender = false;
 
 import '../../styles/global.css';
@@ -317,5 +318,6 @@ const errorMsg = errorMap[errorKey] ?? '';
         .slug-prefix { font-size: 0.78rem; padding: 12px 10px; }
       }
     </style>
-  </body>
+    <LoadingOverlay />
+</body>
 </html>
