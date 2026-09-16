@@ -1,8 +1,5 @@
 ---
-import LoadingOverlay from '../../../../components/LoadingOverlay.astro';
 export const prerender = false;
-
-import '../../../../styles/global.css';
 import { getSession } from '../../../../lib/auth';
 import { supabase } from '../../../../lib/supabase';
 
@@ -13,7 +10,7 @@ const { id } = Astro.params;
 
 const { data: profile } = await supabase
   .from('profiles')
-  .select('id')
+  .select('id, name, location, avatar_url, pets_json')
   .eq('user_id', session.userId)
   .single();
 
@@ -28,145 +25,529 @@ const { data: listing } = await supabase
 
 if (!listing) return Astro.redirect('/owner/dashboard');
 
+const pets: any[] = Array.isArray(profile.pets_json) ? profile.pets_json : [];
+const petNames = pets.map((p: any) => p.name).filter(Boolean).join(', ');
+const ownerInitials = (profile.name || 'O').split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
+
+// Enquiry count — graceful fallback
+let enquiryCount = 0;
+try {
+  const { count } = await supabase
+    .from('applications')
+    .select('*', { count: 'exact', head: true })
+    .eq('listing_id', listing.id);
+  enquiryCount = count ?? 0;
+} catch { /* table may not exist yet */ }
+
+const postedDate = listing.created_at
+  ? new Date(listing.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  : null;
+
+// Compute initial duration text server-side for the duration banner
+function fmtDateSrv(d: string | null): string {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+const initFrom = listing.date_from ?? '';
+const initTo = listing.date_to ?? '';
+const initDays = (initFrom && initTo)
+  ? Math.ceil((new Date(initTo + 'T00:00:00').getTime() - new Date(initFrom + 'T00:00:00').getTime()) / 86400000)
+  : 0;
+const initDurationText = initDays > 0
+  ? `${initDays} ${initDays === 1 ? 'day' : 'days'} — ${fmtDateSrv(initFrom)} to ${fmtDateSrv(initTo)}`
+  : '';
+const initPreviewDates = initDays > 0 ? `${fmtDateSrv(initFrom)} — ${fmtDateSrv(initTo)}` : 'Add your dates';
+const initPreviewChip = initDays > 0 ? `${initDays} ${initDays === 1 ? 'day' : 'days'}` : 'Dates to confirm';
+
+const STATUS_DEFS: Array<{ key: string; label: string; colour: string; hint: string }> = [
+  { key: 'active', label: 'Active', colour: '#2f5d45', hint: 'Live in browse results — sitters can find it and enquire.' },
+  { key: 'filled', label: 'Filled', colour: '#2f7d4f', hint: 'Hidden from browse. Kept on your dashboard for your records.' },
+  { key: 'cancelled', label: 'Cancelled', colour: '#8a6a4f', hint: 'Hidden from browse and marked cancelled to anyone who enquired.' },
+];
+const currentStatus = listing.status ?? 'active';
+const currentStatusDef = STATUS_DEFS.find(s => s.key === currentStatus) ?? STATUS_DEFS[0];
+
+const saved = Astro.url.searchParams.get('saved');
 const error = Astro.url.searchParams.get('error');
+const detail = Astro.url.searchParams.get('detail');
 const errorMap: Record<string, string> = {
   missing: 'Please fill in all required fields.',
   dates: 'End date must be after start date.',
-  server: 'Something went wrong. Please try again.',
+  server: detail ? `Something went wrong: ${detail}` : 'Something went wrong. Please try again.',
 };
 const errorMsg = errorMap[error ?? ''] ?? '';
 ---
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>Edit listing — MYAH</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-      <div class="nav-right">
-        <a href="/owner/dashboard" class="nav-back">&larr; Dashboard</a>
-        <a href="/api/auth/logout" class="nav-logout">Log out</a>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" type="image/png" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Edit listing — MYAH</title>
+  <style>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; }
+    a:hover { color:#2c1a0e; }
+    input::placeholder, textarea::placeholder { color:rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform:rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    @media (max-width:900px) {
+      [data-topnav] { padding:14px 24px !important; }
+      [data-pad] { padding:36px 24px 70px !important; }
+      [data-form-grid] { grid-template-columns:minmax(0,1fr) !important; }
+      [data-aside] { position:static !important; }
+      [data-card] { padding:26px !important; }
+      [data-date-row] { grid-template-columns:minmax(0,1fr) !important; }
+    }
+  </style>
+</head>
+<body style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <!-- Loading overlay -->
+  <div id="loader" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <!-- Nav -->
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="/owner/dashboard"
+        style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s,color .2s"
+        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'"
+        onmouseout="this.style.gap='9px';this.style.color='#6b4e35'"
+      >&larr; Dashboard</a>
+      <a href="/api/auth/logout"
+        style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
+        onmouseover="this.style.color='#2c1a0e'"
+        onmouseout="this.style.color='#2f5d45'"
+      >Log out</a>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main data-pad="1" style="flex:1;padding:52px 48px 80px">
+    <div style="max-width:1100px;margin:0 auto">
+
+      <!-- Header -->
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:32px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
+          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Edit listing
+        </p>
+        <h1 id="pageHeadline" style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">{listing.title || 'Untitled listing'}</h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:580px;margin:0">Change the dates, details or status of this sit. Sitters who&rsquo;ve already enquired keep their conversation with you.</p>
       </div>
-    </nav>
 
-    <main class="create-wrap">
-      <div class="create-card">
-        <p class="section-label">Edit Listing</p>
-        <h1 class="section-title">{listing.title}</h1>
-        <div class="divider"></div>
+      {saved && (
+        <div style="background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:10px;padding:14px 18px;font-size:.9rem;margin-bottom:24px;font-weight:600">Changes saved successfully.</div>
+      )}
+      {errorMsg && (
+        <div style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;border-radius:10px;padding:14px 18px;font-size:.9rem;margin-bottom:24px">{errorMsg}</div>
+      )}
 
-        {errorMsg && <p class="create-error">{errorMsg}</p>}
+      <!-- 2-col grid -->
+      <div data-form-grid="1" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start">
 
-        <form method="POST" action="/api/owner/listings" class="create-form">
+        <!-- Form -->
+        <form id="editForm" method="POST" action="/api/owner/listings" style="display:flex;flex-direction:column;gap:24px">
           <input type="hidden" name="_action" value="update" />
           <input type="hidden" name="listing_id" value={listing.id} />
+          <input type="hidden" name="status" id="statusInput" value={currentStatus} />
 
-          <div class="field">
-            <label for="title">Title <span class="req">*</span></label>
-            <input type="text" id="title" name="title" value={listing.title} required />
-          </div>
+          <!-- Card 1: Sit details -->
+          <div data-card="1"
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'"
+          >
+            <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Sit details</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 28px"></div>
 
-          <div class="date-row">
-            <div class="field">
-              <label for="date_from">From <span class="req">*</span></label>
-              <input type="date" id="date_from" name="date_from" value={listing.date_from} required />
+            <!-- Title -->
+            <div style="margin-bottom:26px">
+              <label for="title" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Title <span style="color:#2f5d45">*</span></label>
+              <input
+                id="title" name="title" type="text" value={listing.title ?? ''} required
+                style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s,box-shadow .2s"
+                onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+                onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow='none'"
+                oninput="updatePreview()"
+              />
             </div>
-            <div class="field">
-              <label for="date_to">To <span class="req">*</span></label>
-              <input type="date" id="date_to" name="date_to" value={listing.date_to} required />
+
+            <!-- Date row -->
+            <div data-date-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px">
+              <div>
+                <label for="date_from" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">From <span style="color:#2f5d45">*</span></label>
+                <input
+                  id="date_from" name="date_from" type="date" value={initFrom} required
+                  style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s,box-shadow .2s"
+                  onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+                  onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow='none'"
+                  oninput="updateDates()" onchange="updateDates()"
+                />
+              </div>
+              <div>
+                <label for="date_to" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">To <span style="color:#2f5d45">*</span></label>
+                <input
+                  id="date_to" name="date_to" type="date" value={initTo} required
+                  style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s,box-shadow .2s"
+                  onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+                  onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow='none'"
+                  oninput="updateDates()" onchange="updateDates()"
+                />
+              </div>
+            </div>
+
+            <!-- Duration banner -->
+            <div id="durationBanner" style={`display:${initDurationText ? 'flex' : 'none'};margin-bottom:26px;padding:14px 18px;border-radius:12px;background:rgba(110,84,56,.09);border:1px solid rgba(110,84,56,.32)`}>
+              <span style="display:flex;align-items:center;gap:10px;font-size:.86rem;font-weight:600;color:#5c3d20;letter-spacing:.02em">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+                <span id="durationText">{initDurationText}</span>
+              </span>
+            </div>
+
+            <!-- Status buttons -->
+            <div style="margin-bottom:26px">
+              <span style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Status</span>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                {STATUS_DEFS.map(s => (
+                  <button
+                    type="button"
+                    data-status-btn={s.key}
+                    onclick={`setStatus('${s.key}')`}
+                    style={`display:inline-flex;align-items:center;gap:9px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;padding:10px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease,color .25s ease,border-color .25s ease,transform .15s ease;${currentStatus === s.key ? `background:${s.colour};color:#fff;border:1.5px solid ${s.colour};` : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.35);'}`}
+                  >
+                    <span style={`width:8px;height:8px;border-radius:50%;display:block;flex-shrink:0;background:${currentStatus === s.key ? '#fff' : s.colour}`}></span>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+              <p id="statusHint" style="font-size:.82rem;color:#6b4e35;margin:12px 0 0;line-height:1.6">{currentStatusDef.hint}</p>
+            </div>
+
+            <!-- Description -->
+            <div>
+              <label for="description" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Details</label>
+              <textarea
+                id="description" name="description" rows="6"
+                placeholder="Anything specific to this sit — daily routine, special instructions, house rules."
+                style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .2s,box-shadow .2s"
+                onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+                onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow='none'"
+              >{listing.description ?? ''}</textarea>
             </div>
           </div>
 
-          <div class="field">
-            <label for="status">Status</label>
-            <select id="status" name="status">
-              <option value="active" selected={listing.status === 'active'}>Active</option>
-              <option value="filled" selected={listing.status === 'filled'}>Filled</option>
-              <option value="cancelled" selected={listing.status === 'cancelled'}>Cancelled</option>
-            </select>
+          <!-- Card 2: Handover for this sit -->
+          <div data-card="1"
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'"
+          >
+            <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Handover for this sit</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 26px;max-width:480px">Only the parts that change sit to sit. Your address, wifi, vet and house notes come from your profile.</p>
+
+            <div data-date-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:26px">
+              <div>
+                <label for="arrival" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Sitter arrives</label>
+                <input
+                  id="arrival" name="arrival" type="text"
+                  value={listing.arrival ?? ''}
+                  placeholder="e.g. Sat 3 Oct, 6pm"
+                  style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s,box-shadow .2s"
+                  onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+                  onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow='none'"
+                />
+                <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">Most owners hand over the evening before.</p>
+              </div>
+              <div>
+                <label for="keys" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Keys</label>
+                <select
+                  id="keys" name="keys"
+                  style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s"
+                  onfocus="this.style.borderColor='#2f5d45'"
+                  onblur="this.style.borderColor='rgba(44,26,14,.18)'"
+                >
+                  <option value="Handed over in person" selected={!listing.keys || listing.keys === 'Handed over in person'}>Handed over in person</option>
+                  <option value="Left with a neighbour" selected={listing.keys === 'Left with a neighbour'}>Left with a neighbour</option>
+                  <option value="Key safe — code shared on confirmation" selected={listing.keys === 'Key safe — code shared on confirmation'}>Key safe — code on confirmation</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Private info notice -->
+            <div style="display:flex;align-items:flex-start;gap:13px;background:rgba(110,84,56,.1);border:1px solid rgba(110,84,56,.32);border-radius:12px;padding:16px 18px">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+              <p style="font-size:.9rem;color:#5c3d20;line-height:1.65;margin:0">Address, wifi, vet, neighbour and house notes stay private until you confirm a sitter &mdash; then all of it appears on their sit page. <a href="/owner/edit" style="font-weight:600">Edit handover details &rarr;</a></p>
+            </div>
           </div>
 
-          <div class="field">
-            <label for="description">Details</label>
-            <textarea id="description" name="description" rows="6">{listing.description ?? ''}</textarea>
+          <!-- Actions -->
+          <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+            <button
+              type="submit"
+              style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;transition:background .25s ease,border-color .25s ease,transform .15s ease,box-shadow .25s ease"
+              onmouseover="this.style.background='#3e7a5b';this.style.borderColor='#3e7a5b';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(110,84,56,.36)'"
+              onmouseout="this.style.background='#2f5d45';this.style.borderColor='#2f5d45';this.style.transform='translateY(0)';this.style.boxShadow='0 6px 20px rgba(110,84,56,.28)'"
+              onmousedown="this.style.transform='translateY(0) scale(.98)'"
+              onmouseup="this.style.transform='translateY(-2px) scale(1)'"
+            >Save changes</button>
+            <a href="/owner/dashboard"
+              style="font-size:.8rem;color:#6b4e35;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:color .2s"
+              onmouseover="this.style.color='#2c1a0e'"
+              onmouseout="this.style.color='#6b4e35'"
+            >Cancel</a>
           </div>
 
-          <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Save changes</button>
+          <!-- Delete card -->
+          <div data-card="1"
+            id="deleteCard"
+            style="background:#fff;border:1px solid rgba(185,28,28,.2);border-radius:18px;padding:30px 36px;transition:border-color .3s ease"
+            onmouseover="this.style.borderColor='rgba(185,28,28,.38)'"
+            onmouseout="this.style.borderColor='rgba(185,28,28,.2)'"
+          >
+            <h3 style="font-family:'Marcellus',serif;font-size:1.05rem;color:#b91c1c;margin:0 0 8px">Delete this listing</h3>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.65;margin:0 0 18px;max-width:420px">It disappears from browse results straight away. Messages stay in your inbox. This cannot be undone.</p>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <button
+                type="button"
+                id="deleteBtn"
+                onclick="handleDelete()"
+                style="font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:13px 28px;border-radius:50px;cursor:pointer;transition:background .25s ease,color .25s ease,transform .15s ease,box-shadow .25s ease;background:#fff;color:#b91c1c;border:1.5px solid rgba(185,28,28,.4)"
+              >Delete listing</button>
+              <button
+                type="button"
+                id="keepBtn"
+                onclick="cancelDelete()"
+                style="display:none;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;background:none;border:none;cursor:pointer;padding:6px 2px;transition:color .2s"
+                onmouseover="this.style.color='#2c1a0e'"
+                onmouseout="this.style.color='#6b4e35'"
+              >Keep listing</button>
+            </div>
+          </div>
         </form>
 
-        <div class="danger-zone">
-          <h3>Delete this listing</h3>
-          <p>This cannot be undone.</p>
-          <form method="POST" action="/api/owner/listings" onsubmit="return confirm('Delete this listing?')">
-            <input type="hidden" name="_action" value="delete" />
-            <input type="hidden" name="listing_id" value={listing.id} />
-            <button type="submit" class="btn-danger">Delete listing</button>
-          </form>
-        </div>
+        <!-- Aside -->
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+
+          <!-- Preview card -->
+          <div
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'"
+          >
+            <div style="padding:20px 24px;border-bottom:1px solid rgba(110,84,56,.2);display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">How sitters see it</p>
+              <span id="statusPill" style={`font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 12px;border-radius:50px;white-space:nowrap;color:#fff;background:${currentStatusDef.colour}`}>{currentStatusDef.label}</span>
+            </div>
+            <div style="padding:22px 24px 26px;background:#faf6ee;display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                {profile.avatar_url ? (
+                  <img src={profile.avatar_url} alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+                ) : (
+                  <div style="width:48px;height:48px;border-radius:50%;background:#2f5d45;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid rgba(110,84,56,.35)">{ownerInitials}</div>
+                )}
+                <div style="flex:1;min-width:0">
+                  <p id="pvTitle" style="font-family:'Marcellus',serif;font-size:1.08rem;color:#2c1a0e;margin:0 0 4px;line-height:1.3">{listing.title || 'Your listing title appears here'}</p>
+                  <p style="font-size:.8rem;color:#2f5d45;font-weight:600;margin:0">{profile.name}{profile.location ? ` · ${profile.location}` : ''}</p>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px;font-size:.84rem;color:#6b4e35;padding-top:14px;border-top:1px solid rgba(44,26,14,.08)">
+                <span style="display:flex;align-items:center;gap:9px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+                  <span id="pvDates">{initPreviewDates}</span>
+                </span>
+                {pets.length > 0 && (
+                  <span style="display:flex;align-items:center;gap:9px">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="8" cy="9" r="2.2"></circle><circle cx="16" cy="9" r="2.2"></circle><circle cx="12" cy="15.5" r="3"></circle></svg>
+                    {petNames}
+                  </span>
+                )}
+              </div>
+              <span id="pvChip" style={`display:inline-block;width:fit-content;font-size:.74rem;font-weight:700;letter-spacing:.06em;padding:6px 15px;border-radius:50px;${initDays > 0 ? 'background:rgba(110,84,56,.12);color:#2f5d45;' : 'background:rgba(44,26,14,.06);color:#6b4e35;'}`}>{initPreviewChip}</span>
+            </div>
+          </div>
+
+          <!-- This listing so far -->
+          <div
+            style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px;transition:border-color .3s ease"
+            onmouseover="this.style.borderColor='rgba(110,84,56,.5)'"
+            onmouseout="this.style.borderColor='rgba(110,84,56,.28)'"
+          >
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">This listing so far</p>
+            <div style="display:flex;flex-direction:column;gap:11px;font-size:.88rem;color:#6b4e35;line-height:1.6">
+              <span style="display:flex;align-items:center;gap:11px">
+                <span style="width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.64rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">{enquiryCount}</span>
+                {enquiryCount === 1 ? 'enquiry received' : 'enquiries received'}
+              </span>
+              {postedDate && (
+                <span style="display:flex;align-items:center;gap:11px">
+                  <span style="width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.64rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">✓</span>
+                  Posted {postedDate}
+                </span>
+              )}
+            </div>
+            <a href="/messages"
+              style="display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-size:.74rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:gap .2s,color .2s"
+              onmouseover="this.style.gap='12px';this.style.color='#2c1a0e'"
+              onmouseout="this.style.gap='8px';this.style.color='#2f5d45'"
+            >View enquiries &rarr;</a>
+          </div>
+        </aside>
       </div>
-    </main>
+    </div>
+  </main>
 
-    <style>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
-      nav {
-        position: static; border-bottom: 1px solid rgba(47,93,69,0.2); padding: 18px 48px;
-        display: flex; justify-content: space-between; align-items: center;
-      }
-      .nav-right { display: flex; align-items: center; gap: 20px; }
-      .nav-back { font-size: 0.85rem; color: var(--myah-tan); text-decoration: none; font-weight: 600; }
-      .nav-back:hover { color: var(--myah-forest); }
-      .nav-logout { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--myah-forest); text-decoration: none; }
+  <script define:vars={{ listingId: listing.id, STATUS_DEFS }}>
+    function fmtDate(d) {
+      if (!d) return '';
+      return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
 
-      .create-wrap { flex: 1; display: flex; justify-content: center; padding: 60px 24px; }
-      .create-card {
-        background: #fff; border-radius: 12px; padding: 48px; width: 100%; max-width: 560px;
-        box-shadow: 0 4px 32px rgba(44,26,14,0.08); align-self: flex-start;
-      }
-      .create-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; font-size: 0.9rem; margin-bottom: 20px; }
-      .create-form { display: flex; flex-direction: column; gap: 20px; }
+    function getDays() {
+      const from = document.getElementById('date_from').value;
+      const to = document.getElementById('date_to').value;
+      if (!from || !to) return 0;
+      return Math.ceil((new Date(to + 'T00:00:00').getTime() - new Date(from + 'T00:00:00').getTime()) / 86400000);
+    }
 
-      .field { display: flex; flex-direction: column; gap: 6px; }
-      .field label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--myah-tan); text-transform: uppercase; }
-      .req { color: var(--myah-forest); }
-      .field input[type="text"], .field input[type="date"], .field textarea, .field select {
-        border: 1.5px solid rgba(44,26,14,0.2); border-radius: 6px; padding: 11px 14px;
-        font-size: 1rem; font-family: "Lato", sans-serif; color: var(--myah-ink); background: var(--myah-paper);
-        outline: none; transition: border-color 0.2s;
-      }
-      .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--myah-forest); }
-      .field textarea { resize: vertical; }
+    function updateDates() {
+      const from = document.getElementById('date_from').value;
+      const to = document.getElementById('date_to').value;
+      const d = getDays();
+      const valid = d > 0;
+      const banner = document.getElementById('durationBanner');
+      const durationText = document.getElementById('durationText');
+      const pvDates = document.getElementById('pvDates');
+      const pvChip = document.getElementById('pvChip');
 
-      .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+      if (!from || !to) {
+        banner.style.display = 'none';
+      } else if (valid) {
+        banner.style.display = 'flex';
+        banner.style.background = 'rgba(110,84,56,.09)';
+        banner.style.borderColor = 'rgba(110,84,56,.32)';
+        durationText.textContent = d + (d === 1 ? ' day' : ' days') + ' — ' + fmtDate(from) + ' to ' + fmtDate(to);
+        pvDates.textContent = fmtDate(from) + ' — ' + fmtDate(to);
+        pvChip.textContent = d + (d === 1 ? ' day' : ' days');
+        pvChip.style.background = 'rgba(110,84,56,.12)';
+        pvChip.style.color = '#2f5d45';
+      } else {
+        banner.style.display = 'flex';
+        banner.style.background = '#fdeeee';
+        banner.style.borderColor = '#f7cfcf';
+        durationText.textContent = 'End date must be after the start date.';
+        pvDates.textContent = 'Add your dates';
+        pvChip.textContent = 'Dates to confirm';
+        pvChip.style.background = 'rgba(44,26,14,.06)';
+        pvChip.style.color = '#6b4e35';
+      }
+    }
 
-      .danger-zone {
-        margin-top: 40px; padding-top: 32px; border-top: 1px solid rgba(185,28,28,0.15);
-      }
-      .danger-zone h3 { font-size: 0.95rem; color: #b91c1c; margin-bottom: 6px; }
-      .danger-zone p { font-size: 0.85rem; color: var(--myah-tan); margin-bottom: 16px; }
-      .btn-danger {
-        background: #b91c1c; color: #fff; border: none; border-radius: 8px;
-        padding: 10px 24px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
-        letter-spacing: 0.04em;
-      }
-      .btn-danger:hover { background: #991b1b; }
+    function setStatus(key) {
+      document.getElementById('statusInput').value = key;
+      const def = STATUS_DEFS.find(s => s.key === key);
+      if (!def) return;
 
-      @media (max-width: 768px) {
-        nav { padding: 14px 24px; }
-        .create-wrap { padding: 32px 16px; }
-        .create-card { padding: 32px 24px; }
-        .date-row { grid-template-columns: 1fr; }
+      document.querySelectorAll('[data-status-btn]').forEach(btn => {
+        const k = btn.dataset.statusBtn;
+        const d = STATUS_DEFS.find(s => s.key === k);
+        const dot = btn.querySelector('span');
+        if (k === key) {
+          btn.style.background = d.colour;
+          btn.style.color = '#fff';
+          btn.style.borderColor = d.colour;
+          if (dot) dot.style.background = '#fff';
+        } else {
+          btn.style.background = '#fff';
+          btn.style.color = '#5c3d20';
+          btn.style.borderColor = 'rgba(110,84,56,.35)';
+          if (dot) dot.style.background = d.colour;
+        }
+      });
+
+      const pill = document.getElementById('statusPill');
+      if (pill) {
+        pill.textContent = def.label;
+        pill.style.background = def.colour;
       }
-    </style>
-    <LoadingOverlay />
+      const hint = document.getElementById('statusHint');
+      if (hint) hint.textContent = def.hint;
+    }
+
+    function updatePreview() {
+      const title = document.getElementById('title').value.trim();
+      const pvTitle = document.getElementById('pvTitle');
+      pvTitle.textContent = title || 'Your listing title appears here';
+      const headline = document.getElementById('pageHeadline');
+      if (headline) headline.textContent = title || 'Untitled listing';
+    }
+
+    let confirmingDelete = false;
+    function handleDelete() {
+      if (!confirmingDelete) {
+        confirmingDelete = true;
+        const btn = document.getElementById('deleteBtn');
+        btn.textContent = 'Yes, delete it';
+        btn.style.background = '#b91c1c';
+        btn.style.color = '#fff';
+        btn.style.borderColor = '#b91c1c';
+        btn.style.boxShadow = '0 6px 18px rgba(185,28,28,.26)';
+        document.getElementById('keepBtn').style.display = 'inline-block';
+      } else {
+        showLoader();
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/api/owner/listings';
+        form.innerHTML = '<input name="_action" value="delete"><input name="listing_id" value="' + listingId + '">';
+        document.body.appendChild(form);
+        form.submit();
+      }
+    }
+
+    function cancelDelete() {
+      confirmingDelete = false;
+      const btn = document.getElementById('deleteBtn');
+      btn.textContent = 'Delete listing';
+      btn.style.background = '#fff';
+      btn.style.color = '#b91c1c';
+      btn.style.borderColor = 'rgba(185,28,28,.4)';
+      btn.style.boxShadow = 'none';
+      document.getElementById('keepBtn').style.display = 'none';
+    }
+
+    function showLoader() {
+      const loader = document.getElementById('loader');
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+    }
+
+    document.getElementById('editForm').addEventListener('submit', () => showLoader());
+
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http')) return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; showLoader(); });
+    });
+  </script>
 </body>
 </html>
