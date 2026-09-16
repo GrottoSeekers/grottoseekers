@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 1000px) {
+    [data-header-nav] { display: none !important; }
+    [data-topbar] { padding: 16px 24px !important; }
+    [data-page-pad] { padding: 28px 24px 80px !important; }
+    [data-detail-grid] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-aside] { position: static !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <header data-topbar="1" data-screen-label="Header" style="position:sticky;top:0;z-index:210;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;background:rgba(250,246,238,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;flex-shrink:0;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <nav data-header-nav="1" style="display:flex;align-items:center;gap:32px;flex-wrap:nowrap">
+      <a href="Home.dc.html" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Home</a>
+      <a href="Browse sits.dc.html" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;border-bottom:2px solid #2f5d45;padding-bottom:3px">Browse sits</a>
+      <a href="Log in.dc.html" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Log in</a>
+      <a href="Sign up.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Get started</a>
+    </nav>
+  </header>
+
+  <main data-screen-label="Sit detail" data-page-pad="1" style="flex:1;padding:40px 48px 100px">
+    <div style="max-width:1100px;margin:0 auto">
+      <a href="Browse sits.dc.html" style="display:inline-flex;align-items:center;gap:9px;margin-bottom:28px;font-size:.78rem;color:#2f5d45;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:gap .2s, color .2s" style-hover="gap:13px;color:#2c1a0e">&larr; Back to all sits</a>
+
+      <div data-detail-grid="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <div style="position:relative;border-radius:20px;overflow:hidden;border:1px solid rgba(110,84,56,.22)">
+            <img src="public/images/slideshow-living-room.jpeg" alt="The cottage garden room" style="width:100%;height:340px;object-fit:cover;display:block;background:#e9e0d2" />
+            <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(44,26,14,.78) 0%, rgba(44,26,14,.1) 55%, transparent 100%)"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;padding:34px 34px 30px">
+              <p style="font-size:.74rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#c4ab8a;margin:0 0 12px;display:flex;align-items:center;gap:10px"><span style="width:22px;height:1px;background:#c4ab8a;display:block"></span>Available sit</p>
+              <h1 style="font-family:'Marcellus',serif;font-size:2.4rem;color:#fff;line-height:1.15;margin:0 0 18px;text-wrap:pretty">Cosy cottage with two spaniels</h1>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <span style="display:flex;align-items:center;gap:8px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.4);backdrop-filter:blur(6px);color:#fff;padding:8px 16px;border-radius:50px;font-size:.78rem;font-weight:700;letter-spacing:.06em"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4ab8a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Bath, UK</span>
+                <span style="display:flex;align-items:center;gap:8px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.4);backdrop-filter:blur(6px);color:#fff;padding:8px 16px;border-radius:50px;font-size:.78rem;font-weight:700;letter-spacing:.06em"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4ab8a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>4 — 18 Oct 2026</span>
+                <span style="background:#2f5d45;color:#fff;padding:11px 22px;border-radius:50px;font-size:.74rem;font-weight:700;letter-spacing:.06em">14 days</span>
+              </div>
+            </div>
+          </div>
+
+          <section style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">About this sit</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
+            <p style="font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0 0 14px">We're away for two weeks in October and looking for a couple or solo sitter to look after the cottage and our two spaniels, Solomon and Chester.</p>
+            <p style="font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0">The house is a three-bedroom stone cottage on the edge of the village, with a walled garden the dogs can come and go from. The pub is a five-minute walk and Bath is twenty minutes by bus, so there's no need for a car.</p>
+          </section>
+
+          <section style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Meet the pets</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px">
+              <sc-for list="{{ pets }}" as="pet" hint-placeholder-count="2">
+                <div style="display:flex;gap:16px;align-items:flex-start;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:20px">
+                  <img src="{{ pet.photo }}" alt="{{ pet.name }}" style="width:84px;height:84px;border-radius:12px;object-fit:cover;flex-shrink:0" />
+                  <div style="min-width:0">
+                    <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;color:#2c1a0e;margin:0 0 5px">{{ pet.name }}</h3>
+                    <p style="font-size:.8rem;color:#2f5d45;font-weight:700;letter-spacing:.04em;margin:0 0 8px">{{ pet.meta }}</p>
+                    <p style="font-size:.87rem;color:#6b4e35;line-height:1.6;margin:0">{{ pet.temperament }}</p>
+                    <p style="font-size:.83rem;color:#b91c1c;line-height:1.55;margin:8px 0 0;display:flex;gap:7px"><span>⚠</span>{{ pet.needs }}</p>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <section style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Home amenities</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+            <div style="display:flex;flex-wrap:wrap;gap:10px">
+              <sc-for list="{{ amenities }}" as="a" hint-placeholder-count="6">
+                <span style="background:rgba(110,84,56,.08);color:#5c3d20;border:1px solid rgba(110,84,56,.28);padding:9px 18px;border-radius:50px;font-size:.85rem">{{ a }}</span>
+              </sc-for>
+            </div>
+          </section>
+
+          <section style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">What they're looking for</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
+            <p style="font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0">Sitters who are happy to be home most evenings, comfortable with two energetic dogs, and able to keep us updated with the odd photo. Previous sitting references appreciated but not essential.</p>
+          </section>
+
+          <section style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Photos</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px">
+              <sc-for list="{{ photos }}" as="p" hint-placeholder-count="6">
+                <img src="{{ p.src }}" alt="{{ p.alt }}" style="width:100%;height:180px;object-fit:cover;border-radius:12px;display:block;background:#e9e0d2;transition:transform .5s ease" style-hover="transform:scale(1.03)" />
+              </sc-for>
+            </div>
+          </section>
+
+          <section id="enquiry" style="background:#fff;border:2px solid rgba(110,84,56,.35);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Interested? Get in touch</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 18px"></div>
+            <p style="font-size:.95rem;color:#6b4e35;margin:0 0 26px;line-height:1.7">Send a message to Thomas James about this sit.</p>
+            <form data-enquiry="1" data-go="Messages.dc.html" style="display:flex;flex-direction:column;gap:18px">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <label for="eq_name" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Your name <span style="color:#2f5d45">*</span></label>
+                  <input type="text" id="eq_name" name="name" required="required" placeholder="Jane Smith" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <label for="eq_email" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Your email <span style="color:#2f5d45">*</span></label>
+                  <input type="email" id="eq_email" name="email" required="required" placeholder="you@example.com" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px;grid-column:1 / -1">
+                  <label for="eq_message" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Message <span style="color:#2f5d45">*</span></label>
+                  <textarea id="eq_message" name="message" rows="5" required="required" placeholder="Tell them about your experience, availability, and why you'd be a great fit for this sit." style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)"></textarea>
+                </div>
+              </div>
+              <button type="submit" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;align-self:flex-start;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Send message</button>
+              <p data-status="1" style="font-size:.88rem;min-height:1.4em;margin:0;color:#2f7d4f">{{ status }}</p>
+            </form>
+            <div style="display:flex;align-items:center;gap:16px;margin-top:22px;padding-top:22px;border-top:1px solid rgba(44,26,14,.08);flex-wrap:wrap">
+              <span style="font-size:.85rem;color:#6b4e35">or</span>
+              <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#25D366;color:#fff;text-decoration:none;padding:13px 26px;border-radius:50px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 6px 20px rgba(37,211,102,.25);transition:background .2s, transform .12s" style-hover="background:#1da851;transform:translateY(-2px)" style-active="transform:translateY(0) scale(.98)">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Message on WhatsApp
+              </a>
+            </div>
+          </section>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:104px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:28px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:22px;transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;gap:15px;align-items:center">
+              <img src="public/images/solomon-1.jpg" alt="Thomas James" style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+              <div style="min-width:0">
+                <a href="Sitter profile.dc.html" style="font-size:1.02rem;color:#2f5d45;font-weight:600;text-decoration:none;display:block;line-height:1.3">Thomas James</a>
+                <p style="font-size:.85rem;color:#6b4e35;margin:3px 0 0;display:flex;align-items:center;gap:7px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Bath, UK</p>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;padding-top:22px;border-top:1px solid rgba(44,26,14,.08)">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px">
+                <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;flex-shrink:0">From</span>
+                <span style="font-size:.93rem;font-weight:600;color:#2c1a0e;text-align:right">Sun 4 October 2026</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px">
+                <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;flex-shrink:0">To</span>
+                <span style="font-size:.93rem;font-weight:600;color:#2c1a0e;text-align:right">Sun 18 October 2026</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding-top:12px;border-top:1px solid rgba(44,26,14,.08)">
+                <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Length</span>
+                <span style="background:rgba(110,84,56,.12);color:#2f5d45;font-weight:600;padding:7px 16px;border-radius:50px;font-size:.8rem;letter-spacing:.04em">14 days</span>
+              </div>
+            </div>
+            <a href="#enquiry" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              Message Thomas
+            </a>
+            <p style="font-size:.8rem;color:#6b4e35;text-align:center;margin:-8px 0 0">Chat directly on MYAH</p>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">At a glance</p>
+            <div style="display:flex;flex-direction:column;gap:11px;font-size:.88rem;color:#6b4e35">
+              <span style="display:flex;align-items:center;gap:10px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="8" cy="9" r="2.2"></circle><circle cx="16" cy="9" r="2.2"></circle><circle cx="12" cy="15.5" r="3"></circle></svg>Two spaniels — Solomon &amp; Chester</span>
+              <span style="display:flex;align-items:center;gap:10px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>Three-bed cottage, walled garden</span>
+              <span style="display:flex;align-items:center;gap:10px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>No car needed</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer data-screen-label="Footer" style="background:#2c1a0e;color:rgba(255,255,255,.7);padding:0 48px 32px;border-top:3px solid #2f5d45">
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:56px;padding:64px 0 44px">
+        <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+          <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.7rem;letter-spacing:.28em">
+            <img src="public/images/logo-mark-white.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+            <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(255,255,255,.28)"><span style="color:#fff;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);line-height:1">Make Yourself At Home</span></span>
+          </a>
+          <div style="display:flex;flex-direction:column;gap:12px;max-width:340px"><p style="font-family:'Lato',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#c4ab8a;margin:0">Make Yourself At Home</p><p style="line-height:1.8;font-size:.95rem;margin:0;color:rgba(255,255,255,.7)">Premium pet &amp; home care for peace of mind while you travel.</p></div>
+          <a href="Sign up.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;margin-top:6px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Sign up for free</a>
+        </div>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Platform</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="Sign up.dc.html" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Get started</a></li>
+            <li style="margin-bottom:12px"><a href="Log in.dc.html" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Log in</a></li>
+            <li style="margin-bottom:12px"><a href="Browse sits.dc.html" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Browse sits</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Example profile</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="Sitter profile.dc.html" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Callum &amp; Niamh</a></li>
+          </ul>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">
+          <span>&copy; 2026 MYAH</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <a href="#privacy" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" style-hover="color:#c4ab8a">Privacy</a>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <a href="#terms" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" style-hover="color:#c4ab8a">Terms</a>
+        </div>
+        <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with <span style="font-style:normal">&#2f7d4f;</span> for house &amp; pet sitters everywhere</span>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { status: '' };
+
+  renderVals() {
+    return {
+      status: this.state.status,
+      pets: [
+        { name: 'Solomon', photo: 'public/images/solomon-1.jpg', meta: 'Dog · Cocker spaniel · 6 years', temperament: 'Soft, sociable and endlessly hopeful about food. Walks well off-lead.', needs: 'Joint supplement with breakfast' },
+        { name: 'Chester', photo: 'public/images/chester-1.jpg', meta: 'Dog · Cocker spaniel · 3 years', temperament: 'Full of beans and loves the garden. Sleeps in the kitchen bed at night.', needs: 'Keep on lead near livestock' }
+      ],
+      amenities: ['Wi-Fi', 'Walled garden', 'Log fire', 'Washing machine', 'Off-street parking', 'Village pub 5 min', 'Bus to Bath'],
+      photos: [
+        { src: 'public/images/slideshow-living-room.jpeg', alt: 'The living room' },
+        { src: 'public/images/slideshow-dogs-couch.jpeg', alt: 'The dogs at home' },
+        { src: 'public/images/solomon-4.jpg', alt: 'Solomon in the snow' },
+        { src: 'public/images/chester-1.jpg', alt: 'Chester' },
+        { src: 'public/images/slideshow-spaniel-walk.jpeg', alt: 'Walking the spaniels' },
+        { src: 'public/images/slideshow-spaniel-bed.jpeg', alt: 'Bedtime' }
+      ]
+    };
+  }
+
+  componentDidMount() {
+    document.querySelectorAll('form[data-go]').forEach(f => f.addEventListener('submit', e => {
+      e.preventDefault(); e.stopImmediatePropagation();
+      const target = f.getAttribute('data-go');
+      const l = document.querySelector('[data-loader]');
+      if (l) { l.style.opacity = '1'; l.style.pointerEvents = 'all'; }
+      setTimeout(() => { window.location.href = target; }, l ? 700 : 150);
+    }, true));
+    const loader = document.querySelector('[data-loader]');
+    const show = () => {
+      if (!loader) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(this.hideT);
+      this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    };
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || a.target === '_blank') return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+    });
+    const form = document.querySelector('[data-enquiry]');
+    form && form.addEventListener('submit', e => {
+      e.preventDefault();
+      show();
+      this.setState({ status: "Message sent! They'll be in touch soon." });
+      form.reset();
+    });
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); }
+}
+</script>
+</body>
+</html>

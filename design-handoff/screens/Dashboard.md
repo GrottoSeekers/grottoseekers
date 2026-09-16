@@ -1,0 +1,168 @@
+# Dashboard — element-by-element spec
+
+Generated from the approved design file `reference/Dashboard.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `/images/couple-bw-1.jpg`
+- `/images/couple-villa-1.jpg`
+- `/images/couple-dinner-1.jpg`
+- `{{ g }}`
+- `{{ sit.img }}`
+- `{{ sit.pic }}`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `min-height:100vh; display:flex; flex-direction:column; background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<nav>` **Top nav** `[data-topnav]`
+      - style: `display:flex; justify-content:space-between; align-items:center; padding:16px 48px; background:#fff; border-bottom:1px solid rgba(110,84,56,.18)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.35rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:44px; width:44px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<div>` `[data-acct-links]`
+        - style: `display:flex; align-items:center; gap:22px; justify-content:flex-end`
+        - `<a>` → `Browse sits.dc.html`
+          - style: `font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Browse sits"
+        - `<a>` → `Saved sits.dc.html`
+          - style: `font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Saved"
+        - `<a>` → `Availability.dc.html`
+          - style: `font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Availability"
+        - `<a>` → `Verification.dc.html`
+          - style: `font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Verification"
+        - `<a>` → `Notifications.dc.html`
+          - style: `font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Notifications"
+        - `<a>` → `Log in.dc.html`
+          - style: `font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#2f5d45; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Log out"
+    - `<div>` **Tabs**
+      - style: `display:flex; background:#fff; border-bottom:1px solid rgba(44,26,14,.08); box-shadow:0 1px 4px rgba(0,0,0,.04); position:sticky; top:0; z-index:10`
+      - `<sc-for>`
+        - `<button>`
+          - `<span>`
+            - `<svg>`
+          - `<span>`
+            - text: "{{ t.label }}"
+          - `<span>`
+    - `<main>` `[data-dash-pad]`
+      - style: `flex:1; padding:44px 48px 70px`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<sc-if>`
+          - `<div>` **Dashboard**
+            - style: `display:flex; flex-direction:column; gap:24px`
+            - `<div>`
+              - style: `display:flex; justify-content:space-between; align-items:flex-end; gap:24px; border-bottom:1px solid rgba(110,84,56,.3)`
+              - `<div>`
+              - `<div>`
+                - style: `display:flex; gap:10px`
+            - `<div>` `[data-dash-grid]`
+              - style: `display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:start`
+              - `<div>`
+                - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+                - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>` `[data-stats]`
+                - style: `display:flex; flex-direction:column; gap:16px`
+            - `<div>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<h3>`
+                - style: `font-family:'Marcellus',serif; font-size:1.3rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "Share your profile"
+              - `<p>`
+                - style: `font-size:.93rem; color:#6b4e35; margin:0 0 20px; line-height:1.7; max-width:560px`
+                - text: "Send this link to pet owners so they can view your full portfolio, reviews, and get in touch."
+              - `<div>`
+                - style: `display:flex; gap:12px`
+            - `<div>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>`
+                - style: `display:flex; justify-content:space-between; align-items:baseline; gap:20px`
+              - `<div>`
+                - style: `height:8px; border-radius:50px; background:rgba(110,84,56,.15); overflow:hidden`
+              - `<div>`
+                - style: `display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px`
+            - `<div>`
+              - `<div>`
+                - style: `display:flex; justify-content:space-between; align-items:flex-end; gap:20px`
+              - `<div>`
+                - style: `background:#faf6ee; border-radius:18px; overflow:hidden; box-shadow:0 8px 32px rgba(44,26,14,.12); border:1px solid rgba(44,26,14,.08)`
+        - `<sc-if>`
+          - `<div>` **Sits tab**
+            - `<div>`
+              - `<p>`
+                - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 16px; display:flex; align-items:center; gap:12px`
+                - text: "Available sits"
+              - `<h1>`
+                - style: `font-family:'Marcellus',serif; font-size:2.3rem; color:#2c1a0e; margin:0 0 10px; line-height:1.2`
+                - text: "Find your"
+              - `<p>`
+                - style: `font-size:.95rem; color:#6b4e35; line-height:1.7; max-width:600px; margin:0`
+                - text: "Browse homes looking for trusted sitters. Open any listing to see the full details, meet the pets, and get in touch."
+            - `<div>`
+              - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:26px`
+              - `<sc-for>`
+        - `<sc-if>`
+          - `<div>` **Messages tab**
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:80px 48px; text-align:center; max-width:540px; margin:0 auto; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+            - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+            - `<span>`
+              - style: `width:58px; height:58px; border-radius:16px; background:#faf6ee; border:1px solid rgba(110,84,56,.28); color:#6e5438; display:inline-flex; align-items:center; justify-content:center`
+              - `<svg>`
+            - `<h2>`
+              - style: `font-family:'Marcellus',serif; font-size:1.6rem; color:#2c1a0e; margin:0 0 12px`
+              - text: "No messages yet"
+            - `<p>`
+              - style: `font-size:.95rem; color:#6b4e35; line-height:1.7; margin:0`
+              - text: "When an owner gets in touch about a sit, the conversation will appear here."
+        - `<sc-if>`
+          - `<div>` **Profile tab**
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:80px 48px; text-align:center; max-width:540px; margin:0 auto; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+            - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+            - `<span>`
+              - style: `width:58px; height:58px; border-radius:16px; background:#faf6ee; border:1px solid rgba(110,84,56,.28); color:#6e5438; display:inline-flex; align-items:center; justify-content:center`
+              - `<svg>`
+            - `<h2>`
+              - style: `font-family:'Marcellus',serif; font-size:1.6rem; color:#2c1a0e; margin:0 0 12px`
+              - text: "Edit your profile"
+            - `<p>`
+              - style: `font-size:.95rem; color:#6b4e35; line-height:1.7; margin:0 0 28px`
+              - text: "Update your bio, photos, reviews, platform links and colours — everything that appears on your public page."
+            - `<a>` → `Edit profile.dc.html`
+              - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:16px 36px; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .2s, border-color .2s, transform .12s`
+              - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+              - :active `transform:translateY(0) scale(.98)`
+              - text: "Open profile editor"

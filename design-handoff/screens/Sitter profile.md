@@ -1,0 +1,473 @@
+# Sitter profile — element-by-element spec
+
+Generated from the approved design file `reference/Sitter profile.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `/images/couple-villa-1.jpg`
+- `/images/couple-boat-1.jpg`
+- `/images/couple-field-1.jpg`
+- `/images/couple-night-1.jpg`
+- `/images/couple-dinner-1.jpg`
+- `/images/couple-airport-1.jpg`
+- `/images/couple-bw-1.jpg`
+- `{{ g.src }}`
+- `/images/logo-mark-white.png`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<header>` **Header** `[data-topbar]`
+      - style: `position:fixed; top:0; left:0; right:0; z-index:210; padding:16px 48px; display:flex; justify-content:space-between; align-items:center; gap:40px; background:rgba(250,246,238,.97); backdrop-filter:blur(12px); box-shadow:0 1px 0 rgba(110,84,56,.2)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.4rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:46px; width:46px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<nav>` `[data-header-nav]`
+        - style: `display:flex; align-items:center; gap:30px`
+        - `<a>` → `#about`
+          - style: `font-size:.8rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "About"
+        - `<a>` → `#reviews`
+          - style: `font-size:.8rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Reviews"
+        - `<a>` → `#gallery`
+          - style: `font-size:.8rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Gallery"
+        - `<a>` → `Browse sits.dc.html`
+          - style: `font-size:.8rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Profiles"
+        - `<a>` → `#enquiry`
+          - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:13px 28px; white-space:nowrap; box-shadow:0 4px 14px rgba(44,26,14,.18); transition:background .2s, border-color .2s, transform .12s`
+          - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+          - :active `transform:translateY(0) scale(.98)`
+          - text: "Book us today"
+    - `<section>` **Profile hero**
+      - style: `min-height:78vh; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; padding:140px 48px 80px; text-align:center`
+      - `<div>`
+        - style: `position:absolute; inset:0; z-index:0; background:#2c1a0e`
+        - `<img>` `[data-hero-slide]` src=`public/images/couple-villa-1.jpg`
+          - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 30%; opacity:1; transition:opacity 1.2s ease`
+        - `<img>` `[data-hero-slide]` src=`public/images/couple-boat-1.jpg`
+          - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 30%; opacity:0; transition:opacity 1.2s ease`
+        - `<img>` `[data-hero-slide]` src=`public/images/couple-field-1.jpg`
+          - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 25%; opacity:0; transition:opacity 1.2s ease`
+        - `<img>` `[data-hero-slide]` src=`public/images/couple-night-1.jpg`
+          - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 30%; opacity:0; transition:opacity 1.2s ease`
+      - `<div>`
+        - style: `position:absolute; inset:0; z-index:1; background:linear-gradient(180deg, rgba(44,26,14,.52) 0%, rgba(44,26,14,.66) 100%)`
+      - `<div>`
+        - style: `position:relative; z-index:2; max-width:720px`
+        - `<p>`
+          - style: `display:inline-flex; align-items:center; gap:10px; background:rgba(250,246,238,.14); border:1px solid rgba(196,171,138,.45); backdrop-filter:blur(6px); color:#fff; padding:9px 20px; border-radius:50px; font-size:.76rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; margin:0 0 26px`
+          - text: "Experienced sitters worldwide"
+        - `<h1>`
+          - style: `font-family:'Montserrat',sans-serif; font-weight:500; letter-spacing:.28em; font-size:4.6rem; color:#fff; line-height:1; margin:0 0 18px`
+          - text: "MYAH"
+          - `<br>`
+          - `<em>`
+            - style: `color:#c4ab8a`
+            - text: "Sitters"
+        - `<p>`
+          - style: `font-size:1.1rem; color:#fff; font-weight:600; letter-spacing:.14em; text-transform:uppercase; margin:0 0 18px`
+          - text: "Callum & Niamh"
+        - `<p>`
+          - style: `font-size:1.08rem; color:rgba(255,255,255,.85); line-height:1.75; max-width:540px; margin:0 auto 36px`
+          - text: "Experienced house & pet sitters available worldwide — passionate about caring for homes and animals wherever they go."
+        - `<a>` → `#enquiry`
+          - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:16px 36px; box-shadow:0 8px 26px rgba(44,26,14,.3); transition:background .2s, border-color .2s, transform .12s`
+          - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+          - :active `transform:translateY(0) scale(.98)`
+          - text: "Book us today"
+        - `<div>`
+          - style: `display:flex; align-items:center; justify-content:center; gap:20px; margin:34px 0 0; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.72)`
+          - `<span>`
+            - style: `display:flex; align-items:center; gap:8px`
+            - text: "5.0 rating"
+            - `<span>`
+              - style: `color:#c4ab8a; letter-spacing:.2em`
+              - text: "★★★★★"
+          - `<span>`
+            - style: `width:5px; height:5px; border-radius:50%; background:rgba(196,171,138,.6)`
+          - `<span>`
+            - text: "40+ reviews"
+          - `<span>`
+            - style: `width:5px; height:5px; border-radius:50%; background:rgba(196,171,138,.6)`
+          - `<span>`
+            - text: "UK & Australia"
+      - `<a>` → `#about`
+        - style: `position:absolute; bottom:30px; left:50%; transform:translateX(-50%); z-index:2; width:42px; height:42px; border-radius:50%; border:1px solid rgba(196,171,138,.5); background:rgba(250,246,238,.12); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:center; color:#fff; transition:background .2s, transform .2s`
+        - :hover `background:rgba(250,246,238,.25);transform:translateX(-50%) translateY(3px)`
+        - `<svg>`
+          - `<path>`
+    - `<section>` **Credentials** `[data-sec]`
+      - style: `background:#2c1a0e; padding:0 48px`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; border-left:1px solid rgba(196,171,138,.18)`
+        - `<div>`
+          - style: `padding:34px 26px; text-align:center`
+          - `<div>`
+            - style: `font-family:'Marcellus',serif; font-size:2rem; color:#c4ab8a; line-height:1`
+            - text: "40+"
+          - `<div>`
+            - style: `font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.6)`
+            - text: "Five-star reviews"
+        - `<div>`
+          - style: `padding:34px 26px; text-align:center`
+          - `<div>`
+            - style: `font-family:'Marcellus',serif; font-size:2rem; color:#c4ab8a; line-height:1`
+            - text: "5.0"
+          - `<div>`
+            - style: `font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.6)`
+            - text: "Average rating"
+        - `<div>`
+          - style: `padding:34px 26px; text-align:center`
+          - `<div>`
+            - style: `font-family:'Marcellus',serif; font-size:2rem; color:#c4ab8a; line-height:1`
+            - text: "2"
+          - `<div>`
+            - style: `font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.6)`
+            - text: "Verified platforms"
+        - `<div>`
+          - style: `padding:34px 26px; text-align:center`
+          - `<div>`
+            - style: `font-family:'Marcellus',serif; font-size:2rem; color:#c4ab8a; line-height:1`
+            - text: "30+"
+          - `<div>`
+            - style: `font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.6)`
+            - text: "Pets cared for"
+    - `<section>` **About** `[data-sec]`
+      - style: `padding:100px 48px; background:#faf6ee`
+      - `<div>` `[data-split]`
+        - style: `max-width:1100px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:60px; align-items:center`
+        - `<div>`
+          - style: `position:relative; width:100%; aspect-ratio:4/5; border-radius:18px; overflow:hidden; background:#e9e0d2; border:1px solid rgba(110,84,56,.22)`
+          - `<img>` `[data-about-slide]` src=`public/images/couple-dinner-1.jpg`
+            - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; opacity:1; transition:opacity .5s ease`
+          - `<img>` `[data-about-slide]` src=`public/images/couple-airport-1.jpg`
+            - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; opacity:0; transition:opacity .5s ease`
+          - `<img>` `[data-about-slide]` src=`public/images/couple-bw-1.jpg`
+            - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; opacity:0; transition:opacity .5s ease`
+          - `<button>` `[data-about-prev]`
+            - style: `position:absolute; top:50%; left:14px; transform:translateY(-50%); background:rgba(250,246,238,.9); border:1px solid rgba(110,84,56,.3); width:42px; height:42px; border-radius:50%; font-size:1.3rem; color:#2c1a0e; z-index:2; display:flex; align-items:center; justify-content:center; transition:background .2s`
+            - :hover `background:#fff`
+            - text: "‹"
+          - `<button>` `[data-about-next]`
+            - style: `position:absolute; top:50%; right:14px; transform:translateY(-50%); background:rgba(250,246,238,.9); border:1px solid rgba(110,84,56,.3); width:42px; height:42px; border-radius:50%; font-size:1.3rem; color:#2c1a0e; z-index:2; display:flex; align-items:center; justify-content:center; transition:background .2s`
+            - :hover `background:#fff`
+            - text: "›"
+          - `<div>`
+            - style: `position:absolute; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:2`
+            - `<button>` `[data-about-dot]`
+              - style: `width:10px; height:10px; border-radius:50%; border:2px solid rgba(255,255,255,.85); background:rgba(255,255,255,.9); padding:0`
+            - `<button>` `[data-about-dot]`
+              - style: `width:10px; height:10px; border-radius:50%; border:2px solid rgba(255,255,255,.85); background:transparent; padding:0`
+            - `<button>` `[data-about-dot]`
+              - style: `width:10px; height:10px; border-radius:50%; border:2px solid rgba(255,255,255,.85); background:transparent; padding:0`
+        - `<div>`
+          - `<p>`
+            - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 18px; display:flex; align-items:center; gap:12px`
+            - text: "Who we are"
+            - `<span>`
+              - style: `width:26px; height:1px; background:#6e5438; display:block`
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:2.5rem; color:#2c1a0e; line-height:1.2; margin:0`
+            - text: "A home away from home —"
+            - `<em>`
+              - style: `color:#2f5d45`
+              - text: "for you and your pets."
+          - `<div>`
+            - style: `width:48px; height:2px; background:#6e5438; margin:24px 0 26px`
+          - `<p>`
+            - style: `color:#6b4e35; line-height:1.85; margin:0 0 16px; font-size:.98rem`
+            - text: "We're Callum and Niamh. We've cared for all sorts of animals. From cats and dogs to horses and bearded lizards. We've stayed in just as many kinds of home. From…"
+          - `<p>`
+            - style: `color:#6b4e35; line-height:1.85; margin:0; font-size:.98rem`
+            - text: "We treat every sit like it's our own home: daily walks, feeding routines kept to the minute, plants watered, bins out, and regular photo updates so you can rela…"
+    - `<section>` **Reviews** `[data-sec]`
+      - style: `padding:100px 48px; background:#faf6ee`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<p>`
+          - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 18px; display:flex; align-items:center; gap:12px`
+          - text: "What pet owners say"
+          - `<span>`
+            - style: `width:26px; height:1px; background:#6e5438; display:block`
+        - `<h2>`
+          - style: `font-family:'Marcellus',serif; font-size:2.5rem; color:#2c1a0e; line-height:1.2; margin:0`
+          - text: "40+"
+          - `<em>`
+            - style: `color:#2f5d45`
+            - text: "five-star reviews."
+        - `<div>`
+          - style: `display:flex; align-items:center; gap:14px; margin:24px 0 36px`
+          - `<span>`
+            - style: `color:#2f5d45; font-size:1.05rem; letter-spacing:.24em`
+            - text: "★★★★★"
+          - `<span>`
+            - style: `color:#6b4e35; font-size:.8rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase`
+            - text: "5.0 across all platforms"
+        - `<div>`
+          - style: `overflow:hidden`
+          - `<div>` `[data-rev-track]`
+            - style: `display:flex; gap:24px; transition:transform .45s ease`
+            - `<sc-for>`
+              - `<div>` `[data-rev-card]`
+                - style: `max-width:330px; background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 28px; display:flex; flex-direction:column; gap:16px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+                - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+        - `<div>`
+          - style: `display:flex; align-items:center; gap:12px`
+          - `<button>` `[data-rev-prev]`
+            - style: `width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(110,84,56,.4); background:transparent; color:#5c3d20; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:background .2s, color .2s, border-color .2s`
+            - :hover `background:#2f5d45;color:#fff;border-color:#2f5d45`
+            - text: "←"
+          - `<button>` `[data-rev-next]`
+            - style: `width:44px; height:44px; border-radius:50%; border:1.5px solid rgba(110,84,56,.4); background:transparent; color:#5c3d20; font-size:1rem; display:flex; align-items:center; justify-content:center; transition:background .2s, color .2s, border-color .2s`
+            - :hover `background:#2f5d45;color:#fff;border-color:#2f5d45`
+            - text: "→"
+          - `<div>` `[data-rev-dots]`
+            - style: `display:flex; gap:7px`
+    - `<section>` **Gallery** `[data-sec]`
+      - style: `padding:100px 48px; background:#faf6ee`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<p>`
+          - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 18px; display:flex; align-items:center; gap:12px`
+          - text: "Pets we've loved"
+          - `<span>`
+            - style: `width:26px; height:1px; background:#6e5438; display:block`
+        - `<h2>`
+          - style: `font-family:'Marcellus',serif; font-size:2.5rem; color:#2c1a0e; line-height:1.2; margin:0`
+          - text: "Our sits"
+        - `<div>`
+          - style: `width:48px; height:2px; background:#6e5438; margin:24px 0 36px`
+        - `<div>`
+          - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:14px`
+          - `<sc-for>`
+            - `<button>` `[data-lightbox] [data-lightbox-alt]`
+              - style: `position:relative; border:none; padding:0; border-radius:14px; overflow:hidden; aspect-ratio:1; background:#e9e0d2; display:block; width:100%`
+              - `<img>` src=`{{ g.src }}`
+                - style: `width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease`
+              - `<span>`
+                - style: `position:absolute; inset:0; background:linear-gradient(to top, rgba(44,26,14,.78) 0%, transparent 60%); opacity:0; transition:opacity .3s ease; display:flex; align-items:flex-end; padding:16px; font-family:'Montserrat',sans-serif; font-size:.82rem; font-weight:600; letter-spacing:.04em; color:#fff; text-align:left`
+                - :hover `opacity:1`
+                - text: "{{ g.alt }}"
+    - `<section>` **Platforms** `[data-sec]`
+      - style: `padding:100px 48px; background:#faf6ee`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<p>`
+          - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 18px; display:flex; align-items:center; gap:12px`
+          - text: "Find us online"
+          - `<span>`
+            - style: `width:26px; height:1px; background:#6e5438; display:block`
+        - `<h2>`
+          - style: `font-family:'Marcellus',serif; font-size:2.5rem; color:#2c1a0e; line-height:1.2; margin:0`
+          - text: "Verified profiles"
+        - `<div>`
+          - style: `width:48px; height:2px; background:#6e5438; margin:24px 0 36px`
+        - `<div>`
+          - style: `display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px`
+          - `<a>` → `https://www.rover.com/sit/callud53623`
+            - style: `display:flex; flex-direction:column; gap:12px; background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px 32px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease`
+            - :hover `transform:translateY(-6px);box-shadow:0 20px 50px rgba(44,26,14,.1);border-color:rgba(110,84,56,.45)`
+            - `<span>`
+              - style: `font-family:'Marcellus',serif; font-size:1.5rem; width:48px; height:48px; border-radius:50%; background:#2f5d45; color:#fff; display:flex; align-items:center; justify-content:center`
+              - text: "R"
+            - `<h3>`
+              - style: `font-family:'Marcellus',serif; font-size:1.3rem; color:#2c1a0e; margin:0`
+              - text: "Rover (UK)"
+            - `<p>`
+              - style: `color:#6b4e35; line-height:1.75; font-size:.92rem; margin:0`
+              - text: "Our UK profile, with verified reviews from owners across the country."
+            - `<span>`
+              - style: `color:#2f5d45; font-weight:600; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase`
+              - text: "View profile →"
+          - `<a>` → `https://www.trustedhousesitters.com/house-and-pet-sitters/australia/new-south-wales/sydney/l/6979617/`
+            - style: `display:flex; flex-direction:column; gap:12px; background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px 32px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease`
+            - :hover `transform:translateY(-6px);box-shadow:0 20px 50px rgba(44,26,14,.1);border-color:rgba(110,84,56,.45)`
+            - `<span>`
+              - style: `font-family:'Marcellus',serif; font-size:1.5rem; width:48px; height:48px; border-radius:50%; background:#2f5d45; color:#fff; display:flex; align-items:center; justify-content:center`
+              - text: "T"
+            - `<h3>`
+              - style: `font-family:'Marcellus',serif; font-size:1.3rem; color:#2c1a0e; margin:0`
+              - text: "TrustedHouseSitters (AU)"
+            - `<p>`
+              - style: `color:#6b4e35; line-height:1.75; font-size:.92rem; margin:0`
+              - text: "Our Sydney-based profile, covering sits across New South Wales."
+            - `<span>`
+              - style: `color:#2f5d45; font-weight:600; font-size:.78rem; letter-spacing:.12em; text-transform:uppercase`
+              - text: "View profile →"
+    - `<section>` **Enquiry** `[data-sec]`
+      - style: `padding:100px 48px; background:#faf6ee`
+      - `<div>` `[data-split]`
+        - style: `max-width:1100px; margin:0 auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.35fr); gap:60px; align-items:start`
+        - `<div>`
+          - `<p>`
+            - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 18px; display:flex; align-items:center; gap:12px`
+            - text: "Get in touch"
+            - `<span>`
+              - style: `width:26px; height:1px; background:#6e5438; display:block`
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:2.5rem; color:#2c1a0e; line-height:1.2; margin:0`
+            - text: "Book Callum"
+            - `<em>`
+              - style: `color:#2f5d45`
+              - text: "& Niamh"
+          - `<div>`
+            - style: `width:48px; height:2px; background:#6e5438; margin:24px 0 26px`
+          - `<p>`
+            - style: `color:#6b4e35; line-height:1.85; font-size:.98rem; margin:0`
+            - text: "Tell us about your home, your pets, and your dates and we'll get back to you within 24 hours."
+          - `<a>` → `https://wa.me/`
+            - style: `display:inline-flex; align-items:center; gap:10px; padding:14px 28px; background:#25D366; color:#fff; border-radius:50px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; box-shadow:0 6px 20px rgba(37,211,102,.25); transition:background .2s, transform .12s`
+            - :hover `background:#1ebe5d;transform:translateY(-2px)`
+            - :active `transform:translateY(0) scale(.98)`
+            - text: "Message on WhatsApp"
+            - `<svg>`
+              - `<path>`
+        - `<form>` `[data-enquiry] [data-go]`
+          - style: `display:flex; flex-direction:column; gap:18px; background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px; box-shadow:0 1px 2px rgba(44,26,14,.04)`
+          - `<div>`
+            - style: `display:grid; grid-template-columns:1fr 1fr; gap:16px`
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:8px`
+              - `<label>`
+                - style: `font-size:.74rem; font-weight:600; letter-spacing:.12em; color:#5c3d20; text-transform:uppercase`
+                - text: "First name"
+              - `<input>`
+                - style: `padding:12px 15px; border:1.5px solid rgba(110,84,56,.3); border-radius:10px; background:#faf6ee; color:#2c1a0e; font-family:'Montserrat',sans-serif; font-size:.95rem; transition:border-color .2s, box-shadow .2s`
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:8px`
+              - `<label>`
+                - style: `font-size:.74rem; font-weight:600; letter-spacing:.12em; color:#5c3d20; text-transform:uppercase`
+                - text: "Last name"
+              - `<input>`
+                - style: `padding:12px 15px; border:1.5px solid rgba(110,84,56,.3); border-radius:10px; background:#faf6ee; color:#2c1a0e; font-family:'Montserrat',sans-serif; font-size:.95rem; transition:border-color .2s, box-shadow .2s`
+          - `<div>`
+            - style: `display:flex; flex-direction:column; gap:8px`
+            - `<label>`
+              - style: `font-size:.74rem; font-weight:600; letter-spacing:.12em; color:#5c3d20; text-transform:uppercase`
+              - text: "Email"
+            - `<input>`
+              - style: `padding:12px 15px; border:1.5px solid rgba(110,84,56,.3); border-radius:10px; background:#faf6ee; color:#2c1a0e; font-family:'Montserrat',sans-serif; font-size:.95rem; transition:border-color .2s, box-shadow .2s`
+          - `<div>`
+            - style: `display:grid; grid-template-columns:1fr 1fr; gap:16px`
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:8px`
+              - `<label>`
+                - style: `font-size:.74rem; font-weight:600; letter-spacing:.12em; color:#5c3d20; text-transform:uppercase`
+                - text: "From"
+              - `<input>`
+                - style: `padding:12px 15px; border:1.5px solid rgba(110,84,56,.3); border-radius:10px; background:#faf6ee; color:#2c1a0e; font-family:'Montserrat',sans-serif; font-size:.95rem; transition:border-color .2s, box-shadow .2s`
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:8px`
+              - `<label>`
+                - style: `font-size:.74rem; font-weight:600; letter-spacing:.12em; color:#5c3d20; text-transform:uppercase`
+                - text: "To"
+              - `<input>`
+                - style: `padding:12px 15px; border:1.5px solid rgba(110,84,56,.3); border-radius:10px; background:#faf6ee; color:#2c1a0e; font-family:'Montserrat',sans-serif; font-size:.95rem; transition:border-color .2s, box-shadow .2s`
+          - `<div>`
+            - style: `display:flex; flex-direction:column; gap:8px`
+            - `<label>`
+              - style: `font-size:.74rem; font-weight:600; letter-spacing:.12em; color:#5c3d20; text-transform:uppercase`
+              - text: "Tell us about your pets & home"
+            - `<textarea>`
+              - style: `padding:12px 15px; border:1.5px solid rgba(110,84,56,.3); border-radius:10px; background:#faf6ee; color:#2c1a0e; font-family:'Montserrat',sans-serif; font-size:.95rem; min-height:110px; line-height:1.7; transition:border-color .2s, box-shadow .2s`
+          - `<button>`
+            - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:13px 32px; font-family:'Montserrat',sans-serif; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .2s, border-color .2s, transform .12s`
+            - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+            - :active `transform:translateY(0) scale(.98)`
+            - text: "Send enquiry"
+          - `<p>`
+            - style: `font-size:.86rem; text-align:center; min-height:1.2em; margin:0; color:#2f7d4f; font-weight:600`
+            - text: "{{ status }}"
+    - `<div>` `[data-lb]`
+      - style: `position:fixed; inset:0; z-index:9998; background:rgba(44,26,14,.9); backdrop-filter:blur(10px); display:flex; align-items:center; justify-content:center; padding:48px; opacity:0; transition:opacity .25s ease`
+      - `<button>` `[data-lb-close]`
+        - style: `position:absolute; top:28px; right:32px; width:44px; height:44px; border-radius:50%; border:1px solid rgba(196,171,138,.45); background:rgba(250,246,238,.12); color:#fff; display:flex; align-items:center; justify-content:center; transition:background .2s`
+        - :hover `background:rgba(250,246,238,.25)`
+        - `<svg>`
+          - `<path>`
+      - `<figure>`
+        - style: `margin:0; display:flex; flex-direction:column; align-items:center; gap:16px; max-width:100%`
+        - `<img>` `[data-lb-img]`
+          - style: `max-width:min(880px,100%); object-fit:contain; border-radius:16px; display:block`
+        - `<figcaption>` `[data-lb-cap]`
+          - style: `font-size:.82rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#c4ab8a`
+    - `<footer>` **Footer** `[data-sec]`
+      - style: `background:#2c1a0e; color:rgba(255,255,255,.7); padding:0 48px 32px; border-top:3px solid #2f5d45`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<div>`
+          - style: `display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr); gap:56px; padding:64px 0 44px`
+          - `<div>`
+            - style: `display:flex; flex-direction:column; gap:18px; align-items:flex-start`
+            - `<a>` → `Home.dc.html`
+              - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.7rem; letter-spacing:.28em`
+              - `<img>` src=`public/images/logo-mark-white.png`
+                - style: `height:46px; width:46px; display:block; object-fit:contain`
+              - `<span>`
+                - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(255,255,255,.28)`
+            - `<p>`
+              - style: `line-height:1.8; font-size:.95rem; margin:0; max-width:340px; color:rgba(255,255,255,.7)`
+              - text: "Callum & Niamh — experienced house and pet sitters."
+          - `<div>`
+            - `<h4>`
+              - style: `color:#fff; font-size:.76rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; margin:0 0 20px; border-bottom:1px solid rgba(196,171,138,.28)`
+              - text: "Quick links"
+            - `<ul>`
+              - style: `list-style:none; padding:0; margin:0`
+              - `<li>`
+              - `<li>`
+              - `<li>`
+              - `<li>`
+          - `<div>`
+            - `<h4>`
+              - style: `color:#fff; font-size:.76rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; margin:0 0 20px; border-bottom:1px solid rgba(196,171,138,.28)`
+              - text: "Platforms"
+            - `<ul>`
+              - style: `list-style:none; padding:0; margin:0`
+              - `<li>`
+              - `<li>`
+        - `<div>`
+          - style: `border-top:1px solid rgba(255,255,255,.1); display:flex; justify-content:space-between; align-items:center; gap:24px`
+          - `<div>`
+            - style: `display:flex; align-items:center; gap:16px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.45)`
+            - `<span>`
+              - text: "© 2026 MYAH"
+            - `<span>`
+              - style: `width:4px; height:4px; border-radius:50%; background:rgba(196,171,138,.5); display:block`
+            - `<span>`
+              - text: "Callum & Niamh"
+          - `<span>`
+            - style: `display:flex; align-items:center; gap:9px; font-size:.82rem; color:rgba(255,255,255,.55); font-style:italic`
+            - text: "Made with for pet lovers everywhere"
+            - `<span>`
+              - style: `font-style:normal`
+              - text: "f7d4f;"

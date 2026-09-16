@@ -1,0 +1,240 @@
+# Sit detail — element-by-element spec
+
+Generated from the approved design file `reference/Sit detail.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `/images/slideshow-living-room.jpeg`
+- `{{ pet.photo }}`
+- `{{ p.src }}`
+- `/images/solomon-1.jpg`
+- `/images/logo-mark-white.png`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `min-height:100vh; display:flex; flex-direction:column; background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<header>` **Header** `[data-topbar]`
+      - style: `position:sticky; top:0; z-index:210; padding:16px 48px; display:flex; justify-content:space-between; align-items:center; gap:40px; background:rgba(250,246,238,.97); backdrop-filter:blur(12px); box-shadow:0 1px 0 rgba(110,84,56,.2)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.4rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:46px; width:46px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<nav>` `[data-header-nav]`
+        - style: `display:flex; align-items:center; gap:32px`
+        - `<a>` → `Home.dc.html`
+          - style: `font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Home"
+        - `<a>` → `Browse sits.dc.html`
+          - style: `font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#2f5d45; white-space:nowrap; border-bottom:2px solid #2f5d45`
+          - text: "Browse sits"
+        - `<a>` → `Log in.dc.html`
+          - style: `font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Log in"
+        - `<a>` → `Sign up.dc.html`
+          - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:13px 28px; white-space:nowrap; box-shadow:0 4px 14px rgba(44,26,14,.18); transition:background .2s, border-color .2s, transform .12s`
+          - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+          - :active `transform:translateY(0) scale(.98)`
+          - text: "Get started"
+    - `<main>` **Sit detail** `[data-page-pad]`
+      - style: `flex:1; padding:40px 48px 100px`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<a>` → `Browse sits.dc.html`
+          - style: `display:inline-flex; align-items:center; gap:9px; font-size:.78rem; color:#2f5d45; font-weight:600; letter-spacing:.12em; text-transform:uppercase; transition:gap .2s, color .2s`
+          - :hover `gap:13px;color:#2c1a0e`
+          - text: "← Back to all sits"
+        - `<div>` `[data-detail-grid]`
+          - style: `display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:32px; align-items:start`
+          - `<div>`
+            - style: `display:flex; flex-direction:column; gap:24px`
+            - `<div>`
+              - style: `position:relative; border-radius:20px; overflow:hidden; border:1px solid rgba(110,84,56,.22)`
+              - `<img>` src=`public/images/slideshow-living-room.jpeg`
+                - style: `width:100%; height:340px; object-fit:cover; display:block; background:#e9e0d2`
+              - `<div>`
+                - style: `position:absolute; inset:0; background:linear-gradient(to top, rgba(44,26,14,.78) 0%, rgba(44,26,14,.1) 55%, transparent 100%)`
+              - `<div>`
+                - style: `position:absolute; left:0; right:0; bottom:0; padding:34px 34px 30px`
+            - `<section>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<h2>`
+                - style: `font-family:'Marcellus',serif; font-size:1.5rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "About this sit"
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 22px`
+              - `<p>`
+                - style: `font-size:.97rem; color:#2c1a0e; line-height:1.85; margin:0 0 14px`
+                - text: "We're away for two weeks in October and looking for a couple or solo sitter to look after the cottage and our two spaniels, Solomon and Chester."
+              - `<p>`
+                - style: `font-size:.97rem; color:#2c1a0e; line-height:1.85; margin:0`
+                - text: "The house is a three-bedroom stone cottage on the edge of the village, with a walled garden the dogs can come and go from. The pub is a five-minute walk and Bat…"
+            - `<section>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<h2>`
+                - style: `font-family:'Marcellus',serif; font-size:1.5rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "Meet the pets"
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 24px`
+              - `<div>`
+                - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(270px,1fr)); gap:18px`
+            - `<section>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<h2>`
+                - style: `font-family:'Marcellus',serif; font-size:1.5rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "Home amenities"
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 24px`
+              - `<div>`
+                - style: `display:flex; gap:10px`
+            - `<section>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<h2>`
+                - style: `font-family:'Marcellus',serif; font-size:1.5rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "What they're looking for"
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 22px`
+              - `<p>`
+                - style: `font-size:.97rem; color:#2c1a0e; line-height:1.85; margin:0`
+                - text: "Sitters who are happy to be home most evenings, comfortable with two energetic dogs, and able to keep us updated with the odd photo. Previous sitting references…"
+            - `<section>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<h2>`
+                - style: `font-family:'Marcellus',serif; font-size:1.5rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "Photos"
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 24px`
+              - `<div>`
+                - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px`
+            - `<section>`
+              - style: `background:#fff; border:2px solid rgba(110,84,56,.35); border-radius:18px; padding:36px; box-shadow:0 1px 2px rgba(44,26,14,.04)`
+              - `<h2>`
+                - style: `font-family:'Marcellus',serif; font-size:1.5rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "Interested? Get in touch"
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 18px`
+              - `<p>`
+                - style: `font-size:.95rem; color:#6b4e35; margin:0 0 26px; line-height:1.7`
+                - text: "Send a message to Thomas James about this sit."
+              - `<form>` `[data-enquiry] [data-go]`
+                - style: `display:flex; flex-direction:column; gap:18px`
+              - `<div>`
+                - style: `display:flex; align-items:center; gap:16px; border-top:1px solid rgba(44,26,14,.08)`
+          - `<aside>` `[data-aside]`
+            - style: `position:sticky; top:104px; display:flex; flex-direction:column; gap:20px`
+            - `<div>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:28px; box-shadow:0 1px 2px rgba(44,26,14,.04); display:flex; flex-direction:column; gap:22px; transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>`
+                - style: `display:flex; gap:15px; align-items:center`
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:12px; border-top:1px solid rgba(44,26,14,.08)`
+              - `<a>` → `#enquiry`
+                - style: `display:inline-flex; align-items:center; justify-content:center; gap:9px; width:100%; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:13px 28px; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .2s, border-color .2s, transform .12s`
+                - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+                - :active `transform:translateY(0) scale(.98)`
+                - text: "Message Thomas"
+              - `<p>`
+                - style: `font-size:.8rem; color:#6b4e35; text-align:center; margin:-8px 0 0`
+                - text: "Chat directly on MYAH"
+            - `<div>`
+              - style: `background:#faf6ee; border:1px solid rgba(110,84,56,.28); border-radius:18px; padding:24px 26px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 14px`
+                - text: "At a glance"
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:11px; font-size:.88rem; color:#6b4e35`
+    - `<footer>` **Footer**
+      - style: `background:#2c1a0e; color:rgba(255,255,255,.7); padding:0 48px 32px; border-top:3px solid #2f5d45`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<div>`
+          - style: `display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr); gap:56px; padding:64px 0 44px`
+          - `<div>`
+            - style: `display:flex; flex-direction:column; gap:18px; align-items:flex-start`
+            - `<a>` → `Home.dc.html`
+              - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.7rem; letter-spacing:.28em`
+              - `<img>` src=`public/images/logo-mark-white.png`
+                - style: `height:46px; width:46px; display:block; object-fit:contain`
+              - `<span>`
+                - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(255,255,255,.28)`
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:12px; max-width:340px`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:#c4ab8a; margin:0`
+                - text: "Make Yourself At Home"
+              - `<p>`
+                - style: `line-height:1.8; font-size:.95rem; margin:0; color:rgba(255,255,255,.7)`
+                - text: "Premium pet & home care for peace of mind while you travel."
+            - `<a>` → `Sign up.dc.html`
+              - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:13px 28px; white-space:nowrap; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .2s, border-color .2s, transform .12s`
+              - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+              - :active `transform:translateY(0) scale(.98)`
+              - text: "Sign up for free"
+          - `<div>`
+            - `<h4>`
+              - style: `color:#fff; font-size:.76rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; margin:0 0 20px; border-bottom:1px solid rgba(196,171,138,.28)`
+              - text: "Platform"
+            - `<ul>`
+              - style: `list-style:none; padding:0; margin:0`
+              - `<li>`
+              - `<li>`
+              - `<li>`
+          - `<div>`
+            - `<h4>`
+              - style: `color:#fff; font-size:.76rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; margin:0 0 20px; border-bottom:1px solid rgba(196,171,138,.28)`
+              - text: "Example profile"
+            - `<ul>`
+              - style: `list-style:none; padding:0; margin:0`
+              - `<li>`
+        - `<div>`
+          - style: `border-top:1px solid rgba(255,255,255,.1); display:flex; justify-content:space-between; align-items:center; gap:24px`
+          - `<div>`
+            - style: `display:flex; align-items:center; gap:16px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.45)`
+            - `<span>`
+              - text: "© 2026 MYAH"
+            - `<span>`
+              - style: `width:4px; height:4px; border-radius:50%; background:rgba(196,171,138,.5); display:block`
+            - `<a>` → `#privacy`
+              - style: `color:rgba(255,255,255,.45); transition:color .2s`
+              - :hover `color:#c4ab8a`
+              - text: "Privacy"
+            - `<span>`
+              - style: `width:4px; height:4px; border-radius:50%; background:rgba(196,171,138,.5); display:block`
+            - `<a>` → `#terms`
+              - style: `color:rgba(255,255,255,.45); transition:color .2s`
+              - :hover `color:#c4ab8a`
+              - text: "Terms"
+          - `<span>`
+            - style: `display:flex; align-items:center; gap:9px; font-size:.82rem; color:rgba(255,255,255,.55); font-style:italic`
+            - text: "Made with for house & pet sitters everywhere"
+            - `<span>`
+              - style: `font-style:normal`
+              - text: "f7d4f;"

@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; overflow-x: hidden; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 1000px) {
+    [data-header-nav] { display: none !important; }
+    [data-topbar] { padding: 14px 24px !important; }
+    [data-sec] { padding-left: 24px !important; padding-right: 24px !important; }
+    [data-split] { grid-template-columns: minmax(0,1fr) !important; gap: 40px !important; }
+  }
+</style>
+</helmet>
+<div style="background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <header data-topbar="1" data-screen-label="Header" style="position:fixed;top:0;left:0;right:0;z-index:210;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;background:rgba(250,246,238,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;flex-shrink:0;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <nav data-header-nav="1" style="display:flex;align-items:center;gap:30px;flex-wrap:nowrap">
+      <a href="#about" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">About</a>
+      <a href="#reviews" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Reviews</a>
+      <a href="#gallery" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Gallery</a>
+      <a href="Browse sits.dc.html" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Profiles</a>
+      <a href="#enquiry" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Book us today</a>
+    </nav>
+  </header>
+
+  <section data-screen-label="Profile hero" style="min-height:78vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:140px 48px 80px;text-align:center">
+    <div style="position:absolute;inset:0;z-index:0;background:#2c1a0e">
+      <img data-hero-slide="1" src="public/images/couple-villa-1.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:1;transition:opacity 1.2s ease" />
+      <img data-hero-slide="1" src="public/images/couple-boat-1.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease" />
+      <img data-hero-slide="1" src="public/images/couple-field-1.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 25%;opacity:0;transition:opacity 1.2s ease" />
+      <img data-hero-slide="1" src="public/images/couple-night-1.jpg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease" />
+    </div>
+    <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg, rgba(44,26,14,.52) 0%, rgba(44,26,14,.66) 100%)"></div>
+    <div style="position:relative;z-index:2;max-width:720px">
+      <p style="display:inline-flex;align-items:center;gap:10px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.45);backdrop-filter:blur(6px);color:#fff;padding:9px 20px;border-radius:50px;font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 26px">Experienced sitters worldwide</p>
+      <h1 style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:4.6rem;color:#fff;line-height:1;margin:0 0 18px">MYAH<br /><em style="color:#c4ab8a;">Sitters</em></h1>
+      <p style="font-size:1.1rem;color:#fff;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 18px">Callum &amp; Niamh</p>
+      <p style="font-size:1.08rem;color:rgba(255,255,255,.85);line-height:1.75;max-width:540px;margin:0 auto 36px">Experienced house &amp; pet sitters available worldwide — passionate about caring for homes and animals wherever they go.</p>
+      <a href="#enquiry" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;box-shadow:0 8px 26px rgba(44,26,14,.3);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Book us today</a>
+      <div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin:34px 0 0;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.72)">
+        <span style="display:flex;align-items:center;gap:8px"><span style="color:#c4ab8a;letter-spacing:.2em">★★★★★</span>5.0 rating</span>
+        <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
+        <span>40+ reviews</span>
+        <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
+        <span>UK &amp; Australia</span>
+      </div>
+    </div>
+    <a href="#about" aria-label="Scroll to about" style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid rgba(196,171,138,.5);background:rgba(250,246,238,.12);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;transition:background .2s, transform .2s" style-hover="background:rgba(250,246,238,.25);transform:translateX(-50%) translateY(3px)">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+    </a>
+  </section>
+
+  <section data-screen-label="Credentials" style="background:#2c1a0e;padding:0 48px" data-sec="1">
+    <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-left:1px solid rgba(196,171,138,.18);border-right:1px solid rgba(196,171,138,.18)">
+      <div style="padding:34px 26px;text-align:center;border-right:1px solid rgba(196,171,138,.18)">
+        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">40+</div>
+        <div style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:8px">Five-star reviews</div>
+      </div>
+      <div style="padding:34px 26px;text-align:center;border-right:1px solid rgba(196,171,138,.18)">
+        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">5.0</div>
+        <div style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:8px">Average rating</div>
+      </div>
+      <div style="padding:34px 26px;text-align:center;border-right:1px solid rgba(196,171,138,.18)">
+        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">2</div>
+        <div style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:8px">Verified platforms</div>
+      </div>
+      <div style="padding:34px 26px;text-align:center">
+        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">30+</div>
+        <div style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:8px">Pets cared for</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about" data-sec="1" data-screen-label="About" style="padding:100px 48px;background:#faf6ee">
+    <div data-split="1" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:60px;align-items:center">
+      <div style="position:relative;width:100%;aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:#e9e0d2;border:1px solid rgba(110,84,56,.22)">
+        <img data-about-slide="1" src="public/images/couple-dinner-1.jpg" alt="Callum and Niamh at dinner" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;opacity:1;transition:opacity .5s ease" />
+        <img data-about-slide="1" src="public/images/couple-airport-1.jpg" alt="Callum and Niamh at the airport" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;opacity:0;transition:opacity .5s ease" />
+        <img data-about-slide="1" src="public/images/couple-bw-1.jpg" alt="Callum and Niamh" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;opacity:0;transition:opacity .5s ease" />
+        <button data-about-prev="1" aria-label="Previous photo" style="position:absolute;top:50%;left:14px;transform:translateY(-50%);background:rgba(250,246,238,.9);border:1px solid rgba(110,84,56,.3);width:42px;height:42px;border-radius:50%;font-size:1.3rem;color:#2c1a0e;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s" style-hover="background:#fff">&#8249;</button>
+        <button data-about-next="1" aria-label="Next photo" style="position:absolute;top:50%;right:14px;transform:translateY(-50%);background:rgba(250,246,238,.9);border:1px solid rgba(110,84,56,.3);width:42px;height:42px;border-radius:50%;font-size:1.3rem;color:#2c1a0e;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s" style-hover="background:#fff">&#8250;</button>
+        <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2">
+          <button data-about-dot="0" aria-label="Photo 1" style="width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:rgba(255,255,255,.9);cursor:pointer;padding:0"></button>
+          <button data-about-dot="1" aria-label="Photo 2" style="width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:transparent;cursor:pointer;padding:0"></button>
+          <button data-about-dot="2" aria-label="Photo 3" style="width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:transparent;cursor:pointer;padding:0"></button>
+        </div>
+      </div>
+      <div>
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Who we are</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">A home away from home — <em style="color:#2f5d45;">for you and your pets.</em></h2>
+        <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 26px"></div>
+        <p style="color:#6b4e35;line-height:1.85;margin:0 0 16px;font-size:.98rem">We're Callum and Niamh. We've cared for all sorts of animals. From cats and dogs to horses and bearded lizards. We've stayed in just as many kinds of home. From high-rise city apartments to farmhouses on a hundred acres.</p>
+        <p style="color:#6b4e35;line-height:1.85;margin:0;font-size:.98rem">We treat every sit like it's our own home: daily walks, feeding routines kept to the minute, plants watered, bins out, and regular photo updates so you can relax while you're away.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="reviews" data-sec="1" data-screen-label="Reviews" style="padding:100px 48px;background:#faf6ee">
+    <div style="max-width:1100px;margin:0 auto">
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>What pet owners say</p>
+      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">40+ <em style="color:#2f5d45;">five-star reviews.</em></h2>
+      <div style="display:flex;align-items:center;gap:14px;margin:24px 0 36px">
+        <span style="color:#2f5d45;font-size:1.05rem;letter-spacing:.24em">★★★★★</span>
+        <span style="color:#6b4e35;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase">5.0 across all platforms</span>
+      </div>
+      <div style="overflow:hidden;margin-bottom:26px">
+        <div data-rev-track="1" style="display:flex;gap:24px;transition:transform .45s ease">
+          <sc-for list="{{ reviews }}" as="r" hint-placeholder-count="4">
+            <div data-rev-card="1" style="min-width:330px;max-width:330px;flex-shrink:0;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+              <div style="color:#2f5d45;font-size:.85rem;letter-spacing:.3em">★★★★★</div>
+              <p style="color:#6b4e35;font-size:.92rem;line-height:1.8;margin:0;font-style:italic">"{{ r.text }}"</p>
+              <div style="display:flex;align-items:center;gap:13px;margin-top:auto;padding-top:18px;border-top:1px solid rgba(44,26,14,.08)">
+                <span style="width:42px;height:42px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;flex-shrink:0;letter-spacing:.04em">{{ r.initials }}</span>
+                <div style="min-width:0">
+                  <div style="font-weight:600;color:#2c1a0e;font-size:.92rem">{{ r.name }}</div>
+                  <div style="color:#6b4e35;font-size:.78rem;letter-spacing:.04em">{{ r.platform }}</div>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button data-rev-prev="1" aria-label="Previous reviews" style="width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(110,84,56,.4);background:transparent;color:#5c3d20;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">&larr;</button>
+        <button data-rev-next="1" aria-label="Next reviews" style="width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(110,84,56,.4);background:transparent;color:#5c3d20;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">&rarr;</button>
+        <div data-rev-dots="1" style="display:flex;gap:7px;margin-left:10px"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="gallery" data-sec="1" data-screen-label="Gallery" style="padding:100px 48px;background:#faf6ee">
+    <div style="max-width:1100px;margin:0 auto">
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Pets we've loved</p>
+      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">Our sits</h2>
+      <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 36px"></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px">
+        <sc-for list="{{ gallery }}" as="g" hint-placeholder-count="8">
+          <button type="button" data-lightbox="{{ g.src }}" data-lightbox-alt="{{ g.alt }}" style="position:relative;border:none;padding:0;border-radius:14px;overflow:hidden;aspect-ratio:1;background:#e9e0d2;cursor:pointer;display:block;width:100%">
+            <img src="{{ g.src }}" alt="{{ g.alt }}" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease" />
+            <span style="position:absolute;inset:0;background:linear-gradient(to top, rgba(44,26,14,.78) 0%, transparent 60%);opacity:0;transition:opacity .3s ease;display:flex;align-items:flex-end;padding:16px;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:#fff;text-align:left" style-hover="opacity:1">{{ g.alt }}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section id="profiles" data-sec="1" data-screen-label="Platforms" style="padding:100px 48px;background:#faf6ee">
+    <div style="max-width:1100px;margin:0 auto">
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Find us online</p>
+      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">Verified profiles</h2>
+      <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 36px"></div>
+      <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+        <a href="https://www.rover.com/sit/callud53623" target="_blank" rel="noopener noreferrer" style="display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px 32px;text-decoration:none;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease" style-hover="transform:translateY(-6px);box-shadow:0 20px 50px rgba(44,26,14,.1);border-color:rgba(110,84,56,.45)">
+          <span style="font-family:'Marcellus',serif;font-size:1.5rem;width:48px;height:48px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:6px">R</span>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Rover (UK)</h3>
+          <p style="color:#6b4e35;line-height:1.75;font-size:.92rem;margin:0">Our UK profile, with verified reviews from owners across the country.</p>
+          <span style="color:#2f5d45;font-weight:600;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-top:6px">View profile &rarr;</span>
+        </a>
+        <a href="https://www.trustedhousesitters.com/house-and-pet-sitters/australia/new-south-wales/sydney/l/6979617/" target="_blank" rel="noopener noreferrer" style="display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px 32px;text-decoration:none;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease" style-hover="transform:translateY(-6px);box-shadow:0 20px 50px rgba(44,26,14,.1);border-color:rgba(110,84,56,.45)">
+          <span style="font-family:'Marcellus',serif;font-size:1.5rem;width:48px;height:48px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:6px">T</span>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">TrustedHouseSitters (AU)</h3>
+          <p style="color:#6b4e35;line-height:1.75;font-size:.92rem;margin:0">Our Sydney-based profile, covering sits across New South Wales.</p>
+          <span style="color:#2f5d45;font-weight:600;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-top:6px">View profile &rarr;</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="enquiry" data-sec="1" data-screen-label="Enquiry" style="padding:100px 48px;background:#faf6ee">
+    <div data-split="1" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:60px;align-items:start">
+      <div>
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Get in touch</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">Book Callum <em style="color:#2f5d45;">&amp; Niamh</em></h2>
+        <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 26px"></div>
+        <p style="color:#6b4e35;line-height:1.85;font-size:.98rem;margin:0">Tell us about your home, your pets, and your dates and we'll get back to you within 24 hours.</p>
+        <a href="https://wa.me/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:10px;margin-top:26px;padding:14px 28px;background:#25D366;color:#fff;border-radius:50px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 6px 20px rgba(37,211,102,.25);transition:background .2s, transform .12s" style-hover="background:#1ebe5d;transform:translateY(-2px)" style-active="transform:translateY(0) scale(.98)">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          Message on WhatsApp
+        </a>
+      </div>
+      <form data-enquiry="1" data-go="Messages.dc.html" style="display:flex;flex-direction:column;gap:18px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label for="fname" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">First name</label>
+            <input type="text" id="fname" name="first_name" placeholder="Jane" required="required" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label for="lname" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Last name</label>
+            <input type="text" id="lname" name="last_name" placeholder="Smith" required="required" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label for="email" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Email</label>
+          <input type="email" id="email" name="email" placeholder="jane@example.com" required="required" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label for="date-from" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">From</label>
+            <input type="date" id="date-from" name="date_from" required="required" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <label for="date-to" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">To</label>
+            <input type="date" id="date-to" name="date_to" required="required" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label for="message" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Tell us about your pets &amp; home</label>
+          <textarea id="message" name="message" rows="4" placeholder="Breed, age, any special needs…" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;resize:vertical;min-height:110px;line-height:1.7;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)"></textarea>
+        </div>
+        <button type="submit" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Send enquiry</button>
+        <p style="font-size:.86rem;text-align:center;min-height:1.2em;margin:0;color:#2f7d4f;font-weight:600">{{ status }}</p>
+      </form>
+    </div>
+  </section>
+
+  <div data-lb="1" style="position:fixed;inset:0;z-index:9998;background:rgba(44,26,14,.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:48px;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <button type="button" data-lb-close="1" aria-label="Close" style="position:absolute;top:28px;right:32px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(196,171,138,.45);background:rgba(250,246,238,.12);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s" style-hover="background:rgba(250,246,238,.25)">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
+    </button>
+    <figure style="margin:0;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:100%">
+      <img data-lb-img="1" alt="" style="max-width:min(880px,100%);max-height:72vh;object-fit:contain;border-radius:16px;display:block" />
+      <figcaption data-lb-cap="1" style="font-size:.82rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#c4ab8a"></figcaption>
+    </figure>
+  </div>
+
+  <footer data-sec="1" data-screen-label="Footer" style="background:#2c1a0e;color:rgba(255,255,255,.7);padding:0 48px 32px;border-top:3px solid #2f5d45">
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:56px;padding:64px 0 44px">
+        <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+          <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.7rem;letter-spacing:.28em">
+            <img src="public/images/logo-mark-white.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+            <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(255,255,255,.28)"><span style="color:#fff;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);line-height:1">Make Yourself At Home</span></span>
+          </a>
+          <p style="line-height:1.8;font-size:.95rem;margin:0;max-width:340px;color:rgba(255,255,255,.7)">Callum &amp; Niamh — experienced house and pet sitters.</p>
+        </div>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Quick links</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="#about" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">About us</a></li>
+            <li style="margin-bottom:12px"><a href="#reviews" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Reviews</a></li>
+            <li style="margin-bottom:12px"><a href="#gallery" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Gallery</a></li>
+            <li style="margin-bottom:12px"><a href="#enquiry" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Book us</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Platforms</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="https://www.rover.com/sit/callud53623" target="_blank" rel="noopener noreferrer" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Rover (UK)</a></li>
+            <li style="margin-bottom:12px"><a href="https://www.trustedhousesitters.com/house-and-pet-sitters/australia/new-south-wales/sydney/l/6979617/" target="_blank" rel="noopener noreferrer" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">TrustedHouseSitters (AU)</a></li>
+          </ul>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">
+          <span>&copy; 2026 MYAH</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <span>Callum &amp; Niamh</span>
+        </div>
+        <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with <span style="font-style:normal">&#2f7d4f;</span> for pet lovers everywhere</span>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { status: '' };
+
+  renderVals() {
+    return {
+      status: this.state.status,
+      reviews: [
+        { text: 'Super lovely couple who took great care of our cat Rocco! Regular updates, spotless apartment on return. Rocco was extremely happy when we got home.', name: 'Jess & Sam', initials: 'JS', platform: 'TrustedHouseSitters' },
+        { text: "We couldn't have asked for better pet sitters — reliable, trustworthy, and incredibly caring. They left our home spotless and exceeded every expectation.", name: 'Libby', initials: 'L', platform: 'Rover' },
+        { text: "Callum and Niamh have looked after Solomon for four years. They are reliable, trustworthy, and clearly care about his wellbeing. I couldn't recommend them highly enough.", name: 'Thomas James', initials: 'TJ', platform: 'Rover' },
+        { text: 'Came back to a tidy house, a very happy dog and a fridge full of the food we left. Booked them again for the summer before we had even unpacked.', name: 'Angela', initials: 'A', platform: 'TrustedHouseSitters' },
+        { text: 'Daily photos, walks rain or shine, and the garden looked better than when we left. Genuinely the easiest holiday we have had since getting the dogs.', name: 'Deb', initials: 'D', platform: 'Rover' }
+      ],
+      gallery: [
+        { src: 'public/images/alfie-1.jpg', alt: 'Alfie the cockapoo' },
+        { src: 'public/images/solomon-1.jpg', alt: 'Solomon the labradoodle' },
+        { src: 'public/images/chester-1.jpg', alt: 'Chester the cocker spaniel' },
+        { src: 'public/images/travis-1.jpg', alt: 'Travis the Vizsla' },
+        { src: 'public/images/bailey-1.jpg', alt: 'Bailey' },
+        { src: 'public/images/zeus-1.jpg', alt: 'Zeus the Weimaraner' },
+        { src: 'public/images/orca-3.jpg', alt: 'Orca' },
+        { src: 'public/images/solomon-4.jpg', alt: 'Solomon in the snow' }
+      ]
+    };
+  }
+
+  componentDidMount() {
+    document.querySelectorAll('form[data-go]').forEach(f => f.addEventListener('submit', e => {
+      e.preventDefault(); e.stopImmediatePropagation();
+      const target = f.getAttribute('data-go');
+      const l = document.querySelector('[data-loader]');
+      if (l) { l.style.opacity = '1'; l.style.pointerEvents = 'all'; }
+      setTimeout(() => { window.location.href = target; }, l ? 700 : 150);
+    }, true));
+    const q = s => document.querySelector(s);
+    const qa = s => Array.from(document.querySelectorAll(s));
+
+    const loader = q('[data-loader]');
+    const show = () => {
+      if (!loader) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(this.hideT);
+      this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    };
+    qa('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || a.target === '_blank') return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+    });
+
+    const form = q('[data-enquiry]');
+    form && form.addEventListener('submit', e => {
+      e.preventDefault();
+      show();
+      this.setState({ status: "Enquiry sent! You'll hear back soon." });
+      form.reset();
+    });
+
+    // smooth scroll past the fixed header
+    qa('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+      const off = (q('[data-topbar]') ? q('[data-topbar]').offsetHeight : 0) + 20;
+      window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+    }));
+
+    // hero slideshow
+    const hero = qa('[data-hero-slide]');
+    let hi = 0;
+    if (hero.length > 1) {
+      this.heroT = setInterval(() => {
+        hero[hi].style.opacity = '0';
+        hi = (hi + 1) % hero.length;
+        hero[hi].style.opacity = '1';
+      }, 5000);
+    }
+
+    // about carousel
+    const slides = qa('[data-about-slide]');
+    const dots = qa('[data-about-dot]');
+    let ai = 0;
+    const goAbout = i => {
+      slides[ai].style.opacity = '0';
+      if (dots[ai]) dots[ai].style.background = 'transparent';
+      ai = (i + slides.length) % slides.length;
+      slides[ai].style.opacity = '1';
+      if (dots[ai]) dots[ai].style.background = 'rgba(255,255,255,.9)';
+    };
+    const resetAbout = () => {
+      clearInterval(this.aboutT);
+      this.aboutT = setInterval(() => goAbout(ai + 1), 4500);
+    };
+    q('[data-about-prev]') && q('[data-about-prev]').addEventListener('click', () => { goAbout(ai - 1); resetAbout(); });
+    q('[data-about-next]') && q('[data-about-next]').addEventListener('click', () => { goAbout(ai + 1); resetAbout(); });
+    dots.forEach(d => d.addEventListener('click', () => { goAbout(Number(d.getAttribute('data-about-dot'))); resetAbout(); }));
+    if (slides.length > 1) resetAbout();
+
+    // reviews carousel
+    const track = q('[data-rev-track]');
+    const dotsEl = q('[data-rev-dots]');
+    const setupRev = () => {
+      const cards = qa('[data-rev-card]');
+      if (!track || !cards.length || !dotsEl) return;
+      let ri = 0;
+      const visible = () => window.innerWidth >= 1100 ? 3 : window.innerWidth >= 760 ? 2 : 1;
+      const cardW = () => cards[0].offsetWidth + 24;
+      const maxIdx = () => Math.max(0, cards.length - visible());
+      const paint = () => {
+        track.style.transform = 'translateX(-' + (ri * cardW()) + 'px)';
+        Array.from(dotsEl.children).forEach((d, j) => {
+          d.style.background = j === ri ? '#2f5d45' : '#e9e0d2';
+        });
+      };
+      const go = i => { ri = Math.max(0, Math.min(i, maxIdx())); paint(); };
+      const build = () => {
+        dotsEl.innerHTML = '';
+        for (let i = 0; i <= maxIdx(); i++) {
+          const d = document.createElement('div');
+          Object.assign(d.style, { width: '8px', height: '8px', borderRadius: '50%', background: '#e9e0d2', cursor: 'pointer', transition: 'background .2s' });
+          d.addEventListener('click', () => go(i));
+          dotsEl.appendChild(d);
+        }
+        paint();
+      };
+      q('[data-rev-prev]').onclick = () => go(ri - 1);
+      q('[data-rev-next]').onclick = () => go(ri + 1);
+      this.onResize = () => { build(); go(ri); };
+      window.addEventListener('resize', this.onResize);
+      build();
+    };
+    setTimeout(setupRev, 60);
+
+    // gallery lightbox
+    const lb = q('[data-lb]');
+    const lbImg = q('[data-lb-img]');
+    const lbCap = q('[data-lb-cap]');
+    const openLb = (src, alt) => {
+      if (!lb) return;
+      lbImg.src = src;
+      lbImg.alt = alt || '';
+      lbCap.textContent = alt || '';
+      lb.style.opacity = '1';
+      lb.style.pointerEvents = 'all';
+    };
+    const closeLb = () => {
+      if (!lb) return;
+      lb.style.opacity = '0';
+      lb.style.pointerEvents = 'none';
+    };
+    document.addEventListener('click', e => {
+      const btn = e.target.closest && e.target.closest('[data-lightbox]');
+      if (btn) openLb(btn.getAttribute('data-lightbox'), btn.getAttribute('data-lightbox-alt'));
+    });
+    q('[data-lb-close]') && q('[data-lb-close]').addEventListener('click', closeLb);
+    lb && lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+    this.onKey = e => { if (e.key === 'Escape') closeLb(); };
+    document.addEventListener('keydown', this.onKey);
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.hideT);
+    clearInterval(this.heroT);
+    clearInterval(this.aboutT);
+    if (this.onResize) window.removeEventListener('resize', this.onResize);
+    if (this.onKey) document.removeEventListener('keydown', this.onKey);
+  }
+}
+</script>
+</body>
+</html>

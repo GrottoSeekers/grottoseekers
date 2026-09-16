@@ -1,0 +1,232 @@
+# Browse sits — element-by-element spec
+
+Generated from the approved design file `reference/Browse sits.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `{{ sit.pic }}`
+- `/images/logo-mark-white.png`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `min-height:100vh; display:flex; flex-direction:column; background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<header>` **Header** `[data-topbar]`
+      - style: `position:sticky; top:0; z-index:210; padding:16px 48px; display:flex; justify-content:space-between; align-items:center; gap:40px; background:rgba(250,246,238,.97); backdrop-filter:blur(12px); box-shadow:0 1px 0 rgba(110,84,56,.2)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.4rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:46px; width:46px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<nav>` `[data-header-nav]`
+        - style: `display:flex; align-items:center; gap:32px`
+        - `<a>` → `Home.dc.html`
+          - style: `font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Home"
+        - `<a>` → `#listings`
+          - style: `font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#2f5d45; white-space:nowrap; border-bottom:2px solid #2f5d45`
+          - text: "Browse sits"
+        - `<a>` → `Log in.dc.html`
+          - style: `font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Log in"
+        - `<a>` → `Sign up.dc.html`
+          - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:13px 28px; white-space:nowrap; box-shadow:0 4px 14px rgba(44,26,14,.18); transition:background .2s, border-color .2s, transform .12s`
+          - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+          - :active `transform:translateY(0) scale(.98)`
+          - text: "Get started"
+    - `<main>` **Browse sits** `[data-page-pad]`
+      - style: `flex:1; padding:72px 48px 100px`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<div>`
+          - style: `display:grid; grid-template-columns:minmax(0,1fr) minmax(0,.85fr); gap:56px; align-items:end; border-bottom:1px solid rgba(110,84,56,.3)`
+          - `<div>`
+            - `<p>`
+              - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 18px; display:flex; align-items:center; gap:12px`
+              - text: "Available sits"
+              - `<span>`
+                - style: `width:26px; height:1px; background:#6e5438; display:block`
+            - `<h1>`
+              - style: `font-family:'Marcellus',serif; font-size:2.9rem; color:#2c1a0e; line-height:1.15; margin:0`
+              - text: "Find your"
+              - `<em>`
+                - style: `color:#2f5d45`
+                - text: "next sit"
+          - `<p>`
+            - style: `color:#6b4e35; font-size:1.02rem; line-height:1.8; margin:0 0 6px; border-left:2px solid rgba(110,84,56,.35)`
+            - text: "Browse homes looking for trusted sitters. Open any listing to see the full details, meet the pets, and get in touch."
+        - `<div>` **Filters**
+          - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:26px 28px; margin:30px 0 28px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+          - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+          - `<div>`
+            - style: `display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr); gap:18px`
+            - `<div>`
+              - style: `position:relative`
+              - `<label>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6b4e35; margin:0 0 8px; display:block`
+                - text: "Search"
+              - `<input>`
+                - style: `font-family:'Montserrat',sans-serif; font-size:.9rem; color:#2c1a0e; background:#faf6ee; border:1.5px solid rgba(110,84,56,.35); border-radius:10px; padding:12px 14px 12px 40px; width:100%; transition:border-color .2s, box-shadow .2s`
+              - `<span>`
+                - style: `position:absolute; left:14px; bottom:13px; display:flex`
+            - `<div>`
+              - style: `position:relative`
+              - `<label>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6b4e35; margin:0 0 8px; display:block`
+                - text: "Location"
+              - `<select>`
+                - style: `font-family:'Montserrat',sans-serif; font-size:.9rem; color:#2c1a0e; background:#fff; border:1.5px solid rgba(110,84,56,.35); border-radius:10px; padding:12px 38px 12px 14px; width:100%; transition:border-color .2s, box-shadow .2s`
+              - `<span>`
+                - style: `position:absolute; right:14px; bottom:15px; width:8px; height:8px; border-bottom:1.5px solid #2f5d45; transform:rotate(45deg)`
+            - `<div>`
+              - style: `position:relative`
+              - `<label>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6b4e35; margin:0 0 8px; display:block`
+                - text: "Pets"
+              - `<select>`
+                - style: `font-family:'Montserrat',sans-serif; font-size:.9rem; color:#2c1a0e; background:#fff; border:1.5px solid rgba(110,84,56,.35); border-radius:10px; padding:12px 38px 12px 14px; width:100%; transition:border-color .2s, box-shadow .2s`
+              - `<span>`
+                - style: `position:absolute; right:14px; bottom:15px; width:8px; height:8px; border-bottom:1.5px solid #2f5d45; transform:rotate(45deg)`
+            - `<div>`
+              - style: `position:relative`
+              - `<label>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6b4e35; margin:0 0 8px; display:block`
+                - text: "Sort by"
+              - `<select>`
+                - style: `font-family:'Montserrat',sans-serif; font-size:.9rem; color:#2c1a0e; background:#fff; border:1.5px solid rgba(110,84,56,.35); border-radius:10px; padding:12px 38px 12px 14px; width:100%; transition:border-color .2s, box-shadow .2s`
+              - `<span>`
+                - style: `position:absolute; right:14px; bottom:15px; width:8px; height:8px; border-bottom:1.5px solid #2f5d45; transform:rotate(45deg)`
+          - `<div>`
+            - style: `display:flex; align-items:center; gap:10px; border-top:1px solid rgba(44,26,14,.08)`
+            - `<span>`
+              - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6b4e35`
+              - text: "Length of stay"
+            - `<sc-for>`
+              - `<button>` `[data-len]`
+                - text: "{{ opt.label }}"
+        - `<div>`
+          - style: `display:flex; align-items:center; justify-content:space-between; gap:20px; padding:0 0 26px`
+          - `<p>`
+            - style: `margin:0; font-size:.8rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#6b4e35`
+            - text: "{{ countLabel }}"
+          - `<button>`
+            - style: `background:none; border:none; font-family:'Montserrat',sans-serif; font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#2f5d45; padding:4px 0; border-bottom:1px solid rgba(110,84,56,.4); transition:color .2s`
+            - :hover `color:#2c1a0e`
+            - text: "Clear filters"
+        - `<div>`
+          - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:24px`
+          - `<sc-for>`
+            - `<a>` → `Sit detail.dc.html`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:28px; color:inherit; box-shadow:0 1px 2px rgba(44,26,14,.04); display:flex; flex-direction:column; gap:18px; transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease`
+              - :hover `transform:translateY(-6px);box-shadow:0 20px 50px rgba(44,26,14,.1);border-color:rgba(110,84,56,.45)`
+              - `<div>`
+                - style: `display:flex; gap:16px; align-items:flex-start`
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:9px; font-size:.85rem; color:#6b4e35`
+              - `<p>`
+                - style: `margin:0; border-top:1px solid rgba(44,26,14,.08); font-size:.9rem; color:#6b4e35; line-height:1.7`
+                - text: "{{ sit.desc }}"
+              - `<span>`
+                - style: `font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#2f5d45; display:flex; align-items:center; gap:8px`
+                - text: "View sit →"
+        - `<sc-if>`
+          - `<div>`
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:72px 48px; text-align:center; max-width:520px; margin:0 auto; transition:box-shadow .3s ease, border-color .3s ease`
+            - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+            - `<span>`
+              - style: `width:56px; height:56px; border-radius:16px; background:#faf6ee; border:1px solid rgba(110,84,56,.28); color:#6e5438; display:inline-flex; align-items:center; justify-content:center`
+              - `<svg>`
+            - `<h2>`
+              - style: `font-family:'Marcellus',serif; font-size:1.6rem; color:#2c1a0e; margin:0 0 12px`
+              - text: "No sits match those filters"
+            - `<p>`
+              - style: `font-size:.95rem; color:#6b4e35; line-height:1.7; margin:0`
+              - text: "Try widening your search — or clear the filters to see everything available."
+    - `<footer>` **Footer**
+      - style: `background:#2c1a0e; color:rgba(255,255,255,.7); padding:0 48px 32px; border-top:3px solid #2f5d45`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<div>`
+          - style: `display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr); gap:56px; padding:64px 0 44px`
+          - `<div>`
+            - style: `display:flex; flex-direction:column; gap:18px; align-items:flex-start`
+            - `<a>` → `Home.dc.html`
+              - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.7rem; letter-spacing:.28em`
+              - `<img>` src=`public/images/logo-mark-white.png`
+                - style: `height:46px; width:46px; display:block; object-fit:contain`
+              - `<span>`
+                - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(255,255,255,.28)`
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:12px; max-width:340px`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.24em; text-transform:uppercase; color:#c4ab8a; margin:0`
+                - text: "Make Yourself At Home"
+              - `<p>`
+                - style: `line-height:1.8; font-size:.95rem; margin:0; color:rgba(255,255,255,.7)`
+                - text: "Premium pet & home care for peace of mind while you travel."
+            - `<a>` → `Sign up.dc.html`
+              - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:13px 28px; white-space:nowrap; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .2s, border-color .2s, transform .12s`
+              - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+              - :active `transform:translateY(0) scale(.98)`
+              - text: "Sign up for free"
+          - `<div>`
+            - `<h4>`
+              - style: `color:#fff; font-size:.76rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; margin:0 0 20px; border-bottom:1px solid rgba(196,171,138,.28)`
+              - text: "Platform"
+            - `<ul>`
+              - style: `list-style:none; padding:0; margin:0`
+              - `<li>`
+              - `<li>`
+              - `<li>`
+          - `<div>`
+            - `<h4>`
+              - style: `color:#fff; font-size:.76rem; font-weight:600; letter-spacing:.18em; text-transform:uppercase; margin:0 0 20px; border-bottom:1px solid rgba(196,171,138,.28)`
+              - text: "Example profile"
+            - `<ul>`
+              - style: `list-style:none; padding:0; margin:0`
+              - `<li>`
+        - `<div>`
+          - style: `border-top:1px solid rgba(255,255,255,.1); display:flex; justify-content:space-between; align-items:center; gap:24px`
+          - `<div>`
+            - style: `display:flex; align-items:center; gap:16px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.45)`
+            - `<span>`
+              - text: "© 2026 MYAH"
+            - `<span>`
+              - style: `width:4px; height:4px; border-radius:50%; background:rgba(196,171,138,.5); display:block`
+            - `<a>` → `#privacy`
+              - style: `color:rgba(255,255,255,.45); transition:color .2s`
+              - :hover `color:#c4ab8a`
+              - text: "Privacy"
+            - `<span>`
+              - style: `width:4px; height:4px; border-radius:50%; background:rgba(196,171,138,.5); display:block`
+            - `<a>` → `#terms`
+              - style: `color:rgba(255,255,255,.45); transition:color .2s`
+              - :hover `color:#c4ab8a`
+              - text: "Terms"
+          - `<span>`
+            - style: `display:flex; align-items:center; gap:9px; font-size:.82rem; color:rgba(255,255,255,.55); font-style:italic`
+            - text: "Made with for house & pet sitters everywhere"
+            - `<span>`
+              - style: `font-style:normal`
+              - text: "f7d4f;"

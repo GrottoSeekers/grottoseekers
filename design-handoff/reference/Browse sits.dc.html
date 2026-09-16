@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder { color: rgba(44,26,14,.35); }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 1000px) {
+    [data-header-nav] { display: none !important; }
+    [data-page-pad] { padding-left: 24px !important; padding-right: 24px !important; }
+    [data-topbar] { padding: 16px 24px !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <header data-topbar="1" data-screen-label="Header" style="position:sticky;top:0;z-index:210;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;background:rgba(250,246,238,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;flex-shrink:0;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <nav data-header-nav="1" style="display:flex;align-items:center;gap:32px;flex-wrap:nowrap">
+      <a href="Home.dc.html" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Home</a>
+      <a href="#listings" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;border-bottom:2px solid #2f5d45;padding-bottom:3px">Browse sits</a>
+      <a href="Log in.dc.html" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Log in</a>
+      <a href="Sign up.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Get started</a>
+    </nav>
+  </header>
+
+  <main data-screen-label="Browse sits" data-page-pad="1" style="flex:1;padding:72px 48px 100px">
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:56px;align-items:end;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:34px">
+        <div>
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Available sits</p>
+          <h1 style="font-family:'Marcellus',serif;font-size:2.9rem;color:#2c1a0e;line-height:1.15;margin:0">Find your <em style="color:#2f5d45;">next sit</em></h1>
+        </div>
+        <p style="color:#6b4e35;font-size:1.02rem;line-height:1.8;margin:0 0 6px;padding-left:28px;border-left:2px solid rgba(110,84,56,.35)">Browse homes looking for trusted sitters. Open any listing to see the full details, meet the pets, and get in touch.</p>
+      </div>
+
+      <div data-screen-label="Filters" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px 28px;margin:30px 0 28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+        <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:18px">
+          <div style="position:relative">
+            <label for="q" style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 8px;display:block">Search</label>
+            <input id="q" type="search" value="{{ q }}" onInput="{{ onQ }}" placeholder="Title, owner, pet or place" style="font-family:'Montserrat',sans-serif;font-size:.9rem;color:#2c1a0e;background:#faf6ee;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 14px 12px 40px;outline:none;width:100%;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+            <span style="position:absolute;left:14px;bottom:13px;pointer-events:none;display:flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg></span>
+          </div>
+          <div style="position:relative">
+            <label for="place" style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 8px;display:block">Location</label>
+            <select id="place" value="{{ place }}" onChange="{{ onPlace }}" style="font-family:'Montserrat',sans-serif;font-size:.9rem;color:#2c1a0e;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)">
+              <option value="all">All locations</option>
+              <option value="UK">United Kingdom</option>
+              <option value="AU">Australia</option>
+            </select>
+            <span style="position:absolute;right:14px;bottom:15px;width:8px;height:8px;border-right:1.5px solid #2f5d45;border-bottom:1.5px solid #2f5d45;transform:rotate(45deg);pointer-events:none"></span>
+          </div>
+          <div style="position:relative">
+            <label for="pet" style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 8px;display:block">Pets</label>
+            <select id="pet" value="{{ pet }}" onChange="{{ onPet }}" style="font-family:'Montserrat',sans-serif;font-size:.9rem;color:#2c1a0e;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)">
+              <option value="all">Any pets</option>
+              <option value="dog">Dogs</option>
+              <option value="cat">Cats</option>
+            </select>
+            <span style="position:absolute;right:14px;bottom:15px;width:8px;height:8px;border-right:1.5px solid #2f5d45;border-bottom:1.5px solid #2f5d45;transform:rotate(45deg);pointer-events:none"></span>
+          </div>
+          <div style="position:relative">
+            <label for="sort" style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 8px;display:block">Sort by</label>
+            <select id="sort" value="{{ sort }}" onChange="{{ onSort }}" style="font-family:'Montserrat',sans-serif;font-size:.9rem;color:#2c1a0e;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)">
+              <option value="soonest">Starting soonest</option>
+              <option value="longest">Longest stay</option>
+              <option value="shortest">Shortest stay</option>
+            </select>
+            <span style="position:absolute;right:14px;bottom:15px;width:8px;height:8px;border-right:1.5px solid #2f5d45;border-bottom:1.5px solid #2f5d45;transform:rotate(45deg);pointer-events:none"></span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:20px;padding-top:20px;border-top:1px solid rgba(44,26,14,.08)">
+          <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin-right:4px">Length of stay</span>
+          <sc-for list="{{ lengths }}" as="opt" hint-placeholder-count="4">
+            <button type="button" data-len="{{ opt.value }}" onClick="{{ opt.onClick }}" style="{{ opt.style }}">{{ opt.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:0 0 26px">
+        <p style="margin:0;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#6b4e35">{{ countLabel }}</p>
+        <button type="button" onClick="{{ onClear }}" style="background:none;border:none;font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;cursor:pointer;padding:4px 0;border-bottom:1px solid rgba(110,84,56,.4);transition:color .2s" style-hover="color:#2c1a0e">Clear filters</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:24px">
+        <sc-for list="{{ listings }}" as="sit" hint-placeholder-count="6">
+          <a href="Sit detail.dc.html" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:28px;text-decoration:none;color:inherit;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:18px;transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease" style-hover="transform:translateY(-6px);box-shadow:0 20px 50px rgba(44,26,14,.1);border-color:rgba(110,84,56,.45)">
+            <div style="display:flex;gap:16px;align-items:flex-start">
+              <img src="{{ sit.pic }}" alt="{{ sit.owner }}" style="width:54px;height:54px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+              <div style="flex:1;min-width:0">
+                <h3 style="font-family:'Marcellus',serif;font-size:1.2rem;color:#2c1a0e;margin:0 0 4px;line-height:1.3">{{ sit.title }}</h3>
+                <p style="margin:0;font-size:.84rem;color:#2f5d45;font-weight:600;letter-spacing:.02em">{{ sit.owner }}</p>
+              </div>
+              <span style="flex-shrink:0;background:rgba(110,84,56,.12);color:#2f5d45;font-weight:600;padding:5px 12px;border-radius:50px;font-size:.74rem;letter-spacing:.06em;white-space:nowrap">{{ sit.duration }}</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:.85rem;color:#6b4e35">
+              <span style="display:flex;align-items:center;gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>{{ sit.location }}</span>
+              <span style="display:flex;align-items:center;gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>{{ sit.dates }}</span>
+              <span style="display:flex;align-items:center;gap:9px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="8" cy="9" r="2.2"></circle><circle cx="16" cy="9" r="2.2"></circle><circle cx="12" cy="15.5" r="3"></circle></svg>{{ sit.pets }}</span>
+            </div>
+            <p style="margin:0;padding-top:16px;border-top:1px solid rgba(44,26,14,.08);font-size:.9rem;color:#6b4e35;line-height:1.7">{{ sit.desc }}</p>
+            <span style="margin-top:auto;font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;display:flex;align-items:center;gap:8px">View sit →</span>
+          </a>
+        </sc-for>
+      </div>
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:72px 48px;text-align:center;max-width:520px;margin:0 auto;transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+          <span style="width:56px;height:56px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg></span>
+          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No sits match those filters</h2>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0">Try widening your search — or clear the filters to see everything available.</p>
+        </div>
+      </sc-if>
+    </div>
+  </main>
+
+  <footer data-screen-label="Footer" style="background:#2c1a0e;color:rgba(255,255,255,.7);padding:0 48px 32px;border-top:3px solid #2f5d45">
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:56px;padding:64px 0 44px">
+        <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+          <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.7rem;letter-spacing:.28em">
+            <img src="public/images/logo-mark-white.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+            <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(255,255,255,.28)"><span style="color:#fff;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);line-height:1">Make Yourself At Home</span></span>
+          </a>
+          <div style="display:flex;flex-direction:column;gap:12px;max-width:340px"><p style="font-family:'Lato',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#c4ab8a;margin:0">Make Yourself At Home</p><p style="line-height:1.8;font-size:.95rem;margin:0;color:rgba(255,255,255,.7)">Premium pet &amp; home care for peace of mind while you travel.</p></div>
+          <a href="Sign up.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;margin-top:6px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Sign up for free</a>
+        </div>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Platform</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="Sign up.dc.html" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Get started</a></li>
+            <li style="margin-bottom:12px"><a href="Log in.dc.html" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Log in</a></li>
+            <li style="margin-bottom:12px"><a href="#listings" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Browse sits</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Example profile</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="Sitter profile.dc.html" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s" style-hover="color:#c4ab8a">Callum &amp; Niamh</a></li>
+          </ul>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">
+          <span>&copy; 2026 MYAH</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <a href="#privacy" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" style-hover="color:#c4ab8a">Privacy</a>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <a href="#terms" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s" style-hover="color:#c4ab8a">Terms</a>
+        </div>
+        <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with <span style="font-style:normal">&#2f7d4f;</span> for house &amp; pet sitters everywhere</span>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { sort: 'soonest', q: '', place: 'all', pet: 'all', len: 'any' };
+
+  data = [
+    { title: 'Cosy cottage with two spaniels', owner: 'Thomas James', pic: 'public/images/solomon-1.jpg', location: 'Bath, UK', country: 'UK', species: 'dog', from: '2026-10-04', to: '2026-10-18', pets: 'Solomon, Chester', desc: 'Two gentle spaniels, a walled garden and a village pub five minutes away. Happy to leave the car.' },
+    { title: 'Sydney apartment, one cat', owner: 'Jess & Sam', pic: 'public/images/orca-3.jpg', location: 'Bondi, Sydney, AU', country: 'AU', species: 'cat', from: '2026-09-26', to: '2026-10-02', pets: 'Rocco', desc: 'Bright two-bed a short walk from the beach. Rocco is an indoor cat who mostly wants breakfast on time.' },
+    { title: 'Farmhouse sit — three dogs', owner: 'Deb Wallace', pic: 'public/images/travis-1.jpg', location: 'Peak District, UK', country: 'UK', species: 'dog', from: '2026-11-02', to: '2026-11-30', pets: 'Travis, Bailey, Alfie', desc: 'Long stay on a working smallholding. Big walks from the door, log fire, and a very soft sofa for three dogs.' },
+    { title: 'Townhouse with a labradoodle', owner: 'Libby Grant', pic: 'public/images/solomon-4.jpg', location: 'Edinburgh, UK', country: 'UK', species: 'dog', from: '2026-10-20', to: '2026-10-27', pets: 'Solomon', desc: 'Central location, five minutes from the Meadows. Solomon needs two decent walks and plenty of company.' },
+    { title: 'Beach house, two dogs + garden', owner: 'Angela Reid', pic: 'public/images/bailey-3.jpg', location: 'Byron Bay, AU', country: 'AU', species: 'dog', from: '2026-12-08', to: '2026-12-22', pets: 'Bailey, Zeus', desc: 'Christmas sit by the coast. Watering the garden daily and beach walks morning and evening.' },
+    { title: 'City flat, one senior cat', owner: 'Charlotte Fox', pic: 'public/images/zeus-1.jpg', location: 'Manchester, UK', country: 'UK', species: 'cat', from: '2026-09-29', to: '2026-10-06', pets: 'Mabel', desc: 'Quiet one-bed near the Northern Quarter. Mabel is 14, needs medication with breakfast, and sleeps the rest of the day.' }
+  ];
+
+  fmt(d) {
+    return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  days(from, to) {
+    return Math.ceil((new Date(to + 'T00:00:00') - new Date(from + 'T00:00:00')) / 86400000);
+  }
+
+  renderVals() {
+    const { sort, q, place, pet, len } = this.state;
+    const needle = q.trim().toLowerCase();
+    let rows = this.data.map(s => {
+      const d = this.days(s.from, s.to);
+      return Object.assign({}, s, {
+        duration: d + (d === 1 ? ' day' : ' days'),
+        days: d,
+        dates: this.fmt(s.from) + ' — ' + this.fmt(s.to)
+      });
+    });
+    if (needle) rows = rows.filter(r => (r.title + ' ' + r.owner + ' ' + r.pets + ' ' + r.location + ' ' + r.desc).toLowerCase().includes(needle));
+    if (place !== 'all') rows = rows.filter(r => r.country === place);
+    if (pet !== 'all') rows = rows.filter(r => r.species === pet);
+    if (len === 'week') rows = rows.filter(r => r.days <= 7);
+    if (len === 'fortnight') rows = rows.filter(r => r.days > 7 && r.days <= 14);
+    if (len === 'long') rows = rows.filter(r => r.days > 14);
+    rows.sort((a, b) => {
+      if (sort === 'longest') return b.days - a.days;
+      if (sort === 'shortest') return a.days - b.days;
+      return a.from < b.from ? -1 : 1;
+    });
+
+    const chip = on => 'font-family:\'Montserrat\',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;padding:9px 18px;border-radius:50px;cursor:pointer;transition:background .2s, color .2s, border-color .2s;' +
+      (on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.35);');
+    const lengths = [
+      { value: 'any', label: 'Any length' },
+      { value: 'week', label: 'Up to 1 week' },
+      { value: 'fortnight', label: '1–2 weeks' },
+      { value: 'long', label: 'Over 2 weeks' }
+    ].map(o => Object.assign({}, o, {
+      style: chip(len === o.value),
+      onClick: () => this.setState({ len: o.value })
+    }));
+
+    const total = this.data.length;
+    return {
+      listings: rows,
+      lengths,
+      sort, q, place, pet,
+      isEmpty: rows.length === 0,
+      countLabel: rows.length === total ? total + ' sits available' : rows.length + ' of ' + total + ' sits',
+      onSort: e => this.setState({ sort: e.target.value }),
+      onQ: e => this.setState({ q: e.target.value }),
+      onPlace: e => this.setState({ place: e.target.value }),
+      onPet: e => this.setState({ pet: e.target.value }),
+      onClear: () => this.setState({ q: '', place: 'all', pet: 'all', len: 'any', sort: 'soonest' })
+    };
+  }
+
+  componentDidMount() {
+    const loader = document.querySelector('[data-loader]');
+    const show = () => {
+      if (!loader) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(this.hideT);
+      this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    };
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+    });
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); }
+}
+</script>
+</body>
+</html>

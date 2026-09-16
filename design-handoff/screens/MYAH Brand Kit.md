@@ -1,0 +1,456 @@
+# MYAH Brand Kit — element-by-element spec
+
+Generated from the approved design file `reference/MYAH Brand Kit.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `{{ heroMark }}`
+- `{{ i.src }}`
+- `/images/logo-tile.png`
+- `/images/favicon.png`
+- `/images/logo-mark-cream.png`
+- `{{ c.src }}`
+- `{{ m.src }}`
+- `/images/slideshow-springer-beach.jpeg`
+- `/images/logo-mark-white.png`
+- `/images/slideshow-cockapoo-window.jpeg`
+- `/images/slideshow-ocean-sunset.jpeg`
+- `/images/slideshow-spaniel-walk.jpeg`
+- `/images/avatar-cream.png`
+- `/images/avatar-forest.png`
+- `/images/logo-mark-ink.png`
+- `{{ a.src }}`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `background:#faf6ee; min-height:100vh`
+    - `<nav>`
+      - style: `display:flex; justify-content:space-between; align-items:center; gap:20px; padding:16px 48px; background:#fff; border-bottom:1px solid rgba(110,84,56,.2)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.35rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:44px; width:44px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<span>`
+        - style: `font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6b4e35`
+        - text: "Brand kit · final mark"
+    - `<main>` `[data-pad]`
+      - style: `padding:60px 48px 110px`
+      - `<div>`
+        - style: `max-width:1180px; margin:0 auto`
+        - `<header>` `[data-g2]`
+          - style: `display:grid; grid-template-columns:auto minmax(0,1fr); gap:42px; align-items:center; border-bottom:1px solid rgba(110,84,56,.3)`
+          - `<div>`
+            - `<img>` src=`{{ heroMark }}`
+              - style: `width:150px; height:150px; object-fit:contain; display:block`
+          - `<div>`
+            - `<p>`
+              - style: `font-size:.74rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 16px; display:flex; align-items:center; gap:12px`
+              - text: "The complete kit"
+              - `<span>`
+                - style: `width:26px; height:1px; background:#6e5438; display:block`
+            - `<h1>`
+              - style: `font-family:'Montserrat',sans-serif; font-weight:500; letter-spacing:.28em; font-size:2.6rem; color:#2c1a0e; line-height:1.1; margin:0 0 12px`
+              - text: "MYAH"
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.72rem; letter-spacing:.24em; text-transform:uppercase; color:#2f5d45; margin:0 0 20px`
+              - text: "Make Yourself At Home"
+            - `<p>`
+              - style: `color:#6b4e35; font-size:1.02rem; line-height:1.8; margin:0; max-width:640px; text-wrap:pretty`
+              - text: "The finalised paw-and-keyhole mark, the palette, the type, and ready-made pieces for social, email, print and product. Every asset comes from one folder — — so …"
+              - `<span>`
+                - style: `font-family:'Lato',sans-serif; color:#2c1a0e`
+                - text: "public/images/"
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "01"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "The mark"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 14px`
+          - `<p>`
+            - style: `font-size:.96rem; color:#6b4e35; line-height:1.8; margin:0 0 28px; max-width:660px; text-wrap:pretty`
+            - text: "A paw print with a keyhole cut through the pad and a globe held inside it. Three ideas in one silhouette: the animal, the front door, and the fact that the door…"
+          - `<div>` `[data-card] [data-g2]`
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:34px; display:grid; grid-template-columns:auto minmax(0,1fr); gap:36px; align-items:center`
+            - `<div>`
+              - style: `width:196px; height:196px; border-radius:16px; background:#faf6ee; display:flex; align-items:center; justify-content:center`
+              - `<img>` src=`public/images/logo-mark.png`
+                - style: `width:156px; height:156px; object-fit:contain; display:block`
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:13px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0`
+                - text: "What the parts mean"
+              - `<p>`
+                - style: `font-size:.93rem; color:#6b4e35; line-height:1.75; margin:0`
+                - text: "The pet is the reason the trip works at all. Four toes rotated outward, so the arc reads as a print rather than four dots."
+              - `<p>`
+                - style: `font-size:.93rem; color:#6b4e35; line-height:1.75; margin:0`
+                - text: "A true knock-out through the pad — whatever is behind shows through, so the mark never needs redrawing for a new background."
+              - `<p>`
+                - style: `font-size:.93rem; color:#6b4e35; line-height:1.75; margin:0`
+                - text: "Held in the bow of the keyhole. It is the only fine detail in the mark and the first thing to close up small — which is what sets the 32px floor."
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#8a6a4f; margin:0 0 16px`
+            - text: "Inks"
+          - `<div>`
+            - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(196px,1fr)); gap:18px`
+            - `<sc-for>`
+              - `<div>`
+                - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:16px; overflow:hidden`
+          - `<div>` `[data-g2]`
+            - style: `display:grid; grid-template-columns:1fr 1fr; gap:18px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 20px`
+                - text: "Clearspace"
+              - `<div>`
+                - style: `background:#faf6ee; border-radius:14px; padding:30px; display:flex; align-items:center; justify-content:center`
+              - `<p>`
+                - style: `font-size:.86rem; color:#6b4e35; line-height:1.7; margin:20px 0 0`
+                - text: "One toe width — 25% of the mark’s height — clear on all four sides. Nothing enters it: no type, no rule, no photo edge, no button."
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 20px`
+                - text: "Minimum sizes"
+              - `<div>`
+                - style: `background:#faf6ee; border-radius:14px; padding:30px; display:flex; align-items:flex-end; gap:26px`
+              - `<p>`
+                - style: `font-size:.86rem; color:#6b4e35; line-height:1.7; margin:20px 0 0`
+                - text: "32px is the floor for the bare mark on screen, 12mm in print. Below that, switch to the forest tile — the globe and keyhole stop reading."
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "02"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "Lockups & containers"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 24px`
+          - `<div>` `[data-g2]`
+            - style: `display:grid; grid-template-columns:1fr 1fr; gap:18px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:34px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 22px`
+                - text: "Horizontal — primary"
+              - `<div>`
+                - style: `display:inline-flex; align-items:center; gap:16px; line-height:1`
+              - `<p>`
+                - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:24px 0 0`
+                - text: "Site header, email, invoices, decks. Divider rule at 1px; mark height matches the two-line stack."
+            - `<div>` `[data-card]`
+              - style: `background:#2f5d45; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:34px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(233,224,210,.8); margin:0 0 22px`
+                - text: "Stacked — on forest"
+              - `<div>`
+                - style: `display:flex; flex-direction:column; align-items:center; gap:14px`
+              - `<p>`
+                - style: `font-size:.84rem; color:rgba(233,224,210,.88); line-height:1.7; margin:24px 0 0`
+                - text: "Covers, merch, welcome cards — anything square or portrait, and every dark surface."
+          - `<div>`
+            - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:18px`
+            - `<sc-for>`
+              - `<div>`
+                - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:16px; padding:26px; display:flex; flex-direction:column; align-items:center; gap:18px`
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "03"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "Misuse"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 24px`
+          - `<div>`
+            - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(184px,1fr)); gap:18px`
+            - `<sc-for>`
+              - `<div>`
+                - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:16px; overflow:hidden`
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "04"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "Colour"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 14px`
+          - `<p>`
+            - style: `font-size:.96rem; color:#6b4e35; line-height:1.8; margin:0 0 28px; max-width:660px; text-wrap:pretty`
+            - text: "Paper and ink carry nearly every surface. Forest is the only colour that means “do something” — buttons, links, active states — so it is never used as decoratio…"
+          - `<div>`
+            - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(176px,1fr)); gap:18px`
+            - `<sc-for>`
+              - `<div>`
+                - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:16px; overflow:hidden`
+          - `<div>` `[data-card]`
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 32px`
+            - `<p>`
+              - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 18px`
+              - text: "Approved pairings"
+            - `<div>`
+              - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px`
+              - `<sc-for>`
+            - `<p>`
+              - style: `font-size:.82rem; color:#6b4e35; line-height:1.7; margin:18px 0 0`
+              - text: "Tan is the one limit: use it for labels and captions at 13px and up, never for body copy or small print."
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "05"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "Typography"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 24px`
+          - `<div>` `[data-g2]`
+            - style: `display:grid; grid-template-columns:1fr 1fr; gap:18px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 16px`
+                - text: "Marcellus — display"
+              - `<p>`
+                - style: `font-family:'Marcellus',serif; font-size:2.6rem; color:#2c1a0e; line-height:1.1; margin:0 0 14px`
+                - text: "A key, a paw,a whole house"
+              - `<p>`
+                - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:0`
+                - text: "Headlines and section titles only. Sentence case, tracking at 0, never below 20px, never for UI labels."
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 16px`
+                - text: "Montserrat — wordmark & UI"
+              - `<p>`
+                - style: `font-family:'Montserrat',sans-serif; font-weight:500; font-size:2rem; letter-spacing:.28em; color:#2f5d45; margin:0 0 16px`
+                - text: "MYAH"
+              - `<p>`
+                - style: `font-size:.95rem; color:#6b4e35; line-height:1.8; margin:0 0 12px`
+                - text: "Interface, body copy and buttons. Weights 400, 500 and 600 only — 700 is reserved for Lato labels."
+              - `<p>`
+                - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:0`
+                - text: "The wordmark is fixed: weight 500, tracking .28em, uppercase, never re-spaced."
+          - `<div>` `[data-card]`
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 32px`
+            - `<p>`
+              - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 20px`
+              - text: "The scale"
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:14px`
+              - `<sc-for>`
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "06"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "Voice"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 14px`
+          - `<p>`
+            - style: `font-size:.96rem; color:#6b4e35; line-height:1.8; margin:0 0 26px; max-width:660px; text-wrap:pretty`
+            - text: "We are asking someone to hand over a key. Write like the neighbour who already has one: calm, specific, never salesy."
+          - `<div>` `[data-g2]`
+            - style: `display:grid; grid-template-columns:repeat(auto-fit,minmax(236px,1fr)); gap:18px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px`
+              - `<p>`
+                - style: `font-family:'Marcellus',serif; font-size:1.18rem; color:#2c1a0e; margin:0 0 10px`
+                - text: "Plain, not breezy"
+              - `<p>`
+                - style: `font-size:.9rem; color:#6b4e35; line-height:1.75; margin:0`
+                - text: "Say the thing. No exclamation marks, no puns on the mark, no “furry friends”."
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px`
+              - `<p>`
+                - style: `font-family:'Marcellus',serif; font-size:1.18rem; color:#2c1a0e; margin:0 0 10px`
+                - text: "Specific over warm"
+              - `<p>`
+                - style: `font-size:.9rem; color:#6b4e35; line-height:1.75; margin:0`
+                - text: "“Two dogs, ten nights, Bristol” reassures more than “loving pet care” ever will."
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px`
+              - `<p>`
+                - style: `font-family:'Marcellus',serif; font-size:1.18rem; color:#2c1a0e; margin:0 0 10px`
+                - text: "Owner first"
+              - `<p>`
+                - style: `font-size:.9rem; color:#6b4e35; line-height:1.75; margin:0`
+                - text: "Every line answers the only real question: can I trust this person with my home?"
+          - `<div>` `[data-card]`
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 32px`
+            - `<p>`
+              - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 18px`
+              - text: "Say this, not that"
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:12px`
+              - `<sc-for>`
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "07"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "Social kit"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 14px`
+          - `<p>`
+            - style: `font-size:.96rem; color:#6b4e35; line-height:1.8; margin:0 0 28px; max-width:660px; text-wrap:pretty`
+            - text: "Four templates cover everything we post: a full-bleed photo post, a quote card, a listing card, and the story frame. Previews below are to scale — export sizes …"
+          - `<div>`
+            - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px`
+            - `<div>`
+              - `<div>`
+                - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; position:relative; background:#2c1a0e`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+                - text: "Photo post · 1080 × 1080 · white mark, bottom-left copy"
+            - `<div>`
+              - `<div>`
+                - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#2f5d45; padding:34px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+                - text: "Quote card · 1080 × 1080 · forest ground, cream mark"
+            - `<div>`
+              - `<div>`
+                - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#faf6ee; border:1px solid rgba(110,84,56,.22); padding:26px; display:flex; flex-direction:column; gap:16px`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+                - text: "Listing card · 1080 × 1080 · paper ground, real listing data"
+            - `<div>`
+              - `<div>`
+                - style: `width:100%; max-width:230px; aspect-ratio:9/16; border-radius:16px; overflow:hidden; position:relative; background:#2c1a0e; margin:0 auto`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0; text-align:center`
+                - text: "Story · 1080 × 1920 · keep copy inside the middle 80%"
+          - `<div>` `[data-card]`
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 32px`
+            - `<p>`
+              - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 18px`
+              - text: "Cover / banner · 1640 × 624"
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1640/624; border-radius:14px; overflow:hidden; position:relative; background:#2f5d45; display:flex; align-items:center; padding:0 7%`
+              - `<div>`
+                - style: `position:absolute; right:0; top:0; bottom:0; width:46%; opacity:.5`
+              - `<div>`
+                - style: `position:absolute; right:0; top:0; bottom:0; width:60%; background:linear-gradient(to right,#2f5d45 12%,rgba(47,93,69,0))`
+              - `<div>`
+                - style: `position:relative; display:flex; align-items:center; gap:20px`
+            - `<p>`
+              - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:16px 0 0`
+              - text: "Same artwork crops for LinkedIn (1584 × 396), X (1500 × 500) and YouTube (2048 × 1152) — keep the lockup inside the left third so nothing is cut by avatar overl…"
+          - `<div>` `[data-card]`
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 32px`
+            - `<p>`
+              - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 16px`
+              - text: "Posting rules"
+            - `<div>`
+              - style: `display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px`
+              - `<p>`
+                - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0`
+                - text: "Top-left on photos, or centred on the story frame. Never both."
+              - `<p>`
+                - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0`
+                - text: "Sitter and owner photography, shot in daylight, no stock."
+              - `<p>`
+                - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0`
+                - text: "Two lines, one detail, one link. Three hashtags maximum."
+              - `<p>`
+                - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0`
+                - text: "Never set post copy in the wordmark tracking."
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "08"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "Email, print & product"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 24px`
+          - `<div>` `[data-g2]`
+            - style: `display:grid; grid-template-columns:1fr 1fr; gap:18px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 32px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 18px`
+                - text: "Email header & footer"
+              - `<div>`
+                - style: `border:1px solid rgba(110,84,56,.2); border-radius:12px; overflow:hidden`
+              - `<p>`
+                - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:16px 0 0`
+                - text: "600px wide, single column, forest bar at the top. Mark ships as a 64px PNG — never an SVG in email."
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 32px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 18px`
+                - text: "Signature block"
+              - `<div>`
+                - style: `display:flex; align-items:center; gap:16px; padding:20px; border-radius:12px; background:#faf6ee`
+              - `<p>`
+                - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:16px 0 0`
+                - text: "No logo in the signature — the cream avatar carries the brand. Plain text, no images beyond the avatar."
+          - `<div>`
+            - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:18px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:26px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 16px`
+                - text: "Business card · 85 × 55mm"
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:12px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:26px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 16px`
+                - text: "Sticker & stamp"
+              - `<div>`
+                - style: `display:flex; align-items:center; justify-content:center; gap:18px; padding:22px 0; background:#faf6ee; border-radius:12px`
+              - `<p>`
+                - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:16px 0 0`
+                - text: "Die-cut circle for welcome packs; the ringed ink version is the rubber stamp for handwritten cards."
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:26px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 16px`
+                - text: "Key tag & welcome card"
+              - `<div>`
+                - style: `display:flex; align-items:center; gap:16px; padding:20px; background:#faf6ee; border-radius:12px`
+              - `<p>`
+                - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:16px 0 0`
+                - text: "Debossed bark tag on the keyring, letterpress card in the pack. One mark, no tagline on the tag."
+        - `<section>`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#8a6a4f; margin:0 0 6px`
+            - text: "09"
+          - `<h2>`
+            - style: `font-family:'Marcellus',serif; font-size:1.8rem; color:#2c1a0e; margin:0 0 8px`
+            - text: "Asset index"
+          - `<div>`
+            - style: `width:40px; height:2px; background:#6e5438; margin:0 0 24px`
+          - `<div>` `[data-card]`
+            - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:12px 32px 22px`
+            - `<sc-for>`
+              - `<div>`
+                - style: `display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:18px; align-items:center; padding:14px 0; border-bottom:1px solid rgba(110,84,56,.14)`
+            - `<p>`
+              - style: `font-size:.84rem; color:#6b4e35; line-height:1.7; margin:18px 0 0`
+              - text: "All PNG with transparency where the mark is bare. The source drawing is kept untouched as — colour variants are recolours of it, with no change to shape or outl…"
+              - `<span>`
+                - style: `font-family:'Lato',sans-serif; color:#2c1a0e`
+                - text: "logo-mark-original.png"

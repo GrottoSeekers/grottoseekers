@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder { color: rgba(44,26,14,.4); }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @keyframes msg-pop { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+  @media (max-width: 900px) {
+    [data-topnav] { padding: 12px 24px !important; }
+    [data-msg-pad] { padding: 24px !important; }
+    [data-msg-grid] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-thread] { min-height: 560px !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.18)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div data-acct-links="1" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end">
+      <a href="Dashboard.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Dashboard</a>
+      <a href="Notifications.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Notifications</a>
+      <a href="Log in.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Log out</a>
+    </div>
+  </nav>
+
+  <div data-screen-label="Tabs" style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04)">
+    <a href="Dashboard.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s" style-hover="color:#2f5d45">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Dashboard</span>
+    </a>
+    <a href="Browse sits.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s" style-hover="color:#2f5d45">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Sits</span>
+    </a>
+    <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;color:#2f5d45;position:relative">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Messages</span>
+      <span style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:#2f5d45"></span>
+    </span>
+    <a href="Sitter profile.dc.html" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s" style-hover="color:#2f5d45">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Profile</span>
+    </a>
+  </div>
+
+  <main data-msg-pad="1" data-screen-label="Messages" style="flex:1;padding:40px 48px 60px">
+    <div style="max-width:1100px;margin:0 auto">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px;margin-bottom:28px">
+        <div>
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your inbox</p>
+          <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Messages</h1>
+        </div>
+        <p style="margin:0 0 4px;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#6b4e35">{{ unreadLabel }}</p>
+      </div>
+
+      <div data-msg-grid="1" style="display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;align-items:start">
+
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+          <sc-for list="{{ conversations }}" as="c" hint-placeholder-count="4">
+            <button type="button" onClick="{{ c.onClick }}" style="{{ c.rowStyle }}">
+              <span style="position:relative;flex-shrink:0">
+                <img src="{{ c.pic }}" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block" />
+                <span style="{{ c.badgeStyle }}"></span>
+              </span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+                <span style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+                  <span style="font-weight:600;font-size:.95rem;color:#2c1a0e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.name }}</span>
+                  <span style="font-size:.74rem;color:#6b4e35;flex-shrink:0">{{ c.time }}</span>
+                </span>
+                <span style="font-size:.72rem;color:#2f5d45;font-weight:600;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ c.listing }}</span>
+                <span style="{{ c.previewStyle }}">{{ c.preview }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+
+        <div data-thread="1" style="background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;height:640px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+          <div style="display:flex;align-items:center;gap:13px;padding:14px 20px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2);flex-shrink:0">
+            <img src="{{ activePic }}" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.3)" />
+            <div style="flex:1;min-width:0">
+              <p style="font-weight:600;font-size:1rem;color:#2c1a0e;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ activeName }}</p>
+              <p style="font-size:.75rem;color:#2f5d45;font-weight:600;letter-spacing:.03em;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ activeListing }}</p>
+            </div>
+            <a href="Sit detail.dc.html" style="font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border:1.5px solid rgba(110,84,56,.4);border-radius:50px;padding:9px 18px;white-space:nowrap;transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">View sit</a>
+          </div>
+
+          <div data-scroll="1" style="flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:3px">
+            <div style="text-align:center;margin:4px 0 14px">
+              <span style="background:rgba(110,84,56,.14);color:#5c3d20;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:50px;display:inline-block">{{ threadDate }}</span>
+            </div>
+            <sc-for list="{{ messages }}" as="m" hint-placeholder-count="5">
+              <div style="{{ m.rowStyle }}">
+                <div style="{{ m.bubbleStyle }}">
+                  <span style="font-size:.92rem;line-height:1.55;color:#2c1a0e">{{ m.text }}</span>
+                  <span style="display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:5px">
+                    <span style="font-size:.66rem;color:rgba(44,26,14,.45)">{{ m.time }}</span>
+                    <span style="{{ m.checkStyle }}">{{ m.check }}</span>
+                  </span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <form data-compose="1" style="display:flex;gap:10px;align-items:center;padding:14px 18px;background:#fff;border-top:1px solid rgba(110,84,56,.2);flex-shrink:0">
+            <input data-input="1" type="text" placeholder="Type a message…" autocomplete="off" style="flex:1;border:1.5px solid rgba(110,84,56,.3);border-radius:50px;padding:13px 20px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+            <button type="submit" aria-label="Send message" style="width:48px;height:48px;border-radius:50%;border:1.5px solid #2f5d45;background:#2f5d45;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(110,84,56,.3);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.96)">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = {
+    active: 0,
+    draft: '',
+    threads: [
+      {
+        name: 'Thomas James',
+        pic: 'public/images/solomon-1.jpg',
+        listing: 'Cosy cottage with two spaniels',
+        time: '10:42',
+        unread: 2,
+        messages: [
+          { mine: false, text: "Hi both! Saw your profile and wondered if you're free for our October sit?", time: '09:58', read: true },
+          { mine: true, text: 'Hi Thomas — we are, those dates look clear for us. Two spaniels, is that right?', time: '10:06', read: true },
+          { mine: false, text: 'That’s right — Solomon and Chester. Both easy, they just need a decent walk each morning.', time: '10:31', read: true },
+          { mine: false, text: 'Would you like to do a video call this week so you can see the house?', time: '10:42', read: false }
+        ]
+      },
+      {
+        name: 'Jess & Sam',
+        pic: 'public/images/orca-3.jpg',
+        listing: 'Sydney apartment, one cat',
+        time: 'Tue',
+        unread: 0,
+        messages: [
+          { mine: false, text: 'Thanks again for looking after Rocco — he was so relaxed when we got back!', time: '18:12', read: true },
+          { mine: true, text: 'He was a joy. Do send our way if you need anyone over Christmas.', time: '18:40', read: true }
+        ]
+      },
+      {
+        name: 'Deb Wallace',
+        pic: 'public/images/travis-1.jpg',
+        listing: 'Farmhouse sit — three dogs',
+        time: 'Mon',
+        unread: 0,
+        messages: [
+          { mine: false, text: 'November is quite a long one — four weeks. Would that suit you both?', time: '11:20', read: true },
+          { mine: true, text: 'Long sits are our favourite. Happy to talk it through whenever suits.', time: '12:03', read: true }
+        ]
+      },
+      {
+        name: 'Libby Grant',
+        pic: 'public/images/solomon-4.jpg',
+        listing: 'Townhouse with a labradoodle',
+        time: '4 Sep',
+        unread: 0,
+        messages: [
+          { mine: false, text: 'Left you a five-star review — thank you for everything!', time: '08:15', read: true },
+          { mine: true, text: 'That’s very kind, thank you Libby.', time: '09:02', read: true }
+        ]
+      }
+    ]
+  };
+
+  renderVals() {
+    const { threads, active } = this.state;
+    const cur = threads[active];
+    const unreadTotal = threads.reduce((n, t) => n + t.unread, 0);
+
+    return {
+      unreadLabel: unreadTotal > 0 ? unreadTotal + ' unread' : 'All caught up',
+      activeName: cur.name,
+      activePic: cur.pic,
+      activeListing: cur.listing,
+      threadDate: 'Today',
+      conversations: threads.map((t, i) => {
+        const on = i === active;
+        const last = t.messages[t.messages.length - 1];
+        return {
+          name: t.name,
+          pic: t.pic,
+          listing: t.listing,
+          time: t.time,
+          preview: (last.mine ? 'You: ' : '') + (last.text.length > 58 ? last.text.slice(0, 58) + '…' : last.text),
+          rowStyle: 'display:flex;gap:15px;align-items:center;width:100%;padding:17px 19px;border:none;border-bottom:1px solid rgba(44,26,14,.06);cursor:pointer;font-family:\'Montserrat\',sans-serif;text-align:left;transition:background .15s;border-left:3px solid ' +
+            (on ? '#2f5d45;background:rgba(110,84,56,.08);' : 'transparent;background:' + (t.unread ? 'rgba(110,84,56,.08)' : '#fff') + ';'),
+          badgeStyle: t.unread
+            ? 'position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:50px;background:#2f5d45;border:2.5px solid #fff;color:#fff;font-size:.64rem;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1'
+            : 'display:none',
+          previewStyle: 'font-size:.85rem;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;' +
+            (t.unread ? 'color:#5c3d20;font-weight:700;' : 'color:#6b4e35;'),
+          onClick: () => {
+            const next = this.state.threads.map((x, j) => j === i ? Object.assign({}, x, { unread: 0 }) : x);
+            this.setState({ active: i, threads: next }, () => this.scrollDown());
+          }
+        };
+      }),
+      messages: cur.messages.map(m => ({
+        text: m.text,
+        time: m.time,
+        check: m.mine ? (m.read ? '✓✓' : '✓') : '',
+        checkStyle: 'font-size:.7rem;letter-spacing:-2px;' + (m.mine ? (m.read ? 'color:#2f5d45;' : 'color:rgba(44,26,14,.4);') : 'display:none'),
+        rowStyle: 'display:flex;padding:0 2px;margin-bottom:6px;justify-content:' + (m.mine ? 'flex-end' : 'flex-start'),
+        bubbleStyle: 'max-width:78%;padding:11px 15px;border-radius:16px;word-wrap:break-word;animation:msg-pop .3s ease;' +
+          (m.mine
+            ? 'background:#e9e0d2;border:1px solid rgba(110,84,56,.35);border-bottom-right-radius:5px;'
+            : 'background:#fff;border:1px solid rgba(44,26,14,.08);border-bottom-left-radius:5px;box-shadow:0 1px 2px rgba(44,26,14,.04);')
+      }))
+    };
+  }
+
+  scrollDown() {
+    const box = document.querySelector('[data-scroll]');
+    if (box) requestAnimationFrame(() => { box.scrollTop = box.scrollHeight; });
+  }
+
+  componentDidMount() {
+    const loader = document.querySelector('[data-loader]');
+    const show = () => {
+      if (!loader) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(this.hideT);
+      this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    };
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http')) return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+    });
+
+    const form = document.querySelector('[data-compose]');
+    form && form.addEventListener('submit', e => {
+      e.preventDefault();
+      const input = document.querySelector('[data-input]');
+      const body = (input.value || '').trim();
+      if (!body) return;
+      input.value = '';
+      const now = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const threads = this.state.threads.map((t, i) => i === this.state.active
+        ? Object.assign({}, t, { time: now, messages: t.messages.concat([{ mine: true, text: body, time: now, read: false }]) })
+        : t);
+      this.setState({ threads }, () => this.scrollDown());
+      input.focus();
+    });
+
+    this.scrollDown();
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); }
+}
+</script>
+</body>
+</html>

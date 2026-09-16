@@ -1,0 +1,167 @@
+# Confirmed sit — element-by-element spec
+
+Generated from the approved design file `reference/Confirmed sit.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `{{ p.photo }}`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `min-height:100vh; display:flex; flex-direction:column; background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<nav>` **Top nav** `[data-topnav]`
+      - style: `display:flex; justify-content:space-between; align-items:center; padding:16px 48px; background:#fff; border-bottom:1px solid rgba(110,84,56,.2)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.35rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:44px; width:44px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<div>`
+        - style: `display:flex; align-items:center; gap:22px`
+        - `<a>` → `Dashboard.dc.html`
+          - style: `display:inline-flex; align-items:center; gap:9px; font-size:.78rem; color:#6b4e35; font-weight:600; letter-spacing:.1em; text-transform:uppercase; transition:gap .2s, color .2s`
+          - :hover `gap:13px;color:#2f5d45`
+          - text: "← Dashboard"
+        - `<a>` → `Messages.dc.html`
+          - style: `font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#2f5d45; transition:color .2s`
+          - :hover `color:#2c1a0e`
+          - text: "Messages"
+        - `<a>` → `Leave a review.dc.html`
+          - style: `font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20; white-space:nowrap; transition:color .2s`
+          - :hover `color:#2f5d45`
+          - text: "Leave a review"
+    - `<main>` **Confirmed sit** `[data-pad]`
+      - style: `flex:1; padding:52px 48px 90px`
+      - `<div>`
+        - style: `max-width:1120px; margin:0 auto`
+        - `<div>`
+          - style: `background:#2c1a0e; border-radius:20px; padding:38px 40px; display:flex; align-items:center; justify-content:space-between; gap:28px`
+          - `<div>`
+            - `<p>`
+              - style: `font-size:.72rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 14px; display:flex; align-items:center; gap:12px`
+              - text: "Confirmed sit"
+              - `<span>`
+                - style: `width:26px; height:1px; background:#6e5438; display:block`
+            - `<h1>`
+              - style: `font-family:'Marcellus',serif; font-size:2.3rem; color:#fff; line-height:1.15; margin:0 0 12px`
+              - text: "Charlcombe Cottage,"
+              - `<em>`
+                - style: `color:#2f5d45`
+                - text: "near Bath"
+            - `<p>`
+              - style: `font-size:1rem; color:rgba(255,255,255,.75); line-height:1.7; margin:0`
+              - text: "Sun 4 Oct – Sun 18 Oct 2026 · 14 days · Thomas James & Callum and Niamh"
+          - `<div>`
+            - style: `text-align:right`
+            - `<p>`
+              - style: `font-family:'Marcellus',serif; font-size:3.4rem; color:#6e5438; margin:0; line-height:1`
+              - text: "20"
+            - `<p>`
+              - style: `font-size:.74rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.7); margin:6px 0 0`
+              - text: "days to go"
+        - `<div>` `[data-two-col]`
+          - style: `display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:26px; align-items:start`
+          - `<div>`
+            - style: `display:flex; flex-direction:column; gap:24px`
+            - `<section>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:34px 36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>`
+                - style: `display:flex; align-items:baseline; gap:14px; margin:0 0 8px`
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 26px`
+              - `<p>`
+                - style: `font-size:.82rem; color:#8a6a4f; line-height:1.6; margin:-18px 0 24px`
+                - text: "Dates, arrival and keys from the listing · address from Thomas’s profile"
+              - `<div>` `[data-facts]`
+                - style: `display:grid; grid-template-columns:1fr 1fr; gap:22px 30px`
+            - `<section>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:34px 36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>`
+                - style: `display:flex; align-items:baseline; gap:14px; margin:0 0 8px`
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 26px`
+              - `<p>`
+                - style: `font-size:.82rem; color:#8a6a4f; line-height:1.6; margin:-18px 0 24px`
+                - text: "Pets and their routines from Thomas’s profile"
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:18px`
+            - `<section>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:34px 36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>`
+                - style: `display:flex; align-items:baseline; gap:14px; margin:0 0 8px`
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 26px`
+              - `<p>`
+                - style: `font-size:.82rem; color:#8a6a4f; line-height:1.6; margin:-18px 0 24px`
+                - text: "House notes from Thomas’s handover details"
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:14px`
+            - `<section>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(185,28,28,.22); border-radius:18px; padding:34px 36px; box-shadow:0 1px 2px rgba(44,26,14,.04)`
+              - `<div>`
+                - style: `display:flex; align-items:baseline; gap:14px; margin:0 0 8px`
+              - `<div>`
+                - style: `width:40px; height:2px; background:#b91c1c; margin:0 0 26px`
+              - `<p>`
+                - style: `font-size:.82rem; color:#8a6a4f; line-height:1.6; margin:-18px 0 24px`
+                - text: "Vet, neighbour and contact numbers from Thomas’s handover details"
+              - `<div>` `[data-facts]`
+                - style: `display:grid; grid-template-columns:1fr 1fr; gap:20px 30px`
+          - `<aside>` `[data-aside]`
+            - style: `position:sticky; top:28px; display:flex; flex-direction:column; gap:20px`
+            - `<div>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:26px 26px 28px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>`
+                - style: `display:flex; align-items:baseline; justify-content:space-between; gap:12px`
+              - `<div>`
+                - style: `height:6px; border-radius:50px; background:rgba(44,26,14,.08); overflow:hidden; margin:12px 0 20px`
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:11px`
+            - `<div>` `[data-noprint]`
+              - style: `background:#faf6ee; border:1px solid rgba(110,84,56,.28); border-radius:18px; padding:24px 26px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 16px`
+                - text: "Both of you"
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:14px`
+              - `<a>` → `Messages.dc.html`
+                - style: `display:flex; align-items:center; justify-content:center; font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:11px 22px; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .25s ease, border-color .25s ease, transform .15s ease`
+                - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+                - text: "Message"
+              - `<button>`
+                - style: `width:100%; font-family:'Montserrat',sans-serif; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#2f5d45; background:#fff; border:1.5px solid rgba(110,84,56,.45); border-radius:50px; padding:14px 20px; transition:background .25s ease, border-color .25s ease`
+                - :hover `background:rgba(110,84,56,.1);border-color:#2f5d45`
+                - text: "Print this pack"
+            - `<div>` `[data-noprint]`
+              - style: `background:#fff; border:1px solid rgba(44,26,14,.1); border-radius:18px; padding:22px 24px`
+              - `<p>`
+                - style: `font-size:.86rem; color:#6b4e35; line-height:1.7; margin:0 0 14px`
+                - text: "Plans changed?"
+              - `<a>` → `Messages.dc.html`
+                - style: `font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#b91c1c; border-bottom:1px solid rgba(185,28,28,.35); transition:color .2s`
+                - :hover `color:#2c1a0e`
+                - text: "Cancel this sit"

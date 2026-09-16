@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+  input[type="color"] { -webkit-appearance: none; appearance: none; padding: 2px; }
+  input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+  input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 960px) {
+    [data-topnav] { padding: 14px 24px !important; }
+    [data-pad] { padding: 32px 20px 90px !important; }
+    [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-aside] { position: static !important; }
+    [data-card] { padding: 26px 22px !important; }
+    [data-field-row] { grid-template-columns: minmax(0,1fr) !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="Dashboard.dc.html" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s" style-hover="gap:13px;color:#2f5d45">&larr; Dashboard</a>
+      <a href="Sitter profile.dc.html" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s" style-hover="color:#2c1a0e">View my page</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Edit profile" style="flex:1;padding:52px 48px 140px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH sitter</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Edit your <em style="color:#2f5d45;">profile</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:600px;margin:0">Everything here updates your public page. The preview below moves as you type &mdash; change it, look at it, then save at the bottom.</p>
+      </div>
+
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:34px">
+        <sc-for list="{{ jumpLinks }}" as="j" hint-placeholder-count="6">
+          <a href="{{ j.href }}" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;text-decoration:none;padding:8px 16px;border-radius:50px;background:#fff;border:1px solid rgba(110,84,56,.28);transition:background .2s, color .2s, border-color .2s" style-hover="background:rgba(110,84,56,.1);color:#2f5d45;border-color:rgba(110,84,56,.5)">{{ j.label }}</a>
+        </sc-for>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <section id="details" data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">01</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Your name &amp; bio</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 28px;max-width:460px">The basics &mdash; your name, one line under it, and the text pet owners read when they land on your page.</p>
+
+            <div style="margin-bottom:26px">
+              <span style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Profile type</span>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:420px">
+                <sc-for list="{{ accountTypes }}" as="a" hint-placeholder-count="2">
+                  <button type="button" onClick="{{ a.onClick }}" style="{{ a.style }}">
+                    <span style="font-size:1.3rem;line-height:1">{{ a.icon }}</span>
+                    <span style="font-size:.85rem;font-weight:600">{{ a.label }}</span>
+                  </button>
+                </sc-for>
+              </div>
+              <p style="font-size:.82rem;color:#6b4e35;margin:12px 0 0;line-height:1.6">Changes the default wording on your page &mdash; {{ wordingHint }}</p>
+            </div>
+
+            <div style="margin-bottom:24px">
+              <label for="name" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Your name <span style="color:#2f5d45">*</span></label>
+              <input data-name="1" type="text" id="name" required="required" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+            </div>
+
+            <div style="margin-bottom:24px">
+              <label for="tagline" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Short description</label>
+              <input data-tagline="1" type="text" id="tagline" placeholder="e.g. Experienced pet sitters based in Bath" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+              <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">One line under your name on the banner.</p>
+            </div>
+
+            <div style="margin-bottom:24px">
+              <label for="badge" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Highlight badge</label>
+              <input data-badge="1" type="text" id="badge" placeholder="e.g. 5★ rated on TrustedHousesitters" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+              <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">A small pill on your banner photo. Leave blank to hide it.</p>
+            </div>
+
+            <div style="margin-bottom:26px">
+              <label for="bio" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">About you</label>
+              <textarea data-bio="1" id="bio" rows="7" placeholder="Your experience, what you offer, and why pets settle with you." style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)"></textarea>
+              <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">{{ bioCount }}</p>
+            </div>
+
+            <div style="margin-bottom:30px">
+              <span style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Profile photo</span>
+              <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap">
+                <img src="public/images/couple-bw-1.jpg" alt="" style="width:74px;height:74px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35);flex-shrink:0" />
+                <button type="button" style="display:inline-flex;align-items:center;gap:10px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;background:#faf6ee;border:1.5px dashed rgba(110,84,56,.5);border-radius:50px;padding:13px 26px;cursor:pointer;transition:background .25s ease, border-color .25s ease, color .25s ease" style-hover="background:rgba(110,84,56,.1);border-color:#2f5d45;color:#2f5d45">Change photo</button>
+              </div>
+              <p style="font-size:.82rem;color:#6b4e35;margin:12px 0 0;line-height:1.6">JPG or PNG, up to 5&nbsp;MB.</p>
+            </div>
+
+            <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:26px">
+              <p style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 20px">Where enquiries go</p>
+              <div data-field-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                <div>
+                  <label for="email" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Enquiry email <span style="color:#2f5d45">*</span></label>
+                  <input type="email" id="email" value="hello@myahsits.com" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+                </div>
+                <div>
+                  <label for="whatsapp" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">WhatsApp number</label>
+                  <input type="tel" id="whatsapp" placeholder="+447700900000" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+                </div>
+              </div>
+              <p style="font-size:.82rem;color:#6b4e35;margin:12px 0 0;line-height:1.6">Neither is shown publicly. With a number set, a WhatsApp button appears on your page.</p>
+            </div>
+          </section>
+
+          <section id="photos" data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">02</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Photos</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+
+            <sc-for list="{{ photoGroups }}" as="g" hint-placeholder-count="3">
+              <div style="{{ g.wrapStyle }}">
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px">
+                  <p style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5c3d20;margin:0">{{ g.title }}</p>
+                  <span style="font-size:.78rem;color:#6b4e35">{{ g.count }}</span>
+                </div>
+                <p style="font-size:.86rem;color:#6b4e35;line-height:1.65;margin:0 0 16px;max-width:480px">{{ g.desc }}</p>
+                <div style="display:flex;flex-wrap:wrap;gap:12px">
+                  <sc-for list="{{ g.images }}" as="img" hint-placeholder-count="4">
+                    <div style="position:relative;width:118px;height:88px;border-radius:10px;overflow:hidden;border:1px solid rgba(110,84,56,.25);transition:transform .2s ease, box-shadow .2s ease" style-hover="transform:translateY(-2px);box-shadow:0 8px 20px rgba(44,26,14,.14)">
+                      <img src="{{ img.src }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
+                      <span style="{{ img.badgeStyle }}">Cover</span>
+                      <button type="button" onClick="{{ img.onRemove }}" title="Remove photo" style="position:absolute;top:6px;right:6px;width:23px;height:23px;border-radius:50%;background:rgba(44,26,14,.6);color:#fff;border:none;font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s ease" style-hover="background:#b91c1c">&times;</button>
+                    </div>
+                  </sc-for>
+                  <button type="button" onClick="{{ g.onAdd }}" style="width:118px;height:88px;border-radius:10px;border:1.5px dashed rgba(110,84,56,.5);background:#faf6ee;color:#2f5d45;font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .25s ease, border-color .25s ease" style-hover="background:rgba(110,84,56,.12);border-color:#2f5d45">+ Add</button>
+                </div>
+              </div>
+            </sc-for>
+          </section>
+
+          <section id="reviews" data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">03</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Reviews</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 24px;max-width:500px">Reviews are written by the pet owners themselves. Generate a link, send it to them, and their words land straight on your page.</p>
+
+            <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:26px">
+              <sc-for list="{{ reviews }}" as="r" hint-placeholder-count="2">
+                <div style="display:flex;gap:18px;align-items:flex-start;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:20px 22px;transition:border-color .25s ease" style-hover="border-color:rgba(110,84,56,.45)">
+                  <div style="flex:1;min-width:0">
+                    <p style="font-size:.94rem;color:#2c1a0e;line-height:1.7;font-style:italic;margin:0 0 8px">&ldquo;{{ r.text }}&rdquo;</p>
+                    <p style="font-size:.8rem;color:#2f5d45;font-weight:600;margin:0">&mdash; {{ r.name }}</p>
+                  </div>
+                  <button type="button" onClick="{{ r.onRemove }}" title="Remove review" style="width:26px;height:26px;border-radius:50%;background:rgba(44,26,14,.08);color:#6b4e35;border:none;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:background .2s ease, color .2s ease" style-hover="background:#b91c1c;color:#fff">&times;</button>
+                </div>
+              </sc-for>
+            </div>
+
+            <div style="background:#faf6ee;border:1px dashed rgba(110,84,56,.45);border-radius:14px;padding:24px 26px">
+              <p style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5c3d20;margin:0 0 14px">Request a review</p>
+              <div style="{{ linkBoxStyle }}">
+                <input readonly="readonly" value="{{ reviewLink }}" style="flex:1;min-width:0;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 14px;font-size:.86rem;font-family:'Montserrat',sans-serif;color:#5c3d20;background:#fff;outline:none" />
+                <button type="button" onClick="{{ onCopyLink }}" style="font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;cursor:pointer;white-space:nowrap;transition:background .25s ease, border-color .25s ease, transform .15s ease" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)">{{ copyLabel }}</button>
+              </div>
+              <button type="button" onClick="{{ onGenerateLink }}" style="display:inline-flex;align-items:center;gap:9px;font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:12px 26px;cursor:pointer;transition:background .25s ease, border-color .25s ease, transform .15s ease" style-hover="background:rgba(110,84,56,.1);border-color:#2f5d45;transform:translateY(-1px)">Generate review link</button>
+            </div>
+          </section>
+
+          <section id="platforms" data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">04</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Your other profiles</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 24px;max-width:500px">Sitting sites, socials, anywhere else owners can check you out. These show as cards near the bottom of your page.</p>
+
+            <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+              <sc-for list="{{ platforms }}" as="p" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:16px 20px;transition:border-color .25s ease" style-hover="border-color:rgba(110,84,56,.45)">
+                  <span style="width:38px;height:38px;border-radius:50%;background:#2f5d45;color:#fff;font-family:'Marcellus',serif;font-size:1.05rem;display:flex;align-items:center;justify-content:center;flex-shrink:0">{{ p.letter }}</span>
+                  <div style="flex:1;min-width:0">
+                    <p style="font-size:.95rem;font-weight:700;color:#2c1a0e;margin:0 0 3px">{{ p.name }}</p>
+                    <p style="font-size:.82rem;color:#6b4e35;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ p.url }}</p>
+                  </div>
+                  <button type="button" onClick="{{ p.onRemove }}" title="Remove link" style="width:26px;height:26px;border-radius:50%;background:rgba(44,26,14,.08);color:#6b4e35;border:none;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:background .2s ease, color .2s ease" style-hover="background:#b91c1c;color:#fff">&times;</button>
+                </div>
+              </sc-for>
+            </div>
+
+            <div data-field-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
+              <input data-plat-name="1" type="text" placeholder="Site name — e.g. Instagram" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+              <input data-plat-url="1" type="url" placeholder="https://instagram.com/yourname" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+            </div>
+            <button type="button" onClick="{{ onAddPlatform }}" style="font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:12px 26px;cursor:pointer;transition:background .25s ease, border-color .25s ease, transform .15s ease" style-hover="background:rgba(110,84,56,.1);border-color:#2f5d45;transform:translateY(-1px)">Add site</button>
+          </section>
+
+          <section id="headings" data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">05</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Section headings</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 26px;max-width:500px">Every section has a small label and a big title. Leave anything blank to keep the wording shown.</p>
+
+            <div style="display:flex;flex-direction:column;gap:26px">
+              <sc-for list="{{ headingGroups }}" as="h" hint-placeholder-count="4">
+                <div>
+                  <p style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5c3d20;margin:0 0 4px">{{ h.title }}</p>
+                  <p style="font-size:.84rem;color:#6b4e35;line-height:1.6;margin:0 0 14px">{{ h.where }}</p>
+                  <div data-field-row="1" style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px">
+                    <input type="text" placeholder="{{ h.labelPh }}" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.93rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+                    <input type="text" placeholder="{{ h.titlePh }}" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.93rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+            <button type="button" onClick="{{ onSave }}" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease, box-shadow .25s ease" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">{{ saveLabel }}</button>
+            <a href="Dashboard.dc.html" style="font-size:.8rem;color:#6b4e35;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:color .2s" style-hover="color:#2c1a0e">Back to dashboard</a>
+          </div>
+        </div>
+
+        <aside data-aside="1" id="preview" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:18px">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="padding:18px 22px;border-bottom:1px solid rgba(110,84,56,.2);display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">Page preview</p>
+              <a href="Sitter profile.dc.html" style="display:inline-flex;align-items:center;gap:7px;font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:gap .2s, color .2s" style-hover="gap:11px;color:#2c1a0e">Open &rarr;</a>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:#faf6ee;border-bottom:1px solid rgba(110,84,56,.18)">
+              <span style="display:flex;gap:5px;flex-shrink:0">
+                <span style="width:8px;height:8px;border-radius:50%;background:rgba(44,26,14,.16);display:block"></span>
+                <span style="width:8px;height:8px;border-radius:50%;background:rgba(44,26,14,.16);display:block"></span>
+                <span style="width:8px;height:8px;border-radius:50%;background:rgba(44,26,14,.16);display:block"></span>
+              </span>
+              <span style="flex:1;min-width:0;font-size:.7rem;color:#6b4e35;background:#fff;border:1px solid rgba(44,26,14,.08);border-radius:50px;padding:5px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pvUrl }}</span>
+            </div>
+
+            <div style="{{ pvBodyStyle }}">
+              <div style="position:relative;height:186px;overflow:hidden">
+                <img src="{{ heroSrc }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
+                <div style="position:absolute;inset:0;background:rgba(44,26,14,.52)"></div>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;gap:6px">
+                  <span style="{{ pvBadgeStyle }}">{{ pvBadge }}</span>
+                  <p style="{{ pvBrandStyle }}">MYAH</p>
+                  <p style="font-size:.72rem;color:rgba(255,255,255,.9);font-weight:600;letter-spacing:.08em;margin:0">{{ pvName }}</p>
+                  <p style="{{ pvTaglineStyle }}">{{ pvTagline }}</p>
+                  <span style="{{ pvBtnStyle }}">{{ pvBtnLabel }}</span>
+                </div>
+              </div>
+
+              <div style="padding:18px 20px">
+                <p style="{{ pvLabelStyle }}">{{ pvAboutLabel }}</p>
+                <div style="display:flex;gap:12px;align-items:flex-start">
+                  <img src="public/images/couple-field-1.jpg" alt="" style="width:62px;height:62px;border-radius:10px;object-fit:cover;flex-shrink:0" />
+                  <p style="{{ pvBodyTextStyle }}">{{ pvBio }}</p>
+                </div>
+              </div>
+
+              <div style="padding:0 20px 18px">
+                <p style="{{ pvLabelStyle }}">What Pet Owners Say</p>
+                <div style="display:flex;gap:8px">
+                  <sc-for list="{{ pvReviews }}" as="r" hint-placeholder-count="2">
+                    <div style="{{ r.cardStyle }}">
+                      <span style="{{ r.starStyle }}">★★★★★</span>
+                      <p style="{{ r.textStyle }}">&ldquo;{{ r.text }}&rdquo;</p>
+                      <span style="{{ r.nameStyle }}">&mdash; {{ r.name }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="padding:0 20px 18px">
+                <p style="{{ pvLabelStyle }}">{{ pvGalleryLabel }}</p>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px">
+                  <sc-for list="{{ pvGallery }}" as="g" hint-placeholder-count="8">
+                    <div style="aspect-ratio:1;border-radius:4px;overflow:hidden"><img src="{{ g.src }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+                  </sc-for>
+                </div>
+              </div>
+
+              <div style="padding:0 20px 20px">
+                <p style="{{ pvLabelStyle }}">Get In Touch</p>
+                <div style="display:flex;flex-direction:column;gap:5px;max-width:210px">
+                  <div style="height:17px;background:rgba(44,26,14,.05);border:1px solid rgba(44,26,14,.09);border-radius:3px"></div>
+                  <div style="height:17px;background:rgba(44,26,14,.05);border:1px solid rgba(44,26,14,.09);border-radius:3px"></div>
+                  <div style="height:30px;background:rgba(44,26,14,.05);border:1px solid rgba(44,26,14,.09);border-radius:3px"></div>
+                  <div style="{{ pvMockBtnStyle }}">Send Enquiry</div>
+                </div>
+              </div>
+
+              <div style="{{ pvFooterStyle }}">
+                <p style="{{ pvFooterBrandStyle }}">MYAH</p>
+                <span style="font-size:.6rem;color:rgba(255,255,255,.45)">{{ pvName }}</span>
+              </div>
+            </div>
+
+            <div style="padding:18px 20px 20px;background:#fff;border-top:1px solid rgba(110,84,56,.2)">
+              <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:14px">
+                <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="5">
+                  <label style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">
+                    <input type="color" value="{{ s.value }}" onChange="{{ s.onChange }}" onInput="{{ s.onChange }}" style="width:38px;height:38px;border:2px solid rgba(44,26,14,.15);border-radius:50%;cursor:pointer;background:#faf6ee;transition:border-color .2s, transform .15s" style-hover="border-color:#2f5d45;transform:scale(1.08)" />
+                    <span style="font-size:.64rem;font-weight:600;color:#6b4e35;letter-spacing:.03em">{{ s.label }}</span>
+                  </label>
+                </sc-for>
+              </div>
+              <div style="display:flex;justify-content:center">
+                <button type="button" onClick="{{ onResetColours }}" style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;background:none;border:1.5px solid rgba(44,26,14,.15);border-radius:50px;padding:9px 22px;cursor:pointer;transition:border-color .2s, color .2s" style-hover="border-color:#2f5d45;color:#2c1a0e">Reset colours</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px;transition:border-color .3s ease" style-hover="border-color:rgba(110,84,56,.5)">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">Profile strength</p>
+            <div style="height:7px;border-radius:50px;background:rgba(44,26,14,.08);overflow:hidden;margin-bottom:12px">
+              <div style="{{ strengthBarStyle }}"></div>
+            </div>
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.65;margin:0">{{ strengthText }}</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <div style="{{ saveBarStyle }}">
+    <div style="max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <p style="font-size:.88rem;color:#6b4e35;margin:0;line-height:1.5">{{ saveBarText }}</p>
+      <button type="button" onClick="{{ onSave }}" style="{{ saveBarBtnStyle }}">{{ saveLabel }}</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1260,&quot;height&quot;:980}}">
+const POOL = ['public/images/slideshow-dogs-couch.jpeg','public/images/slideshow-spaniel-bed.jpeg','public/images/slideshow-cat-bag.jpeg','public/images/slideshow-labrador-puppy.jpeg','public/images/slideshow-springer-beach.jpeg','public/images/slideshow-cockapoo-window.jpeg','public/images/slideshow-spaniel-walk.jpeg','public/images/slideshow-living-room.jpeg','public/images/bailey-1.jpg','public/images/alfie-1.jpg','public/images/zeus-1.jpg','public/images/travis-1.jpg'];
+const DEFAULT_THEME = { background: '#faf6ee', accent: '#2f5d45', accentLight: '#c4ab8a', text: '#2c1a0e', textSoft: '#6b4e35' };
+
+class Component extends DCLogic {
+  state = {
+    accountType: 'joint',
+    name: 'Callum & Niamh',
+    tagline: 'Experienced house & pet sitters — Bath, UK',
+    badge: '5★ rated · 40+ sits',
+    bio: 'We have been sitting together for six years, from a farmhouse in Devon to a top-floor flat in Lisbon. Dogs, cats, chickens, one very opinionated parrot. We work remotely, so someone is home nearly all day — which most owners tell us is the part that sold them.',
+    theme: { ...DEFAULT_THEME },
+    hero: ['public/images/couple-villa-1.jpg', 'public/images/slideshow-ocean-sunset.jpeg', 'public/images/couple-boat-1.jpg'],
+    about: ['public/images/couple-field-1.jpg', 'public/images/callum-niamh-event.jpg'],
+    gallery: ['public/images/solomon-1.jpg', 'public/images/bailey-3.jpg', 'public/images/chester-1.jpg', 'public/images/orca-3.jpg', 'public/images/solomon-4.jpg', 'public/images/zeus-1.jpg'],
+    reviews: [
+      { name: 'Thomas J., Bath', text: 'Came home to a spotless house and a dog who clearly preferred them to us. Photos every day without being asked.' },
+      { name: 'Priya N., Bristol', text: 'Chester is a nervous cat and he was sitting on Niamh\u2019s lap by day two. That never happens.' }
+    ],
+    platforms: [
+      { name: 'TrustedHousesitters', url: 'trustedhousesitters.com/callum-niamh' },
+      { name: 'Instagram', url: 'instagram.com/myahsitters' }
+    ],
+    reviewToken: '',
+    copied: false,
+    saved: false
+  };
+
+  setTheme(key, value) {
+    this.setState(s => ({ theme: { ...s.theme, [key]: value }, saved: false }));
+  }
+
+  removeFrom(key, i) {
+    this.setState(s => ({ [key]: s[key].filter((_, n) => n !== i), saved: false }));
+  }
+
+  addTo(key) {
+    this.setState(s => {
+      const used = new Set([...s.hero, ...s.about, ...s.gallery]);
+      const next = POOL.find(p => !used.has(p)) || POOL[s[key].length % POOL.length];
+      return { [key]: [...s[key], next], saved: false };
+    });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const t = s.theme;
+    const joint = s.accountType === 'joint';
+
+    const group = (key, title, desc) => ({
+      title, desc,
+      count: s[key].length + (s[key].length === 1 ? ' photo' : ' photos'),
+      wrapStyle: 'padding-bottom:26px;' + (key === 'gallery' ? '' : 'margin-bottom:26px;border-bottom:1px solid rgba(44,26,14,.07);'),
+      images: s[key].map((src, i) => ({
+        src,
+        badgeStyle: (key === 'hero' && i === 0)
+          ? 'position:absolute;left:6px;bottom:6px;font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(44,26,14,.62);padding:3px 9px;border-radius:50px'
+          : 'display:none',
+        onRemove: () => this.removeFrom(key, i)
+      })),
+      onAdd: () => this.addTo(key)
+    });
+
+    const filled = [s.name.trim(), s.tagline.trim(), s.bio.trim().length > 80, s.hero.length > 0, s.about.length > 0, s.gallery.length >= 4, s.reviews.length >= 2, s.platforms.length > 0].filter(Boolean).length;
+    const pct = Math.round((filled / 8) * 100);
+
+    const pvLabel = 'font-size:.58rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;margin:0 0 9px;color:' + t.accent + ';';
+
+    return {
+      jumpLinks: [
+        { href: '#details', label: 'Name & bio' },
+        { href: '#photos', label: 'Photos' },
+        { href: '#reviews', label: 'Reviews' },
+        { href: '#platforms', label: 'Other profiles' },
+        { href: '#headings', label: 'Headings' },
+        { href: '#preview', label: 'Colours' }
+      ],
+      accountTypes: [
+        { key: 'solo', icon: '🧍', label: 'Solo sitter' },
+        { key: 'joint', icon: '🧑‍🤝‍🧑', label: 'Joint / couple' }
+      ].map(a => ({
+        icon: a.icon,
+        label: a.label,
+        style: 'display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;font-family:\'Montserrat\',sans-serif;padding:18px 12px;border-radius:14px;cursor:pointer;transition:background .25s ease, border-color .25s ease, color .25s ease, transform .15s ease;' +
+          (s.accountType === a.key
+            ? 'background:rgba(110,84,56,.12);border:1.5px solid #2f5d45;color:#2c1a0e;'
+            : 'background:#faf6ee;border:1.5px solid rgba(44,26,14,.14);color:#5c3d20;'),
+        onClick: () => this.setState({ accountType: a.key, saved: false })
+      })),
+      wordingHint: joint ? '“Book Us Today”, “Who We Are”.' : '“Book Me Today”, “Who I Am”.',
+      bioCount: s.bio.trim().length + ' characters — around ' + Math.max(1, Math.round(s.bio.trim().split(/\s+/).length / 200 * 60)) + ' seconds to read.',
+      photoGroups: [
+        group('hero', 'Banner photos', 'The full-width photos at the top of your page, cycling as a slideshow. Wide landscape shots work best.'),
+        group('about', 'Photos beside your bio', 'A small slideshow next to your About text. You with pets, at a sit, around the house.'),
+        group('gallery', 'Gallery', 'The grid further down — pets you have looked after, places you have stayed.')
+      ],
+      reviews: s.reviews.map((r, i) => ({ ...r, onRemove: () => this.removeFrom('reviews', i) })),
+      reviewLink: s.reviewToken ? 'myahsits.com/review/' + s.reviewToken : 'Generate a link to send to a pet owner',
+      linkBoxStyle: 'display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;' + (s.reviewToken ? '' : 'opacity:.55;pointer-events:none;'),
+      copyLabel: s.copied ? 'Copied' : 'Copy',
+      onCopyLink: () => {
+        navigator.clipboard && navigator.clipboard.writeText('https://myahsits.com/review/' + this.state.reviewToken);
+        this.setState({ copied: true });
+        clearTimeout(this.copyT);
+        this.copyT = setTimeout(() => this.setState({ copied: false }), 2000);
+      },
+      onGenerateLink: () => this.setState({ reviewToken: Math.random().toString(36).slice(2, 10), copied: false }),
+      platforms: s.platforms.map((p, i) => ({
+        name: p.name, url: p.url, letter: p.name.charAt(0).toUpperCase(),
+        onRemove: () => this.removeFrom('platforms', i)
+      })),
+      onAddPlatform: () => {
+        const nameEl = document.querySelector('[data-plat-name]');
+        const urlEl = document.querySelector('[data-plat-url]');
+        const name = (nameEl && nameEl.value.trim()) || '';
+        const url = (urlEl && urlEl.value.trim()) || '';
+        if (!name) return;
+        this.setState(st => ({ platforms: [...st.platforms, { name, url: url.replace(/^https?:\/\//, '') || 'link to add' }], saved: false }));
+        if (nameEl) nameEl.value = '';
+        if (urlEl) urlEl.value = '';
+      },
+      headingGroups: [
+        { title: 'About section', where: 'Your bio text and photos.', labelPh: joint ? 'Who We Are' : 'Who I Am', titlePh: 'A home away from home — for you and your pets.' },
+        { title: 'Reviews section', where: 'Your review cards.', labelPh: 'What Pet Owners Say', titlePh: 'Leave blank to show your review count' },
+        { title: 'Gallery section', where: 'The photo grid.', labelPh: joint ? "Pets We've Loved" : "Pets I've Loved", titlePh: joint ? 'Our Sits' : 'My Sits' },
+        { title: 'Contact section', where: 'The enquiry form at the bottom.', labelPh: 'Get In Touch', titlePh: 'Book ' + (s.name.trim() || 'us') }
+      ],
+      saveLabel: s.saved ? 'Changes saved' : 'Save changes',
+      onSave: () => { this.setState({ saved: true }); this.showLoader(); },
+      saveBarStyle: 'position:fixed;left:0;right:0;bottom:0;z-index:40;padding:16px 48px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid rgba(110,84,56,.28);box-shadow:0 -6px 24px rgba(44,26,14,.06);transition:transform .3s ease, opacity .3s ease;' +
+        (s.saved ? 'transform:translateY(100%);opacity:0;pointer-events:none;' : 'transform:translateY(0);opacity:1;'),
+      saveBarText: 'Unsaved changes — your public page still shows the old version.',
+      saveBarBtnStyle: 'font-family:\'Montserrat\',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease',
+      pvUrl: 'myahsits.com/' + ((s.name.trim() || 'your-name').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')),
+
+      pvBodyStyle: 'background:' + t.background + ';transition:background .3s ease',
+      heroSrc: s.hero[0] || 'public/images/couple-villa-1.jpg',
+      pvBadge: s.badge.trim() || 'Available this autumn',
+      pvBadgeStyle: 'font-size:.55rem;background:rgba(255,255,255,.18);color:#fff;padding:4px 11px;border-radius:50px;font-weight:700;letter-spacing:.07em;' + (s.badge.trim() ? '' : 'opacity:.45;'),
+      pvBrandStyle: 'font-family:\'Montserrat\',sans-serif;font-weight:500;letter-spacing:.28em;font-size:1.35rem;color:#fff;line-height:1;margin:4px 0 0',
+      pvBrandEmStyle: 'font-style:italic;color:' + t.accent + ';',
+      pvName: s.name.trim() || 'Your name',
+      pvTagline: s.tagline.trim() || 'Your one-line description',
+      pvTaglineStyle: 'font-size:.62rem;color:rgba(255,255,255,.7);margin:0;' + (s.tagline.trim() ? '' : 'font-style:italic;opacity:.6;'),
+      pvBtnLabel: joint ? 'Book Us Today' : 'Book Me Today',
+      pvBtnStyle: 'display:inline-block;margin-top:6px;background:' + t.accent + ';color:#fff;font-size:.55rem;font-weight:600;padding:6px 15px;border-radius:6px;letter-spacing:.07em;text-transform:uppercase;',
+      pvLabelStyle: pvLabel,
+      pvAboutLabel: joint ? 'Who We Are' : 'Who I Am',
+      pvBio: s.bio.trim() ? (s.bio.trim().length > 130 ? s.bio.trim().slice(0, 130) + '…' : s.bio.trim()) : 'No bio yet',
+      pvBodyTextStyle: 'font-size:.66rem;line-height:1.65;margin:0;color:' + t.textSoft + ';' + (s.bio.trim() ? '' : 'font-style:italic;opacity:.5;'),
+      pvReviews: s.reviews.slice(0, 2).map(r => ({
+        text: r.text.length > 52 ? r.text.slice(0, 52) + '…' : r.text,
+        name: r.name.split(',')[0],
+        cardStyle: 'flex:1;min-width:0;border-radius:8px;padding:10px;background:rgba(255,255,255,.55);border:1px solid ' + t.accentLight + '40;',
+        starStyle: 'display:block;margin-bottom:4px;font-size:.5rem;color:' + t.accent + ';',
+        textStyle: 'font-size:.58rem;line-height:1.5;font-style:italic;margin:0 0 5px;color:' + t.textSoft + ';',
+        nameStyle: 'font-size:.52rem;font-weight:700;color:' + t.accent + ';'
+      })),
+      pvGalleryLabel: joint ? "Pets We've Loved" : "Pets I've Loved",
+      pvGallery: s.gallery.slice(0, 8).map(src => ({ src })),
+      pvMockBtnStyle: 'text-align:center;padding:6px;border-radius:4px;font-size:.52rem;font-weight:700;color:#fff;background:' + t.accent + ';',
+      pvFooterStyle: 'padding:12px 20px;display:flex;justify-content:space-between;align-items:center;background:' + t.text + ';',
+      pvFooterBrandStyle: 'font-family:\'Montserrat\',sans-serif;font-weight:500;letter-spacing:.24em;font-size:.68rem;margin:0;color:rgba(255,255,255,.75)',
+
+      swatches: [
+        { key: 'background', label: 'Background' },
+        { key: 'accent', label: 'Accent' },
+        { key: 'accentLight', label: 'Highlight' },
+        { key: 'text', label: 'Text' },
+        { key: 'textSoft', label: 'Soft text' }
+      ].map(sw => ({
+        label: sw.label,
+        value: t[sw.key],
+        onChange: e => this.setTheme(sw.key, e.target.value)
+      })),
+      onResetColours: () => this.setState({ theme: { ...DEFAULT_THEME }, saved: false }),
+
+      strengthBarStyle: 'height:100%;width:' + pct + '%;border-radius:50px;background:linear-gradient(90deg,#2f5d45,#c4ab8a);transition:width .4s ease',
+      strengthText: pct === 100
+        ? 'Everything is filled in. Owners see a complete page — that is the version that gets replies.'
+        : pct + '% complete. ' + (s.gallery.length < 4 ? 'A fuller gallery is the quickest win.' : s.reviews.length < 2 ? 'One more review would round it out.' : 'Add a little more to each section.')
+    };
+  }
+
+  showLoader() {
+    const loader = document.querySelector('[data-loader]');
+    if (!loader) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    clearTimeout(this.hideT);
+    this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  }
+
+  componentDidMount() {
+    const q = sel => document.querySelector(sel);
+
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http')) return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; this.showLoader(); });
+    });
+
+    [['[data-name]', 'name'], ['[data-tagline]', 'tagline'], ['[data-badge]', 'badge'], ['[data-bio]', 'bio']].forEach(([sel, key]) => {
+      const el = q(sel);
+      if (!el) return;
+      el.value = this.state[key];
+      el.addEventListener('input', () => this.setState({ [key]: el.value, saved: false }));
+    });
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); clearTimeout(this.copyT); }
+}
+</script>
+</body>
+</html>

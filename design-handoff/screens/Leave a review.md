@@ -1,0 +1,135 @@
+# Leave a review — element-by-element spec
+
+Generated from the approved design file `reference/Leave a review.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `/images/couple-bw-1.jpg`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `min-height:100vh; display:flex; flex-direction:column; background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<nav>` **Top nav** `[data-topnav]`
+      - style: `display:flex; justify-content:center; align-items:center; padding:16px 48px; background:#fff; border-bottom:1px solid rgba(110,84,56,.2)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.35rem; transition:transform .25s ease; letter-spacing:.28em`
+        - :hover `transform:translateY(-1px)`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:44px; width:44px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+    - `<main>` **Leave a review** `[data-wrap]`
+      - style: `flex:1; display:flex; align-items:center; justify-content:center; padding:60px 24px`
+      - `<sc-if>`
+        - `<div>` `[data-card]`
+          - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:20px; padding:48px; box-shadow:0 4px 28px rgba(44,26,14,.07); max-width:580px; width:100%; animation:card-in .4s ease; transition:box-shadow .3s ease, border-color .3s ease`
+          - :hover `box-shadow:0 14px 44px rgba(44,26,14,.1);border-color:rgba(110,84,56,.4)`
+          - `<div>`
+            - style: `display:flex; gap:20px; align-items:center`
+            - `<img>` src=`public/images/couple-bw-1.jpg`
+              - style: `width:76px; height:76px; border-radius:50%; object-fit:cover; border:3px solid rgba(110,84,56,.32)`
+            - `<div>`
+              - `<p>`
+                - style: `font-size:.74rem; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:#6e5438; margin:0 0 8px; display:flex; align-items:center; gap:10px`
+                - text: "Leave a review for"
+              - `<h1>`
+                - style: `font-family:'Marcellus',serif; font-size:1.95rem; color:#2c1a0e; line-height:1.2; margin:0`
+                - text: "Callum & Niamh"
+          - `<p>`
+            - style: `font-size:.95rem; color:#6b4e35; line-height:1.8; margin:0 0 28px; border-bottom:1px solid rgba(44,26,14,.08)`
+            - text: "Callum & Niamh have asked you to share your experience. Your review will appear on their MYAH profile page."
+          - `<div>`
+            - style: `background:#faf6ee; border:1px solid rgba(110,84,56,.28); border-radius:18px; padding:26px 24px`
+            - `<div>`
+              - style: `display:flex; justify-content:space-between; align-items:flex-start; gap:20px`
+              - `<div>`
+              - `<div>`
+            - `<div>`
+              - style: `display:flex; flex-direction:column; gap:4px`
+              - `<sc-for>`
+          - `<form>` `[data-review] [data-go]`
+            - style: `display:flex; flex-direction:column; gap:22px`
+            - `<div>`
+              - `<label>`
+                - style: `display:block; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20`
+                - text: "Your name"
+              - `<input>`
+                - style: `width:100%; border:1.5px solid rgba(44,26,14,.18); border-radius:10px; padding:13px 16px; font-size:.97rem; font-family:'Montserrat',sans-serif; color:#2c1a0e; background:#faf6ee; transition:border-color .25s ease, box-shadow .25s ease`
+              - `<p>`
+                - style: `font-size:.82rem; color:#6b4e35; margin:8px 0 0; line-height:1.6`
+                - text: "This will be shown alongside your review."
+            - `<div>`
+              - `<label>`
+                - style: `display:block; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#5c3d20`
+                - text: "Your review"
+              - `<textarea>` `[data-text]`
+                - style: `width:100%; border:1.5px solid rgba(44,26,14,.18); border-radius:10px; padding:13px 16px; font-size:.97rem; font-family:'Montserrat',sans-serif; color:#2c1a0e; background:#faf6ee; line-height:1.7; transition:border-color .25s ease, box-shadow .25s ease`
+              - `<div>`
+                - style: `display:flex; justify-content:space-between; gap:16px`
+            - `<button>`
+              - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; box-shadow:0 6px 20px rgba(110,84,56,.28); padding:16px 36px; font-family:'Montserrat',sans-serif; white-space:nowrap; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .25s ease, border-color .25s ease, transform .15s ease, box-shadow .25s ease`
+              - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+              - :active `transform:translateY(0) scale(.98)`
+              - text: "Submit review"
+      - `<sc-if>`
+        - `<div>` `[data-card]`
+          - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:20px; padding:56px 48px; box-shadow:0 4px 28px rgba(44,26,14,.07); max-width:520px; width:100%; text-align:center; animation:card-in .4s ease; transition:box-shadow .3s ease, border-color .3s ease`
+          - :hover `box-shadow:0 14px 44px rgba(44,26,14,.1);border-color:rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `width:70px; height:70px; border-radius:50%; background:rgba(110,84,56,.12); border:1px solid rgba(110,84,56,.35); color:#2f5d45; display:inline-flex; align-items:center; justify-content:center`
+            - `<svg>`
+              - `<path>`
+          - `<h1>`
+            - style: `font-family:'Marcellus',serif; font-size:2rem; color:#2c1a0e; margin:0 0 14px`
+            - text: "Thank you!"
+          - `<div>`
+            - style: `width:48px; height:2px; background:#6e5438; margin:0 auto 22px`
+          - `<p>`
+            - style: `font-size:.97rem; color:#6b4e35; line-height:1.8; margin:0 0 30px`
+            - text: "Your review has been submitted and will appear on Callum & Niamh's profile."
+          - `<a>` → `Sitter profile.dc.html`
+            - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:16px 36px; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .25s ease, border-color .25s ease, transform .15s ease, box-shadow .25s ease`
+            - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+            - :active `transform:translateY(0) scale(.98)`
+            - text: "View their profile"
+      - `<sc-if>`
+        - `<div>` `[data-card]`
+          - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:20px; padding:56px 48px; box-shadow:0 4px 28px rgba(44,26,14,.07); max-width:520px; width:100%; text-align:center; animation:card-in .4s ease; transition:box-shadow .3s ease, border-color .3s ease`
+          - :hover `box-shadow:0 14px 44px rgba(44,26,14,.1);border-color:rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `width:70px; height:70px; border-radius:50%; background:#faf6ee; border:1px solid rgba(110,84,56,.35); color:#2f5d45; display:inline-flex; align-items:center; justify-content:center`
+            - `<svg>`
+              - `<path>`
+              - `<path>`
+          - `<h1>`
+            - style: `font-family:'Marcellus',serif; font-size:2rem; color:#2c1a0e; margin:0 0 14px`
+            - text: "Link not valid"
+          - `<div>`
+            - style: `width:48px; height:2px; background:#6e5438; margin:0 auto 22px`
+          - `<p>`
+            - style: `font-size:.97rem; color:#6b4e35; line-height:1.8; margin:0 0 30px`
+            - text: "This review link has already been used or is no longer valid. If you think this is a mistake, ask your sitter to send you a new link."
+          - `<a>` → `Home.dc.html`
+            - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:16px 36px; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .25s ease, border-color .25s ease, transform .15s ease, box-shadow .25s ease`
+            - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+            - :active `transform:translateY(0) scale(.98)`
+            - text: "Visit MYAH"

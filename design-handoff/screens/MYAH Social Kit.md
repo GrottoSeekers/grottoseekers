@@ -1,0 +1,327 @@
+# MYAH Social Kit — element-by-element spec
+
+Generated from the approved design file `reference/MYAH Social Kit.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `/images/slideshow-springer-beach.jpeg`
+- `/images/logo-mark-white.png`
+- `/images/logo-mark-cream.png`
+- `/images/slideshow-cockapoo-window.jpeg`
+- `/images/callum-niamh-airport.jpg`
+- `/images/couple-airport-1.jpg`
+- `/images/slideshow-spaniel-bed.jpeg`
+- `/images/chester-1.jpg`
+- `/images/slideshow-living-room.jpeg`
+- `/images/slideshow-labrador-puppy.jpeg`
+- `/images/bailey-1.jpg`
+- `/images/couple-villa-1.jpg`
+- `/images/slideshow-ocean-sunset.jpeg`
+- `/images/slideshow-cat-bag.jpeg`
+- `/images/zeus-1.jpg`
+- `/images/slideshow-dogs-couch.jpeg`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `background:#faf6ee; min-height:100vh`
+    - `<nav>`
+      - style: `display:flex; justify-content:space-between; align-items:center; gap:20px; padding:16px 48px; background:#fff; border-bottom:1px solid rgba(110,84,56,.2)`
+      - `<a>` → `MYAH Brand Kit.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.35rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:44px; width:44px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<span>`
+        - style: `font-size:.72rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6b4e35`
+        - text: "Social templates · editable"
+    - `<main>` `[data-pad]`
+      - style: `padding:56px 48px 110px`
+      - `<div>`
+        - style: `max-width:1240px; margin:0 auto`
+        - `<header>`
+          - style: `border-bottom:1px solid rgba(110,84,56,.3)`
+          - `<p>`
+            - style: `font-size:.74rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 14px; display:flex; align-items:center; gap:12px`
+            - text: "Post templates"
+            - `<span>`
+              - style: `width:26px; height:1px; background:#6e5438; display:block`
+          - `<h1>`
+            - style: `font-family:'Marcellus',serif; font-size:2.3rem; color:#2c1a0e; line-height:1.14; margin:0 0 16px`
+            - text: "Twelve posts, ready to fill in"
+          - `<p>`
+            - style: `color:#6b4e35; font-size:1rem; line-height:1.8; margin:0; max-width:660px; text-wrap:pretty`
+            - text: "Every line of copy here is editable in place, and every photo can be swapped for your own — the layout holds. Each frame is built at its true aspect ratio, so w…"
+        - `<p>`
+          - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.68rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; margin:0 0 20px`
+          - text: "Feed posts · 1080 × 1080"
+        - `<div>`
+          - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:26px`
+          - `<div>` **Post 01 Sit of the week**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; position:relative; background:#2c1a0e`
+              - `<img>` src=`public/images/slideshow-springer-beach.jpeg`
+                - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover`
+              - `<div>`
+                - style: `position:absolute; inset:0; background:linear-gradient(to top,rgba(20,12,6,.88) 0%,rgba(20,12,6,.2) 55%,rgba(20,12,6,.32) 100%)`
+              - `<div>`
+                - style: `position:absolute; top:24px; left:26px; display:inline-flex; align-items:center; gap:11px`
+              - `<div>`
+                - style: `position:absolute; left:26px; right:26px; bottom:26px`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Hero photo · swap the image, keep the gradient"
+          - `<div>` **Post 02 Testimonial**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#2f5d45; padding:34px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<img>` src=`public/images/logo-mark-cream.png`
+                - style: `height:44px; width:44px; object-fit:contain; display:block`
+              - `<div>`
+              - `<p>`
+                - style: `font-family:'Montserrat',sans-serif; font-weight:500; font-size:.8rem; letter-spacing:.28em; color:rgba(245,239,228,.85); margin:0`
+                - text: "MYAH"
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Quote card · forest ground, no photo needed"
+          - `<div>` **Post 03 New listing**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#faf6ee; border:1px solid rgba(110,84,56,.22); padding:26px; display:flex; flex-direction:column; gap:16px`
+              - `<div>`
+                - style: `display:flex; align-items:center; justify-content:space-between; gap:12px`
+              - `<div>`
+                - style: `flex:1; border-radius:12px; overflow:hidden; min-height:0`
+              - `<div>`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Listing card · paper ground, real sit details"
+          - `<div>` **Post 04 Sitter spotlight**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#fff; border:1px solid rgba(110,84,56,.22); display:flex; flex-direction:column`
+              - `<div>`
+                - style: `flex:1; position:relative; min-height:0`
+              - `<div>`
+                - style: `padding:22px 26px 24px; display:flex; align-items:center; justify-content:space-between; gap:16px`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Spotlight · photo on top, facts below"
+          - `<div>` **Post 05 Number**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#2c1a0e; padding:36px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.62rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,239,228,.75); margin:0`
+                - text: "Since January"
+              - `<div>`
+              - `<div>`
+                - style: `display:flex; align-items:center; gap:11px`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Number card · one figure, one line"
+          - `<div>` **Post 06 Checklist**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#e9e0d2; padding:34px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<div>`
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:12px`
+              - `<div>`
+                - style: `display:flex; align-items:center; justify-content:space-between; gap:14px`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Numbered tips · cream ground, up to five lines"
+          - `<div>` **Post 07 Two photo split**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#faf6ee; display:flex; flex-direction:column`
+              - `<div>`
+                - style: `flex:1; display:grid; grid-template-columns:1fr 1fr; gap:3px; min-height:0`
+              - `<div>`
+                - style: `background:#2f5d45; padding:22px 26px; display:flex; align-items:center; justify-content:space-between; gap:16px`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Split photo · two images, one caption bar"
+          - `<div>` **Post 08 Meet the pet**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#fff; border:1px solid rgba(110,84,56,.22); padding:34px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; text-align:center`
+              - `<img>` src=`public/images/chester-1.jpg`
+                - style: `width:150px; height:150px; border-radius:50%; object-fit:cover; display:block; border:3px solid #e9e0d2`
+              - `<div>`
+              - `<img>` src=`public/images/logo-mark.png`
+                - style: `height:30px; width:30px; object-fit:contain; display:block`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Pet profile · circular photo, three facts"
+          - `<div>` **Post 09 Announcement**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; position:relative; background:#4a3726`
+              - `<img>` src=`public/images/slideshow-living-room.jpeg`
+                - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.32`
+              - `<div>`
+                - style: `position:absolute; inset:0; padding:36px; display:flex; flex-direction:column; justify-content:space-between`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Announcement · dimmed photo behind copy"
+        - `<p>`
+          - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.68rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; margin:0 0 20px`
+          - text: "Portrait posts · 1080 × 1350"
+        - `<div>`
+          - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:26px`
+          - `<div>` **Post 10 Portrait photo**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:4/5; border-radius:16px; overflow:hidden; position:relative; background:#2c1a0e`
+              - `<img>` src=`public/images/slideshow-labrador-puppy.jpeg`
+                - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover`
+              - `<div>`
+                - style: `position:absolute; inset:0; background:linear-gradient(to top,rgba(20,12,6,.9),rgba(20,12,6,.1) 58%)`
+              - `<div>`
+                - style: `position:absolute; left:26px; right:26px; bottom:28px`
+              - `<img>` src=`public/images/logo-mark-white.png`
+                - style: `position:absolute; top:24px; right:24px; height:34px; width:34px; object-fit:contain; display:block`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Portrait hero · best reach on Instagram feed"
+          - `<div>` **Post 11 Review**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:4/5; border-radius:16px; overflow:hidden; background:#faf6ee; border:1px solid rgba(110,84,56,.22); padding:30px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<div>`
+              - `<div>`
+                - style: `display:flex; align-items:center; gap:14px; border-top:1px solid rgba(110,84,56,.2)`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Review card · stars, quote, pet photo"
+          - `<div>` **Post 12 Recruiting**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:4/5; border-radius:16px; overflow:hidden; background:#2f5d45; padding:32px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<img>` src=`public/images/logo-mark-cream.png`
+                - style: `height:42px; width:42px; object-fit:contain; display:block`
+              - `<div>`
+              - `<div>`
+                - style: `border-radius:12px; overflow:hidden; height:34%`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Recruiting · forest ground, photo panel at the foot"
+        - `<p>`
+          - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.68rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; margin:0 0 20px`
+          - text: "Stories · 1080 × 1920"
+        - `<div>`
+          - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:26px`
+          - `<div>` **Story 01 Hero**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:9/16; border-radius:16px; overflow:hidden; position:relative; background:#2c1a0e`
+              - `<img>` src=`public/images/slideshow-ocean-sunset.jpeg`
+                - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover`
+              - `<div>`
+                - style: `position:absolute; inset:0; background:linear-gradient(to bottom,rgba(20,12,6,.5),rgba(20,12,6,.15) 42%,rgba(20,12,6,.9))`
+              - `<div>`
+                - style: `position:absolute; inset:0; padding:26px 22px; display:flex; flex-direction:column; justify-content:space-between; align-items:center; text-align:center`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0; text-align:center`
+              - text: "Hero story"
+          - `<div>` **Story 02 Question**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:9/16; border-radius:16px; overflow:hidden; background:#e9e0d2; padding:26px 22px; display:flex; flex-direction:column; justify-content:space-between; align-items:center; text-align:center`
+              - `<img>` src=`public/images/logo-mark.png`
+                - style: `height:38px; width:38px; object-fit:contain; display:block`
+              - `<div>`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-size:.74rem; color:#6b4e35; margin:0`
+                - text: "Tap to answer"
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0; text-align:center`
+              - text: "Poll story · two options"
+          - `<div>` **Story 03 Sit alert**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:9/16; border-radius:16px; overflow:hidden; background:#faf6ee; display:flex; flex-direction:column`
+              - `<div>`
+                - style: `height:52%; position:relative`
+              - `<div>`
+                - style: `flex:1; padding:24px 22px; display:flex; flex-direction:column; justify-content:space-between`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0; text-align:center`
+              - text: "Sit alert · photo top, details below"
+          - `<div>` **Story 04 Quote**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:9/16; border-radius:16px; overflow:hidden; background:#2c1a0e; padding:28px 22px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<img>` src=`public/images/logo-mark-cream.png`
+                - style: `height:36px; width:36px; object-fit:contain; display:block`
+              - `<div>`
+              - `<div>`
+                - style: `border-radius:12px; overflow:hidden; height:30%`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0; text-align:center`
+              - text: "Quote story · ink ground"
+        - `<p>`
+          - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.68rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; margin:0 0 20px`
+          - text: "Carousel · three slides, 1080 × 1080"
+        - `<div>`
+          - style: `display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:26px`
+          - `<div>` **Carousel 1 Cover**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; position:relative; background:#2f5d45; padding:32px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<div>`
+                - style: `display:flex; align-items:center; justify-content:space-between; gap:14px`
+              - `<div>`
+              - `<p>`
+                - style: `font-family:'Lato',sans-serif; font-size:.74rem; color:rgba(245,239,228,.7); margin:0`
+                - text: "Swipe →"
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Cover slide"
+          - `<div>` **Carousel 2 Step**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; background:#faf6ee; border:1px solid rgba(110,84,56,.22); padding:32px; display:flex; flex-direction:column; justify-content:space-between`
+              - `<div>`
+                - style: `display:flex; align-items:center; justify-content:space-between; gap:14px`
+              - `<div>`
+              - `<div>`
+                - style: `display:flex; align-items:center; justify-content:space-between; gap:14px`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Step slide · duplicate for 01 and 03"
+          - `<div>` **Carousel 3 CTA**
+            - `<div>`
+              - style: `width:100%; aspect-ratio:1/1; border-radius:16px; overflow:hidden; position:relative; background:#2c1a0e`
+              - `<img>` src=`public/images/slideshow-dogs-couch.jpeg`
+                - style: `position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.5`
+              - `<div>`
+                - style: `position:absolute; inset:0; padding:32px; display:flex; flex-direction:column; justify-content:space-between; align-items:center; text-align:center`
+            - `<p>`
+              - style: `font-family:'Lato',sans-serif; font-size:.78rem; color:#8a6a4f; margin:12px 0 0`
+              - text: "Closing slide"
+        - `<div>`
+          - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:30px 32px`
+          - `<p>`
+            - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 16px`
+            - text: "How to use these"
+          - `<div>`
+            - style: `display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:14px`
+            - `<p>`
+              - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0`
+              - text: "Click any line and type. Keep headlines to two lines and captions to one."
+              - `<strong>`
+                - style: `color:#2c1a0e`
+                - text: "Edit the copy in place."
+            - `<p>`
+              - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0`
+              - text: "Drop a new image on any photo — it fills the same frame, so the layout holds."
+              - `<strong>`
+                - style: `color:#2c1a0e`
+                - text: "Swap photos, not crops."
+            - `<p>`
+              - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0`
+              - text: "White over photos, cream on forest and ink, bark on paper and cream."
+              - `<strong>`
+                - style: `color:#2c1a0e`
+                - text: "One mark per frame."
+            - `<p>`
+              - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0`
+              - text: "Frames are built at true ratio — screenshot any one at 2× for a print-clean 2160px file."
+              - `<strong>`
+                - style: `color:#2c1a0e`
+                - text: "Exporting."

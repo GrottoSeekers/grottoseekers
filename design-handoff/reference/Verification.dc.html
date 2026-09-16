@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 1000px) {
+    [data-topnav] { padding: 14px 24px !important; }
+    [data-pad] { padding: 34px 20px 80px !important; }
+    [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-aside] { position: static !important; }
+    [data-card] { padding: 26px 22px !important; }
+    [data-step] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-stages] { grid-template-columns: minmax(0,1fr) !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="Dashboard.dc.html" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s" style-hover="gap:13px;color:#2f5d45">&larr; Dashboard</a>
+      <a href="Sitter profile.dc.html" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s" style-hover="color:#2c1a0e">View my page</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Verification" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH sitter</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Getting <em style="color:#2f5d45;">verified</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">Owners are handing you their keys and their animals. Verify your ID once and the badge shows on your page and in browse &mdash; verified sitters hear back far more often.</p>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <sc-for list="{{ steps }}" as="s" hint-placeholder-count="4">
+            <section data-card="1" style="{{ s.wrapStyle }}">
+              <div data-step="1" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:start">
+                <span style="{{ s.iconStyle }}">{{ s.icon }}</span>
+                <div style="min-width:0">
+                  <div style="display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;margin-bottom:8px">
+                    <h2 style="font-family:'Marcellus',serif;font-size:1.28rem;color:#2c1a0e;margin:0;line-height:1.25">{{ s.title }}</h2>
+                    <span style="{{ s.pillStyle }}">{{ s.pill }}</span>
+                  </div>
+                  <p style="font-size:.95rem;color:#6b4e35;line-height:1.75;margin:0 0 8px;max-width:520px">{{ s.body }}</p>
+                  <p style="{{ s.metaStyle }}">{{ s.meta }}</p>
+
+                  <div data-stages="1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px">
+                    <sc-for list="{{ s.stages }}" as="g" hint-placeholder-count="3">
+                      <div style="{{ g.wrapStyle }}">
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+                          <span style="{{ g.numStyle }}">{{ g.num }}</span>
+                          <span style="{{ g.stateStyle }}">{{ g.state }}</span>
+                        </div>
+                        <p style="font-size:.88rem;font-weight:700;color:#2c1a0e;margin:0 0 4px">{{ g.title }}</p>
+                        <p style="font-size:.82rem;color:#6b4e35;line-height:1.6;margin:0">{{ g.body }}</p>
+                      </div>
+                    </sc-for>
+                  </div>
+
+                  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px">
+                    <button type="button" onClick="{{ s.onAction }}" style="{{ s.actionStyle }}">{{ s.actionLabel }}</button>
+                    <span style="{{ s.hintStyle }}">{{ s.hint }}</span>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </sc-for>
+
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.22rem;color:#2c1a0e;margin:0 0 8px">What the badge changes</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
+            <div style="display:flex;flex-direction:column;gap:0">
+              <sc-for list="{{ unlocks }}" as="u" hint-placeholder-count="3">
+                <div style="{{ u.rowStyle }}">
+                  <span style="{{ u.markStyle }}">{{ u.mark }}</span>
+                  <div style="flex:1;min-width:0">
+                    <p style="font-size:.94rem;font-weight:700;color:#2c1a0e;margin:0 0 3px">{{ u.title }}</p>
+                    <p style="font-size:.87rem;color:#6b4e35;line-height:1.65;margin:0">{{ u.body }}</p>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.22rem;color:#2c1a0e;margin:0 0 8px">What we do with your document</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ privacy }}" as="p" hint-placeholder-count="4">
+                <div style="display:flex;gap:13px;align-items:flex-start">
+                  <span style="width:20px;height:20px;border-radius:50%;background:rgba(110,84,56,.16);color:#2f5d45;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">✓</span>
+                  <p style="font-size:.93rem;color:#6b4e35;line-height:1.7;margin:0">{{ p }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+
+          <div style="background:#2c1a0e;border-radius:18px;padding:28px 26px 30px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Your trust level</p>
+            <p style="font-family:'Marcellus',serif;font-size:2rem;color:#fff;margin:0 0 6px;line-height:1.1">{{ levelName }}</p>
+            <p style="font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.65;margin:0 0 20px">{{ levelNote }}</p>
+            <div style="height:7px;border-radius:50px;background:rgba(255,255,255,.14);overflow:hidden;margin-bottom:20px">
+              <div style="{{ levelBarStyle }}"></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12)">
+              <span style="{{ emblemStyle }}">✓</span>
+              <p style="font-size:.87rem;color:rgba(255,255,255,.72);line-height:1.6;margin:0">{{ emblemLine }}</p>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:24px 26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">On your card</p>
+            <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:14px;padding:18px 20px">
+              <div style="display:flex;gap:13px;align-items:center;margin-bottom:14px">
+                <div style="position:relative;flex-shrink:0">
+                  <img src="public/images/couple-bw-1.jpg" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
+                  <span style="{{ cardTickStyle }}">✓</span>
+                </div>
+                <div style="min-width:0">
+                  <p style="font-family:'Marcellus',serif;font-size:1.04rem;color:#2c1a0e;margin:0 0 2px">Callum &amp; Niamh</p>
+                  <p style="font-size:.78rem;color:#6b4e35;margin:0">41 sits &middot; Bristol</p>
+                </div>
+              </div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap">
+                <sc-for list="{{ badges }}" as="b" hint-placeholder-count="3">
+                  <span style="{{ b.style }}">{{ b.label }}</span>
+                </sc-for>
+              </div>
+              <p style="{{ noBadgeStyle }}">No badges yet &mdash; owners see a plain card.</p>
+            </div>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.88rem;color:#6b4e35;line-height:1.7;margin:0">{{ nudge }}</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:940}}">
+class Component extends DCLogic {
+  state = { id: 'none' };
+
+  renderVals() {
+    const s = this.state;
+
+    const stateStyles = {
+      verified: { pill: 'Verified', bg: '#2f5d45', colour: '#fff' },
+      pending: { pill: 'In review', bg: 'rgba(110,84,56,.16)', colour: '#2f5d45' },
+      none: { pill: 'Not started', bg: 'rgba(44,26,14,.08)', colour: '#6b4e35' }
+    };
+
+    const svg = (paths) => React.createElement('svg', {
+      width: 22, height: 22, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+      strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round'
+    }, paths.map((d, i) => React.createElement('path', { key: i, d })));
+
+    const ICONS = {
+      id: svg(['M3 6.5h18v11H3z', 'M7.5 11.6a1.6 1.6 0 1 0 0-.1', 'M6 15c.5-1.2 1.6-1.8 2.8-1.8s2.3.6 2.8 1.8', 'M14.5 10.5h4', 'M14.5 13.5h3']),
+      selfie: svg(['M4 8.5h3l1.4-2h7.2L17 8.5h3V19H4z', 'M12 16.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z'])
+    };
+
+    const step = (cfg) => {
+      const st = stateStyles[cfg.state];
+      const done = cfg.state === 'verified';
+      return {
+        icon: cfg.icon,
+        iconStyle: 'width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;transition:background .3s ease, color .3s ease;' +
+          (done ? 'background:#2f5d45;color:#fff;' : cfg.state === 'pending' ? 'background:rgba(110,84,56,.18);color:#2f5d45;' : 'background:#faf6ee;color:#8a6a4f;border:1.5px dashed rgba(110,84,56,.5);'),
+        title: cfg.title,
+        pill: st.pill,
+        pillStyle: 'font-size:.64rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:50px;background:' + st.bg + ';color:' + st.colour + ';',
+        body: cfg.body,
+        meta: cfg.meta || '',
+        metaStyle: 'font-size:.84rem;color:#8a6a4f;line-height:1.6;margin:0;' + (cfg.meta ? '' : 'display:none;'),
+        stages: cfg.stages || [],
+        actionLabel: cfg.actionLabel,
+        actionStyle: 'font-family:\'Montserrat\',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:13px 28px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease, transform .15s ease;' +
+          (done
+            ? 'background:none;color:#6b4e35;border:1.5px solid rgba(44,26,14,.15);'
+            : 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;box-shadow:0 6px 18px rgba(110,84,56,.26);'),
+        hint: cfg.hint || '',
+        hintStyle: 'font-size:.84rem;color:#8a6a4f;line-height:1.6;' + (cfg.hint ? '' : 'display:none;'),
+        onAction: cfg.onAction,
+        wrapStyle: 'background:#fff;border-radius:18px;padding:32px 34px;transition:border-color .3s ease, box-shadow .3s ease;' +
+          (done ? 'border:1.5px solid rgba(110,84,56,.45);box-shadow:0 6px 22px rgba(110,84,56,.1);' : 'border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);')
+      };
+    };
+
+    const steps = [
+      step({
+        state: s.id, icon: ICONS.id, title: 'Photo ID',
+        body: 'Passport or driving licence, checked against a selfie you take on the spot. Two minutes, and it usually comes back the same day.',
+        meta: s.id === 'verified' ? 'Verified 12 March 2026 · renews every two years' : s.id === 'pending' ? 'Submitted 8 September · with the checker now' : '',
+        actionLabel: s.id === 'verified' ? 'Replace document' : s.id === 'pending' ? 'Check progress' : 'Verify my ID',
+        hint: s.id === 'verified' ? '' : 'Owners filter on this before they read a word of your profile.',
+        stages: [
+          { num: '1', title: 'Your document', body: 'Passport or driving licence, photographed with your phone.' },
+          { num: '2', title: 'A quick selfie', body: 'Matched against the photo on the document.' },
+          { num: '3', title: 'Checked', body: 'Usually back the same day. We email you either way.' }
+        ].map((g, i) => {
+          const reached = s.id === 'verified' ? 3 : s.id === 'pending' ? 2 : 0;
+          const done = i < reached;
+          return {
+            num: g.num, title: g.title, body: g.body,
+            state: done ? 'Done' : s.id === 'pending' && i === 2 ? 'In review' : 'To do',
+            stateStyle: 'font-size:.64rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:' + (done ? '#2f5d45' : '#8a6a4f') + ';',
+            numStyle: 'width:24px;height:24px;border-radius:50%;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;' +
+              (done ? 'background:#2f5d45;color:#fff;' : 'background:rgba(44,26,14,.07);color:#6b4e35;'),
+            wrapStyle: 'border-radius:12px;padding:16px 18px;transition:background .3s ease, border-color .3s ease;' +
+              (done ? 'background:rgba(110,84,56,.09);border:1px solid rgba(110,84,56,.35);' : 'background:#faf6ee;border:1px solid rgba(44,26,14,.08);')
+          };
+        }),
+        onAction: () => this.setState({ id: s.id === 'verified' ? 'none' : 'verified' })
+      })
+    ];
+
+    const verified = s.id === 'verified';
+    const doneCount = verified ? 1 : 0;
+    const level = verified ? 'Verified sitter' : 'Unverified';
+
+    const badgeDefs = verified ? [{ label: 'ID verified' }] : [];
+
+    return {
+      steps,
+      unlocks: [
+        { title: 'You appear in verified-only searches', body: 'Most owners tick that filter first. Without the badge you are not in the list at all.', on: verified },
+        { title: 'The badge sits on your browse card', body: 'A gold tick beside your photo, wherever your profile appears.', on: verified },
+        { title: 'Owners see it on your application', body: 'It shows next to your name in their applicant list, above the message you wrote.', on: verified }
+      ].map((u, i, arr) => ({
+        title: u.title, body: u.body,
+        mark: u.on ? '✓' : String(i + 1),
+        markStyle: 'width:26px;height:26px;border-radius:50%;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:background .3s ease, color .3s ease;' +
+          (u.on ? 'background:#2f5d45;color:#fff;' : 'background:rgba(44,26,14,.07);color:#6b4e35;'),
+        rowStyle: 'display:flex;gap:14px;align-items:flex-start;padding:16px 0;' + (i < arr.length - 1 ? 'border-bottom:1px solid rgba(44,26,14,.07);' : '')
+      })),
+      privacy: [
+        'Your document is deleted as soon as the check clears — we keep the result, not the file.',
+        'Date of birth and document numbers are never shown to owners or other sitters.',
+        'The check is run by a third-party identity provider; we never see the raw images.',
+        'You can remove the check from your profile at any time, and the badge goes with it.'
+      ],
+      levelName: level,
+      levelNote: verified
+        ? 'You show up for owners who only accept verified sitters — which is most of them.'
+        : 'Owners filtering for verified sitters cannot see you yet.',
+      levelBarStyle: 'height:100%;width:' + (verified ? 100 : 8) + '%;border-radius:50px;background:linear-gradient(90deg,#2f5d45,#c4ab8a);transition:width .4s ease',
+      emblemStyle: 'width:30px;height:30px;border-radius:50%;font-size:.8rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .3s ease, color .3s ease;' +
+        (verified ? 'background:#2f5d45;color:#fff;' : 'background:rgba(255,255,255,.1);color:rgba(255,255,255,.3);'),
+      emblemLine: verified
+        ? 'Checked 12 March 2026. Renews in two years — we will remind you.'
+        : 'Four of the six sits posted this week accept verified sitters only.',
+      cardTickStyle: 'position:absolute;right:-3px;bottom:-3px;width:21px;height:21px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;display:flex;align-items:center;justify-content:center;border:2px solid #faf6ee;' + (badgeDefs.length ? '' : 'display:none;'),
+      badges: badgeDefs.map(b => ({
+        label: b.label,
+        style: 'font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#2f5d45;background:rgba(110,84,56,.14);padding:5px 12px;border-radius:50px;'
+      })),
+      noBadgeStyle: 'font-size:.84rem;color:#8a6a4f;line-height:1.6;margin:0;' + (badgeDefs.length ? 'display:none;' : ''),
+      nudge: verified
+        ? 'ID verified — owners filtering for verified sitters can now see you.'
+        : 'Verified sitters hear back on roughly twice as many applications as unverified ones.'
+    };
+  }
+
+  componentDidMount() {
+    const loader = document.querySelector('[data-loader]');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+      a.addEventListener('click', e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        loader.style.opacity = '1';
+        loader.style.pointerEvents = 'all';
+        clearTimeout(this.hideT);
+        this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+      });
+    });
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); }
+}
+</script>
+</body>
+</html>

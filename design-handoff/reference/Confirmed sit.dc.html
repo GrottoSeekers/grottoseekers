@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 1000px) {
+    [data-topnav] { padding: 14px 24px !important; }
+    [data-pad] { padding: 34px 20px 80px !important; }
+    [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-aside] { position: static !important; }
+    [data-card] { padding: 26px 22px !important; }
+    [data-facts] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-pet] { grid-template-columns: minmax(0,1fr) !important; }
+  }
+  @media print {
+    [data-topnav], [data-noprint] { display: none !important; }
+    body { background: #fff; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="Dashboard.dc.html" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s" style-hover="gap:13px;color:#2f5d45">&larr; Dashboard</a>
+      <a href="Messages.dc.html" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s" style-hover="color:#2c1a0e">Messages</a>
+      <a href="Leave a review.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Leave a review</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Confirmed sit" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1120px;margin:0 auto">
+
+      <div style="background:#2c1a0e;border-radius:20px;padding:38px 40px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap">
+        <div style="min-width:0">
+          <p style="font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Confirmed sit</p>
+          <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#fff;line-height:1.15;margin:0 0 12px">Charlcombe Cottage, <em style="color:#2f5d45;">near Bath</em></h1>
+          <p style="font-size:1rem;color:rgba(255,255,255,.75);line-height:1.7;margin:0">Sun 4 Oct &ndash; Sun 18 Oct 2026 &middot; 14 days &middot; Thomas James &amp; Callum and Niamh</p>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <p style="font-family:'Marcellus',serif;font-size:3.4rem;color:#6e5438;margin:0;line-height:1">20</p>
+          <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:6px 0 0">days to go</p>
+        </div>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:26px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <section data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">01</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The basics</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
+            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">Dates, arrival and keys from the listing &middot; address from Thomas&rsquo;s profile</p>
+            <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:22px 30px">
+              <sc-for list="{{ facts }}" as="f" hint-placeholder-count="6">
+                <div>
+                  <p style="font-size:.72rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#2f5d45;margin:0 0 7px">{{ f.label }}</p>
+                  <p style="font-size:.98rem;color:#2c1a0e;line-height:1.6;margin:0">{{ f.value }}</p>
+                  <p style="{{ f.noteStyle }}">{{ f.note }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <section data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">02</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Care routine</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
+            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">Pets and their routines from Thomas&rsquo;s profile</p>
+            <div style="display:flex;flex-direction:column;gap:18px">
+              <sc-for list="{{ pets }}" as="p" hint-placeholder-count="2">
+                <div data-pet="1" style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:20px;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:22px 24px">
+                  <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+                    <img src="{{ p.photo }}" alt="" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
+                    <p style="font-family:'Marcellus',serif;font-size:1.05rem;color:#2c1a0e;margin:0;text-align:center">{{ p.name }}</p>
+                  </div>
+                  <div style="min-width:0">
+                    <p style="font-size:.8rem;color:#2f5d45;font-weight:600;margin:0 0 14px">{{ p.meta }}</p>
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                      <sc-for list="{{ p.lines }}" as="l" hint-placeholder-count="4">
+                        <div style="display:flex;gap:14px;align-items:baseline">
+                          <span style="font-size:.76rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a6a4f;width:82px;flex-shrink:0">{{ l.when }}</span>
+                          <span style="font-size:.93rem;color:#6b4e35;line-height:1.65">{{ l.what }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <p style="{{ p.warnStyle }}">{{ p.warn }}</p>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <section data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">03</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The house</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
+            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">House notes from Thomas&rsquo;s handover details</p>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ houseNotes }}" as="n" hint-placeholder-count="5">
+                <div style="display:flex;gap:14px;align-items:baseline;padding-bottom:14px;border-bottom:1px solid rgba(44,26,14,.07)">
+                  <span style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;width:110px;flex-shrink:0">{{ n.label }}</span>
+                  <span style="font-size:.95rem;color:#6b4e35;line-height:1.7">{{ n.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+
+          <section data-card="1" style="background:#fff;border:1px solid rgba(185,28,28,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#b91c1c;letter-spacing:.08em">04</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">If something goes wrong</h2></div>
+            <div style="width:40px;height:2px;background:#b91c1c;margin:0 0 26px"></div>
+            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">Vet, neighbour and contact numbers from Thomas&rsquo;s handover details</p>
+            <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:20px 30px">
+              <sc-for list="{{ emergency }}" as="e" hint-placeholder-count="4">
+                <div>
+                  <p style="font-size:.72rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#b91c1c;margin:0 0 7px">{{ e.label }}</p>
+                  <p style="font-size:.98rem;color:#2c1a0e;line-height:1.6;margin:0 0 3px">{{ e.value }}</p>
+                  <p style="font-size:.86rem;color:#6b4e35;line-height:1.6;margin:0">{{ e.note }}</p>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px 26px 28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px">
+              <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">Before the handover</p>
+              <span style="font-size:.78rem;color:#6b4e35">{{ checkCount }}</span>
+            </div>
+            <div style="height:6px;border-radius:50px;background:rgba(44,26,14,.08);overflow:hidden;margin:12px 0 20px">
+              <div style="{{ checkBarStyle }}"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="6">
+                <button type="button" onClick="{{ c.onClick }}" style="{{ c.style }}">
+                  <span style="{{ c.boxStyle }}">✓</span>
+                  <span style="{{ c.labelStyle }}">{{ c.label }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div data-noprint="1" style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Both of you</p>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">
+              <sc-for list="{{ people }}" as="p" hint-placeholder-count="2">
+                <div style="display:flex;gap:13px;align-items:center">
+                  <img src="{{ p.photo }}" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+                  <div style="min-width:0">
+                    <p style="font-size:.95rem;font-weight:600;color:#2c1a0e;margin:0 0 2px">{{ p.name }}</p>
+                    <p style="font-size:.8rem;color:#6b4e35;margin:0">{{ p.role }}</p>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <a href="Messages.dc.html" style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)">Message</a>
+            <button type="button" onClick="{{ onPrint }}" style="width:100%;margin-top:10px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:14px 20px;cursor:pointer;transition:background .25s ease, border-color .25s ease" style-hover="background:rgba(110,84,56,.1);border-color:#2f5d45">Print this pack</button>
+          </div>
+
+          <div data-noprint="1" style="background:#fff;border:1px solid rgba(44,26,14,.1);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 14px">Plans changed?</p>
+            <a href="Messages.dc.html" style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#b91c1c;text-decoration:none;border-bottom:1px solid rgba(185,28,28,.35);padding-bottom:2px;transition:color .2s" style-hover="color:#2c1a0e">Cancel this sit</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1220,&quot;height&quot;:960}}">
+const CHECKS = [
+  'Handover call booked',
+  'Arrival time agreed',
+  'Keys arranged',
+  'Vet details confirmed',
+  'Wifi password shared',
+  'Emergency contact swapped'
+];
+
+class Component extends DCLogic {
+  state = { done: { 0: true, 1: true, 3: true } };
+
+  renderVals() {
+    const done = this.state.done;
+    const count = CHECKS.filter((_, i) => done[i]).length;
+
+    return {
+      facts: [
+        { label: 'Dates', value: 'Sun 4 Oct — Sun 18 Oct 2026', note: '14 nights' },
+        { label: 'Arrival', value: 'Sat 3 Oct, 6pm', note: 'Evening before, for handover' },
+        { label: 'Address', value: 'Charlcombe Cottage, Woolley, BA1 8AU', note: 'Edge of the village — 20 minutes into Bath by bus' },
+        { label: 'Keys', value: 'Handed over in person', note: 'Set on the listing · spare set with Angela at the next cottage' },
+        { label: 'Pets', value: 'Solomon & Chester — two cocker spaniels', note: '' },
+        { label: 'Owner away in', value: 'Porto, Portugal', note: 'One hour ahead, reachable all day' }
+      ].map(f => ({ ...f, noteStyle: 'font-size:.86rem;color:#6b4e35;line-height:1.6;margin:5px 0 0;' + (f.note ? '' : 'display:none;') })),
+
+      pets: [
+        {
+          name: 'Solomon', photo: 'public/images/solomon-1.jpg', meta: 'Cocker spaniel · 6 years · soft, sociable, endlessly hopeful about food',
+          lines: [
+            { when: '7:30am', what: 'Breakfast, one scoop. Joint supplement stirred through it.' },
+            { when: 'Morning', what: '40 minutes on the field path. He walks well off-lead and comes back.' },
+            { when: '5:30pm', what: 'Dinner, one scoop.' },
+            { when: 'Evening', what: 'Ten minutes round the lane, then the kitchen bed.' }
+          ],
+          warn: 'Livestock in the field past the gate — both dogs on the lead from there.'
+        },
+        {
+          name: 'Chester', photo: 'public/images/chester-1.jpg', meta: 'Cocker spaniel · 3 years · full of beans, lives for the garden',
+          lines: [
+            { when: '7:30am', what: 'Breakfast alongside Solomon, one scoop.' },
+            { when: 'All day', what: 'In and out of the walled garden on his own. He will let you know.' },
+            { when: '5:30pm', what: 'Dinner, then the kitchen bed at night.' }
+          ],
+          warn: 'Keep him on the lead near livestock — he does not have Solomon’s recall.'
+        }
+      ].map(p => ({ ...p, warnStyle: 'font-size:.88rem;color:#b91c1c;font-weight:600;line-height:1.65;margin:14px 0 0;' + (p.warn ? '' : 'display:none;') })),
+
+      houseNotes: [
+        { label: 'Wifi', value: 'CharlcombeCottage · password shared at handover' },
+        { label: 'Heating', value: 'Thermostat in the hall, set it how you like. Log fire in the sitting room — basket by the door, more logs in the lean-to.' },
+        { label: 'Bins', value: 'Out Tuesday night. Green box fortnightly, odd weeks.' },
+        { label: 'Post', value: 'Pile it on the hall table, nothing needs opening.' },
+        { label: 'Parking', value: 'Off-street space beside the gate. No car needed — the bus into Bath is a two-minute walk.' },
+        { label: 'The garden gate', value: 'Needs a firm push to latch. Solomon knows when it has not.' }
+      ],
+
+      emergency: [
+        { label: 'Vet', value: 'Bath Veterinary Group', note: '01225 832 521 · 8 Cleveland Place · registered in Solomon and Chester’s names' },
+        { label: 'Out of hours vet', value: 'Vets Now Bristol', note: '0117 916 6969 · 24 hours' },
+        { label: 'Neighbour', value: 'Angela, next cottage along', note: '07700 900 118 · has a spare key and knows the dogs' },
+        { label: 'Owner', value: 'Thomas James', note: '07700 900 204 · WhatsApp is fastest' }
+      ],
+
+      checkCount: count + ' of ' + CHECKS.length + ' done',
+      checkBarStyle: 'height:100%;width:' + Math.round((count / CHECKS.length) * 100) + '%;border-radius:50px;background:linear-gradient(90deg,#2f5d45,#c4ab8a);transition:width .4s ease',
+      checklist: CHECKS.map((label, i) => {
+        const on = !!done[i];
+        return {
+          label,
+          style: 'display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:\'Montserrat\',sans-serif;background:none;border:none;padding:2px 0;cursor:pointer',
+          boxStyle: 'width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0;transition:background .2s ease, color .2s ease, border-color .2s ease;' +
+            (on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:transparent;border:1.5px solid rgba(44,26,14,.18);'),
+          labelStyle: 'font-size:.93rem;line-height:1.5;transition:color .2s ease;' + (on ? 'color:#8a6a4f;text-decoration:line-through;' : 'color:#2c1a0e;'),
+          onClick: () => this.setState(s => ({ done: { ...s.done, [i]: !s.done[i] } }))
+        };
+      }),
+
+      people: [
+        { name: 'Thomas James', role: 'Owner · Woolley, near Bath', photo: 'public/images/couple-dinner-1.jpg' },
+        { name: 'Callum & Niamh', role: 'Sitters · 41 sits', photo: 'public/images/couple-bw-1.jpg' }
+      ],
+
+      onPrint: () => window.print()
+    };
+  }
+
+  componentDidMount() {
+    const loader = document.querySelector('[data-loader]');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+      a.addEventListener('click', e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        loader.style.opacity = '1';
+        loader.style.pointerEvents = 'all';
+        clearTimeout(this.hideT);
+        this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+      });
+    });
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); }
+}
+</script>
+</body>
+</html>
