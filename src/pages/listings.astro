@@ -1,49 +1,147 @@
 ---
-export const prerender = false;
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../lib/auth';
+import {
+  supabase,
+} from
+  '../lib/supabase';
 
-import { getSession } from '../../lib/auth';
-import { supabase } from '../../lib/supabase';
+const sess =
+  await getSession(
+    Astro.request,
+  );
 
-const session = await getSession(Astro.request);
+const { data: raw } =
+  await supabase
+    .from('listings')
+    .select(
+      'id, title,' +
+      ' description,' +
+      ' date_from,' +
+      ' date_to,' +
+      ' profiles!inner(' +
+      'name, location,' +
+      ' slug,' +
+      ' profile_pic,' +
+      ' pets_json,' +
+      ' hero_images_json)',
+    )
+    .eq('status', 'active')
+    .gte(
+      'date_to',
+      new Date()
+        .toISOString()
+        .slice(0, 10),
+    )
+    .order(
+      'date_from',
+      {ascending: true},
+    );
 
-const { data: rawListings } = await supabase
-  .from('listings')
-  .select('id, title, description, date_from, date_to, profiles!inner(name, location, slug, profile_pic, pets_json, hero_images_json)')
-  .eq('status', 'active')
-  .gte('date_to', new Date().toISOString().slice(0, 10))
-  .order('date_from', { ascending: true });
-
-function daysBetween(from: string, to: string) {
-  const ms = new Date(to + 'T00:00:00').getTime() - new Date(from + 'T00:00:00').getTime();
-  return Math.ceil(ms / 86400000);
+function daysBetween(
+  from: string,
+  to: string,
+) {
+  const sfx = 'T00:00:00';
+  const t0 =
+    new Date(from + sfx)
+      .getTime();
+  const t1 =
+    new Date(to + sfx)
+      .getTime();
+  const ms = t1 - t0;
+  return Math.ceil(
+    ms / 86400000,
+  );
 }
 
-function fmtDate(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+function fmtDate(
+  d: string,
+) {
+  return new Date(
+    d + 'T00:00:00',
+  ).toLocaleDateString(
+    'en-GB',
+    {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    },
+  );
 }
 
-const listings = (rawListings ?? []).map((l: any) => {
+function mapSit(l: any) {
   const lp = l.profiles;
-  const pets: any[] = Array.isArray(lp?.pets_json) ? lp.pets_json : [];
-  const hero: any[] = Array.isArray(lp?.hero_images_json) ? lp.hero_images_json : [];
-  const days = daysBetween(l.date_from, l.date_to);
+  const pj = lp?.pets_json;
+  const hj =
+    lp?.hero_images_json;
+  const pets: any[] =
+    Array.isArray(pj)
+      ? pj : [];
+  const hero: any[] =
+    Array.isArray(hj)
+      ? hj : [];
+  const days =
+    daysBetween(
+      l.date_from,
+      l.date_to,
+    );
+  function pstr(p: any) {
+    const t = p.type || '';
+    const s = t
+      ? ' (' + t + ')'
+      : '';
+    return p.name + s;
+  }
+  const petList =
+    pets.map(pstr)
+      .join(', ');
+  const ptypes =
+    pets.map(
+      (p: any) =>
+        (p.type || '')
+          .toLowerCase(),
+    );
+  const dates =
+    fmtDate(l.date_from) +
+    ' — ' +
+    fmtDate(l.date_to);
+  const dur =
+    days + (
+      days === 1
+        ? ' day' : ' days'
+    );
   return {
     id: l.id,
     title: l.title,
-    description: l.description || '',
-    owner: lp?.name || '',
-    location: lp?.location || '',
-    slug: lp?.slug || '',
-    pic: lp?.profile_pic || '',
-    heroImg: hero.length > 0 ? hero[0].src : '',
-    pets: pets.map((p: any) => p.name + (p.type ? ' (' + p.type + ')' : '')).join(', '),
-    petTypes: pets.map((p: any) => (p.type || '').toLowerCase()),
-    dates: fmtDate(l.date_from) + ' — ' + fmtDate(l.date_to),
+    description:
+      l.description || '',
+    owner:
+      lp?.name || '',
+    location:
+      lp?.location || '',
+    slug:
+      lp?.slug || '',
+    pic:
+      lp?.profile_pic
+        || '',
+    heroImg:
+      hero.length > 0
+        ? hero[0].src : '',
+    pets: petList,
+    petTypes: ptypes,
+    dates,
     dateFrom: l.date_from,
     days,
-    duration: days + (days === 1 ? ' day' : ' days'),
+    duration: dur,
   };
-});
+}
+const listings =
+  (raw ?? [])
+    .map(mapSit);
 ---
 
 <!DOCTYPE html>
@@ -70,15 +168,21 @@ const listings = (rawListings ?? []).map((l: any) => {
     @media (max-width:1000px) {
       [data-header-nav] { display:none !important; }
       [data-page-pad] { padding-left:24px !important; padding-right:24px !important; }
-      [data-topbar] { padding:16px 24px !important; }
+      [data-topbar] { padding: 16px 24px !important; }
     }
     input:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; }
     select:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; }
     .sit-card:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.1) !important; border-color:rgba(110,84,56,.45) !important; }
     #filter-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
-    #nav-getstarted:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px); }
-    #footer-signup:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px); }
-    footer a:hover { color:#c4ab8a !important; }
+    #nav-getstarted:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36) !important; }
+    #nav-getstarted:active { transform:translateY(0) scale(.98); }
+    #footer-signup:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36) !important; }
+    #footer-signup:active { transform:translateY(0) scale(.98); }
+    [data-header-nav] a:hover { color:#2f5d45; }
+    #clearBtn:hover { color:#2c1a0e; }
+    footer a[href="#privacy"]:hover,
+    footer a[href="#terms"]:hover { color:#c4ab8a; }
+    #empty-state:hover { box-shadow:0 10px 34px rgba(44,26,14,.08); border-color:rgba(110,84,56,.4); }
   </style>
 </head>
 <body>
@@ -97,18 +201,18 @@ const listings = (rawListings ?? []).map((l: any) => {
       <img src="/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
       <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
         <span style="color:#2f5d45;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
       </span>
     </a>
     <nav data-header-nav="1" style="display:flex;align-items:center;gap:32px;flex-wrap:nowrap">
       <a href="/" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Home</a>
       <a href="/listings" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;border-bottom:2px solid #2f5d45;padding-bottom:3px">Browse sits</a>
-      {session ? (
+      {sess ? (
         <a href="/dashboard" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Dashboard</a>
       ) : (
         <a href="/login" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Log in</a>
       )}
-      {session ? (
+      {sess ? (
         <a href="/dashboard" id="nav-getstarted" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s">Go to dashboard</a>
       ) : (
         <a href="/signup" id="nav-getstarted" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s">Get started</a>
@@ -120,7 +224,7 @@ const listings = (rawListings ?? []).map((l: any) => {
     <div style="max-width:1100px;margin:0 auto">
       <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:56px;align-items:end;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:34px">
         <div>
-          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Available sits</p>
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px">Available sits<span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span></p>
           <h1 style="font-family:'Marcellus',serif;font-size:2.9rem;color:#2c1a0e;line-height:1.15;margin:0">Find your <em style="color:#2f5d45;">next sit</em></h1>
         </div>
         <p style="color:#6b4e35;font-size:1.02rem;line-height:1.8;margin:0 0 6px;padding-left:28px;border-left:2px solid rgba(110,84,56,.35)">Browse homes looking for trusted sitters. Open any listing to see the full details, meet the pets, and get in touch.</p>
@@ -135,7 +239,7 @@ const listings = (rawListings ?? []).map((l: any) => {
           </div>
           <div style="position:relative">
             <label for="place" style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 8px;display:block">Location</label>
-            <select id="place" style="font-family:'Montserrat',sans-serif;font-size:.9rem;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s">
+            <select id="place" style="font-family:'Montserrat',sans-serif;font-size:.9rem;color:#2c1a0e;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s">
               <option value="all">All locations</option>
               <option value="UK">United Kingdom</option>
               <option value="AU">Australia</option>
@@ -144,7 +248,7 @@ const listings = (rawListings ?? []).map((l: any) => {
           </div>
           <div style="position:relative">
             <label for="pet" style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 8px;display:block">Pets</label>
-            <select id="pet" style="font-family:'Montserrat',sans-serif;font-size:.9rem;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s">
+            <select id="pet" style="font-family:'Montserrat',sans-serif;font-size:.9rem;color:#2c1a0e;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s">
               <option value="all">Any pets</option>
               <option value="dog">Dogs</option>
               <option value="cat">Cats</option>
@@ -153,7 +257,7 @@ const listings = (rawListings ?? []).map((l: any) => {
           </div>
           <div style="position:relative">
             <label for="sort" style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 8px;display:block">Sort by</label>
-            <select id="sort" style="font-family:'Montserrat',sans-serif;font-size:.9rem;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s">
+            <select id="sort" style="font-family:'Montserrat',sans-serif;font-size:.9rem;color:#2c1a0e;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:10px;padding:12px 38px 12px 14px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s, box-shadow .2s">
               <option value="soonest">Starting soonest</option>
               <option value="longest">Longest stay</option>
               <option value="shortest">Shortest stay</option>
@@ -171,13 +275,13 @@ const listings = (rawListings ?? []).map((l: any) => {
       </div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:0 0 26px">
-        <p id="countLabel" style="margin:0;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#6b4e35">{listings.length} sits available</p>
+        <p id="countLabel" style="margin:0;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#6b4e35"></p>
         <button type="button" id="clearBtn" style="background:none;border:none;font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;cursor:pointer;padding:4px 0;border-bottom:1px solid rgba(110,84,56,.4);transition:color .2s">Clear filters</button>
       </div>
 
       <div id="grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:24px"></div>
 
-      <div id="emptyState" style="display:none;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:72px 48px;text-align:center;max-width:520px;margin:0 auto">
+      <div id="empty-state" style="display:none;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:72px 48px;text-align:center;max-width:520px;margin:0 auto;transition:box-shadow .3s ease, border-color .3s ease">
         <span style="width:56px;height:56px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M16.5 16.5L21 21"></path></svg></span>
         <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No sits match those filters</h2>
         <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0">Try widening your search — or clear the filters to see everything available.</p>
@@ -211,9 +315,9 @@ const listings = (rawListings ?? []).map((l: any) => {
           </ul>
         </div>
         <div>
-          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Company</h4>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Example profile</h4>
           <ul style="list-style:none;padding:0;margin:0">
-            <li style="margin-bottom:12px"><a href="/" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">About MYAH</a></li>
+            <li style="margin-bottom:12px"><a href="/callum-niamh" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Callum &amp; Niamh</a></li>
           </ul>
         </div>
       </div>
@@ -221,11 +325,11 @@ const listings = (rawListings ?? []).map((l: any) => {
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">
           <span>&copy; 2026 MYAH</span>
           <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
-          <a href="#" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s">Privacy</a>
+          <a href="#privacy" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s">Privacy</a>
           <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
-          <a href="#" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s">Terms</a>
+          <a href="#terms" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s">Terms</a>
         </div>
-        <span style="font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with love for house &amp; pet sitters everywhere</span>
+        <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with <span style="font-style:normal">&#2f7d4f;</span> for house &amp; pet sitters everywhere</span>
       </div>
     </div>
   </footer>
@@ -236,7 +340,7 @@ const listings = (rawListings ?? []).map((l: any) => {
   let state = { q: '', place: 'all', pet: 'all', len: 'any', sort: 'soonest' };
 
   const grid = document.getElementById('grid');
-  const empty = document.getElementById('emptyState');
+  const empty = document.getElementById('empty-state');
   const countLabel = document.getElementById('countLabel');
 
   function chipStyle(on) {
@@ -303,36 +407,34 @@ const listings = (rawListings ?? []).map((l: any) => {
     `).join('');
   }
 
-  // Length chips
   document.querySelectorAll('.len-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       state.len = btn.dataset.len;
-      document.querySelectorAll('.len-chip').forEach(b => { (b as HTMLElement).style.cssText = chipStyle(b.dataset.len === state.len); });
+      document.querySelectorAll('.len-chip').forEach(b => { b.style.cssText = chipStyle(b.dataset.len === state.len); });
       render();
     });
   });
 
-  document.getElementById('q')?.addEventListener('input', e => { state.q = (e.target as HTMLInputElement).value; render(); });
-  document.getElementById('place')?.addEventListener('change', e => { state.place = (e.target as HTMLSelectElement).value; render(); });
-  document.getElementById('pet')?.addEventListener('change', e => { state.pet = (e.target as HTMLSelectElement).value; render(); });
-  document.getElementById('sort')?.addEventListener('change', e => { state.sort = (e.target as HTMLSelectElement).value; render(); });
+  document.getElementById('q')?.addEventListener('input', e => { state.q = e.target.value; render(); });
+  document.getElementById('place')?.addEventListener('change', e => { state.place = e.target.value; render(); });
+  document.getElementById('pet')?.addEventListener('change', e => { state.pet = e.target.value; render(); });
+  document.getElementById('sort')?.addEventListener('change', e => { state.sort = e.target.value; render(); });
   document.getElementById('clearBtn')?.addEventListener('click', () => {
     state = { q: '', place: 'all', pet: 'all', len: 'any', sort: 'soonest' };
-    (document.getElementById('q') as HTMLInputElement).value = '';
-    (document.getElementById('place') as HTMLSelectElement).value = 'all';
-    (document.getElementById('pet') as HTMLSelectElement).value = 'all';
-    (document.getElementById('sort') as HTMLSelectElement).value = 'soonest';
-    document.querySelectorAll('.len-chip').forEach(b => { (b as HTMLElement).style.cssText = chipStyle(b.dataset.len === 'any'); });
+    document.getElementById('q').value = '';
+    document.getElementById('place').value = 'all';
+    document.getElementById('pet').value = 'all';
+    document.getElementById('sort').value = 'soonest';
+    document.querySelectorAll('.len-chip').forEach(b => { b.style.cssText = chipStyle(b.dataset.len === 'any'); });
     render();
   });
 
-  // Loading overlay
-  const loader = document.querySelector('[data-loader]') as HTMLElement | null;
+  const loader = document.querySelector('[data-loader]');
   document.querySelectorAll('a[href]').forEach(a => {
     const href = a.getAttribute('href') || '';
     if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
-    a.addEventListener('click', (e: Event) => {
-      if ((e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey || (e as MouseEvent).shiftKey) return;
+    a.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
       if (loader) { loader.style.opacity = '1'; loader.style.pointerEvents = 'all'; }
     });
   });
@@ -340,7 +442,6 @@ const listings = (rawListings ?? []).map((l: any) => {
     if (e.persisted && loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
   });
 
-  // Initial render
   render();
 </script>
 </body>
