@@ -1,16 +1,36 @@
 ---
-export const prerender = false;
-import { getSession } from '../lib/auth';
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../lib/auth';
+const sess =
+  await getSession(
+    Astro.request,
+  );
+if (sess)
+  return Astro.redirect(
+    '/dashboard',
+  );
 
-const session = await getSession(Astro.request);
-if (session) return Astro.redirect('/dashboard');
-
-const error = Astro.url.searchParams.get('error');
-const errorMessages: Record<string, string> = {
-  missing: 'Please enter your email and password.',
-  invalid: 'Incorrect email or password.',
-};
-const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please try again.') : null;
+const sp =
+  Astro.url.searchParams;
+const e = sp.get('error');
+const missing =
+  'Please enter your' +
+  ' email and password.';
+const invalid =
+  'Incorrect email' +
+  ' or password.';
+const fallback =
+  'Something went wrong.';
+const errTxt = !e
+  ? null
+  : e === 'missing'
+    ? missing
+    : e === 'invalid'
+      ? invalid
+      : fallback;
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -33,8 +53,8 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
     @keyframes gs-ring { to { transform:rotate(360deg); } }
     @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
     @media (max-width:700px) {
-      [data-auth-nav] { padding:14px 24px !important; }
-      [data-auth-card] { padding:34px 26px !important; }
+      [data-auth-nav] { padding: 14px 24px !important; }
+      [data-auth-card] { padding: 34px 26px !important; }
     }
   </style>
 </head>
@@ -54,7 +74,7 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
       <img src="/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
       <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
         <span style="color:#2f5d45;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
       </span>
     </a>
   </nav>
@@ -66,13 +86,13 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
       <div style="width:48px;height:2px;background:#6e5438;margin:20px 0 24px"></div>
       <p style="font-size:.98rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Log in to manage your page, enquiries and sits.</p>
 
-      {errorText && (
+      {errTxt && (
         <div style="background:#fff3f0;border:1px solid rgba(164,68,46,.3);border-radius:10px;padding:14px 16px;margin-bottom:22px;font-size:.9rem;color:#a4442e;line-height:1.5">
-          {errorText}
+          {errTxt}
         </div>
       )}
 
-      <form method="POST" action="/api/auth/login" style="display:flex;flex-direction:column;gap:22px">
+      <form method="POST" action="/api/auth/login" data-login-form="1" style="display:flex;flex-direction:column;gap:22px">
         <label style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;color:#5c3d20;text-transform:uppercase">
           Email address
           <input type="email" name="email" required autocomplete="email" placeholder="you@example.com" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:13px 15px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
@@ -81,12 +101,12 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
         <label style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;color:#5c3d20;text-transform:uppercase">
           Password
           <span style="position:relative;display:block">
-            <input type="password" id="pw-input" name="password" required autocomplete="current-password" placeholder="Your password" style="width:100%;padding:13px 74px 13px 15px;border:1.5px solid rgba(44,26,14,.2);border-radius:10px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
-            <button type="button" id="pw-toggle" aria-label="Show password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#2f5d45;font-size:.74rem;font-weight:600;letter-spacing:.08em;cursor:pointer;padding:4px 8px;text-transform:uppercase;font-family:'Montserrat',sans-serif;transition:color .2s">Show</button>
+            <input type="password" id="pw-input" name="password" data-pw="1" required autocomplete="current-password" placeholder="Your password" style="width:100%;padding:13px 74px 13px 15px;border:1.5px solid rgba(44,26,14,.2);border-radius:10px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <button type="button" id="pw-toggle" data-pw-toggle="1" aria-label="Show password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#2f5d45;font-size:.74rem;font-weight:600;letter-spacing:.08em;cursor:pointer;padding:4px 8px;text-transform:uppercase;font-family:'Montserrat',sans-serif;transition:color .2s">Show</button>
           </span>
         </label>
 
-        <button type="submit" id="login-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:4px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Log in</button>
+        <button type="submit" id="login-btn" data-go="1" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:4px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Log in</button>
       </form>
 
       <p style="margin:26px 0 0;text-align:center;font-size:.92rem;color:#6b4e35">Don't have an account? <a href="/signup" style="color:#2f5d45;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:1px">Sign up</a></p>
@@ -97,6 +117,7 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
 <style>
   #login-btn:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
   #login-btn:active { transform:translateY(0) scale(.98); }
+  [data-pw-toggle]:hover { color:#2c1a0e; }
   input:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; }
 </style>
 
