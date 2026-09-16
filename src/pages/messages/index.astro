@@ -1,8 +1,6 @@
 ---
-import LoadingOverlay from '../../components/LoadingOverlay.astro';
 export const prerender = false;
 
-import '../../styles/global.css';
 import { getSession } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 
@@ -18,337 +16,446 @@ const { data: profile } = await supabase
 if (!profile) return Astro.redirect(session.role === 'owner' ? '/owner/create' : '/profile/create');
 
 const dashUrl = profile.profile_type === 'owner' ? '/owner/dashboard' : '/dashboard';
+const sitsUrl = profile.profile_type === 'owner' ? '/owner/dashboard?tab=sits' : '/dashboard?tab=sits';
 const profileUrl = profile.profile_type === 'owner' ? '/owner/edit' : '/profile/edit';
 ---
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>Messages — MYAH</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-      <a href="/api/auth/logout" class="nav-logout">Log out</a>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" type="image/png" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Messages — MYAH</title>
+  <style>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    input::placeholder { color: rgba(44,26,14,.4); }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @keyframes msg-pop { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: none; } }
+    @keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes toast-out { to { transform: translateX(120%); opacity: 0; } }
+    [data-navlink]:hover { color: #2f5d45 !important; }
+    [data-tabnav]:hover { color: #2f5d45 !important; }
+    [data-viewsit]:hover { background: #2f5d45 !important; color: #fff !important; border-color: #2f5d45 !important; }
+    [data-sendbtn]:hover { background: #3e7a5b !important; border-color: #3e7a5b !important; transform: translateY(-2px) !important; box-shadow: 0 12px 28px rgba(110,84,56,.36) !important; }
+    [data-sendbtn]:active { transform: translateY(0) scale(.96) !important; }
+    [data-msginput]:focus { border-color: #2f5d45 !important; box-shadow: 0 0 0 3px rgba(110,84,56,.15) !important; }
+    [data-convrow]:hover { background: rgba(110,84,56,.06) !important; }
+    @media (max-width: 900px) {
+      [data-topnav] { padding: 12px 24px !important; }
+      [data-msg-pad] { padding: 24px !important; }
+      [data-msg-grid] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-thread] { min-height: 560px !important; }
+    }
+  </style>
+</head>
+<body style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
 
-    <div class="nav-strip">
-      <a href={dashUrl} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
-        <span>Dashboard</span>
-      </a>
-      <a href={dashUrl + '?tab=sits'} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>{profile.profile_type === 'owner' ? 'My Sits' : 'Sits'}</span>
-      </a>
-      <a href="/messages" class="nav-tab active">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-        <span>Messages</span>
-      </a>
-      <a href={profileUrl} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Profile</span>
-      </a>
+  <!-- Loading overlay -->
+  <div id="loader" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
     </div>
+  </div>
 
-    <div id="msgToasts" class="msg-toast-container"></div>
+  <!-- Nav -->
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.18);position:sticky;top:0;z-index:200">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end">
+      <a href={dashUrl} data-navlink="1" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Dashboard</a>
+      <a href="/notifications" data-navlink="1" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Notifications</a>
+      <a href="/api/auth/logout" data-navlink="1" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s">Log out</a>
+    </div>
+  </nav>
 
-    <main class="inbox-wrap">
-      <div class="inbox-container">
-        <header class="inbox-header">
-          <h1>Messages</h1>
-        </header>
+  <!-- Tab bar -->
+  <div style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04)">
+    <a href={dashUrl} data-tabnav="1" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Dashboard</span>
+    </a>
+    <a href={sitsUrl} data-tabnav="1" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Sits</span>
+    </a>
+    <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;color:#2f5d45;position:relative">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Messages</span>
+      <span style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:#2f5d45"></span>
+    </span>
+    <a href={profileUrl} data-tabnav="1" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Profile</span>
+    </a>
+  </div>
 
-        <div class="conv-list" id="convList">
-          <div class="loading">Loading conversations...</div>
+  <!-- Toast container -->
+  <div id="msgToasts" style="position:fixed;top:20px;right:20px;z-index:8000;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
+
+  <main data-msg-pad="1" style="flex:1;padding:40px 48px 60px">
+    <div style="max-width:1100px;margin:0 auto">
+
+      <!-- Header -->
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px;margin-bottom:28px">
+        <div>
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px">
+            <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>
+            Your inbox
+          </p>
+          <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Messages</h1>
         </div>
+        <p id="unreadLabel" style="margin:0 0 4px;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#6b4e35">Loading…</p>
       </div>
-    </main>
 
-    <script define:vars={{ myProfileId: profile.id }}>
-      async function loadConversations() {
-        const list = document.getElementById('convList');
-        try {
-          const res = await fetch('/api/messages/conversations');
-          const data = await res.json();
+      <!-- 2-col grid -->
+      <div data-msg-grid="1" style="display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;align-items:start">
 
-          if (!Array.isArray(data) || data.length === 0) {
-            list.innerHTML = `
-              <div class="empty-inbox">
-                <div class="empty-icon">💬</div>
-                <h2>No messages yet</h2>
-                <p>When you start a conversation, it will appear here.</p>
-              </div>`;
-            return;
-          }
+        <!-- Conversation list -->
+        <div id="convList" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+          <div style="padding:24px;text-align:center;color:#8a6a4f;font-size:.9rem">Loading…</div>
+        </div>
 
-          list.innerHTML = data.map(conv => {
-            const other = conv.other;
-            const lastMsg = conv.last_message;
-            const unread = conv.unread_count > 0;
-            const time = lastMsg ? formatTime(lastMsg.created_at) : '';
-            const preview = lastMsg
-              ? (lastMsg.sender_profile_id === myProfileId ? 'You: ' : '') + truncate(lastMsg.body, 60)
-              : 'No messages yet';
-            const listingLabel = conv.listing?.title ? conv.listing.title : '';
+        <!-- Thread panel -->
+        <div data-thread="1" style="background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;height:640px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
 
-            return `
-              <a href="/messages/${conv.id}" class="conv-item ${unread ? 'unread' : ''}">
-                <div class="conv-avatar-wrap">
-                  ${other?.profile_pic
-                    ? `<img src="${other.profile_pic}" alt="" class="conv-avatar" />`
-                    : `<div class="conv-avatar conv-avatar-placeholder">${(other?.name || '?').charAt(0).toUpperCase()}</div>`
-                  }
-                  ${unread ? '<span class="conv-badge"></span>' : ''}
-                </div>
-                <div class="conv-content">
-                  <div class="conv-top">
-                    <span class="conv-name">${other?.name || 'Unknown'}</span>
-                    <span class="conv-time">${time}</span>
-                  </div>
-                  ${listingLabel ? `<span class="conv-listing">${listingLabel}</span>` : ''}
-                  <p class="conv-preview">${preview}</p>
-                </div>
-              </a>`;
-          }).join('');
-        } catch {
-          list.innerHTML = '<p class="error-msg">Failed to load conversations.</p>';
-        }
+          <!-- Thread header -->
+          <div id="threadHeader" style="display:flex;align-items:center;gap:13px;padding:14px 20px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2);flex-shrink:0">
+            <div style="width:44px;height:44px;border-radius:50%;background:rgba(110,84,56,.12);flex-shrink:0;display:flex;align-items:center;justify-content:center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(110,84,56,.5)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <p style="font-weight:600;font-size:1rem;color:#8a6a4f;margin:0">Select a conversation</p>
+              <p style="font-size:.75rem;color:#8a6a4f;margin:2px 0 0">Choose from the list on the left</p>
+            </div>
+          </div>
+
+          <!-- Messages scroll area -->
+          <div id="threadScroll" data-scroll="1" style="flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:3px">
+            <div style="flex:1;display:flex;align-items:center;justify-content:center">
+              <div style="text-align:center;color:#8a6a4f">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="rgba(110,84,56,.3)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 12px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <p style="font-size:.85rem;margin:0">No conversation selected</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compose form -->
+          <form id="composeForm" data-compose="1" style="display:flex;gap:10px;align-items:center;padding:14px 18px;background:#fff;border-top:1px solid rgba(110,84,56,.2);flex-shrink:0">
+            <input id="msgInput" data-msginput="1" type="text" placeholder="Type a message…" autocomplete="off"
+              style="flex:1;border:1.5px solid rgba(110,84,56,.3);border-radius:50px;padding:13px 20px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <button type="submit" data-sendbtn="1" aria-label="Send message"
+              style="width:48px;height:48px;border-radius:50%;border:1.5px solid #2f5d45;background:#2f5d45;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(110,84,56,.3);transition:background .2s, border-color .2s, transform .12s">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <script define:vars={{ myProfileId: profile.id }}>
+    let activeConvId = null;
+    let conversations = [];
+    let allSeenMsgIds = new Set();
+    let isFirstUnreadCheck = true;
+    let pollTimer = null;
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function esc(str) {
+      const d = document.createElement('div');
+      d.textContent = String(str);
+      return d.innerHTML;
+    }
+
+    function formatTime(iso) {
+      const d = new Date(iso);
+      const now = new Date();
+      const diff = now.getTime() - d.getTime();
+      if (diff < 60000) return 'Now';
+      if (diff < 3600000) return Math.floor(diff / 60000) + 'm';
+      if (diff < 86400000) return d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      if (diff < 604800000) return d.toLocaleDateString('en-GB', { weekday: 'short' });
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+    function truncate(str, len) {
+      return str.length > len ? str.slice(0, len) + '…' : str;
+    }
+
+    // ── Conversation list ─────────────────────────────────────────
+    async function loadConversations() {
+      try {
+        const res = await fetch('/api/messages/conversations');
+        const data = await res.json();
+        conversations = Array.isArray(data) ? data : [];
+        renderConvList();
+        updateUnreadLabel();
+      } catch {}
+    }
+
+    function renderConvList() {
+      const list = document.getElementById('convList');
+      if (!list) return;
+
+      if (conversations.length === 0) {
+        list.innerHTML = `<div style="padding:40px 24px;text-align:center">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="rgba(110,84,56,.3)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" style="display:block;margin:0 auto 14px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <p style="font-family:'Marcellus',serif;font-size:1.1rem;color:#2c1a0e;margin:0 0 8px">No messages yet</p>
+          <p style="font-size:.82rem;color:#6b4e35;margin:0">When you start a conversation, it will appear here.</p>
+        </div>`;
+        return;
       }
 
-      function formatTime(iso) {
-        const d = new Date(iso);
-        const now = new Date();
-        const diff = now.getTime() - d.getTime();
-        if (diff < 60000) return 'Just now';
-        if (diff < 3600000) return Math.floor(diff / 60000) + 'm';
-        if (diff < 86400000) return Math.floor(diff / 3600000) + 'h';
-        if (diff < 604800000) return d.toLocaleDateString('en-GB', { weekday: 'short' });
-        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-      }
+      list.innerHTML = conversations.map(conv => {
+        const other = conv.other;
+        const lastMsg = conv.last_message;
+        const unread = conv.unread_count > 0;
+        const isActive = conv.id === activeConvId;
+        const time = lastMsg ? formatTime(lastMsg.created_at) : '';
+        const preview = lastMsg
+          ? (lastMsg.sender_profile_id === myProfileId ? 'You: ' : '') + truncate(lastMsg.body, 58)
+          : 'No messages yet';
+        const listingLabel = conv.listing?.title || '';
+        const name = other?.name || 'Unknown';
+        const pic = other?.profile_pic || '';
+        const initial = name.charAt(0).toUpperCase();
 
-      function truncate(str, len) {
-        return str.length > len ? str.slice(0, len) + '...' : str;
-      }
+        const borderColor = isActive ? '#2f5d45' : 'transparent';
+        const bgColor = isActive ? 'rgba(110,84,56,.08)' : (unread ? 'rgba(110,84,56,.06)' : '#fff');
+        const previewWeight = unread && !isActive ? 'font-weight:700;color:#5c3d20;' : 'color:#6b4e35;';
 
-      loadConversations();
-      setInterval(loadConversations, 6000);
-
-      // ── TOAST NOTIFICATIONS ──
-      (function() {
-        const seenIds = new Set();
-        let isFirst = true;
-
-        function playNotifSound() {
-          try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.setValueAtTime(660, ctx.currentTime);
-            osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
-            osc.type = 'sine';
-            gain.gain.setValueAtTime(0.08, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.4);
-          } catch {}
-        }
-
-        function esc(str) {
-          const d = document.createElement('div');
-          d.textContent = str;
-          return d.innerHTML;
-        }
-
-        function showToast(msg) {
-          const container = document.getElementById('msgToasts');
-          if (!container) return;
-          const sender = msg.sender || {};
-          const initial = (sender.name || '?').charAt(0).toUpperCase();
-          const avatar = sender.profile_pic
-            ? `<img src="${esc(sender.profile_pic)}" class="msg-toast-avatar" />`
-            : `<div class="msg-toast-avatar-ph">${initial}</div>`;
-          const toast = document.createElement('a');
-          toast.href = `/messages/${msg.conversation_id}`;
-          toast.className = 'msg-toast';
-          toast.innerHTML = `${avatar}<div class="msg-toast-body"><div class="msg-toast-name">${esc(sender.name || 'Someone')}</div><div class="msg-toast-preview">${esc((msg.body || '').slice(0, 80))}</div></div>`;
-          container.appendChild(toast);
-          setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 5000);
-        }
-
-        async function checkUnread() {
-          try {
-            const res = await fetch('/api/messages/unread');
-            const data = await res.json();
-            if (data.messages) {
-              if (!isFirst) {
-                const fresh = data.messages.filter(m => !seenIds.has(m.id));
-                if (fresh.length > 0) {
-                  playNotifSound();
-                  fresh.slice(0, 3).forEach(showToast);
-                }
-              }
-              data.messages.forEach(m => seenIds.add(m.id));
+        return `<button type="button" data-convrow="1" onclick="selectConv('${esc(conv.id)}')"
+          style="display:flex;gap:15px;align-items:center;width:100%;padding:17px 19px;border:none;border-bottom:1px solid rgba(44,26,14,.06);cursor:pointer;font-family:'Montserrat',sans-serif;text-align:left;transition:background .15s;border-left:3px solid ${borderColor};background:${bgColor}">
+          <span style="position:relative;flex-shrink:0">
+            ${pic
+              ? `<img src="${esc(pic)}" alt="" style="width:52px;height:52px;border-radius:50%;object-fit:cover;display:block" />`
+              : `<span style="width:52px;height:52px;border-radius:50%;background:rgba(110,84,56,.15);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:#6b4e35">${esc(initial)}</span>`
             }
-            isFirst = false;
-          } catch {}
+            ${unread ? `<span style="position:absolute;top:-2px;right:-2px;min-width:20px;height:20px;padding:0 5px;border-radius:50px;background:#2f5d45;border:2.5px solid #fff;color:#fff;font-size:.64rem;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1">${conv.unread_count}</span>` : ''}
+          </span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;text-align:left">
+            <span style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+              <span style="font-weight:600;font-size:.95rem;color:#2c1a0e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(name)}</span>
+              <span style="font-size:.74rem;color:#6b4e35;flex-shrink:0">${esc(time)}</span>
+            </span>
+            ${listingLabel ? `<span style="font-size:.72rem;color:#2f5d45;font-weight:600;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(listingLabel)}</span>` : ''}
+            <span style="font-size:.85rem;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;${previewWeight}">${esc(preview)}</span>
+          </span>
+        </button>`;
+      }).join('');
+    }
+
+    function updateUnreadLabel() {
+      const total = conversations.reduce((n, c) => n + (c.unread_count || 0), 0);
+      const el = document.getElementById('unreadLabel');
+      if (el) el.textContent = total > 0 ? total + ' unread' : 'All caught up';
+    }
+
+    // ── Select conversation ───────────────────────────────────────
+    window.selectConv = async function(id) {
+      activeConvId = id;
+      renderConvList();
+      await loadThread(id);
+    };
+
+    async function loadThread(id) {
+      const scroll = document.getElementById('threadScroll');
+      const header = document.getElementById('threadHeader');
+      if (!scroll || !header) return;
+
+      const conv = conversations.find(c => c.id === id);
+      const other = conv?.other;
+      const listing = conv?.listing;
+      const name = other?.name || 'Unknown';
+      const pic = other?.profile_pic || '';
+      const initial = name.charAt(0).toUpperCase();
+      const listingTitle = listing?.title || '';
+      const listingId = listing?.id || '';
+
+      header.innerHTML = `
+        <span style="position:relative;flex-shrink:0">
+          ${pic
+            ? `<img src="${esc(pic)}" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.3)" />`
+            : `<span style="width:44px;height:44px;border-radius:50%;background:rgba(110,84,56,.15);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:#6b4e35;border:2px solid rgba(110,84,56,.3)">${esc(initial)}</span>`
+          }
+        </span>
+        <div style="flex:1;min-width:0">
+          <p style="font-weight:600;font-size:1rem;color:#2c1a0e;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(name)}</p>
+          <p style="font-size:.75rem;color:#2f5d45;font-weight:600;letter-spacing:.03em;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(listingTitle)}</p>
+        </div>
+        ${listingId ? `<a href="/listings/${esc(listingId)}" data-viewsit="1" style="font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border:1.5px solid rgba(110,84,56,.4);border-radius:50px;padding:9px 18px;white-space:nowrap;transition:background .2s, color .2s, border-color .2s">View sit</a>` : ''}
+      `;
+
+      scroll.innerHTML = `<div style="padding:20px;text-align:center;color:#8a6a4f;font-size:.85rem">Loading messages…</div>`;
+
+      try {
+        const res = await fetch(`/api/messages/${id}`);
+        const msgs = await res.json();
+        if (!Array.isArray(msgs)) throw new Error('bad response');
+        renderMessages(msgs);
+        conversations = conversations.map(c => c.id === id ? { ...c, unread_count: 0 } : c);
+        updateUnreadLabel();
+        renderConvList();
+        scrollDown();
+      } catch {
+        scroll.innerHTML = `<div style="padding:20px;text-align:center;color:#c0392b;font-size:.85rem">Failed to load messages.</div>`;
+      }
+    }
+
+    function renderMessages(msgs) {
+      const scroll = document.getElementById('threadScroll');
+      if (!scroll) return;
+
+      if (msgs.length === 0) {
+        scroll.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center">
+          <p style="font-size:.85rem;color:#8a6a4f;text-align:center">No messages yet. Say hello!</p>
+        </div>`;
+        return;
+      }
+
+      const grouped = [];
+      let lastDate = null;
+      msgs.forEach(m => {
+        const d = new Date(m.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+        if (d !== lastDate) { grouped.push({ type: 'date', label: d }); lastDate = d; }
+        grouped.push({ type: 'msg', ...m });
+      });
+
+      scroll.innerHTML = grouped.map(item => {
+        if (item.type === 'date') {
+          return `<div style="text-align:center;margin:4px 0 14px">
+            <span style="background:rgba(110,84,56,.14);color:#5c3d20;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:50px;display:inline-block">${esc(item.label)}</span>
+          </div>`;
         }
+        const mine = item.sender_profile_id === myProfileId;
+        const time = new Date(item.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        const read = !!item.read_at;
+        const bubbleStyle = mine
+          ? 'background:#e9e0d2;border:1px solid rgba(110,84,56,.35);border-bottom-right-radius:5px;'
+          : 'background:#fff;border:1px solid rgba(44,26,14,.08);border-bottom-left-radius:5px;box-shadow:0 1px 2px rgba(44,26,14,.04);';
+        return `<div style="display:flex;padding:0 2px;margin-bottom:6px;justify-content:${mine ? 'flex-end' : 'flex-start'}">
+          <div style="max-width:78%;padding:11px 15px;border-radius:16px;word-wrap:break-word;animation:msg-pop .3s ease;${bubbleStyle}">
+            <span style="font-size:.92rem;line-height:1.55;color:#2c1a0e">${esc(item.body)}</span>
+            <span style="display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:5px">
+              <span style="font-size:.66rem;color:rgba(44,26,14,.45)">${time}</span>
+              ${mine ? `<span style="font-size:.7rem;letter-spacing:-2px;${read ? 'color:#2f5d45' : 'color:rgba(44,26,14,.4)'}">${read ? '✓✓' : '✓'}</span>` : ''}
+            </span>
+          </div>
+        </div>`;
+      }).join('');
+    }
 
-        checkUnread();
-        setInterval(checkUnread, 8000);
-      })();
-    </script>
+    function scrollDown() {
+      const box = document.getElementById('threadScroll');
+      if (box) requestAnimationFrame(() => { box.scrollTop = box.scrollHeight; });
+    }
 
-    <style is:global>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
+    // ── Send message ─────────────────────────────────────────────
+    document.getElementById('composeForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!activeConvId) return;
+      const input = document.getElementById('msgInput');
+      const body = (input.value || '').trim();
+      if (!body) return;
+      input.value = '';
+      input.focus();
+      try {
+        await fetch('/api/messages/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversationId: activeConvId, body })
+        });
+        await loadThread(activeConvId);
+      } catch {}
+    });
 
-      /* ── TOAST NOTIFICATIONS ──────────────────────────────── */
-      .msg-toast-container {
-        position: fixed; top: 20px; right: 20px; z-index: 1000;
-        display: flex; flex-direction: column; gap: 10px; pointer-events: none;
-      }
-      .msg-toast {
-        background: #fff; border-radius: 14px; padding: 14px 18px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
-        display: flex; gap: 12px; align-items: center;
-        pointer-events: auto; cursor: pointer; text-decoration: none; color: inherit;
-        transform: translateX(120%); animation: toast-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
-        max-width: 380px; border-left: 4px solid var(--myah-forest, #2f5d45);
-      }
-      .msg-toast.toast-out { animation: toast-out 0.3s ease forwards; }
-      @keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-      @keyframes toast-out { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
-      .msg-toast-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-      .msg-toast-avatar-ph {
-        width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
-        background: rgba(47,93,69,0.12); color: var(--myah-forest, #2f5d45);
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 1rem; font-family: "Marcellus", serif;
-      }
-      .msg-toast-body { flex: 1; min-width: 0; }
-      .msg-toast-name { font-weight: 700; font-size: 0.88rem; color: var(--brown-dark, #2c1a0e); }
-      .msg-toast-preview { font-size: 0.82rem; color: var(--text-soft, #6b4e35); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      nav {
-        position: static; border-bottom: 1px solid rgba(47,93,69,0.15);
-        padding: 14px 48px; display: flex; justify-content: space-between;
-        align-items: center; background: #fff; backdrop-filter: none;
-      }
-      .nav-logout {
-        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--myah-forest); text-decoration: none;
-      }
-      .nav-logout:hover { color: var(--myah-ink); }
+    // ── Page nav loading overlay ──────────────────────────────────
+    const loader = document.getElementById('loader');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('/api')) return;
+      a.addEventListener('click', e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        if (loader) { loader.style.opacity = '1'; loader.style.pointerEvents = 'all'; }
+      });
+    });
 
-      .nav-strip {
-        display: flex; background: #fff;
-        border-bottom: 1px solid rgba(44,26,14,0.08);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        position: sticky; top: 0; z-index: 10;
-      }
-      .nav-tab {
-        flex: 1; display: flex; flex-direction: column;
-        align-items: center; gap: 3px;
-        padding: 10px 4px 8px;
-        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.02em;
-        color: #aaa; text-decoration: none;
-        border: none; background: none; cursor: pointer;
-        position: relative; transition: color 0.2s;
-        font-family: "Lato", sans-serif;
-      }
-      .nav-tab:hover { color: var(--myah-forest); }
-      .nav-tab.active { color: var(--myah-forest); }
-      .nav-tab.active::after {
-        content: ''; position: absolute;
-        bottom: 0; left: 20%; right: 20%;
-        height: 3px; background: var(--myah-forest);
-        border-radius: 3px 3px 0 0;
-      }
+    // ── Toast notifications ───────────────────────────────────────
+    function playNotifSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(660, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+      } catch {}
+    }
 
-      .inbox-wrap { flex: 1; display: flex; justify-content: center; padding: 24px; }
-      .inbox-container { width: 100%; max-width: 680px; }
+    function showToast(msg) {
+      const container = document.getElementById('msgToasts');
+      if (!container) return;
+      const sender = msg.sender || {};
+      const initial = (sender.name || '?').charAt(0).toUpperCase();
+      const avatarHtml = sender.profile_pic
+        ? `<img src="${esc(sender.profile_pic)}" alt="" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0" />`
+        : `<span style="width:42px;height:42px;border-radius:50%;background:rgba(110,84,56,.15);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.95rem;color:#6b4e35;flex-shrink:0">${esc(initial)}</span>`;
+      const toast = document.createElement('a');
+      toast.href = '#';
+      toast.onclick = (e) => { e.preventDefault(); selectConv(msg.conversation_id); toast.remove(); };
+      toast.style.cssText = 'background:#fff;border-radius:14px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08);display:flex;gap:12px;align-items:center;pointer-events:auto;cursor:pointer;text-decoration:none;color:inherit;max-width:380px;border-left:4px solid #2f5d45;animation:toast-in .4s cubic-bezier(.34,1.56,.64,1) forwards';
+      toast.innerHTML = `${avatarHtml}<div style="min-width:0"><div style="font-weight:600;font-size:.88rem;color:#2c1a0e;margin-bottom:2px">${esc(sender.name || 'Someone')}</div><div style="font-size:.8rem;color:#6b4e35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px">${esc((msg.body || '').slice(0, 80))}</div></div>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.style.animation = 'toast-out .3s ease forwards'; setTimeout(() => toast.remove(), 300); }, 5000);
+    }
 
-      .inbox-header {
-        padding: 16px 0 24px; display: flex; justify-content: space-between; align-items: center;
-      }
-      .inbox-header h1 {
-        font-family: "Marcellus", serif; font-size: 1.8rem; color: var(--myah-ink);
-      }
+    async function checkUnread() {
+      try {
+        const res = await fetch('/api/messages/unread');
+        const data = await res.json();
+        if (data.messages) {
+          if (!isFirstUnreadCheck) {
+            const fresh = data.messages.filter(m => !allSeenMsgIds.has(m.id) && m.conversation_id !== activeConvId);
+            if (fresh.length > 0) {
+              playNotifSound();
+              fresh.slice(0, 3).forEach(showToast);
+              await loadConversations();
+              if (activeConvId) await loadThread(activeConvId);
+            }
+          }
+          data.messages.forEach(m => allSeenMsgIds.add(m.id));
+        }
+        isFirstUnreadCheck = false;
+      } catch {}
+    }
 
-      .conv-list { display: flex; flex-direction: column; }
+    // ── Init ──────────────────────────────────────────────────────
+    loadConversations();
+    setInterval(loadConversations, 15000);
+    checkUnread();
+    setInterval(checkUnread, 8000);
+  </script>
 
-      .conv-item {
-        display: flex; gap: 16px; align-items: center;
-        padding: 18px 20px; background: #fff; text-decoration: none; color: inherit;
-        border-bottom: 1px solid rgba(44,26,14,0.06);
-        transition: background 0.15s;
-      }
-      .conv-item:first-child { border-radius: 16px 16px 0 0; }
-      .conv-item:last-child { border-radius: 0 0 16px 16px; border-bottom: none; }
-      .conv-item:only-child { border-radius: 16px; }
-      .conv-item:hover { background: #faf6ee; }
-      .conv-item.unread { background: #fffdf5; }
-
-      .conv-avatar-wrap { position: relative; flex-shrink: 0; }
-      .conv-avatar {
-        width: 52px; height: 52px; border-radius: 50%; object-fit: cover;
-      }
-      .conv-avatar-placeholder {
-        display: flex; align-items: center; justify-content: center;
-        background: rgba(47,93,69,0.12); color: var(--myah-forest);
-        font-family: "Marcellus", serif; font-size: 1.2rem; font-weight: 700;
-      }
-      .conv-badge {
-        position: absolute; top: 0; right: 0;
-        width: 14px; height: 14px; border-radius: 50%;
-        background: var(--myah-forest); border: 2.5px solid #fff;
-      }
-
-      .conv-content { flex: 1; min-width: 0; }
-      .conv-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
-      .conv-name { font-weight: 700; font-size: 0.95rem; color: var(--myah-ink); }
-      .unread .conv-name { color: var(--myah-ink); }
-      .conv-time { font-size: 0.78rem; color: var(--myah-tan); flex-shrink: 0; }
-      .conv-listing {
-        display: inline-block; font-size: 0.72rem; color: var(--myah-forest); font-weight: 600;
-        margin-bottom: 4px;
-      }
-      .conv-preview {
-        font-size: 0.85rem; color: var(--myah-tan); line-height: 1.4;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-      .unread .conv-preview { color: var(--myah-tan); font-weight: 600; }
-
-      .loading { padding: 60px; text-align: center; color: var(--myah-tan); font-size: 0.9rem; }
-      .error-msg { padding: 40px; text-align: center; color: #b91c1c; font-size: 0.9rem; }
-
-      .empty-inbox {
-        background: #fff; border-radius: 16px; padding: 80px 40px; text-align: center;
-        box-shadow: 0 2px 12px rgba(44,26,14,0.05);
-      }
-      .empty-icon { font-size: 3rem; margin-bottom: 16px; }
-      .empty-inbox h2 { font-family: "Marcellus", serif; font-size: 1.4rem; color: var(--myah-ink); margin-bottom: 8px; }
-      .empty-inbox p { font-size: 0.92rem; color: var(--myah-tan); }
-
-      @media (max-width: 768px) {
-        nav { padding: 10px 16px; }
-        .nav-tab { padding: 7px 4px 6px; font-size: 0.62rem; }
-        .nav-tab svg { width: 18px; height: 18px; }
-        .inbox-wrap { padding: 16px; }
-        .inbox-header h1 { font-size: 1.4rem; }
-        .conv-item { padding: 14px 16px; gap: 12px; }
-        .conv-avatar { width: 44px; height: 44px; }
-      }
-    </style>
-    <LoadingOverlay />
 </body>
 </html>
