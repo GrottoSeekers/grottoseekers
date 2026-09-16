@@ -97,7 +97,7 @@ try {
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
       <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
         <span style="color:#2f5d45;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
       </span>
     </a>
     <div style="display:flex;align-items:center;gap:22px">
@@ -383,7 +383,7 @@ function renderCalendar() {
       else style += 'background:#faf6ee;color:#6b4e35;border:1.5px solid rgba(44,26,14,.08);';
       return `<button type="button" data-day="${c.k}" style="${style}" onmousedown="startDrag('${c.k}')" onmouseenter="onEnter('${c.k}')">${c.day}</button>`;
     }).join('');
-    const wds = WEEKDAYS.map(w => `<span style="text-align:center;font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a6a4f">${w}</span>`).join('');
+    const wds = WEEKDAYS.map(w => `<span style="text-align:center;font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6e5438">${w}</span>`).join('');
     return `<div>
       <p style="font-family:'Marcellus',serif;font-size:1.12rem;color:#2c1a0e;margin:0 0 14px">${label}</p>
       <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px">${wds}</div>

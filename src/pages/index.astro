@@ -21,11 +21,12 @@ export const prerender = true;
     a:hover { color:#2c1a0e; }
     @keyframes gs-ring { to { transform:rotate(360deg); } }
     @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    figure:hover { transform:translateY(-6px); background:rgba(255,255,255,.07); border-color:rgba(196,171,138,.4); }
 
     @media (max-width:1000px) {
       [data-header-nav] { display:none !important; }
       [data-burger] { display:flex !important; }
-      header[data-site-header] { padding:16px 24px !important; background:rgba(250,246,238,.97) !important; backdrop-filter:blur(12px); }
+      header[data-site-header] { padding: 16px 24px !important; background:rgba(250,246,238,.97) !important; backdrop-filter:blur(12px); }
       header[data-site-header] [data-nav-logo] { color:#2c1a0e !important; }
       header[data-site-header] [data-burger-bar] { background:#2c1a0e !important; }
 
@@ -466,7 +467,7 @@ export const prerender = true;
       if (logoImg) logoImg.src = on ? '/images/logo-mark.png' : '/images/logo-mark-white.png';
       if (logoWord) logoWord.style.color = on ? '#6e5438' : '#e9e0d2';
       if (logoTag) {
-        logoTag.style.color = on ? '#8a6a4f' : 'rgba(255,255,255,.82)';
+        logoTag.style.color = on ? '#6e5438' : 'rgba(255,255,255,.82)';
         logoTag.style.textShadow = on ? 'none' : '0 1px 8px rgba(44,26,14,.55)';
       }
       navLinks.forEach(a => {

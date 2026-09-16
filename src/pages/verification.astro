@@ -107,7 +107,7 @@ const STEPS = [
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
       <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
         <span style="color:#2f5d45;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
       </span>
     </a>
     <div style="display:flex;align-items:center;gap:22px">
@@ -172,7 +172,7 @@ const STEPS = [
                           <div style={`border-radius:12px;padding:18px 18px 20px;border:1px solid rgba(44,26,14,.1);${done ? 'background:rgba(47,93,69,.06);border-color:rgba(47,93,69,.25);' : 'background:#faf6ee;'}`}>
                             <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
                               <span style={`width:22px;height:22px;border-radius:50%;font-size:.72rem;font-weight:600;display:flex;align-items:center;justify-content:center;${done ? 'background:#2f5d45;color:#fff;' : 'background:rgba(44,26,14,.1);color:#6b4e35;'}`}>{done ? '✓' : g.num}</span>
-                              <span style={`font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;${done ? 'color:#2f5d45;' : 'color:#8a6a4f;'}`}>{done ? 'Done' : 'Pending'}</span>
+                              <span style={`font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;${done ? 'color:#2f5d45;' : 'color:#6e5438;'}`}>{done ? 'Done' : 'Pending'}</span>
                             </div>
                             <p style="font-size:.88rem;font-weight:700;color:#2c1a0e;margin:0 0 4px">{g.title}</p>
                             <p style="font-size:.82rem;color:#6b4e35;line-height:1.6;margin:0">{g.body}</p>
@@ -189,7 +189,7 @@ const STEPS = [
                         {step.actionLabel}
                       </button>
                       {!isVerified && !isPending && (
-                        <span style="font-size:.84rem;color:#8a6a4f">Takes about 2 minutes</span>
+                        <span style="font-size:.84rem;color:#6e5438">Takes about 2 minutes</span>
                       )}
                     </div>
                   </div>
@@ -285,7 +285,7 @@ const STEPS = [
                   <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:rgba(110,84,56,.14);color:#5c3d20">Selfie verified</span>
                 )}
                 {idStatus !== 'verified' && selfieStatus !== 'verified' && (
-                  <p style="font-size:.82rem;color:#8a6a4f;margin:0">No badges yet &mdash; owners see a plain card.</p>
+                  <p style="font-size:.82rem;color:#6e5438;margin:0">No badges yet &mdash; owners see a plain card.</p>
                 )}
               </div>
             </div>

@@ -192,7 +192,7 @@ const conversationId = sit?.conversation_id ?? '';
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
       <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
         <span style="color:#2f5d45;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
       </span>
     </a>
     <div style="display:flex;align-items:center;gap:22px">
@@ -250,7 +250,7 @@ const conversationId = sit?.conversation_id ?? '';
               <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The basics</h2>
             </div>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
-            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">Dates, arrival and keys from the listing &middot; address from the owner&rsquo;s profile</p>
+            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Dates, arrival and keys from the listing &middot; address from the owner&rsquo;s profile</p>
             {facts.length > 0 ? (
               <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:22px 30px">
                 {facts.map(f => (
@@ -262,7 +262,7 @@ const conversationId = sit?.conversation_id ?? '';
                 ))}
               </div>
             ) : (
-              <p style="font-size:.93rem;color:#8a6a4f;line-height:1.65;margin:0">Details will appear here once the sit is set up by the owner.</p>
+              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Details will appear here once the sit is set up by the owner.</p>
             )}
           </section>
 
@@ -276,7 +276,7 @@ const conversationId = sit?.conversation_id ?? '';
               <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Care routine</h2>
             </div>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
-            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">Pets and their routines from the owner&rsquo;s profile</p>
+            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Pets and their routines from the owner&rsquo;s profile</p>
             {pets.length > 0 ? (
               <div style="display:flex;flex-direction:column;gap:18px">
                 {pets.map((p: any) => {
@@ -303,7 +303,7 @@ const conversationId = sit?.conversation_id ?? '';
                           <div style="display:flex;flex-direction:column;gap:10px">
                             {lines.map((l: any) => (
                               <div style="display:flex;gap:14px;align-items:baseline">
-                                <span style="font-size:.76rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a6a4f;width:82px;flex-shrink:0">{l.when ?? l.time}</span>
+                                <span style="font-size:.76rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6e5438;width:82px;flex-shrink:0">{l.when ?? l.time}</span>
                                 <span style="font-size:.93rem;color:#6b4e35;line-height:1.65">{l.what ?? l.note}</span>
                               </div>
                             ))}
@@ -317,7 +317,7 @@ const conversationId = sit?.conversation_id ?? '';
                 })}
               </div>
             ) : (
-              <p style="font-size:.93rem;color:#8a6a4f;line-height:1.65;margin:0">Pet care details will be added by the owner before the sit.</p>
+              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Pet care details will be added by the owner before the sit.</p>
             )}
           </section>
 
@@ -331,7 +331,7 @@ const conversationId = sit?.conversation_id ?? '';
               <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The house</h2>
             </div>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
-            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">House notes from the handover details</p>
+            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">House notes from the handover details</p>
             {houseNotesRaw.length > 0 ? (
               <div style="display:flex;flex-direction:column;gap:14px">
                 {houseNotesRaw.map((n: any) => (
@@ -342,7 +342,7 @@ const conversationId = sit?.conversation_id ?? '';
                 ))}
               </div>
             ) : (
-              <p style="font-size:.93rem;color:#8a6a4f;line-height:1.65;margin:0">House notes will appear here once added by the owner.</p>
+              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">House notes will appear here once added by the owner.</p>
             )}
           </section>
 
@@ -353,7 +353,7 @@ const conversationId = sit?.conversation_id ?? '';
               <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">If something goes wrong</h2>
             </div>
             <div style="width:40px;height:2px;background:#b91c1c;margin:0 0 26px"></div>
-            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">Vet, neighbour and contact numbers from the handover details</p>
+            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Vet, neighbour and contact numbers from the handover details</p>
             {emergencyRaw.length > 0 ? (
               <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:20px 30px">
                 {emergencyRaw.map((e: any) => (
@@ -365,7 +365,7 @@ const conversationId = sit?.conversation_id ?? '';
                 ))}
               </div>
             ) : (
-              <p style="font-size:.93rem;color:#8a6a4f;line-height:1.65;margin:0">Emergency contacts will be added by the owner before the sit begins.</p>
+              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Emergency contacts will be added by the owner before the sit begins.</p>
             )}
           </section>
 
@@ -396,7 +396,7 @@ const conversationId = sit?.conversation_id ?? '';
                     onclick={`toggleCheck(${i})`}
                     style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:'Montserrat',sans-serif;background:none;border:none;padding:2px 0;cursor:pointer">
                     <span data-box={i} style={`width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0;transition:background .2s ease, color .2s ease, border-color .2s ease;${on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:transparent;border:1.5px solid rgba(44,26,14,.18);'}`}>&#10003;</span>
-                    <span data-lbl={i} style={`font-size:.93rem;line-height:1.5;transition:color .2s ease;${on ? 'color:#8a6a4f;text-decoration:line-through;' : 'color:#2c1a0e;'}`}>{label}</span>
+                    <span data-lbl={i} style={`font-size:.93rem;line-height:1.5;transition:color .2s ease;${on ? 'color:#6e5438;text-decoration:line-through;' : 'color:#2c1a0e;'}`}>{label}</span>
                   </button>
                 );
               })}
@@ -468,7 +468,7 @@ function toggleCheck(i) {
     box.style.borderColor = on ? '#2f5d45' : 'rgba(44,26,14,.18)';
   }
   if (lbl) {
-    lbl.style.color = on ? '#8a6a4f' : '#2c1a0e';
+    lbl.style.color = on ? '#6e5438' : '#2c1a0e';
     lbl.style.textDecoration = on ? 'line-through' : '';
   }
 

@@ -62,7 +62,7 @@ const initPreviewChip = initDays > 0 ? `${initDays} ${initDays === 1 ? 'day' : '
 const STATUS_DEFS: Array<{ key: string; label: string; colour: string; hint: string }> = [
   { key: 'active', label: 'Active', colour: '#2f5d45', hint: 'Live in browse results — sitters can find it and enquire.' },
   { key: 'filled', label: 'Filled', colour: '#2f7d4f', hint: 'Hidden from browse. Kept on your dashboard for your records.' },
-  { key: 'cancelled', label: 'Cancelled', colour: '#8a6a4f', hint: 'Hidden from browse and marked cancelled to anyone who enquired.' },
+  { key: 'cancelled', label: 'Cancelled', colour: '#6e5438', hint: 'Hidden from browse and marked cancelled to anyone who enquired.' },
 ];
 const currentStatus = listing.status ?? 'active';
 const currentStatusDef = STATUS_DEFS.find(s => s.key === currentStatus) ?? STATUS_DEFS[0];
@@ -125,7 +125,7 @@ const errorMsg = errorMap[error ?? ''] ?? '';
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
       <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
         <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;color:#2f5d45;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
       </span>
     </a>
     <div style="display:flex;align-items:center;gap:22px">

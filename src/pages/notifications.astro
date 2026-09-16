@@ -74,7 +74,7 @@ const unreadCount = notifications.filter(n => !n.read).length;
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
       <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
         <span style="color:#2f5d45;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
       </span>
     </a>
     <div style="display:flex;align-items:center;gap:22px">
@@ -133,7 +133,7 @@ const unreadCount = notifications.filter(n => !n.read).length;
                     <div style="flex:1;min-width:0">
                       <p style={`font-size:.95rem;font-weight:700;color:#2c1a0e;margin:0 0 5px;${!n.read ? '' : 'font-weight:600;'}`}>{n.title || n.message}</p>
                       <p style="font-size:.92rem;color:#6b4e35;line-height:1.7;margin:0 0 4px">{n.body || ''}</p>
-                      <p style="font-size:.79rem;color:#8a6a4f;margin:0">{new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                      <p style="font-size:.79rem;color:#6e5438;margin:0">{new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </div>
                   </div>
                   <div data-actions="1" style="display:flex;align-items:center;gap:10px;padding:20px 22px;justify-content:flex-end;flex-wrap:wrap">
