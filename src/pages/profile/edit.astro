@@ -48,12 +48,15 @@ const savedMsg = saved ? 'Changes saved!' : '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Edit your profile — Grotto Sitters</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>Edit your profile — MYAH</title>
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="" class="nav-logo-img" />Grotto <span>Sitters</span></a>
+      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
       <a href="/api/auth/logout" class="nav-logout">Log out</a>
     </nav>
 
@@ -111,7 +114,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
             <h2>Page preview</h2>
             <a href={`/${profile.slug}`} target="_blank" class="preview-view-link">Open full page</a>
           </div>
-          <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#c8963e'};--pv-accent-light:${t.accent_light || '#e8b96a'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
+          <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#2f5d45'};--pv-accent-light:${t.accent_light || '#3a7356'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
             <!-- Hero -->
             <div class="pv-hero">
               {heroImages.length > 0 ? (
@@ -213,11 +216,11 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 <span>Background</span>
               </div>
               <div class="colour-swatch">
-                <input type="color" name="accent" value={t.accent || '#c8963e'} class="colour-picker" />
+                <input type="color" name="accent" value={t.accent || '#2f5d45'} class="colour-picker" />
                 <span>Accent</span>
               </div>
               <div class="colour-swatch">
-                <input type="color" name="accent_light" value={t.accent_light || '#e8b96a'} class="colour-picker" />
+                <input type="color" name="accent_light" value={t.accent_light || '#3a7356'} class="colour-picker" />
                 <span>Highlight</span>
               </div>
               <div class="colour-swatch">
@@ -478,7 +481,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
               <div class="new-link-box">
                 <p class="new-link-label">Your new review link (copy and send to a pet owner):</p>
                 <div class="share-url">
-                  <input type="text" readonly value={`https://grottositters.com/review/${newToken}`} id="reviewUrl" class="review-link-input" />
+                  <input type="text" readonly value={`https://myah.com/review/${newToken}`} id="reviewUrl" class="review-link-input" />
                   <button type="button" onclick="copyReviewUrl()" class="btn-primary btn-sm copy-review-btn">Copy</button>
                 </div>
               </div>
@@ -498,10 +501,10 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 {reviewRequests.filter((r: any) => r.status === 'pending').map((req: any) => (
                   <div class="item-card pending-card">
                     <div class="item-content">
-                      <p class="item-meta pending-url">grottositters.com/review/{req.token}</p>
+                      <p class="item-meta pending-url">myah.com/review/{req.token}</p>
                       <p class="item-desc">Created {new Date(req.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </div>
-                    <button type="button" class="btn-copy-small" data-url={`https://grottositters.com/review/${req.token}`} onclick={`navigator.clipboard.writeText(this.dataset.url);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)`}>Copy</button>
+                    <button type="button" class="btn-copy-small" data-url={`https://myah.com/review/${req.token}`} onclick={`navigator.clipboard.writeText(this.dataset.url);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)`}>Copy</button>
                   </div>
                 ))}
               </div>
@@ -685,7 +688,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
           files.forEach((file, idx) => {
             const thumb = document.createElement('div');
             thumb.className = 'upload-preview-thumb';
-            thumb.style.cssText = 'position:relative;width:80px;height:60px;border-radius:6px;overflow:hidden;border:2px solid rgba(200,150,62,0.3);flex-shrink:0';
+            thumb.style.cssText = 'position:relative;width:80px;height:60px;border-radius:6px;overflow:hidden;border:2px solid rgba(47,93,69,0.3);flex-shrink:0';
             const img = document.createElement('img');
             img.src = URL.createObjectURL(file);
             img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block';
@@ -824,7 +827,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
 
       document.getElementById('resetColours')?.addEventListener('click', () => {
         const defaults: Record<string, string> = {
-          background: '#faf6ee', accent: '#c8963e', accent_light: '#e8b96a',
+          background: '#faf6ee', accent: '#2f5d45', accent_light: '#3a7356',
           text: '#2c1a0e', text_soft: '#6b4e35',
         };
         for (const [key, val] of Object.entries(defaults)) {
@@ -845,7 +848,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .upload-preview:empty { display: none; }
       .upload-preview-thumb {
         position: relative; width: 80px; height: 60px; border-radius: 6px;
-        overflow: hidden; border: 2px solid rgba(200,150,62,0.3); flex-shrink: 0;
+        overflow: hidden; border: 2px solid rgba(47,93,69,0.3); flex-shrink: 0;
       }
       .upload-preview-thumb img {
         width: 100%; height: 100%; object-fit: cover; display: block;
@@ -860,20 +863,20 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .preview-remove:hover { background: #991b1b; }
     </style>
     <style is:global>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
 
       nav {
         position: static;
-        border-bottom: 1px solid rgba(200,150,62,0.15);
+        border-bottom: 1px solid rgba(47,93,69,0.15);
         padding: 14px 48px;
         display: flex; justify-content: space-between; align-items: center;
         background: #fff; backdrop-filter: none;
       }
       .nav-logout {
         font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--gold); text-decoration: none;
+        text-transform: uppercase; color: var(--myah-forest); text-decoration: none;
       }
-      .nav-logout:hover { color: var(--brown-dark); }
+      .nav-logout:hover { color: var(--myah-ink); }
 
       .nav-strip {
         display: flex; background: #fff;
@@ -891,12 +894,12 @@ const savedMsg = saved ? 'Changes saved!' : '';
         position: relative; transition: color 0.2s;
         font-family: "Lato", sans-serif;
       }
-      .nav-tab:hover { color: var(--gold); }
-      .nav-tab.active { color: var(--gold); }
+      .nav-tab:hover { color: var(--myah-forest); }
+      .nav-tab.active { color: var(--myah-forest); }
       .nav-tab.active::after {
         content: ''; position: absolute;
         bottom: 0; left: 20%; right: 20%;
-        height: 3px; background: var(--gold);
+        height: 3px; background: var(--myah-forest);
         border-radius: 3px 3px 0 0;
       }
 
@@ -906,13 +909,13 @@ const savedMsg = saved ? 'Changes saved!' : '';
         display: flex; justify-content: space-between; align-items: flex-start;
         flex-wrap: wrap; gap: 20px; margin-bottom: 32px;
       }
-      .edit-intro { font-size: 0.9rem; color: var(--text-soft); line-height: 1.6; margin-top: 12px; max-width: 500px; }
+      .edit-intro { font-size: 0.9rem; color: var(--myah-tan); line-height: 1.6; margin-top: 12px; max-width: 500px; }
       .header-actions { display: flex; gap: 12px; align-items: center; }
       .btn-back {
-        font-size: 0.85rem; color: var(--text-soft); text-decoration: none;
+        font-size: 0.85rem; color: var(--myah-tan); text-decoration: none;
         font-weight: 600;
       }
-      .btn-back:hover { color: var(--brown-dark); }
+      .btn-back:hover { color: var(--myah-ink); }
       .btn-sm { padding: 10px 24px; font-size: 0.82rem; }
 
       .success-banner {
@@ -932,10 +935,10 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .section-nav a {
         background: #fff; border: 1.5px solid rgba(44,26,14,0.12);
         border-radius: 6px; padding: 8px 16px; font-size: 0.8rem;
-        font-weight: 700; color: var(--brown-mid); text-decoration: none;
+        font-weight: 700; color: var(--myah-tan); text-decoration: none;
         letter-spacing: 0.04em; transition: all 0.2s;
       }
-      .section-nav a:hover { border-color: var(--gold); color: var(--gold); }
+      .section-nav a:hover { border-color: var(--myah-forest); color: var(--myah-forest); }
 
       .edit-card {
         background: #fff; border-radius: 12px; padding: 36px;
@@ -944,11 +947,11 @@ const savedMsg = saved ? 'Changes saved!' : '';
         scroll-margin-top: 24px;
       }
       .edit-card h2 {
-        font-family: "Playfair Display", serif; font-size: 1.15rem;
-        color: var(--brown-dark); margin-bottom: 8px;
+        font-family: "Marcellus", serif; font-size: 1.15rem;
+        color: var(--myah-ink); margin-bottom: 8px;
       }
       .card-desc {
-        font-size: 0.88rem; color: var(--text-soft); line-height: 1.6;
+        font-size: 0.88rem; color: var(--myah-tan); line-height: 1.6;
         margin-bottom: 24px;
       }
 
@@ -958,10 +961,10 @@ const savedMsg = saved ? 'Changes saved!' : '';
         display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
       }
       .page-preview-header h2 {
-        font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark);
+        font-family: "Marcellus", serif; font-size: 1.2rem; color: var(--myah-ink);
       }
       .preview-view-link {
-        font-size: 0.78rem; font-weight: 700; color: var(--gold);
+        font-size: 0.78rem; font-weight: 700; color: var(--myah-forest);
         text-decoration: none; letter-spacing: 0.04em;
       }
       .preview-view-link:hover { text-decoration: underline; }
@@ -978,7 +981,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .pv-hero-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.5); }
       .pv-hero-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; text-align: center; padding: 16px; }
       .pv-badge { font-size: 0.55rem; background: rgba(255,255,255,0.15); color: #fff; padding: 4px 10px; border-radius: 50px; margin-bottom: 8px; font-weight: 700; letter-spacing: 0.06em; }
-      .pv-brand { font-family: "Playfair Display", serif; font-size: 1.6rem; color: #fff; line-height: 1; }
+      .pv-brand { font-family: "Marcellus", serif; font-size: 1.6rem; color: #fff; line-height: 1; }
       .pv-brand em { color: var(--pv-accent); font-style: italic; }
       .pv-name { font-size: 0.7rem; color: rgba(255,255,255,0.85); font-weight: 700; letter-spacing: 0.06em; margin-top: 6px; }
       .pv-tagline { font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
@@ -993,7 +996,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .pv-empty { font-style: italic; opacity: 0.4; }
 
       .pv-reviews-row { display: flex; gap: 8px; overflow: hidden; }
-      .pv-review-card { flex: 1; min-width: 0; background: var(--pv-bg); border: 1px solid rgba(200,150,62,0.1); border-radius: 8px; padding: 10px; }
+      .pv-review-card { flex: 1; min-width: 0; background: var(--pv-bg); border: 1px solid rgba(47,93,69,0.1); border-radius: 8px; padding: 10px; }
       .pv-stars { color: var(--pv-accent); font-size: 0.5rem; display: block; margin-bottom: 4px; }
       .pv-review-card p { font-size: 0.58rem; color: var(--pv-text-soft); line-height: 1.5; font-style: italic; margin-bottom: 4px; }
       .pv-reviewer { font-size: 0.52rem; font-weight: 700; color: var(--pv-accent); }
@@ -1004,8 +1007,8 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .pv-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
       .pv-platforms-row { display: flex; flex-wrap: wrap; gap: 6px; }
-      .pv-platform-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(200,150,62,0.08); border-radius: 6px; font-size: 0.6rem; font-weight: 600; color: var(--pv-text); }
-      .pv-platform-letter { font-family: "Playfair Display", serif; font-size: 0.55rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; background: var(--pv-accent); color: #fff; display: flex; align-items: center; justify-content: center; }
+      .pv-platform-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(47,93,69,0.08); border-radius: 6px; font-size: 0.6rem; font-weight: 600; color: var(--pv-text); }
+      .pv-platform-letter { font-family: "Marcellus", serif; font-size: 0.55rem; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; background: var(--pv-accent); color: #fff; display: flex; align-items: center; justify-content: center; }
 
       .pv-enquiry-mock { display: flex; flex-direction: column; gap: 5px; max-width: 200px; }
       .pv-mock-field { height: 16px; background: rgba(44,26,14,0.04); border: 1px solid rgba(44,26,14,0.08); border-radius: 3px; }
@@ -1013,7 +1016,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .pv-mock-btn { background: var(--pv-accent); color: #fff; text-align: center; padding: 5px; border-radius: 4px; font-size: 0.5rem; font-weight: 700; }
 
       .pv-footer { background: var(--pv-text, #2c1a0e); padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; }
-      .pv-footer p { font-family: "Playfair Display", serif; font-size: 0.7rem; color: rgba(255,255,255,0.7); }
+      .pv-footer p { font-family: "Marcellus", serif; font-size: 0.7rem; color: rgba(255,255,255,0.7); }
       .pv-footer p em { color: var(--pv-accent); font-style: italic; }
       .pv-footer span { font-size: 0.55rem; color: rgba(255,255,255,0.4); }
 
@@ -1022,7 +1025,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       }
       .contact-divider span {
         font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--text-soft);
+        text-transform: uppercase; color: var(--myah-tan);
       }
 
       .edit-form, .add-form { display: flex; flex-direction: column; gap: 20px; }
@@ -1030,9 +1033,9 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .field { display: flex; flex-direction: column; gap: 6px; }
       .field-sm { max-width: 100px; }
 
-      label { font-size: 0.82rem; font-weight: 700; color: var(--brown-dark); letter-spacing: 0.02em; }
-      .req { color: var(--gold); }
-      .field-hint { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
+      label { font-size: 0.82rem; font-weight: 700; color: var(--myah-ink); letter-spacing: 0.02em; }
+      .req { color: var(--myah-forest); }
+      .field-hint { font-size: 0.78rem; color: var(--myah-tan); line-height: 1.5; }
 
       .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
       .type-option input { position: absolute; opacity: 0; pointer-events: none; }
@@ -1041,19 +1044,19 @@ const savedMsg = saved ? 'Changes saved!' : '';
         padding: 16px 12px; border: 2px solid rgba(44,26,14,0.12); border-radius: 10px;
         cursor: pointer; transition: border-color 0.2s, background 0.2s; text-align: center;
       }
-      .type-card:hover { border-color: var(--gold); background: rgba(200,150,62,0.04); }
-      .type-option input:checked + .type-card { border-color: var(--gold); background: rgba(200,150,62,0.08); }
+      .type-card:hover { border-color: var(--myah-forest); background: rgba(47,93,69,0.04); }
+      .type-option input:checked + .type-card { border-color: var(--myah-forest); background: rgba(47,93,69,0.08); }
       .type-icon { font-size: 1.4rem; }
-      .type-label { font-size: 0.85rem; font-weight: 700; color: var(--brown-dark); }
+      .type-label { font-size: 0.85rem; font-weight: 700; color: var(--myah-ink); }
 
       input[type="text"], input[type="url"], input[type="email"], input[type="tel"], textarea, select {
         width: 100%; box-sizing: border-box;
         border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px;
         padding: 11px 14px; font-size: 0.93rem; font-family: "Lato", sans-serif;
-        color: var(--text); background: var(--cream); outline: none;
+        color: var(--myah-ink); background: var(--myah-paper); outline: none;
         transition: border-color 0.2s;
       }
-      input:focus, textarea:focus, select:focus { border-color: var(--gold); }
+      input:focus, textarea:focus, select:focus { border-color: var(--myah-forest); }
       textarea { resize: vertical; line-height: 1.6; }
 
       .field-row { display: flex; gap: 16px; }
@@ -1062,19 +1065,19 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .form-actions { padding-top: 8px; }
 
       .pic-row { display: flex; align-items: center; gap: 20px; }
-      .current-pic { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(200,150,62,0.3); }
+      .current-pic { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; flex-shrink: 0; border: 2px solid rgba(47,93,69,0.3); }
 
       .file-upload-wrap { position: relative; flex: 1; }
       .file-input { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 2; }
       .file-upload-label {
         display: flex; align-items: center; gap: 10px;
         border: 2px dashed rgba(44,26,14,0.18); border-radius: 8px;
-        padding: 14px 16px; background: var(--cream);
+        padding: 14px 16px; background: var(--myah-paper);
         transition: border-color 0.2s, background 0.2s; cursor: pointer;
       }
-      .file-upload-wrap:hover .file-upload-label { border-color: var(--gold); background: rgba(200,150,62,0.04); }
+      .file-upload-wrap:hover .file-upload-label { border-color: var(--myah-forest); background: rgba(47,93,69,0.04); }
       .file-upload-icon { font-size: 1.2rem; }
-      .file-upload-text { font-size: 0.85rem; color: var(--text-soft); }
+      .file-upload-text { font-size: 0.85rem; color: var(--myah-tan); }
 
       .upload-row { display: flex; gap: 12px; align-items: stretch; }
       .upload-wide { flex: 1; }
@@ -1084,7 +1087,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .upload-save-btn { margin-top: 4px; }
 
       .empty-hint {
-        font-size: 0.88rem; color: var(--text-soft); font-style: italic;
+        font-size: 0.88rem; color: var(--myah-tan); font-style: italic;
         padding: 20px; background: rgba(44,26,14,0.03); border-radius: 8px;
         margin-bottom: 20px; text-align: center; line-height: 1.6;
       }
@@ -1102,14 +1105,14 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .item-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
       .item-card {
         display: flex; gap: 16px; align-items: flex-start;
-        padding: 16px; background: var(--cream); border-radius: 8px;
+        padding: 16px; background: var(--myah-paper); border-radius: 8px;
         border: 1px solid rgba(44,26,14,0.08);
       }
       .item-content { flex: 1; min-width: 0; }
-      .item-quote { font-size: 0.9rem; color: var(--text); line-height: 1.6; font-style: italic; margin-bottom: 6px; }
-      .item-meta { font-size: 0.8rem; color: var(--text-soft); }
-      .item-title { font-size: 0.92rem; font-weight: 700; color: var(--brown-dark); margin-bottom: 4px; }
-      .item-desc { font-size: 0.82rem; color: var(--text-soft); margin-top: 4px; }
+      .item-quote { font-size: 0.9rem; color: var(--myah-ink); line-height: 1.6; font-style: italic; margin-bottom: 6px; }
+      .item-meta { font-size: 0.8rem; color: var(--myah-tan); }
+      .item-title { font-size: 0.92rem; font-weight: 700; color: var(--myah-ink); margin-bottom: 4px; }
+      .item-desc { font-size: 0.82rem; color: var(--myah-tan); margin-top: 4px; }
 
       .delete-form { flex-shrink: 0; }
       .delete-btn {
@@ -1126,8 +1129,8 @@ const savedMsg = saved ? 'Changes saved!' : '';
 
       .add-form { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 24px; }
       .add-form h3 {
-        font-family: "Playfair Display", serif; font-size: 1rem;
-        color: var(--brown-dark); margin-bottom: 16px;
+        font-family: "Marcellus", serif; font-size: 1rem;
+        color: var(--myah-ink); margin-bottom: 16px;
       }
 
       .colour-strip {
@@ -1138,23 +1141,23 @@ const savedMsg = saved ? 'Changes saved!' : '';
       }
       .colour-strip-row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; }
       .colour-swatch { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-      .colour-swatch span { font-size: 0.65rem; font-weight: 600; color: var(--text-soft); letter-spacing: 0.02em; }
+      .colour-swatch span { font-size: 0.65rem; font-weight: 600; color: var(--myah-tan); letter-spacing: 0.02em; }
       .colour-picker {
         width: 38px; height: 38px; border: 2px solid rgba(44,26,14,0.15);
-        border-radius: 50%; cursor: pointer; padding: 2px; background: var(--cream);
+        border-radius: 50%; cursor: pointer; padding: 2px; background: var(--myah-paper);
         flex-shrink: 0; transition: border-color 0.2s, transform 0.15s;
       }
-      .colour-picker:hover { border-color: var(--gold); transform: scale(1.1); }
+      .colour-picker:hover { border-color: var(--myah-forest); transform: scale(1.1); }
       .colour-picker::-webkit-color-swatch-wrapper { padding: 0; }
       .colour-picker::-webkit-color-swatch { border: none; border-radius: 50%; }
       .colour-picker::-moz-color-swatch { border: none; border-radius: 50%; }
       .colour-strip-actions { display: flex; gap: 10px; justify-content: center; }
       .btn-reset-colours {
         background: none; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
-        padding: 8px 16px; font-size: 0.78rem; font-weight: 600; color: var(--text-soft);
+        padding: 8px 16px; font-size: 0.78rem; font-weight: 600; color: var(--myah-tan);
         cursor: pointer; font-family: "Lato", sans-serif; transition: all 0.2s;
       }
-      .btn-reset-colours:hover { border-color: var(--gold); color: var(--brown-dark); }
+      .btn-reset-colours:hover { border-color: var(--myah-forest); color: var(--myah-ink); }
 
       .new-link-box {
         background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px;
@@ -1165,32 +1168,32 @@ const savedMsg = saved ? 'Changes saved!' : '';
       .review-link-input {
         flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
         padding: 10px 14px; font-size: 0.85rem; font-family: "Lato", sans-serif;
-        color: var(--text); background: #fff; outline: none;
+        color: var(--myah-ink); background: #fff; outline: none;
       }
 
       .pending-requests { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 24px; margin-top: 24px; }
       .pending-requests h3 {
-        font-family: "Playfair Display", serif; font-size: 1rem;
-        color: var(--brown-dark); margin-bottom: 4px;
+        font-family: "Marcellus", serif; font-size: 1rem;
+        color: var(--myah-ink); margin-bottom: 4px;
       }
       .pending-requests .card-desc { margin-bottom: 12px; }
-      .pending-card { background: rgba(200,150,62,0.04); }
-      .pending-url { font-family: monospace; font-size: 0.82rem; color: var(--brown-mid); word-break: break-all; }
+      .pending-card { background: rgba(47,93,69,0.04); }
+      .pending-url { font-family: monospace; font-size: 0.82rem; color: var(--myah-tan); word-break: break-all; }
       .btn-copy-small {
-        background: var(--gold); color: #fff; border: none; border-radius: 6px;
+        background: var(--myah-forest); color: #fff; border: none; border-radius: 6px;
         padding: 8px 16px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
         white-space: nowrap; transition: background 0.2s; flex-shrink: 0; align-self: center;
       }
-      .btn-copy-small:hover { background: var(--gold-light); }
+      .btn-copy-small:hover { background: #3a7356; }
 
       .headings-group { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid rgba(44,26,14,0.06); }
       .headings-group:last-of-type { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
       .headings-group-title {
-        font-family: "Playfair Display", serif; font-size: 0.95rem;
-        color: var(--brown-mid); margin-bottom: 4px;
+        font-family: "Marcellus", serif; font-size: 0.95rem;
+        color: var(--myah-tan); margin-bottom: 4px;
       }
       .headings-group-where {
-        font-size: 0.78rem; color: var(--text-soft); margin-bottom: 12px; font-style: italic;
+        font-size: 0.78rem; color: var(--myah-tan); margin-bottom: 12px; font-style: italic;
       }
 
       .save-bar {

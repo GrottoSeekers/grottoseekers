@@ -23,17 +23,20 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Log in — Grotto Sitters</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>Log in — MYAH</title>
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="" class="nav-logo-img" />Grotto <span>Sitters</span></a>
+      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
     </nav>
 
     <main class="auth-wrap">
       <div class="auth-card">
-        <p class="section-label">Grotto Sitters</p>
+        <p class="section-label">MYAH</p>
         <h1 class="section-title">Welcome back</h1>
         <div class="divider"></div>
 
@@ -62,7 +65,7 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
 
     <style>
       body { min-height: 100vh; display: flex; flex-direction: column; }
-      nav { position: static; border-bottom: 1px solid rgba(200,150,62,0.2); padding: 18px 48px; }
+      nav { position: static; border-bottom: 1px solid rgba(47,93,69,0.2); padding: 18px 48px; }
       .auth-wrap {
         flex: 1;
         display: flex;
@@ -99,7 +102,7 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
         font-size: 0.85rem;
         font-weight: 700;
         letter-spacing: 0.06em;
-        color: var(--brown-mid);
+        color: var(--myah-tan);
         text-transform: uppercase;
       }
       .auth-form input {
@@ -108,29 +111,29 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
         padding: 11px 14px;
         font-size: 1rem;
         font-family: "Lato", sans-serif;
-        color: var(--text);
-        background: var(--cream);
+        color: var(--myah-ink);
+        background: var(--myah-paper);
         outline: none;
         transition: border-color 0.2s;
       }
-      .auth-form input:focus { border-color: var(--gold); }
+      .auth-form input:focus { border-color: var(--myah-forest); }
       .auth-footer {
         margin-top: 24px;
         text-align: center;
         font-size: 0.9rem;
-        color: var(--text-soft);
+        color: var(--myah-tan);
       }
-      .auth-footer a { color: var(--gold); font-weight: 700; text-decoration: none; }
+      .auth-footer a { color: var(--myah-forest); font-weight: 700; text-decoration: none; }
       .auth-footer a:hover { text-decoration: underline; }
       .password-wrap { position: relative; }
       .password-wrap input { width: 100%; padding-right: 60px; }
       .pw-toggle {
         position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-        background: none; border: none; color: var(--gold); font-size: 0.78rem;
+        background: none; border: none; color: var(--myah-forest); font-size: 0.78rem;
         font-weight: 700; letter-spacing: 0.04em; cursor: pointer; padding: 4px 8px;
         text-transform: uppercase; font-family: "Lato", sans-serif;
       }
-      .pw-toggle:hover { color: var(--brown-dark); }
+      .pw-toggle:hover { color: var(--myah-ink); }
     </style>
     <script>
       document.querySelectorAll('.pw-toggle').forEach(btn => {

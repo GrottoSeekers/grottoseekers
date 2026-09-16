@@ -14,19 +14,24 @@ const base = import.meta.env.BASE_URL;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Grotto Sitters — Connecting trusted house & pet sitters with home owners worldwide."
+      content="MYAH — Connecting trusted house & pet sitters with home owners worldwide."
     />
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap"
       rel="stylesheet"
     />
     <title>{title}</title>
   </head>
   <body>
     <nav>
-      <a href={`${base}`} class="nav-logo">Grotto <span>Sitters</span></a>
+      <a href={`${base}`} class="nav-logo">
+        <img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH
+      </a>
       <button class="nav-toggle" aria-label="Toggle navigation">
         <span></span>
         <span></span>
@@ -34,7 +39,7 @@ const base = import.meta.env.BASE_URL;
       </button>
       <ul>
         <li class="nav-panel-brand">
-          <a href={`${base}`}>Grotto <span>Sitters</span></a>
+          <a href={`${base}`}>MYAH</a>
         </li>
         <li><a href="#about">About</a></li>
         <li><a href="#services">Services</a></li>
@@ -53,7 +58,9 @@ const base = import.meta.env.BASE_URL;
       <div class="footer-inner">
         <div class="footer-top">
           <div class="footer-brand">
-            <h2>Grotto <span>Sitters</span></h2>
+            <h2>
+              <img src="/images/logo-mark-cream.png" alt="" style="height:32px;width:32px;vertical-align:middle;margin-right:10px;" />MYAH
+            </h2>
             <p>Connecting trusted house &amp; pet sitters with home owners worldwide.</p>
           </div>
           <div class="footer-links">
@@ -89,7 +96,7 @@ const base = import.meta.env.BASE_URL;
           </div>
         </div>
         <div class="footer-bottom">
-          <span>&copy; 2026 Grotto Sitters</span>
+          <span>&copy; 2026 MYAH</span>
           <span>Made with &#128062; for house &amp; pet sitters everywhere</span>
         </div>
       </div>

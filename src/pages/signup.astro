@@ -28,20 +28,23 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Sign up — Grotto Sitters</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>Sign up — MYAH</title>
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="" class="nav-logo-img" />Grotto <span>Sitters</span></a>
+      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
     </nav>
 
     <main class="auth-wrap">
       <div class="auth-card">
-        <p class="section-label">Grotto Sitters</p>
+        <p class="section-label">MYAH</p>
         <h1 class="section-title">Create your account</h1>
         <div class="divider"></div>
-        <p class="auth-intro">Join Grotto Sitters — whether you're offering pet sitting services or looking for a trusted sitter.</p>
+        <p class="auth-intro">Join MYAH — whether you're offering pet sitting services or looking for a trusted sitter.</p>
 
         {errorText && <p class="auth-error">{errorText}</p>}
 
@@ -96,7 +99,7 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
 
     <style>
       body { min-height: 100vh; display: flex; flex-direction: column; }
-      nav { position: static; border-bottom: 1px solid rgba(200,150,62,0.2); padding: 18px 48px; }
+      nav { position: static; border-bottom: 1px solid rgba(47,93,69,0.2); padding: 18px 48px; }
       .auth-wrap {
         flex: 1;
         display: flex;
@@ -114,7 +117,7 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
       }
       .auth-intro {
         font-size: 0.95rem;
-        color: var(--text-soft);
+        color: var(--myah-tan);
         line-height: 1.6;
         margin-bottom: 24px;
       }
@@ -139,7 +142,7 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
         font-size: 0.85rem;
         font-weight: 700;
         letter-spacing: 0.06em;
-        color: var(--brown-mid);
+        color: var(--myah-tan);
         text-transform: uppercase;
       }
       .auth-form input {
@@ -148,23 +151,23 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
         padding: 11px 14px;
         font-size: 1rem;
         font-family: "Lato", sans-serif;
-        color: var(--text);
-        background: var(--cream);
+        color: var(--myah-ink);
+        background: var(--myah-paper);
         outline: none;
         transition: border-color 0.2s;
       }
-      .auth-form input:focus { border-color: var(--gold); }
+      .auth-form input:focus { border-color: var(--myah-forest); }
       .auth-footer {
         margin-top: 24px;
         text-align: center;
         font-size: 0.9rem;
-        color: var(--text-soft);
+        color: var(--myah-tan);
       }
-      .auth-footer a { color: var(--gold); font-weight: 700; text-decoration: none; }
+      .auth-footer a { color: var(--myah-forest); font-weight: 700; text-decoration: none; }
       .auth-footer a:hover { text-decoration: underline; }
 
       .role-picker { margin-bottom: 4px; }
-      .role-label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--brown-mid); text-transform: uppercase; margin-bottom: 10px; }
+      .role-label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--myah-tan); text-transform: uppercase; margin-bottom: 10px; }
       .role-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
       .role-option { cursor: pointer; }
       .role-option input { display: none; }
@@ -173,19 +176,19 @@ const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please
         padding: 20px 12px; border: 2px solid rgba(44,26,14,0.12); border-radius: 10px;
         text-align: center; transition: border-color 0.2s, background 0.2s;
       }
-      .role-option input:checked + .role-card { border-color: var(--gold); background: rgba(200,150,62,0.06); }
+      .role-option input:checked + .role-card { border-color: var(--myah-forest); background: rgba(47,93,69,0.06); }
       .role-icon { font-size: 1.6rem; }
-      .role-name { font-family: "Playfair Display", serif; font-size: 1rem; font-weight: 700; color: var(--brown-dark); }
-      .role-desc { font-size: 0.75rem; color: var(--text-soft); }
+      .role-name { font-family: "Marcellus", serif; font-size: 1rem; font-weight: 700; color: var(--myah-ink); }
+      .role-desc { font-size: 0.75rem; color: var(--myah-tan); }
       .password-wrap { position: relative; }
       .password-wrap input { width: 100%; padding-right: 60px; }
       .pw-toggle {
         position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-        background: none; border: none; color: var(--gold); font-size: 0.78rem;
+        background: none; border: none; color: var(--myah-forest); font-size: 0.78rem;
         font-weight: 700; letter-spacing: 0.04em; cursor: pointer; padding: 4px 8px;
         text-transform: uppercase; font-family: "Lato", sans-serif;
       }
-      .pw-toggle:hover { color: var(--brown-dark); }
+      .pw-toggle:hover { color: var(--myah-ink); }
     </style>
     <script>
       document.querySelectorAll('.pw-toggle').forEach(btn => {

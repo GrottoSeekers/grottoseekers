@@ -35,12 +35,15 @@ const errorMsg = errorMap[errorKey] ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Create your profile — Grotto Sitters</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>Create your profile — MYAH</title>
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="" class="nav-logo-img" />Grotto <span>Sitters</span></a>
+      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
       <div class="nav-right">
         <span class="nav-email">{session.email}</span>
         <a href="/api/auth/logout" class="nav-logout">Log out</a>
@@ -96,7 +99,7 @@ const errorMsg = errorMap[errorKey] ?? '';
             <div class="field">
               <label for="slug">Your profile URL <span class="req">*</span></label>
               <div class="slug-wrap">
-                <span class="slug-prefix">grottositters.com/</span>
+                <span class="slug-prefix">myah.com/</span>
                 <input type="text" id="slug" name="slug" placeholder="yourname" required pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$" />
               </div>
               <p class="field-hint">Lowercase letters, numbers, and hyphens only. This can't be changed later.</p>
@@ -217,25 +220,25 @@ const errorMsg = errorMap[errorKey] ?? '';
     </script>
 
     <style>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
 
       nav {
         position: static;
-        border-bottom: 1px solid rgba(200,150,62,0.2);
+        border-bottom: 1px solid rgba(47,93,69,0.2);
         padding: 18px 48px;
         display: flex; justify-content: space-between; align-items: center;
       }
       .nav-right { display: flex; align-items: center; gap: 20px; }
-      .nav-email { font-size: 0.85rem; color: var(--text-soft); }
+      .nav-email { font-size: 0.85rem; color: var(--myah-tan); }
       .nav-logout {
         font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--gold); text-decoration: none;
+        text-transform: uppercase; color: var(--myah-forest); text-decoration: none;
       }
-      .nav-logout:hover { color: var(--brown-dark); }
+      .nav-logout:hover { color: var(--myah-ink); }
 
       .create-wrap { flex: 1; padding: 60px 48px; }
       .create-header { margin-bottom: 40px; }
-      .create-intro { color: var(--text-soft); font-size: 0.95rem; line-height: 1.7; max-width: 560px; margin-top: 16px; }
+      .create-intro { color: var(--myah-tan); font-size: 0.95rem; line-height: 1.7; max-width: 560px; margin-top: 16px; }
 
       .error-banner {
         background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
@@ -250,29 +253,29 @@ const errorMsg = errorMap[errorKey] ?? '';
         box-shadow: 0 2px 16px rgba(44,26,14,0.06); margin-bottom: 24px;
       }
       .form-section h2 {
-        font-family: "Playfair Display", serif; font-size: 1.15rem;
-        color: var(--brown-dark); margin-bottom: 28px;
+        font-family: "Marcellus", serif; font-size: 1.15rem;
+        color: var(--myah-ink); margin-bottom: 28px;
         padding-bottom: 16px; border-bottom: 1px solid rgba(44,26,14,0.08);
       }
 
       .field { margin-bottom: 24px; }
       .field:last-child { margin-bottom: 0; }
-      label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--brown-dark); margin-bottom: 8px; letter-spacing: 0.02em; }
-      .req { color: var(--gold); }
+      label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--myah-ink); margin-bottom: 8px; letter-spacing: 0.02em; }
+      .req { color: var(--myah-forest); }
 
       input[type="text"], input[type="url"], textarea {
         width: 100%; box-sizing: border-box;
         border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px;
         padding: 12px 16px; font-size: 0.95rem; font-family: "Lato", sans-serif;
-        color: var(--text); background: var(--cream); outline: none;
+        color: var(--myah-ink); background: var(--myah-paper); outline: none;
         transition: border-color 0.2s;
       }
-      input:focus, textarea:focus { border-color: var(--gold); }
+      input:focus, textarea:focus { border-color: var(--myah-forest); }
       textarea { resize: vertical; line-height: 1.6; }
 
-      .slug-wrap { display: flex; align-items: center; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px; overflow: hidden; background: var(--cream); transition: border-color 0.2s; }
-      .slug-wrap:focus-within { border-color: var(--gold); }
-      .slug-prefix { padding: 12px 14px; font-size: 0.88rem; color: var(--text-soft); background: rgba(44,26,14,0.04); border-right: 1px solid rgba(44,26,14,0.1); white-space: nowrap; flex-shrink: 0; }
+      .slug-wrap { display: flex; align-items: center; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px; overflow: hidden; background: var(--myah-paper); transition: border-color 0.2s; }
+      .slug-wrap:focus-within { border-color: var(--myah-forest); }
+      .slug-prefix { padding: 12px 14px; font-size: 0.88rem; color: var(--myah-tan); background: rgba(44,26,14,0.04); border-right: 1px solid rgba(44,26,14,0.1); white-space: nowrap; flex-shrink: 0; }
       .slug-wrap input { border: none; border-radius: 0; background: transparent; }
       .slug-wrap input:focus { border-color: transparent; }
 
@@ -281,14 +284,14 @@ const errorMsg = errorMap[errorKey] ?? '';
       .file-upload-label {
         display: flex; align-items: center; gap: 12px;
         border: 2px dashed rgba(44,26,14,0.2); border-radius: 8px;
-        padding: 20px 16px; background: var(--cream);
+        padding: 20px 16px; background: var(--myah-paper);
         transition: border-color 0.2s, background 0.2s; cursor: pointer;
       }
-      .file-upload-wrap:hover .file-upload-label { border-color: var(--gold); background: rgba(200,150,62,0.05); }
-      .file-upload-label.has-file { border-color: var(--gold); border-style: solid; background: rgba(200,150,62,0.06); }
+      .file-upload-wrap:hover .file-upload-label { border-color: var(--myah-forest); background: rgba(47,93,69,0.05); }
+      .file-upload-label.has-file { border-color: var(--myah-forest); border-style: solid; background: rgba(47,93,69,0.06); }
       .file-upload-icon { font-size: 1.4rem; }
-      .file-upload-text { font-size: 0.9rem; color: var(--text-soft); }
-      .file-upload-label.has-file .file-upload-text { color: var(--brown-dark); font-weight: 600; }
+      .file-upload-text { font-size: 0.9rem; color: var(--myah-tan); }
+      .file-upload-label.has-file .file-upload-text { color: var(--myah-ink); font-weight: 600; }
 
       .type-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
       .type-option input { position: absolute; opacity: 0; pointer-events: none; }
@@ -297,18 +300,18 @@ const errorMsg = errorMap[errorKey] ?? '';
         padding: 20px 16px; border: 2px solid rgba(44,26,14,0.12); border-radius: 10px;
         cursor: pointer; transition: border-color 0.2s, background 0.2s; text-align: center;
       }
-      .type-card:hover { border-color: var(--gold); background: rgba(200,150,62,0.04); }
-      .type-option input:checked + .type-card { border-color: var(--gold); background: rgba(200,150,62,0.08); }
+      .type-card:hover { border-color: var(--myah-forest); background: rgba(47,93,69,0.04); }
+      .type-option input:checked + .type-card { border-color: var(--myah-forest); background: rgba(47,93,69,0.08); }
       .type-icon { font-size: 1.6rem; }
-      .type-label { font-size: 0.9rem; font-weight: 700; color: var(--brown-dark); }
-      .type-desc { font-size: 0.78rem; color: var(--text-soft); }
+      .type-label { font-size: 0.9rem; font-weight: 700; color: var(--myah-ink); }
+      .type-desc { font-size: 0.78rem; color: var(--myah-tan); }
 
-      .field-hint { font-size: 0.8rem; color: var(--text-soft); margin-top: 6px; line-height: 1.5; }
+      .field-hint { font-size: 0.8rem; color: var(--myah-tan); margin-top: 6px; line-height: 1.5; }
 
       .form-actions { display: flex; align-items: center; gap: 24px; }
       .btn-submit { padding: 14px 36px; font-size: 0.95rem; }
-      .cancel-link { font-size: 0.85rem; color: var(--text-soft); text-decoration: none; }
-      .cancel-link:hover { color: var(--brown-dark); }
+      .cancel-link { font-size: 0.85rem; color: var(--myah-tan); text-decoration: none; }
+      .cancel-link:hover { color: var(--myah-ink); }
 
       @media (max-width: 768px) {
         nav { padding: 14px 24px; }
