@@ -37,7 +37,7 @@ export const GET: APIRoute = async ({ request }) => {
   for (const user of users) {
     try {
       await resend.emails.send({
-        from: 'MYAH <hello@myah.com>',
+        from: 'MYAH <hello@myahsits.com>',
         to: user.email,
         subject: 'Your free month is almost up — continue with MYAH',
         html: `
@@ -56,7 +56,7 @@ export const GET: APIRoute = async ({ request }) => {
         <!-- Header -->
         <tr>
           <td style="background:#2f5d45;padding:32px 40px;text-align:center;">
-            <img src="https://myah.com/images/logo-mark-cream.png" width="64" height="64" alt="MYAH" style="display:block;margin:0 auto 12px;" />
+            <img src="https://myahsits.com/images/logo-mark-cream.png" width="64" height="64" alt="MYAH" style="display:block;margin:0 auto 12px;" />
             <p style="margin:0;font-size:1rem;font-weight:600;color:#e9e0d2;letter-spacing:0.28em;text-transform:uppercase;">
               MYAH
             </p>
@@ -69,20 +69,20 @@ export const GET: APIRoute = async ({ request }) => {
         <!-- Body -->
         <tr>
           <td style="padding:40px 40px 32px;">
-            <p style="margin:0 0 8px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#8a6a4f;">
+            <p style="margin:0 0 8px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#6e5438;">
               Your free month
             </p>
             <h1 style="margin:0 0 24px;font-size:1.8rem;color:#2c1a0e;line-height:1.25;font-weight:700;">
               Thanks for being part of MYAH
             </h1>
-            <p style="margin:0 0 20px;font-size:1rem;color:#8a6a4f;line-height:1.7;">
+            <p style="margin:0 0 20px;font-size:1rem;color:#6e5438;line-height:1.7;">
               Your free month is coming to an end — we hope you have loved the platform so far.
             </p>
-            <p style="margin:0 0 20px;font-size:1rem;color:#8a6a4f;line-height:1.7;">
+            <p style="margin:0 0 20px;font-size:1rem;color:#6e5438;line-height:1.7;">
               To keep your profile live and continue connecting with sitters and owners,
               your subscription will be <strong style="color:#2c1a0e;">£4.99/month</strong> going forward.
             </p>
-            <p style="margin:0 0 32px;font-size:1rem;color:#8a6a4f;line-height:1.7;">
+            <p style="margin:0 0 32px;font-size:1rem;color:#6e5438;line-height:1.7;">
               We will be in touch shortly with payment details. In the meantime, your profile
               stays live and nothing changes on your end.
             </p>
@@ -91,14 +91,14 @@ export const GET: APIRoute = async ({ request }) => {
             <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
               <tr>
                 <td style="background:#2f5d45;border-radius:999px;padding:14px 36px;">
-                  <a href="https://myah.com/dashboard" style="color:#ffffff;font-size:0.9rem;font-weight:600;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
+                  <a href="https://myahsits.com/dashboard" style="color:#ffffff;font-size:0.9rem;font-weight:600;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
                     Go to my dashboard
                   </a>
                 </td>
               </tr>
             </table>
 
-            <p style="margin:0;font-size:0.9rem;color:#8a6a4f;line-height:1.7;">
+            <p style="margin:0;font-size:0.9rem;color:#6e5438;line-height:1.7;">
               Any questions? Just reply to this email — we are always happy to help.
             </p>
           </td>
@@ -107,9 +107,9 @@ export const GET: APIRoute = async ({ request }) => {
         <!-- Footer -->
         <tr>
           <td style="background:#faf6ee;padding:24px 40px;border-top:1px solid rgba(47,93,69,0.15);">
-            <p style="margin:0;font-size:0.78rem;color:#8a6a4f;text-align:center;line-height:1.6;">
+            <p style="margin:0;font-size:0.78rem;color:#6e5438;text-align:center;line-height:1.6;">
               © ${new Date().getFullYear()} MYAH &nbsp;·&nbsp;
-              <a href="https://myah.com" style="color:#2f5d45;text-decoration:none;">myah.com</a>
+              <a href="https://myahsits.com" style="color:#2f5d45;text-decoration:none;">myahsits.com</a>
             </p>
           </td>
         </tr>

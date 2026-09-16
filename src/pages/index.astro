@@ -1,757 +1,522 @@
 ---
-import LoadingOverlay from '../components/LoadingOverlay.astro';
-import '../styles/global.css';
 ---
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MYAH — The platform that connects trusted house & pet sitters with home owners. Create a stunning profile page in minutes." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>MYAH — Trusted house & pet sitting</title>
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="MYAH — One platform for house & pet sitters and home owners. Create your profile, share your link, and connect." />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>MYAH</title>
+  <style>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; overflow-x:hidden; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; }
+    a:hover { color:#2c1a0e; }
+    @keyframes gs-ring { to { transform:rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    figure:hover { transform:translateY(-6px); background:rgba(255,255,255,.07); border-color:rgba(196,171,138,.4); }
 
-    <!-- ── NAV ──────────────────────────────────────────────────── -->
-    <header class="site-header" id="siteHeader">
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-      <nav class="header-nav">
-        <a href="#how-it-works">How it works</a>
-        <a href="#example">See an example</a>
-        <a href="/listings">Browse sits</a>
-        <a href="/login" class="nav-login">Log in</a>
-        <a href="/signup" class="btn-primary btn-sm">Get started</a>
-      </nav>
-      <button class="burger" id="burger" aria-label="Menu">
-        <span></span><span></span><span></span>
+    @media (max-width:1000px) {
+      [data-header-nav] { display:none !important; }
+      [data-burger] { display:flex !important; }
+      header[data-site-header] { padding: 16px 24px !important; background:rgba(250,246,238,.97) !important; backdrop-filter:blur(12px); }
+      header[data-site-header] [data-nav-logo] { color:#2c1a0e !important; }
+      header[data-site-header] [data-burger-bar] { background:#2c1a0e !important; }
+
+      section[data-hero] { grid-template-columns:minmax(0,1fr) !important; }
+      section[data-hero] [data-hero-photo] { min-height:55vw !important; }
+      section[data-hero] [data-hero-copy] { padding:48px 20px 60px !important; }
+      .two-col-grid { grid-template-columns:minmax(0,1fr) !important; }
+      .three-col-grid { grid-template-columns:minmax(0,1fr) !important; }
+      .four-col-grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important; }
+      .section-inner { padding:0 20px !important; }
+      .footer-grid { grid-template-columns:minmax(0,1fr) !important; gap:40px !important; }
+      .hero-h1 { font-size:2.2rem !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Loading overlay -->
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header data-site-header="1" style="position:fixed;top:0;left:0;right:0;z-index:210;padding:20px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;transition:background .3s, box-shadow .3s, padding .3s">
+    <a href="/" style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;color:#fff;text-decoration:none;white-space:nowrap;flex-shrink:0;display:inline-flex;align-items:center;gap:14px;line-height:1;margin-left:-4px;letter-spacing:.28em" data-nav-logo="1">
+      <img data-logo-img="1" src="/images/logo-mark-white.png" alt="" style="height:46px;width:46px;flex-shrink:0;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span data-logo-word="1" style="color:#e9e0d2;line-height:1">MYAH</span>
+        <span data-logo-tag="1" style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.82);line-height:1;text-shadow:0 1px 8px rgba(44,26,14,.55)">Make Yourself At Home</span>
+      </span>
+    </a>
+    <nav data-header-nav="1" style="display:flex;align-items:center;gap:32px;flex-wrap:nowrap">
+      <a href="#how-it-works" data-nav-link="1" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;transition:color .2s;text-shadow:0 1px 8px rgba(44,26,14,.55);white-space:nowrap;flex-shrink:0">How it works</a>
+      <a href="#example" data-nav-link="1" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;transition:color .2s;text-shadow:0 1px 8px rgba(44,26,14,.55);white-space:nowrap;flex-shrink:0">See an example</a>
+      <a href="/listings" data-nav-link="1" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;transition:color .2s;text-shadow:0 1px 8px rgba(44,26,14,.55);white-space:nowrap;flex-shrink:0">Browse sits</a>
+      <a href="/login" data-nav-link="1" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;transition:color .2s;text-shadow:0 1px 8px rgba(44,26,14,.55);white-space:nowrap;flex-shrink:0">Log in</a>
+      <a href="/signup" id="header-signup-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;box-shadow:0 4px 14px rgba(44,26,14,.18);white-space:nowrap;flex-shrink:0;transition:background .2s, border-color .2s, transform .12s">Get started</a>
+    </nav>
+    <button data-burger="1" aria-label="Menu" style="display:none;background:none;border:none;cursor:pointer;flex-direction:column;gap:5px;padding:4px;z-index:215">
+      <span data-burger-bar="1" style="display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:background .3s"></span>
+      <span data-burger-bar="1" style="display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:background .3s"></span>
+      <span data-burger-bar="1" style="display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:background .3s"></span>
+    </button>
+  </header>
+
+  <!-- Mobile overlay -->
+  <div data-mm-overlay="1" style="position:fixed;inset:0;z-index:190;background:rgba(0,0,0,.45);opacity:0;visibility:hidden;transition:opacity .3s ease, visibility .3s ease"></div>
+
+  <!-- Mobile drawer -->
+  <div data-mobile-menu="1" style="position:fixed;top:0;right:0;bottom:0;width:320px;max-width:85vw;z-index:200;background:#fff;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .35s cubic-bezier(.4,0,.2,1);box-shadow:-8px 0 40px rgba(0,0,0,.12)">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid rgba(44,26,14,.08);flex-shrink:0">
+      <a href="/" style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.25rem;color:#2c1a0e;text-decoration:none;letter-spacing:.28em">MYAH</a>
+      <button data-mm-close="1" aria-label="Close menu" style="width:36px;height:36px;border-radius:50%;border:1px solid rgba(44,26,14,.12);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#2c1a0e">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
       </button>
-    </header>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:12px 0">
+      <a href="#how-it-works" data-mm-item="1" style="display:flex;align-items:center;gap:16px;padding:16px 24px;text-decoration:none;color:#2c1a0e">
+        <span style="width:40px;height:40px;border-radius:10px;background:#faf6ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#2f5d45"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg></span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:.95rem;font-weight:600;color:#2c1a0e">How it works</span><span style="font-size:.78rem;color:#6b4e35">Get started in minutes</span></span>
+        <span style="font-size:1.4rem;color:rgba(44,26,14,.2);font-weight:300">›</span>
+      </a>
+      <a href="#example" data-mm-item="1" style="display:flex;align-items:center;gap:16px;padding:16px 24px;text-decoration:none;color:#2c1a0e">
+        <span style="width:40px;height:40px;border-radius:10px;background:#faf6ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#2f5d45"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="m21 15-5-5L5 21"></path></svg></span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:.95rem;font-weight:600;color:#2c1a0e">See an example</span><span style="font-size:.78rem;color:#6b4e35">View a live profile</span></span>
+        <span style="font-size:1.4rem;color:rgba(44,26,14,.2);font-weight:300">›</span>
+      </a>
+      <a href="/listings" data-mm-item="1" style="display:flex;align-items:center;gap:16px;padding:16px 24px;text-decoration:none;color:#2c1a0e">
+        <span style="width:40px;height:40px;border-radius:10px;background:#faf6ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#2f5d45"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:.95rem;font-weight:600;color:#2c1a0e">Browse sits</span><span style="font-size:.78rem;color:#6b4e35">Find homes that need a sitter</span></span>
+        <span style="font-size:1.4rem;color:rgba(44,26,14,.2);font-weight:300">›</span>
+      </a>
+      <div style="height:1px;background:rgba(44,26,14,.08);margin:8px 24px"></div>
+      <a href="/login" data-mm-item="1" style="display:flex;align-items:center;gap:16px;padding:16px 24px;text-decoration:none;color:#2c1a0e">
+        <span style="width:40px;height:40px;border-radius:10px;background:#faf6ee;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#2f5d45"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg></span>
+        <span style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:.95rem;font-weight:600;color:#2c1a0e">Log in</span><span style="font-size:.78rem;color:#6b4e35">Access your dashboard</span></span>
+        <span style="font-size:1.4rem;color:rgba(44,26,14,.2);font-weight:300">›</span>
+      </a>
+    </div>
+    <div style="padding:20px 24px;border-top:1px solid rgba(44,26,14,.08);flex-shrink:0">
+      <a href="/signup" data-mm-item="1" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 24px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s;width:100%">Sign up for free</a>
+    </div>
+  </div>
 
-    <div class="mm-overlay" id="mmOverlay"></div>
-    <div class="mobile-menu" id="mobileMenu">
-      <div class="mm-header">
-        <a href="/" class="mm-logo">MYAH</a>
-        <button class="mm-close" id="mmClose" aria-label="Close menu">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-            <path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          </svg>
-        </button>
+  <!-- Hero -->
+  <section data-hero="1" style="min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);position:relative;overflow:hidden">
+    <div data-hero-photo="1" style="grid-column:1;grid-row:1;position:relative;min-height:100vh;overflow:hidden;background:#2c1a0e">
+      <img data-hero-slide="1" src="/images/slideshow-cockapoo-window.jpeg" alt="Cockapoo by the window" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:1;transition:opacity 1.2s ease-in-out" />
+      <img data-hero-slide="1" src="/images/slideshow-dogs-couch.jpeg" alt="Two dogs relaxing on the couch" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease-in-out" />
+      <img data-hero-slide="1" src="/images/slideshow-labrador-puppy.jpeg" alt="Labrador puppy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease-in-out" />
+      <img data-hero-slide="1" src="/images/slideshow-spaniel-walk.jpeg" alt="Spaniel on a walk" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease-in-out" />
+      <img data-hero-slide="1" src="/images/slideshow-springer-beach.jpeg" alt="Springer spaniel on the beach" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease-in-out" />
+      <img data-hero-slide="1" src="/images/slideshow-cat-bag.jpeg" alt="Cat in a paper bag" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease-in-out" />
+      <img data-hero-slide="1" src="/images/slideshow-living-room.jpeg" alt="Bright living room" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease-in-out" />
+      <img data-hero-slide="1" src="/images/slideshow-ocean-sunset.jpeg" alt="Ocean sunset from the balcony" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease-in-out" />
+      <img data-hero-slide="1" src="/images/slideshow-spaniel-bed.jpeg" alt="Spaniel cosy in bed" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 30%;opacity:0;transition:opacity 1.2s ease-in-out" />
+      <div style="position:absolute;inset:0;background:linear-gradient(to right, rgba(44,26,14,.35) 0%, rgba(44,26,14,0) 60%), linear-gradient(to top, rgba(44,26,14,.5) 0%, transparent 40%)"></div>
+    </div>
+    <div data-hero-copy="1" style="grid-column:2;grid-row:1;display:flex;flex-direction:column;justify-content:center;padding:150px 64px 90px 60px;background:#faf6ee">
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 24px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>For sitters &amp; home owners</p>
+      <h1 class="hero-h1" style="font-family:'Marcellus',serif;font-size:3.5rem;color:#2c1a0e;line-height:1.1;margin:0 0 26px">House &amp; pet sitting<br /><em style="color:#2f5d45;">made simple.</em></h1>
+      <p style="color:#6b4e35;font-size:1.08rem;line-height:1.8;margin:0 0 32px;max-width:440px">One platform for house &amp; pet sitters and home owners. Create your profile, share your link, and connect — all in one place.</p>
+      <ul style="list-style:none;padding:0;margin:0 0 36px;display:flex;flex-direction:column;gap:12px">
+        <li style="font-size:.93rem;color:#2c1a0e;line-height:1.6;padding-left:28px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Your own page at <strong style="color:#2f5d45;font-weight:600">myahsits.com/yourname</strong></li>
+        <li style="font-size:.93rem;color:#2c1a0e;line-height:1.6;padding-left:28px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Free to join, live in five minutes</li>
+      </ul>
+      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+        <a href="/signup" id="hero-cta" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Sign up for free today</a>
+        <a href="#example" style="display:inline-flex;align-items:center;gap:9px;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.5);padding-bottom:4px;transition:color .2s, border-color .2s">See an example →</a>
       </div>
-      <div class="mm-body">
-        <a href="#how-it-works" class="mm-item">
-          <div class="mm-item-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          </div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">How it works</span>
-            <span class="mm-item-desc">Get started in minutes</span>
-          </div>
-          <span class="mm-chevron">&#8250;</span>
-        </a>
-        <a href="#example" class="mm-item">
-          <div class="mm-item-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-          </div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">See an example</span>
-            <span class="mm-item-desc">View a live profile</span>
-          </div>
-          <span class="mm-chevron">&#8250;</span>
-        </a>
-        <a href="/listings" class="mm-item">
-          <div class="mm-item-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">Browse sits</span>
-            <span class="mm-item-desc">Find homes that need a sitter</span>
-          </div>
-          <span class="mm-chevron">&#8250;</span>
-        </a>
-        <div class="mm-divider"></div>
-        <a href="/login" class="mm-item">
-          <div class="mm-item-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-          </div>
-          <div class="mm-item-text">
-            <span class="mm-item-title">Log in</span>
-            <span class="mm-item-desc">Access your dashboard</span>
-          </div>
-          <span class="mm-chevron">&#8250;</span>
-        </a>
+    </div>
+  </section>
+
+  <!-- Sitters & owners -->
+  <section style="padding:100px 0;background:#fff">
+    <div class="section-inner" style="max-width:1100px;margin:0 auto;padding:0 48px">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:block">Two sides, one platform</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:2.8rem;color:#2c1a0e;line-height:1.2;margin:0">Built for sitters <em style="color:#2f5d45;">&amp;</em> owners</h2>
+        <div style="width:48px;height:2px;background:#6e5438;margin:22px 0 0"></div>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:520px;margin:22px 0 0">Whichever side you're on, everything lives on one page — and takes minutes to set up.</p>
       </div>
-      <div class="mm-footer">
-        <a href="/signup" class="btn-primary mm-cta">Sign up for free</a>
+      <div class="two-col-grid" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px;margin-top:48px">
+        <div id="card-sitters" style="background:#faf6ee;border-radius:20px;padding:44px 40px;display:flex;flex-direction:column;gap:18px;border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease">
+          <div style="width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#2f5d45 0%,#3e7a5b 100%);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(110,84,56,.3)">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.7rem;color:#2c1a0e;margin:0;line-height:1.2">For sitters</h3>
+          <p style="color:#6b4e35;font-size:.95rem;line-height:1.7;margin:0">Showcase everything that makes you a great sitter — in one beautiful, shareable page.</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;padding:16px 0;margin:0;border-top:1px solid rgba(44,26,14,.08)">
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Create a stunning profile with your bio, photos &amp; experience</li>
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Collect and display five-star reviews from owners</li>
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Share one link — <strong style="color:#2f5d45;font-weight:600">myahsits.com/yourname</strong></li>
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Get enquiries straight to your inbox or WhatsApp</li>
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Browse available sits and apply directly</li>
+          </ul>
+          <a href="/signup" style="display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin-top:auto;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:13px 28px;transition:background .2s, color .2s, border-color .2s">Get started as a sitter &rarr;</a>
+        </div>
+        <div id="card-owners" style="background:#faf6ee;border-radius:20px;padding:44px 40px;display:flex;flex-direction:column;gap:18px;border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease">
+          <div style="width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,#2f5d45 0%,#3e7a5b 100%);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 24px rgba(110,84,56,.3)">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+          </div>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.7rem;color:#2c1a0e;margin:0;line-height:1.2">For owners</h3>
+          <p style="color:#6b4e35;font-size:.95rem;line-height:1.7;margin:0">List your home and pets so trusted sitters can find you — and you can find them.</p>
+          <ul style="list-style:none;display:flex;flex-direction:column;gap:12px;padding:16px 0;margin:0;border-top:1px solid rgba(44,26,14,.08)">
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Create a profile for your home with photos &amp; details</li>
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Add your pets — breed, temperament &amp; special needs</li>
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Post sit listings with dates you need covered</li>
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Sitters browse &amp; apply — you pick the perfect match</li>
+            <li style="font-size:.9rem;color:#2c1a0e;line-height:1.6;padding-left:24px;position:relative"><span style="position:absolute;left:0;top:2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;font-weight:600;display:flex;align-items:center;justify-content:center;line-height:1">✓</span>Receive enquiries via email or WhatsApp</li>
+          </ul>
+          <a href="/signup" style="display:inline-flex;align-items:center;gap:8px;align-self:flex-start;margin-top:auto;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:13px 28px;transition:background .2s, color .2s, border-color .2s">Get started as an owner &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section id="how-it-works" style="padding:100px 0;background:#fff">
+    <div class="section-inner" style="max-width:1100px;margin:0 auto;padding:0 48px">
+      <div style="display:flex;flex-direction:column;align-items:center;text-align:center">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:block">Simple &amp; fast</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:2.8rem;color:#2c1a0e;line-height:1.2;margin:0">Up and running in minutes</h2>
+        <div style="width:48px;height:2px;background:#6e5438;margin:22px 0 0"></div>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:520px;margin:22px 0 0">Three steps between signing up and sharing a page you're proud of.</p>
+      </div>
+      <div style="position:relative;margin-top:82px">
+        <div style="position:absolute;top:0;left:12%;right:12%;height:1px;background:repeating-linear-gradient(to right,rgba(110,84,56,.45) 0 6px,transparent 6px 12px)"></div>
+        <div class="three-col-grid" style="position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px">
+          <div style="position:relative;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:20px;padding:44px 32px 36px;text-align:center;transition:transform .3s ease, box-shadow .3s ease">
+            <div style="position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:1.5px solid rgba(110,84,56,.45);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.25rem;color:#6e5438;box-shadow:0 6px 18px rgba(44,26,14,.06)">01</div>
+            <h3 style="font-family:'Marcellus',serif;font-size:1.35rem;color:#2c1a0e;margin:8px 0 12px">Create an account</h3>
+            <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">Sign up as a house &amp; pet sitter or home owner. Free to join.</p>
+          </div>
+          <div style="position:relative;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:20px;padding:44px 32px 36px;text-align:center;transition:transform .3s ease, box-shadow .3s ease">
+            <div style="position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:1.5px solid rgba(110,84,56,.45);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.25rem;color:#6e5438;box-shadow:0 6px 18px rgba(44,26,14,.06)">02</div>
+            <h3 style="font-family:'Marcellus',serif;font-size:1.35rem;color:#2c1a0e;margin:8px 0 12px">Build your page</h3>
+            <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">Add your bio, photos, reviews, and everything that makes you stand out.</p>
+          </div>
+          <div style="position:relative;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:20px;padding:44px 32px 36px;text-align:center;transition:transform .3s ease, box-shadow .3s ease">
+            <div style="position:absolute;top:-26px;left:50%;transform:translateX(-50%);width:52px;height:52px;border-radius:50%;background:#fff;border:1.5px solid rgba(110,84,56,.45);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.25rem;color:#6e5438;box-shadow:0 6px 18px rgba(44,26,14,.06)">03</div>
+            <h3 style="font-family:'Marcellus',serif;font-size:1.35rem;color:#2c1a0e;margin:8px 0 12px">Share your link</h3>
+            <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">Send <strong style="color:#2f5d45;font-weight:600">myahsits.com/yourname</strong> to connect instantly. That&rsquo;s it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Live example -->
+  <section id="example" style="padding:100px 0 0;background:#faf6ee">
+    <div class="section-inner" style="max-width:1100px;margin:0 auto;padding:0 48px 60px">
+      <div class="two-col-grid" style="display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:end;border-top:1px solid rgba(110,84,56,.3);padding-top:34px">
+        <div>
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block"></span>Our founders</p>
+          <h2 style="font-family:'Marcellus',serif;font-size:3rem;color:#2c1a0e;line-height:1.1;margin:0">Meet Callum<br /><em style="color:#2f5d45;">&amp; Niamh</em></h2>
+        </div>
+        <p style="color:#6b4e35;font-size:1.05rem;line-height:1.8;margin:0 0 6px;padding-left:28px;border-left:2px solid rgba(110,84,56,.35)">The founders of MYAH — and its very first sitters. Callum &amp; Niamh have cared for homes and animals across the world, and their page shows exactly what yours can look like.</p>
+      </div>
+    </div>
+    <div class="two-col-grid" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0;max-width:1300px;margin:0 auto;padding:0 48px">
+      <div style="position:relative;padding:0 48px 0 0">
+        <div class="three-col-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:10px">
+          <img src="/images/couple-boat-1.jpg" alt="Callum and Niamh on a boat" style="width:100%;height:100%;display:block;border-radius:12px;object-fit:cover;grid-column:span 2;grid-row:span 2;aspect-ratio:1;object-position:center 30%" />
+          <img src="/images/alfie-1.jpg" alt="Alfie the cockapoo" style="width:100%;height:100%;display:block;border-radius:12px;object-fit:cover;aspect-ratio:1;object-position:center 20%" />
+          <img src="/images/callum-niamh-event.jpg" alt="Callum and Niamh" style="width:100%;height:100%;display:block;border-radius:12px;object-fit:cover;aspect-ratio:1;object-position:center 15%" />
+          <img src="/images/solomon-2.jpg" alt="Solomon the labradoodle" style="width:100%;height:100%;display:block;border-radius:12px;object-fit:cover;aspect-ratio:1;object-position:center 25%" />
+          <img src="/images/bailey-1.jpg" alt="Bailey" style="width:100%;height:100%;display:block;border-radius:12px;object-fit:cover;aspect-ratio:1;object-position:center 20%" />
+          <img src="/images/couple-dinner-1.jpg" alt="Callum and Niamh at dinner" style="width:100%;height:100%;display:block;border-radius:12px;object-fit:cover;aspect-ratio:1;object-position:center 25%" />
+        </div>
+      </div>
+      <div style="padding:20px 0 60px 48px;display:flex;flex-direction:column;gap:24px;justify-content:center">
+        <div style="display:inline-block;background:#e9e0d2;color:#5c3d20;padding:8px 18px;border-radius:50px;font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;width:fit-content">Experienced sitters worldwide</div>
+        <h3 style="font-family:'Marcellus',serif;font-size:2rem;color:#2c1a0e;line-height:1.15;margin:0">Callum &amp; Niamh</h3>
+        <p style="color:#6b4e35;font-size:.95rem;line-height:1.7;margin:0">Experienced house &amp; pet sitters available worldwide — passionate about caring for homes and animals wherever they go.</p>
+        <blockquote style="border-left:3px solid #2f5d45;margin:0;padding:16px 24px;background:#faf6ee;border-radius:0 8px 8px 0;font-style:italic;color:#6b4e35;font-size:.95rem;line-height:1.75">"We treat every sit like it's our own home — daily walks, feeding routines, garden care, and plenty of love for your animals."</blockquote>
+        <div style="display:flex;gap:32px;padding:20px 0;border-top:1px solid rgba(110,84,56,.15);border-bottom:1px solid rgba(110,84,56,.15)">
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-family:'Marcellus',serif;font-size:1.8rem;color:#6e5438;line-height:1">40+</span>
+            <span style="font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35">Five-star reviews</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <span style="font-family:'Marcellus',serif;font-size:1.8rem;color:#6e5438;line-height:1">★ 5.0</span>
+            <span style="font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35">Average rating</span>
+          </div>
+        </div>
+        <a href="/callum" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s;width:fit-content">View full profile →</a>
       </div>
     </div>
 
-    <!-- ── HERO ──────────────────────────────────────────────────── -->
-    <section class="hero">
-      <div class="hero-image-wrap">
-        <img src="/images/slideshow-cockapoo-window.jpeg" alt="Cockapoo by the window" class="hero-slide active" />
-        <img src="/images/slideshow-dogs-couch.jpeg" alt="Two dogs relaxing on the couch" class="hero-slide" />
-        <img src="/images/slideshow-labrador-puppy.jpeg" alt="Labrador puppy" class="hero-slide" />
-        <img src="/images/slideshow-spaniel-walk.jpeg" alt="Spaniel on a walk" class="hero-slide" />
-        <img src="/images/slideshow-dogs-lake.jpeg" alt="Dogs by the lake" class="hero-slide" />
-        <img src="/images/slideshow-springer-beach.jpeg" alt="Springer spaniel on the beach" class="hero-slide" />
-        <img src="/images/slideshow-garden-conservatory.jpeg" alt="Beautiful garden conservatory" class="hero-slide" />
-        <img src="/images/slideshow-cat-bag.jpeg" alt="Cat in a paper bag" class="hero-slide" />
-        <img src="/images/slideshow-living-room.jpeg" alt="Bright living room" class="hero-slide" />
-        <img src="/images/slideshow-sunset-palms.jpeg" alt="Sunset with palm trees" class="hero-slide" />
-        <img src="/images/slideshow-ocean-sunset.jpeg" alt="Ocean sunset from the balcony" class="hero-slide" />
-        <img src="/images/slideshow-spaniel-bed.jpeg" alt="Spaniel cosy in bed" class="hero-slide" />
-        <div class="hero-gradient"></div>
-      </div>
-      <div class="hero-text">
-        <p class="eyebrow reveal">For house &amp; pet sitters &amp; home owners</p>
-        <h1 class="reveal reveal-delay-1">
-          Trusted house &amp; pet<br />
-          <em>sitting made simple.</em>
-        </h1>
-        <p class="hero-body reveal reveal-delay-2">
-          One platform for house &amp; pet sitters and home owners. Create your profile, share your link, and connect — all in one place.
-        </p>
-        <div class="hero-actions reveal reveal-delay-3">
-          <a href="/signup" class="btn-primary">Sign up for free today</a>
+    <!-- Reviews on ink -->
+    <div style="background:#2c1a0e;padding:72px 48px">
+      <div style="max-width:1100px;margin:0 auto">
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:34px">
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#c4ab8a;margin:0">In their own words</p>
+          <span style="flex:1;height:1px;background:rgba(196,171,138,.25);display:block"></span>
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0">40+ five-star reviews</p>
+        </div>
+        <div class="three-col-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;align-items:stretch">
+          <figure style="position:relative;margin:0;padding:34px 32px 30px;background:rgba(255,255,255,.04);border:1px solid rgba(196,171,138,.18);border-radius:16px;display:flex;flex-direction:column;gap:16px;transition:transform .3s ease, background .3s ease, border-color .3s ease">
+            <span style="position:absolute;top:16px;right:26px;font-family:'Marcellus',serif;font-size:4rem;line-height:1;color:rgba(196,171,138,.18)">&rdquo;</span>
+            <div style="color:#c4ab8a;font-size:.82rem;letter-spacing:.32em">★★★★★</div>
+            <blockquote style="margin:0;color:rgba(255,255,255,.88);font-size:.93rem;line-height:1.8;font-style:italic">"Super lovely couple who took great care of our cat Rocco! Regular updates, spotless apartment on return. Rocco was extremely happy when we got home."</blockquote>
+            <figcaption style="margin-top:auto;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#c4ab8a">
+              <span style="width:6px;height:6px;border-radius:50%;background:#2f5d45;flex-shrink:0"></span>Jess &amp; Sam
+            </figcaption>
+          </figure>
+          <figure style="position:relative;margin:0;padding:34px 32px 30px;background:rgba(255,255,255,.04);border:1px solid rgba(196,171,138,.18);border-radius:16px;display:flex;flex-direction:column;gap:16px;transition:transform .3s ease, background .3s ease, border-color .3s ease">
+            <span style="position:absolute;top:16px;right:26px;font-family:'Marcellus',serif;font-size:4rem;line-height:1;color:rgba(196,171,138,.18)">&rdquo;</span>
+            <div style="color:#c4ab8a;font-size:.82rem;letter-spacing:.32em">★★★★★</div>
+            <blockquote style="margin:0;color:rgba(255,255,255,.88);font-size:.93rem;line-height:1.8;font-style:italic">"We couldn't have asked for better pet sitters — reliable, trustworthy, and incredibly caring. They left our home spotless and exceeded every expectation."</blockquote>
+            <figcaption style="margin-top:auto;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#c4ab8a">
+              <span style="width:6px;height:6px;border-radius:50%;background:#2f5d45;flex-shrink:0"></span>Libby
+            </figcaption>
+          </figure>
+          <figure style="position:relative;margin:0;padding:34px 32px 30px;background:rgba(255,255,255,.04);border:1px solid rgba(196,171,138,.18);border-radius:16px;display:flex;flex-direction:column;gap:16px;transition:transform .3s ease, background .3s ease, border-color .3s ease">
+            <span style="position:absolute;top:16px;right:26px;font-family:'Marcellus',serif;font-size:4rem;line-height:1;color:rgba(196,171,138,.18)">&rdquo;</span>
+            <div style="color:#c4ab8a;font-size:.82rem;letter-spacing:.32em">★★★★★</div>
+            <blockquote style="margin:0;color:rgba(255,255,255,.88);font-size:.93rem;line-height:1.8;font-style:italic">"Callum and Niamh have looked after Solomon for four years. They are reliable, trustworthy, and clearly care about his wellbeing. I couldn't recommend them highly enough."</blockquote>
+            <figcaption style="margin-top:auto;padding-top:18px;border-top:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#c4ab8a">
+              <span style="width:6px;height:6px;border-radius:50%;background:#2f5d45;flex-shrink:0"></span>Thomas James
+            </figcaption>
+          </figure>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ── FOR SITTERS & OWNERS ─────────────────────────────────────── -->
-    <section class="dual-section">
-      <div class="container">
-        <p class="label reveal">Two sides, one platform</p>
-        <h2 class="h2 reveal">Built for sitters <em>&amp;</em> owners</h2>
-        <div class="dual-grid">
-          <div class="dual-card reveal">
-            <div class="dual-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <h3 class="dual-title">For sitters</h3>
-            <p class="dual-desc">Showcase everything that makes you a great sitter — in one beautiful, shareable page.</p>
-            <ul class="dual-list">
-              <li>Create a stunning profile with your bio, photos &amp; experience</li>
-              <li>Collect and display five-star reviews from owners</li>
-              <li>Share one link — <strong>myah.com/yourname</strong></li>
-              <li>Get enquiries straight to your inbox or WhatsApp</li>
-              <li>Browse available sits and apply directly</li>
-            </ul>
-            <a href="/signup" class="dual-cta">Get started as a sitter &rarr;</a>
-          </div>
-          <div class="dual-card dual-card-alt reveal reveal-delay-1">
-            <div class="dual-icon">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            </div>
-            <h3 class="dual-title">For owners</h3>
-            <p class="dual-desc">List your home and pets so trusted sitters can find you — and you can find them.</p>
-            <ul class="dual-list">
-              <li>Create a profile for your home with photos &amp; details</li>
-              <li>Add your pets — breed, temperament &amp; special needs</li>
-              <li>Post sit listings with dates you need covered</li>
-              <li>Sitters browse &amp; apply — you pick the perfect match</li>
-              <li>Receive enquiries via email or WhatsApp</li>
-            </ul>
-            <a href="/signup" class="dual-cta">Get started as an owner &rarr;</a>
-          </div>
-        </div>
-      </div>
-    </section>
+  <!-- Mosaic -->
+  <section style="position:relative;background:#faf6ee">
+    <div class="four-col-grid" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px">
+      <div style="overflow:hidden;background:#e9e0d2;aspect-ratio:1"><img src="/images/travis-1.jpg" alt="Travis the Vizsla" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center 15%;transition:transform .6s ease" /></div>
+      <div style="overflow:hidden;background:#e9e0d2;aspect-ratio:1"><img src="/images/chester-1.jpg" alt="Chester the cocker spaniel" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center;transition:transform .6s ease" /></div>
+      <div style="overflow:hidden;background:#e9e0d2;aspect-ratio:1"><img src="/images/solomon-1.jpg" alt="Solomon the labradoodle" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center;transition:transform .6s ease" /></div>
+      <div style="overflow:hidden;background:#e9e0d2;aspect-ratio:1"><img src="/images/zeus-1.jpg" alt="Zeus the Weimaraner" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center;transition:transform .6s ease" /></div>
+      <div style="overflow:hidden;background:#e9e0d2;aspect-ratio:1"><img src="/images/alfie-1.jpg" alt="Alfie the cockapoo" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center 20%;transition:transform .6s ease" /></div>
+      <div style="overflow:hidden;background:#e9e0d2;aspect-ratio:1"><img src="/images/solomon-4.jpg" alt="Solomon in the snow" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center;transition:transform .6s ease" /></div>
+      <div style="overflow:hidden;background:#e9e0d2;aspect-ratio:1"><img src="/images/orca-3.jpg" alt="Orca" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center 25%;transition:transform .6s ease" /></div>
+      <div style="overflow:hidden;background:#e9e0d2;aspect-ratio:1"><img src="/images/bailey-3.jpg" alt="Bailey" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center;transition:transform .6s ease" /></div>
+    </div>
+    <div style="text-align:center;padding:32px">
+      <p style="font-family:'Marcellus',serif;font-size:1.1rem;color:#6b4e35;font-style:italic;margin:0">Every sit tells a story</p>
+    </div>
+  </section>
 
-    <!-- ── HOW IT WORKS ───────────────────────────────────────────── -->
-    <section id="how-it-works" class="steps-section">
-      <div class="container">
-        <p class="label reveal">Simple &amp; fast</p>
-        <h2 class="h2 reveal">Up and running in minutes</h2>
-        <div class="steps-grid">
-          <div class="step reveal">
-            <div class="step-num">01</div>
-            <h3>Create an account</h3>
-            <p>Sign up as a house &amp; pet sitter or home owner. Free to join.</p>
-          </div>
-          <div class="step-arrow reveal">→</div>
-          <div class="step reveal">
-            <div class="step-num">02</div>
-            <h3>Build your page</h3>
-            <p>Add your bio, photos, reviews, and everything that makes you stand out.</p>
-          </div>
-          <div class="step-arrow reveal">→</div>
-          <div class="step reveal">
-            <div class="step-num">03</div>
-            <h3>Share your link</h3>
-            <p>Send <strong>myah.com/yourname</strong> to connect instantly. That's it.</p>
-          </div>
+  <!-- Features -->
+  <section style="padding:110px 0;background:#faf6ee">
+    <div class="section-inner" style="max-width:1100px;margin:0 auto;padding:0 48px">
+      <div class="two-col-grid" style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:56px;align-items:end;margin-bottom:60px">
+        <div>
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block"></span>What you get</p>
+          <h2 style="font-family:'Marcellus',serif;font-size:2.9rem;color:#2c1a0e;line-height:1.15;margin:0">Everything you need<br /><em style="color:#2f5d45;">in one place</em></h2>
+        </div>
+        <p style="color:#6b4e35;font-size:1.02rem;line-height:1.8;margin:0 0 6px">Six things every MYAH page comes with as standard — no add-ons, no upgrades.</p>
+      </div>
+      <div class="three-col-grid" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:18px;padding:38px 32px 34px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+          <span style="width:50px;height:50px;border-radius:14px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M3.5 9h17M3.5 15h17M12 3c2.5 2.7 2.5 15.3 0 18M12 3c-2.5 2.7-2.5 15.3 0 18"></path></svg></span>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:6px 0 0;line-height:1.25">Your own URL</h3>
+          <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">A clean, shareable link at <strong style="color:#2f5d45;font-weight:700">myahsits.com/yourname</strong> — professional and memorable.</p>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:18px;padding:38px 32px 34px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+          <span style="width:50px;height:50px;border-radius:14px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.5 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.8l6-.8z"></path></svg></span>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:6px 0 0;line-height:1.25">Reviews &amp; trust</h3>
+          <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">Showcase your best reviews from any platform — build trust before you even speak.</p>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:18px;padding:38px 32px 34px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+          <span style="width:50px;height:50px;border-radius:14px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg></span>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:6px 0 0;line-height:1.25">Photo gallery</h3>
+          <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">Show off the homes you&rsquo;ve cared for, the pets you&rsquo;ve loved, or your own home — a gallery that tells your story.</p>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:18px;padding:38px 32px 34px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+          <span style="width:50px;height:50px;border-radius:14px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3.5 7l8.5 6 8.5-6"></path></svg></span>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:6px 0 0;line-height:1.25">Built-in enquiries</h3>
+          <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">Visitors can reach you directly from your page via email or WhatsApp — no back-and-forth.</p>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:18px;padding:38px 32px 34px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+          <span style="width:50px;height:50px;border-radius:14px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2.5" width="10" height="19" rx="2.5"></rect><path d="M11 18.5h2"></path></svg></span>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:6px 0 0;line-height:1.25">Mobile perfect</h3>
+          <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">Looks stunning on every device — because most people are on their phones.</p>
+        </div>
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:18px;padding:38px 32px 34px;display:flex;flex-direction:column;gap:14px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+          <span style="width:50px;height:50px;border-radius:14px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path></svg></span>
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:6px 0 0;line-height:1.25">Fully yours</h3>
+          <p style="color:#6b4e35;font-size:.93rem;line-height:1.75;margin:0">Your page, your colours, your content. Update it any time from your dashboard.</p>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- ── LIVE EXAMPLE ───────────────────────────────────────────── -->
-    <section id="example" class="example-section">
-      <div class="container">
-        <p class="label reveal">Live example</p>
-        <h2 class="h2 reveal">Meet Callum &amp; Niamh</h2>
-        <p class="section-sub reveal">See what a MYAH profile looks like — experienced house &amp; pet sitters who have looked after homes and animals all over the world.</p>
+  <!-- Final CTA -->
+  <section style="position:relative;min-height:560px;display:flex;align-items:center;justify-content:center;text-align:center;padding:100px 48px;overflow:hidden">
+    <div style="position:absolute;inset:0">
+      <img src="/images/callum-niamh-airport.jpg" alt="" style="width:100%;height:100%;object-fit:cover;object-position:center 30%" />
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg, rgba(44,26,14,.62) 0%, rgba(44,26,14,.8) 100%)"></div>
+      <div style="position:absolute;inset:0;background:radial-gradient(ellipse at center, rgba(44,26,14,0) 30%, rgba(44,26,14,.55) 100%)"></div>
+    </div>
+    <div style="position:relative;z-index:2;max-width:660px">
+      <p style="font-size:.78rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#c4ab8a;margin:0 0 26px;display:flex;align-items:center;justify-content:center;gap:16px"><span style="width:34px;height:1px;background:rgba(196,171,138,.55);display:block"></span>Join MYAH<span style="width:34px;height:1px;background:rgba(196,171,138,.55);display:block"></span></p>
+      <h2 style="font-family:'Marcellus',serif;font-size:3.5rem;color:#fff;line-height:1.12;margin:0 0 22px">Ready to create your<br /><em style="color:#c4ab8a;">perfect page?</em></h2>
+      <p style="color:rgba(255,255,255,.8);font-size:1.05rem;line-height:1.7;margin:0 0 36px">Whether you're a house &amp; pet sitter or a home owner looking for one — sign up for free today. It takes less than five minutes.</p>
+      <a href="/signup" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Sign up for free today</a>
+      <div style="display:flex;align-items:center;justify-content:center;gap:22px;margin:30px 0 0;flex-wrap:wrap;font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.68)">
+        <span style="display:flex;align-items:center;gap:8px"><span style="color:#c4ab8a;letter-spacing:.2em">★</span>Build a page like Callum &amp; Niamh</span>
+        <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
+        <span>Free to join</span>
+        <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
+        <span>Live in 5 minutes</span>
       </div>
+      <p style="margin:26px 0 0;font-size:.9rem;color:rgba(255,255,255,.62)">Already have an account? <a href="/login" style="color:#c4ab8a;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(196,171,138,.4);padding-bottom:1px">Log in</a></p>
+    </div>
+  </section>
 
-      <div class="editorial-grid">
-        <div class="editorial-left reveal">
-          <div class="ed-collage">
-            <img src="/images/callum-niamh-boat.jpg" alt="Callum and Niamh on a boat" class="ed-col-img ed-col-wide" style="object-position:center 30%;" />
-            <img src="/images/alfie-1.jpg" alt="Alfie the cockapoo" class="ed-col-img" style="object-position:center 20%;" />
-            <img src="/images/callum-niamh-event.jpg" alt="Callum and Niamh" class="ed-col-img" style="object-position:center 15%;" />
-            <img src="/images/solomon-2.jpg" alt="Solomon the labradoodle" class="ed-col-img ed-col-wide" style="object-position:center 25%;" />
-            <img src="/images/bailey-1.jpg" alt="Bailey" class="ed-col-img" style="object-position:center 20%;" />
-            <img src="/images/callum-niamh-dinner.jpg" alt="Callum and Niamh at dinner" class="ed-col-img" style="object-position:center 25%;" />
+  <!-- Footer -->
+  <footer style="background:#2c1a0e;color:rgba(255,255,255,.7);padding:0 48px 32px;border-top:3px solid #2f5d45">
+    <div style="max-width:1100px;margin:0 auto">
+      <div class="footer-grid" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:56px;padding:72px 0 48px">
+        <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+          <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.7rem;letter-spacing:.28em">
+            <img src="/images/logo-mark-cream.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+            <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(255,255,255,.28)">
+              <span style="color:#fff;line-height:1">MYAH</span>
+              <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);line-height:1">Make Yourself At Home</span>
+            </span>
+          </a>
+          <div style="display:flex;flex-direction:column;gap:12px;max-width:340px">
+            <p style="font-family:'Lato',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#c4ab8a;margin:0">Pet &amp; House Sitting</p>
+            <p style="line-height:1.8;font-size:.95rem;margin:0;color:rgba(255,255,255,.7)">Premium pet &amp; home care for peace of mind while you travel.</p>
           </div>
+          <a href="/signup" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;margin-top:6px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Sign up for free</a>
         </div>
-        <div class="editorial-right reveal reveal-delay-1">
-          <div class="ed-badge">Experienced sitters worldwide</div>
-          <h3 class="ed-name">Callum &amp; Niamh</h3>
-          <p class="ed-tagline">Experienced house &amp; pet sitters available worldwide — passionate about caring for homes and animals wherever they go.</p>
-          <blockquote class="ed-quote">
-            "We treat every sit like it's our own home — daily walks, feeding routines, garden care, and plenty of love for your animals."
-          </blockquote>
-          <div class="ed-stats">
-            <div class="ed-stat">
-              <span class="ed-stat-num">40+</span>
-              <span class="ed-stat-label">Five-star reviews</span>
-            </div>
-            <div class="ed-stat">
-              <span class="ed-stat-num">★ 5.0</span>
-              <span class="ed-stat-label">Average rating</span>
-            </div>
-          </div>
-          <a href="/callumandniamh" class="btn-primary" target="_blank">View full profile →</a>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Platform</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="/signup" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;display:inline-flex;align-items:center;gap:8px;transition:color .2s">Get started</a></li>
+            <li style="margin-bottom:12px"><a href="/login" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;display:inline-flex;align-items:center;gap:8px;transition:color .2s">Log in</a></li>
+            <li style="margin-bottom:12px"><a href="/dashboard" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;display:inline-flex;align-items:center;gap:8px;transition:color .2s">Dashboard</a></li>
+            <li style="margin-bottom:12px"><a href="/listings" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;display:inline-flex;align-items:center;gap:8px;transition:color .2s">Browse sits</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Example profile</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="/callum" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;display:inline-flex;align-items:center;gap:8px;transition:color .2s">Callum &amp; Niamh</a></li>
+          </ul>
         </div>
       </div>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">
+          <span>&copy; 2026 MYAH</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <a href="#privacy" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s">Privacy</a>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <a href="#terms" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s">Terms</a>
+        </div>
+        <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with <span style="font-style:normal">&#9825;</span> for house &amp; pet sitters everywhere</span>
+      </div>
+    </div>
+  </footer>
 
-      <!-- Review strip -->
-      <div class="reviews-strip">
-        <div class="review-strip-card reveal">
-          <div class="rsc-stars">★★★★★</div>
-          <p>"Super lovely couple who took great care of our cat Rocco! Regular updates, spotless apartment on return. Rocco was extremely happy when we got home."</p>
-          <cite>— Jess &amp; Sam · MYAH</cite>
-        </div>
-        <div class="review-strip-card reveal reveal-delay-1">
-          <div class="rsc-stars">★★★★★</div>
-          <p>"We couldn't have asked for better pet sitters — reliable, trustworthy, and incredibly caring. They left our home spotless and exceeded every expectation."</p>
-          <cite>— Libby · MYAH</cite>
-        </div>
-        <div class="review-strip-card reveal reveal-delay-2">
-          <div class="rsc-stars">★★★★★</div>
-          <p>"Callum and Niamh have looked after Solomon for four years. They are reliable, trustworthy, and clearly care about his wellbeing. I couldn't recommend them highly enough."</p>
-          <cite>— Thomas James · MYAH</cite>
-        </div>
-      </div>
-    </section>
+  <style>
+    #hero-cta:hover, #header-signup-btn:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
+    #hero-cta:active, #header-signup-btn:active { transform:translateY(0) scale(.98); }
+    #card-sitters:hover, #card-owners:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.1); }
+  </style>
 
-    <!-- ── PET GALLERY MOSAIC ─────────────────────────────────────── -->
-    <section class="mosaic-section">
-      <div class="mosaic">
-        <div class="mosaic-item mosaic-tall reveal">
-          <img src="/images/travis-1.jpg" alt="Travis the Vizsla" style="object-position:center 15%;" />
-        </div>
-        <div class="mosaic-item reveal reveal-delay-1">
-          <img src="/images/chester-1.jpg" alt="Chester the cocker spaniel" />
-        </div>
-        <div class="mosaic-item reveal reveal-delay-2">
-          <img src="/images/solomon-1.jpg" alt="Solomon the labradoodle" />
-        </div>
-        <div class="mosaic-item mosaic-tall reveal reveal-delay-1">
-          <img src="/images/zeus-1.jpg" alt="Zeus the Weimaraner" />
-        </div>
-        <div class="mosaic-item reveal reveal-delay-2">
-          <img src="/images/alfie-1.jpg" alt="Alfie the cockapoo" />
-        </div>
-        <div class="mosaic-item reveal reveal-delay-3">
-          <img src="/images/solomon-4.jpg" alt="Solomon in the snow" />
-        </div>
-        <div class="mosaic-item reveal">
-          <img src="/images/orca-3.jpg" alt="Orca" style="object-position:center 25%;" />
-        </div>
-        <div class="mosaic-item reveal reveal-delay-1">
-          <img src="/images/bailey-3.jpg" alt="Bailey" />
-        </div>
-      </div>
-      <div class="mosaic-caption reveal">
-        <p>Every sit tells a story</p>
-      </div>
-    </section>
+  <script>
+    // Hero slideshow
+    const slides = document.querySelectorAll('[data-hero-slide]');
+    let slideIdx = 0;
+    if (slides.length > 1) {
+      setInterval(() => {
+        (slides[slideIdx] as HTMLElement).style.opacity = '0';
+        slideIdx = (slideIdx + 1) % slides.length;
+        (slides[slideIdx] as HTMLElement).style.opacity = '1';
+      }, 4500);
+    }
 
-    <!-- ── FEATURES ───────────────────────────────────────────────── -->
-    <section class="features-section">
-      <div class="container">
-        <p class="label reveal">What you get</p>
-        <h2 class="h2 reveal">Everything you need in one place</h2>
-        <div class="features-grid">
-          <div class="feature reveal">
-            <div class="feature-icon">🌐</div>
-            <h3>Your own URL</h3>
-            <p>A clean, shareable link at <strong>myah.com/yourname</strong> — professional and memorable.</p>
-          </div>
-          <div class="feature reveal reveal-delay-1">
-            <div class="feature-icon">⭐</div>
-            <h3>Reviews &amp; trust</h3>
-            <p>Showcase your best reviews from any platform — build trust before you even speak.</p>
-          </div>
-          <div class="feature reveal reveal-delay-2">
-            <div class="feature-icon">📸</div>
-            <h3>Photo gallery</h3>
-            <p>Show off the homes you've cared for, the pets you've loved, or your own home — a gallery that tells your story.</p>
-          </div>
-          <div class="feature reveal">
-            <div class="feature-icon">✉️</div>
-            <h3>Built-in enquiries</h3>
-            <p>Visitors can reach you directly from your page via email or WhatsApp — no back-and-forth.</p>
-          </div>
-          <div class="feature reveal reveal-delay-1">
-            <div class="feature-icon">📱</div>
-            <h3>Mobile perfect</h3>
-            <p>Looks stunning on every device — because most people are on their phones.</p>
-          </div>
-          <div class="feature reveal reveal-delay-2">
-            <div class="feature-icon">🔒</div>
-            <h3>Fully yours</h3>
-            <p>Your page, your colours, your content. Update it any time from your dashboard.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+    // Header scroll
+    const header = document.querySelector('[data-site-header]') as HTMLElement | null;
+    const logoImg = document.querySelector('[data-logo-img]') as HTMLImageElement | null;
+    const logoWord = document.querySelector('[data-logo-word]') as HTMLElement | null;
+    const logoTag = document.querySelector('[data-logo-tag]') as HTMLElement | null;
+    const navLinks = document.querySelectorAll('[data-nav-link]');
+    const burgerBars = document.querySelectorAll('[data-burger-bar]');
 
-    <!-- ── FINAL CTA ──────────────────────────────────────────────── -->
-    <section class="cta-section">
-      <div class="cta-bg">
-        <img src="/images/callum-niamh-airport.jpg" alt="" />
-        <div class="cta-overlay"></div>
-      </div>
-      <div class="cta-content reveal">
-        <p class="eyebrow" style="color:#3a7356">Join MYAH</p>
-        <h2>Ready to create your<br /><em>perfect page?</em></h2>
-        <p class="cta-body">Whether you're a house &amp; pet sitter or a home owner looking for one — sign up for free today. It takes less than five minutes.</p>
-        <a href="/signup" class="btn-primary btn-lg">Sign up for free today</a>
-        <p class="cta-login">Already have an account? <a href="/login">Log in</a></p>
-      </div>
-    </section>
+    function onScroll() {
+      const on = window.scrollY > 60 || window.innerWidth <= 1000;
+      if (!header) return;
+      header.style.background = on ? 'rgba(250,246,238,0.97)' : 'transparent';
+      header.style.backdropFilter = on ? 'blur(12px)' : 'none';
+      header.style.boxShadow = on ? '0 1px 0 rgba(110,84,56,0.15)' : 'none';
+      header.style.padding = on ? '14px 48px' : '20px 48px';
+      if (logoImg) logoImg.src = on ? '/images/logo-mark.png' : '/images/logo-mark-white.png';
+      if (logoWord) logoWord.style.color = on ? '#6e5438' : '#e9e0d2';
+      if (logoTag) {
+        logoTag.style.color = on ? '#8a6a4f' : 'rgba(255,255,255,.82)';
+        logoTag.style.textShadow = on ? 'none' : '0 1px 8px rgba(44,26,14,.55)';
+      }
+      navLinks.forEach(a => {
+        (a as HTMLElement).style.color = on ? '#5c3d20' : '#fff';
+        (a as HTMLElement).style.textShadow = on ? 'none' : '0 1px 8px rgba(44,26,14,.55)';
+      });
+      burgerBars.forEach(b => {
+        (b as HTMLElement).style.background = on ? '#2c1a0e' : '#fff';
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    onScroll();
 
-    <!-- ── FOOTER ─────────────────────────────────────────────────── -->
-    <footer>
-      <div class="footer-inner">
-        <div class="footer-top">
-          <div class="footer-brand">
-            <h2>MYAH</h2>
-            <p>Connecting trusted house &amp; pet sitters with home owners worldwide.</p>
-          </div>
-          <div class="footer-links">
-            <h4>Platform</h4>
-            <ul>
-              <li><a href="/signup">Get started</a></li>
-              <li><a href="/login">Log in</a></li>
-              <li><a href="/dashboard">Dashboard</a></li>
-              <li><a href="/listings">Browse sits</a></li>
-            </ul>
-          </div>
-          <div class="footer-links">
-            <h4>Example profile</h4>
-            <ul>
-              <li><a href="/callumandniamh">Callum &amp; Niamh</a></li>
-            </ul>
-          </div>
-        </div>
-        <div class="footer-bottom">
-          <span>&copy; {new Date().getFullYear()} MYAH</span>
-          <span>Made with &#128062; for house &amp; pet sitters everywhere</span>
-        </div>
-      </div>
-    </footer>
+    // Mobile drawer
+    const burger = document.querySelector('[data-burger]') as HTMLElement | null;
+    const drawer = document.querySelector('[data-mobile-menu]') as HTMLElement | null;
+    const mmOverlay = document.querySelector('[data-mm-overlay]') as HTMLElement | null;
+    const mmClose = document.querySelector('[data-mm-close]') as HTMLElement | null;
 
-    <LoadingOverlay />
+    function setDrawer(open: boolean) {
+      if (!drawer || !mmOverlay) return;
+      drawer.style.transform = open ? 'translateX(0)' : 'translateX(100%)';
+      mmOverlay.style.opacity = open ? '1' : '0';
+      mmOverlay.style.visibility = open ? 'visible' : 'hidden';
+    }
+    burger?.addEventListener('click', () => setDrawer(true));
+    mmClose?.addEventListener('click', () => setDrawer(false));
+    mmOverlay?.addEventListener('click', () => setDrawer(false));
+    document.querySelectorAll('[data-mm-item]').forEach(a => a.addEventListener('click', () => setDrawer(false)));
+
+    // Loading overlay
+    const loader = document.querySelector('[data-loader]') as HTMLElement | null;
+    let hideTimer: ReturnType<typeof setTimeout>;
+    function showLoader() {
+      if (!loader) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        if (loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
+      }, 1600);
+    }
+    document.querySelectorAll('form').forEach(f => f.addEventListener('submit', e => { e.preventDefault(); showLoader(); }));
+    document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach(el => {
+      const href = el.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || el.target === '_blank') return;
+      el.addEventListener('click', e => { if ((e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey || (e as MouseEvent).shiftKey) return; showLoader(); });
+    });
+    window.addEventListener('pageshow', e => { if (e.persisted && loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; } });
+  </script>
 </body>
 </html>
-
-<style>
-  /* ── BASE ──────────────────────────────────────────────────────── */
-  .container { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
-  .label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--myah-forest); margin-bottom: 14px; display: block; }
-  .h2 { font-family: "Marcellus", serif; font-size: 2.6rem; color: var(--myah-ink); line-height: 1.2; margin-bottom: 16px; }
-  .section-sub { color: var(--myah-tan); font-size: 1rem; line-height: 1.75; max-width: 560px; margin-bottom: 56px; }
-  .eyebrow { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: #3a7356; margin-bottom: 20px; display: block; }
-  .btn-sm { padding: 10px 22px; font-size: 0.8rem; }
-  .btn-lg { padding: 18px 52px; font-size: 1rem; }
-
-  /* ── SCROLL REVEAL ─────────────────────────────────────────────── */
-  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
-  .reveal.visible { opacity: 1; transform: none; }
-  .reveal-delay-1 { transition-delay: 0.12s; }
-  .reveal-delay-2 { transition-delay: 0.24s; }
-  .reveal-delay-3 { transition-delay: 0.36s; }
-
-  /* ── HEADER ────────────────────────────────────────────────────── */
-  .site-header {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 210;
-    padding: 20px 48px;
-    display: flex; justify-content: space-between; align-items: center;
-    transition: background 0.3s, box-shadow 0.3s, padding 0.3s;
-  }
-  .site-header.scrolled {
-    background: rgba(250,246,238,0.97);
-    backdrop-filter: blur(12px);
-    box-shadow: 0 1px 0 rgba(47,93,69,0.15);
-    padding: 14px 48px;
-  }
-  .header-nav { display: flex; align-items: center; gap: 32px; }
-  .header-nav a:not(.btn-primary) {
-    font-size: 0.82rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-    color: rgba(255,255,255,0.9); text-decoration: none; transition: color 0.2s;
-  }
-  .site-header.scrolled .header-nav a:not(.btn-primary) { color: var(--myah-tan); }
-  .header-nav a:not(.btn-primary):hover { color: var(--myah-forest); }
-  .nav-logo {
-    font-family: "Marcellus", serif; font-size: 1.4rem; color: #fff;
-    letter-spacing: 0.02em; text-decoration: none; transition: color 0.3s;
-    white-space: nowrap; flex-shrink: 0;
-  }
-  .nav-logo span { color: var(--myah-forest); }
-  .site-header.scrolled .nav-logo { color: var(--myah-ink); }
-  .burger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 4px; z-index: 215; }
-  .burger span { display: block; width: 24px; height: 2px; background: #fff; transition: background 0.3s; border-radius: 2px; }
-  .site-header.scrolled .burger span { background: var(--myah-ink); }
-
-  /* MOBILE MENU — Airbnb-style slide-out drawer */
-  .mm-overlay {
-    position: fixed; inset: 0; z-index: 190;
-    background: rgba(0,0,0,0.45);
-    opacity: 0; visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
-  .mm-overlay.open { opacity: 1; visibility: visible; }
-
-  .mobile-menu {
-    position: fixed; top: 0; right: 0; bottom: 0;
-    width: 320px; max-width: 85vw;
-    z-index: 200;
-    background: #fff;
-    display: flex; flex-direction: column;
-    transform: translateX(100%);
-    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: -8px 0 40px rgba(0,0,0,0.12);
-  }
-  .mobile-menu.open { transform: translateX(0); }
-
-  .mm-header {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 20px 24px; border-bottom: 1px solid rgba(44,26,14,0.08);
-    flex-shrink: 0;
-  }
-  .mm-logo {
-    font-family: "Marcellus", serif; font-size: 1.25rem;
-    color: var(--myah-ink); text-decoration: none;
-  }
-  .mm-logo span { color: var(--myah-forest); }
-  .mm-close {
-    width: 36px; height: 36px; border-radius: 50%;
-    border: 1px solid rgba(44,26,14,0.12); background: #fff;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; color: var(--myah-ink); transition: background 0.2s;
-  }
-  .mm-close:hover { background: var(--myah-paper); }
-
-  .mm-body {
-    flex: 1; overflow-y: auto; padding: 12px 0;
-  }
-  .mm-item {
-    display: flex; align-items: center; gap: 16px;
-    padding: 16px 24px; text-decoration: none; color: var(--myah-ink);
-    transition: background 0.15s;
-  }
-  .mm-item:hover { background: rgba(47,93,69,0.05); }
-  .mm-item:active { background: rgba(47,93,69,0.1); }
-  .mm-item-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: var(--myah-paper); display: flex; align-items: center;
-    justify-content: center; flex-shrink: 0; color: var(--myah-forest);
-  }
-  .mm-item-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-  .mm-item-title { font-size: 0.95rem; font-weight: 700; color: var(--myah-ink); }
-  .mm-item-desc { font-size: 0.78rem; color: var(--myah-tan); }
-  .mm-chevron { font-size: 1.4rem; color: rgba(44,26,14,0.2); font-weight: 300; }
-  .mm-divider { height: 1px; background: rgba(44,26,14,0.08); margin: 8px 24px; }
-
-  .mm-footer {
-    padding: 20px 24px; border-top: 1px solid rgba(44,26,14,0.08);
-    flex-shrink: 0;
-  }
-  .mm-footer .mm-cta { display: block; width: 100%; text-align: center; padding: 16px; font-size: 0.9rem; border-radius: 10px; }
-  .mm-footer-note { font-size: 0.75rem; color: var(--myah-tan); text-align: center; margin-top: 10px; }
-
-  /* ── HERO ──────────────────────────────────────────────────────── */
-  .hero {
-    min-height: 100vh;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero-image-wrap {
-    grid-column: 1; grid-row: 1;
-    position: relative;
-    min-height: 100vh;
-    overflow: hidden;
-    background: var(--myah-ink);
-  }
-  .hero-slide {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%; object-fit: cover; object-position: center 30%;
-    opacity: 0;
-    transition: opacity 1.2s ease-in-out;
-  }
-  .hero-slide.active { opacity: 1; }
-  .hero-gradient {
-    position: absolute; inset: 0;
-    background: linear-gradient(to right, rgba(44,26,14,0.35) 0%, rgba(44,26,14,0) 60%),
-                linear-gradient(to top, rgba(44,26,14,0.5) 0%, transparent 40%);
-  }
-  .hero-text {
-    grid-column: 2; grid-row: 1;
-    display: flex; flex-direction: column; justify-content: center;
-    padding: 140px 64px 80px 60px;
-    background: var(--myah-paper);
-  }
-  .hero-text h1 {
-    font-family: "Marcellus", serif;
-    font-size: 3.4rem;
-    color: var(--myah-ink);
-    line-height: 1.12;
-    margin-bottom: 24px;
-  }
-  .hero-text h1 em { color: var(--myah-forest); font-style: italic; }
-  .hero-body { color: var(--myah-tan); font-size: 1.05rem; line-height: 1.75; margin-bottom: 36px; max-width: 460px; }
-  .hero-actions { display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
-  .hero-sub-note { font-size: 0.82rem; color: var(--myah-tan); margin: 0; letter-spacing: 0.02em; }
-
-  /* ── DUAL SITTER / OWNER ────────────────────────────────────────── */
-  .dual-section { padding: 100px 0; background: #fff; }
-  .dual-section .h2 em { color: var(--myah-forest); font-style: italic; }
-  .dual-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 48px; }
-  .dual-card {
-    background: var(--myah-paper); border-radius: 16px; padding: 40px 36px;
-    display: flex; flex-direction: column; gap: 16px;
-    border: 1px solid rgba(47,93,69,0.15);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-  }
-  .dual-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(44,26,14,0.08); }
-  .dual-card-alt { background: var(--warm-white); }
-  .dual-icon {
-    width: 56px; height: 56px; border-radius: 14px;
-    background: rgba(47,93,69,0.12); color: var(--myah-forest);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .dual-title { font-family: "Marcellus", serif; font-size: 1.5rem; color: var(--myah-ink); }
-  .dual-desc { color: var(--myah-tan); font-size: 0.95rem; line-height: 1.7; }
-  .dual-list {
-    list-style: none; display: flex; flex-direction: column; gap: 12px;
-    padding: 16px 0; margin: 0; border-top: 1px solid rgba(44,26,14,0.08);
-  }
-  .dual-list li {
-    font-size: 0.9rem; color: var(--myah-ink); line-height: 1.6; padding-left: 24px;
-    position: relative;
-  }
-  .dual-list li::before {
-    content: ""; position: absolute; left: 0; top: 8px;
-    width: 12px; height: 12px; border-radius: 50%;
-    background: var(--myah-cream); border: 2px solid var(--myah-forest);
-  }
-  .dual-list li strong { color: var(--myah-forest); font-weight: 700; }
-  .dual-cta {
-    font-size: 0.88rem; font-weight: 700; color: var(--myah-forest); text-decoration: none;
-    letter-spacing: 0.04em; margin-top: auto; padding-top: 8px;
-    transition: color 0.2s;
-  }
-  .dual-cta:hover { color: var(--myah-ink); }
-
-  /* ── STEPS ─────────────────────────────────────────────────────── */
-  .steps-section { padding: 100px 0; background: #fff; }
-  .steps-grid { display: flex; align-items: flex-start; gap: 0; margin-top: 56px; }
-  .step { flex: 1; padding: 0 32px; }
-  .step:first-child { padding-left: 0; }
-  .step:last-child { padding-right: 0; }
-  .step-num { font-family: "Marcellus", serif; font-size: 3.5rem; color: var(--myah-cream); font-weight: 700; line-height: 1; margin-bottom: 16px; }
-  .step h3 { font-family: "Marcellus", serif; font-size: 1.15rem; color: var(--myah-ink); margin-bottom: 10px; }
-  .step p { color: var(--myah-tan); font-size: 0.9rem; line-height: 1.7; }
-  .step p strong { color: var(--myah-forest); font-weight: 700; }
-  .step-arrow { font-size: 1.6rem; color: var(--myah-cream); padding-top: 48px; flex-shrink: 0; }
-
-  /* ── EXAMPLE / EDITORIAL ───────────────────────────────────────── */
-  .example-section { padding: 100px 0 0; background: var(--myah-paper); }
-  .example-section .container { padding-bottom: 60px; }
-  .editorial-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 0; max-width: 1300px; margin: 0 auto;
-    padding: 0 48px;
-  }
-  .editorial-left { position: relative; padding: 0 48px 0 0; }
-  .ed-collage {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .ed-col-img {
-    width: 100%; display: block; border-radius: 10px;
-    object-fit: cover; aspect-ratio: 1;
-  }
-  .ed-col-wide {
-    grid-column: span 2;
-    aspect-ratio: 2 / 1;
-  }
-  .editorial-right { padding: 20px 0 60px 48px; display: flex; flex-direction: column; gap: 24px; justify-content: center; }
-  .ed-badge { display: inline-block; background: var(--myah-cream); color: var(--myah-tan); padding: 8px 18px; border-radius: 50px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; width: fit-content; }
-  .ed-name { font-family: "Marcellus", serif; font-size: 2rem; color: var(--myah-ink); line-height: 1.15; }
-  .ed-tagline { color: var(--myah-tan); font-size: 0.95rem; line-height: 1.7; }
-  .ed-quote { border-left: 3px solid var(--myah-forest); margin: 0; padding: 16px 24px; background: var(--warm-white); border-radius: 0 8px 8px 0; }
-  .ed-quote p, .ed-quote { font-style: italic; color: var(--myah-tan); font-size: 0.95rem; line-height: 1.75; }
-  .ed-stats { display: flex; gap: 32px; padding: 20px 0; border-top: 1px solid rgba(47,93,69,0.15); border-bottom: 1px solid rgba(47,93,69,0.15); }
-  .ed-stat { display: flex; flex-direction: column; gap: 4px; }
-  .ed-stat-num { font-family: "Marcellus", serif; font-size: 1.8rem; color: var(--myah-forest); font-weight: 700; line-height: 1; }
-  .ed-stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--myah-tan); }
-
-  .reviews-strip { background: var(--myah-ink); padding: 60px 48px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .review-strip-card { padding: 28px 32px; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
-  .rsc-stars { color: var(--myah-forest); font-size: 0.9rem; margin-bottom: 14px; }
-  .review-strip-card p { color: rgba(255,255,255,0.82); font-size: 0.88rem; line-height: 1.75; font-style: italic; margin-bottom: 16px; }
-  .review-strip-card cite { font-size: 0.78rem; font-weight: 700; color: #3a7356; letter-spacing: 0.04em; font-style: normal; }
-
-  /* ── MOSAIC ────────────────────────────────────────────────────── */
-  .mosaic-section { position: relative; background: var(--myah-paper); }
-  .mosaic { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 200px 200px; gap: 4px; }
-  .mosaic-item { overflow: hidden; background: var(--myah-cream); }
-  .mosaic-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.5s ease; }
-  .mosaic-item:hover img { transform: scale(1.06); }
-  .mosaic-tall { grid-row: span 2; }
-  .mosaic-caption { text-align: center; padding: 32px; }
-  .mosaic-caption p { font-family: "Marcellus", serif; font-size: 1.1rem; color: var(--myah-tan); font-style: italic; }
-
-  /* ── FEATURES ──────────────────────────────────────────────────── */
-  .features-section { padding: 100px 0; background: var(--warm-white); }
-  .features-section .h2 { margin-bottom: 56px; }
-  .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-  .feature { background: #fff; border-radius: 14px; padding: 36px 28px; box-shadow: 0 2px 20px rgba(44,26,14,0.05); transition: transform 0.2s, box-shadow 0.2s; }
-  .feature:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(44,26,14,0.1); }
-  .feature-icon { font-size: 2.2rem; margin-bottom: 20px; }
-  .feature h3 { font-family: "Marcellus", serif; font-size: 1.15rem; color: var(--myah-ink); margin-bottom: 10px; }
-  .feature p { color: var(--myah-tan); font-size: 0.9rem; line-height: 1.7; }
-  .feature p strong { color: var(--myah-forest); font-weight: 700; }
-
-  /* ── CTA ───────────────────────────────────────────────────────── */
-  .cta-section { position: relative; min-height: 560px; display: flex; align-items: center; justify-content: center; text-align: center; padding: 100px 48px; overflow: hidden; }
-  .cta-bg { position: absolute; inset: 0; }
-  .cta-bg img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
-  .cta-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.72); }
-  .cta-content { position: relative; z-index: 2; max-width: 660px; }
-  .cta-content h2 { font-family: "Marcellus", serif; font-size: 3.2rem; color: #fff; line-height: 1.15; margin-bottom: 20px; }
-  .cta-content h2 em { color: var(--myah-forest); font-style: italic; }
-  .cta-body { color: rgba(255,255,255,0.8); font-size: 1.05rem; line-height: 1.7; margin-bottom: 36px; }
-  .cta-login { margin-top: 20px; font-size: 0.88rem; color: rgba(255,255,255,0.6); }
-  .cta-login a { color: #3a7356; font-weight: 700; text-decoration: none; }
-  .cta-login a:hover { text-decoration: underline; }
-
-  /* ── RESPONSIVE ────────────────────────────────────────────────── */
-  @media (max-width: 1024px) {
-    .hero { grid-template-columns: 1fr; grid-template-rows: 60vh auto; }
-    .hero-image-wrap { grid-column: 1; grid-row: 1; min-height: 60vh; }
-    .hero-gradient { background: rgba(44,26,14,0.5); }
-    .hero-text { grid-column: 1; grid-row: 2; padding: 60px 48px; }
-    .hero-text h1 { font-size: 2.8rem; }
-    .editorial-grid { grid-template-columns: 1fr; padding: 0 48px; }
-    .editorial-right { padding: 40px 0; }
-    .editorial-left { padding: 0; }
-  }
-
-  @media (max-width: 768px) {
-    .dual-section { padding: 60px 0; }
-    .dual-grid { grid-template-columns: 1fr; gap: 20px; }
-    .dual-card { padding: 28px 24px; }
-    .site-header {
-      padding: 16px 24px;
-      background: rgba(250,246,238,0.97);
-      backdrop-filter: blur(12px);
-    }
-    .site-header .nav-logo { color: var(--myah-ink); }
-    .site-header.scrolled { padding: 12px 24px; }
-    .header-nav { display: none; }
-    .burger { display: flex; }
-    .burger span { background: var(--myah-ink); }
-    .container { padding: 0 24px; }
-    .hero-text { padding: 48px 24px; }
-    .hero-text h1 { font-size: 2.2rem; }
-    .steps-section { padding: 60px 0; }
-    .steps-grid { flex-direction: column; gap: 32px; }
-    .step { padding: 0; }
-    .step-arrow { padding-top: 0; transform: rotate(90deg); align-self: center; }
-    .example-section { padding: 60px 0 0; }
-    .editorial-grid { padding: 0 24px; }
-    .reviews-strip { grid-template-columns: 1fr; padding: 48px 24px; gap: 16px; }
-    .mosaic { grid-template-columns: repeat(2, 1fr); grid-template-rows: repeat(4, 140px); }
-    .mosaic-item.mosaic-tall { grid-row: span 1; }
-    .features-section { padding: 60px 0; }
-    .features-grid { grid-template-columns: 1fr; gap: 16px; }
-    .cta-content h2 { font-size: 2.2rem; }
-    .ed-stats { gap: 20px; flex-wrap: wrap; }
-  }
-</style>
-
-<script>
-  // Header scroll state
-  const header = document.getElementById('siteHeader');
-  window.addEventListener('scroll', () => {
-    header?.classList.toggle('scrolled', window.scrollY > 60);
-  }, { passive: true });
-
-  // Mobile menu (Airbnb-style drawer)
-  const burger = document.getElementById('burger');
-  const menu = document.getElementById('mobileMenu');
-  const mmOverlay = document.getElementById('mmOverlay');
-  const mmClose = document.getElementById('mmClose');
-
-  function openMenu() { menu?.classList.add('open'); mmOverlay?.classList.add('open'); }
-  function closeMenu() { menu?.classList.remove('open'); mmOverlay?.classList.remove('open'); }
-
-  burger?.addEventListener('click', openMenu);
-  mmClose?.addEventListener('click', closeMenu);
-  mmOverlay?.addEventListener('click', closeMenu);
-  menu?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
-
-  // Scroll reveal
-  const observer = new IntersectionObserver(
-    (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } }),
-    { threshold: 0.12 }
-  );
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-  // Smooth scroll for anchor links
-  document.querySelectorAll('a[href^="#"]').forEach(a => {
-    a.addEventListener('click', e => {
-      const target = document.querySelector(a.getAttribute('href') ?? '');
-      if (target) {
-        e.preventDefault();
-        const offset = (document.getElementById('siteHeader')?.offsetHeight ?? 0) + 20;
-        window.scrollTo({ top: (target as HTMLElement).getBoundingClientRect().top + window.scrollY - offset, behavior: 'smooth' });
-      }
-    });
-  });
-
-  // Hero slideshow
-  const slides = document.querySelectorAll('.hero-slide');
-  let current = 0;
-  if (slides.length > 1) {
-    setInterval(() => {
-      slides[current].classList.remove('active');
-      current = (current + 1) % slides.length;
-      slides[current].classList.add('active');
-    }, 4500);
-  }
-</script>

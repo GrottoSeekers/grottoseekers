@@ -1,0 +1,382 @@
+---
+export const prerender = false;
+
+import { getSession } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: ownerProfileData } = await supabase
+  .from('profiles')
+  .select('id, name, profile_type')
+  .eq('user_id', session.userId)
+  .single();
+const ownerProfile = ownerProfileData as any;
+if (ownerProfile?.profile_type !== 'owner') return Astro.redirect('/dashboard');
+
+const listingId = Astro.url.searchParams.get('listing') || null;
+let listing: any = null;
+if (listingId) {
+  const { data } = await supabase
+    .from('listings')
+    .select('id, title, date_from, date_to, location, profiles!inner(name, location, hero_images_json)')
+    .eq('id', listingId)
+    .eq('profile_id', ownerProfile.id)
+    .single();
+  listing = data as any;
+}
+
+let sitters: any[] = [];
+try {
+  const { data } = await supabase
+    .from('profiles')
+    .select('id, name, avatar_url, bio, slug, location, sits_count, reviews_json, verified_id')
+    .eq('profile_type', 'sitter')
+    .limit(50);
+  sitters = (data ?? []) as any[];
+} catch {}
+
+function fmt(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find a sitter — MYAH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+  * { box-sizing:border-box; }
+  a { color:#2f5d45; }
+  a:hover { color:#2c1a0e; }
+  input::placeholder { color:rgba(44,26,14,.35); }
+  @keyframes gs-ring { to { transform:rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+  @media (max-width:1000px) {
+    [data-topnav] { padding:14px 24px !important; }
+    [data-pad] { padding:34px 20px 80px !important; }
+    [data-two-col] { grid-template-columns:minmax(0,1fr) !important; }
+    [data-aside] { position:static !important; }
+    [data-cards] { grid-template-columns:minmax(0,1fr) !important; }
+  }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="/owner/dashboard" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s,color .2s"
+        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'" onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
+      {listingId && (
+        <a href={`/owner/listings/${listingId}/applications`} style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
+          onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#2f5d45'">Applications</a>
+      )}
+    </div>
+  </nav>
+
+  <main data-pad="1" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
+          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH owner
+        </p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Find a <em style="color:#2f5d45;">sitter</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">Rather than waiting for applications, go and look. Invite the ones you like and they&rsquo;ll get a message with your sit attached.</p>
+      </div>
+
+      <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:22px 24px;margin-bottom:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+        onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+        onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:18px">
+          <input id="searchInput" type="text" placeholder="Search by name, place or experience" oninput="filterSitters()"
+            style="flex:1;min-width:220px;border:1.5px solid rgba(44,26,14,.18);border-radius:50px;padding:13px 20px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s,box-shadow .2s"
+            onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+            onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow='none'" />
+          {listing?.date_from && listing?.date_to && (
+            <div style="display:flex;align-items:center;gap:10px;background:#faf6ee;border:1.5px solid rgba(110,84,56,.3);border-radius:50px;padding:11px 20px">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+              <span style="font-size:.86rem;font-weight:600;color:#5c3d20">{fmt(listing.date_from)} &ndash; {fmt(listing.date_to)}</span>
+            </div>
+          )}
+        </div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap" id="filterBar">
+          {[
+            { key: 'verified', label: 'ID verified' },
+            { key: 'experienced', label: '10+ sits' },
+          ].map((f, i) => (
+            <button type="button" data-filter={f.key} onclick={`toggleFilter('${f.key}', this)`}
+              style={`font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;padding:10px 18px;border-radius:50px;cursor:pointer;transition:background .25s ease,color .25s ease,border-color .25s ease;${i === 0 ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#faf6ee;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);'}`}
+              data-active={i === 0 ? '1' : '0'}>
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+            <p id="resultLine" style="font-size:.88rem;color:#6b4e35;margin:0">{sitters.length} sitter{sitters.length === 1 ? '' : 's'} — none invited yet.</p>
+            <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Sort</span>
+              {[{ key: 'best', label: 'Best match' }, { key: 'reviews', label: 'Most reviewed' }].map(s => (
+                <button type="button" data-sort={s.key} onclick={`setSort('${s.key}')`}
+                  style={`font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.06em;padding:9px 16px;border-radius:50px;cursor:pointer;transition:background .2s ease,color .2s ease,border-color .2s ease;${s.key === 'best' ? 'background:rgba(110,84,56,.14);color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);' : 'background:#fff;color:#6b4e35;border:1.5px solid rgba(44,26,14,.1);'}`}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {sitters.length === 0 ? (
+            <div style="background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px">
+              <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">No sitters yet</p>
+              <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0;max-width:420px">As sitters join MYAH they&rsquo;ll appear here. Share your listing and applications will come in too.</p>
+            </div>
+          ) : (
+            <div data-cards="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px" id="sitterGrid">
+              {sitters.map((s: any) => {
+                const reviews: any[] = Array.isArray(s.reviews_json) ? s.reviews_json : [];
+                const avgRating = reviews.length ? Math.round(reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length) : 0;
+                const stars = '★'.repeat(avgRating) + '☆'.repeat(5 - avgRating);
+                const initials = (s.name || 'S').split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
+                const isVerified = s.verified_id === true;
+                const sitsCount = s.sits_count || 0;
+                return (
+                  <article data-sitter-id={s.id}
+                    data-verified={isVerified ? '1' : '0'}
+                    data-experienced={sitsCount >= 10 ? '1' : '0'}
+                    data-search={`${s.name || ''} ${s.location || ''} ${s.bio || ''}`.toLowerCase()}
+                    style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+                    onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+                    onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+                    <div style="padding:24px 24px 0;display:flex;gap:16px;align-items:flex-start">
+                      <div style="position:relative;flex-shrink:0">
+                        {s.avatar_url ? (
+                          <img src={s.avatar_url} alt="" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
+                        ) : (
+                          <div style="width:64px;height:64px;border-radius:50%;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.3rem;color:#2f5d45">{initials}</div>
+                        )}
+                        {isVerified && (
+                          <span style="position:absolute;right:-2px;bottom:-2px;width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.6rem;display:flex;align-items:center;justify-content:center;border:2px solid #fff">✓</span>
+                        )}
+                      </div>
+                      <div style="flex:1;min-width:0">
+                        <h2 style="font-family:'Marcellus',serif;font-size:1.16rem;color:#2c1a0e;margin:0 0 5px;line-height:1.3">{s.name || 'Sitter'}</h2>
+                        <p style="font-size:.81rem;color:#2f5d45;font-weight:700;margin:0 0 7px">
+                          {[sitsCount > 0 && `${sitsCount} sits`, s.location].filter(Boolean).join(' · ') || 'Sitter'}
+                        </p>
+                        {avgRating > 0 && (
+                          <p style="font-size:.84rem;color:#6b4e35;margin:0">{stars} &nbsp;{reviews.length} review{reviews.length === 1 ? '' : 's'}</p>
+                        )}
+                      </div>
+                    </div>
+                    <div style="padding:18px 24px 24px;display:flex;flex-direction:column;gap:14px;flex:1">
+                      {s.bio && (
+                        <p style="font-size:.92rem;color:#6b4e35;line-height:1.7;margin:0">{s.bio.slice(0, 140)}{s.bio.length > 140 ? '…' : ''}</p>
+                      )}
+                      <div style="display:flex;gap:10px;margin-top:auto">
+                        <button type="button" onclick={`inviteSitter('${s.id}', this)`} data-invited="0"
+                          style="flex:1;font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 12px;cursor:pointer;transition:background .25s ease,transform .15s ease"
+                          onmouseover="if(this.dataset.invited==='0'){this.style.background='#3e7a5b';this.style.transform='translateY(-2px)'}"
+                          onmouseout="if(this.dataset.invited==='0'){this.style.background='#2f5d45';this.style.transform='translateY(0)'}">Invite</button>
+                        {s.slug && (
+                          <a href={`/${s.slug}`} style="font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;text-decoration:none;border:1.5px solid rgba(44,26,14,.15);border-radius:50px;padding:11px 18px;transition:border-color .2s,color .2s"
+                            onmouseover="this.style.borderColor='#2f5d45';this.style.color='#2f5d45'" onmouseout="this.style.borderColor='rgba(44,26,14,.15)';this.style.color='#6b4e35'">Profile</a>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+
+          <div id="emptyState" style="display:none;background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px">
+            <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">No one matches all that</p>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 22px;max-width:420px">Try loosening the filters &mdash; remove a requirement and more sitters will show up.</p>
+            <button type="button" onclick="clearFilters()" style="font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:12px 28px;cursor:pointer;transition:background .25s ease,border-color .25s ease"
+              onmouseover="this.style.background='rgba(110,84,56,.1)';this.style.borderColor='#2f5d45'" onmouseout="this.style.background='#fff';this.style.borderColor='rgba(110,84,56,.45)'">Clear filters</button>
+          </div>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Inviting them to</p>
+            {listing ? (
+              <div>
+                <div style="display:flex;gap:14px;align-items:flex-start;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:14px;padding:16px 18px">
+                  <div style="min-width:0">
+                    <p style="font-family:'Marcellus',serif;font-size:1.02rem;color:#2c1a0e;margin:0 0 4px;line-height:1.3">{listing.title}</p>
+                    <p style="font-size:.8rem;color:#6b4e35;margin:0">
+                      {listing.date_from && listing.date_to ? `${fmt(listing.date_from)} – ${fmt(listing.date_to)}` : ''}
+                      {listing.profiles?.location ? ` · ${listing.profiles.location}` : ''}
+                    </p>
+                  </div>
+                </div>
+                <p style="font-size:.85rem;color:#6b4e35;line-height:1.7;margin:16px 0 0">An invite sends them the listing and opens a conversation. They can still say no.</p>
+              </div>
+            ) : (
+              <div>
+                <p style="font-size:.88rem;color:#6b4e35;line-height:1.7;margin:0 0 16px">Choose a listing to send with your invite.</p>
+                <a href="/owner/listings/new" style="display:inline-flex;align-items:center;gap:8px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:gap .2s,color .2s"
+                  onmouseover="this.style.gap='12px';this.style.color='#2c1a0e'" onmouseout="this.style.gap='8px';this.style.color='#2f5d45'">Post a sit &rarr;</a>
+              </div>
+            )}
+          </div>
+
+          <div id="invitedPanel" style="display:none;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Invited</p>
+            <div id="invitedList" style="display:flex;flex-direction:column;gap:11px;margin-bottom:18px"></div>
+            <a href="/messages" style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease,transform .15s ease"
+              onmouseover="this.style.background='#3e7a5b';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#2f5d45';this.style.transform='translateY(0)'">Go to messages</a>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0">Tip: sitters with 10+ reviews and a verified badge are the ones owners trust most &mdash; and they respond fastest.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script define:vars={{ listingIdJs: listingId, sitterData: sitters.map((s: any) => ({ id: s.id, name: s.name || 'Sitter', avatar: s.avatar_url || '' })) }}>
+const invited = {};
+const filters = { verified: true, experienced: false };
+
+function filterSitters() {
+  const q = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  let visible = 0;
+  document.querySelectorAll('[data-sitter-id]').forEach(el => {
+    const matchSearch = !q || el.dataset.search?.includes(q);
+    const matchVerified = !filters.verified || el.dataset.verified === '1';
+    const matchExp = !filters.experienced || el.dataset.experienced === '1';
+    const show = matchSearch && matchVerified && matchExp;
+    el.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  const invCount = Object.keys(invited).length;
+  const resultLine = document.getElementById('resultLine');
+  if (resultLine) resultLine.textContent = `${visible} sitter${visible === 1 ? '' : 's'} — ${invCount === 0 ? 'none invited yet.' : `${invCount} invited so far.`}`;
+  const emptyState = document.getElementById('emptyState');
+  const grid = document.getElementById('sitterGrid');
+  if (emptyState && grid) {
+    emptyState.style.display = visible === 0 ? 'block' : 'none';
+    grid.style.display = visible === 0 ? 'none' : '';
+  }
+}
+
+function toggleFilter(key, btn) {
+  filters[key] = !filters[key];
+  btn.dataset.active = filters[key] ? '1' : '0';
+  btn.style.background = filters[key] ? '#2f5d45' : '#faf6ee';
+  btn.style.color = filters[key] ? '#fff' : '#5c3d20';
+  btn.style.borderColor = filters[key] ? '#2f5d45' : 'rgba(110,84,56,.32)';
+  filterSitters();
+}
+
+function clearFilters() {
+  Object.keys(filters).forEach(k => { filters[k] = false; });
+  document.querySelectorAll('[data-filter]').forEach(btn => {
+    btn.style.background = '#faf6ee';
+    btn.style.color = '#5c3d20';
+    btn.style.borderColor = 'rgba(110,84,56,.32)';
+    btn.dataset.active = '0';
+  });
+  filterSitters();
+}
+
+function setSort(key) {
+  document.querySelectorAll('[data-sort]').forEach(btn => {
+    const active = btn.dataset.sort === key;
+    btn.style.background = active ? 'rgba(110,84,56,.14)' : '#fff';
+    btn.style.color = active ? '#2f5d45' : '#6b4e35';
+    btn.style.borderColor = active ? 'rgba(110,84,56,.45)' : 'rgba(44,26,14,.1)';
+  });
+}
+
+function inviteSitter(id, btn) {
+  if (invited[id]) {
+    delete invited[id];
+    btn.textContent = 'Invite';
+    btn.style.background = '#2f5d45';
+    btn.style.color = '#fff';
+    btn.style.border = '1.5px solid #2f5d45';
+    btn.dataset.invited = '0';
+    updateInvitedPanel();
+    return;
+  }
+  invited[id] = true;
+  btn.textContent = '✓ Invited';
+  btn.style.background = 'rgba(110,84,56,.14)';
+  btn.style.color = '#2f5d45';
+  btn.style.border = '1.5px solid rgba(110,84,56,.35)';
+  btn.dataset.invited = '1';
+  updateInvitedPanel();
+  if (listingIdJs) {
+    fetch('/api/invites/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sitterId: id, listingId: listingIdJs }) }).catch(() => {});
+  }
+}
+
+function updateInvitedPanel() {
+  const panel = document.getElementById('invitedPanel');
+  const list = document.getElementById('invitedList');
+  if (!panel || !list) return;
+  const ids = Object.keys(invited);
+  panel.style.display = ids.length > 0 ? 'block' : 'none';
+  list.innerHTML = ids.map(id => {
+    const s = sitterData.find(x => x.id === id);
+    if (!s) return '';
+    const initials = s.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+    return `<div style="display:flex;align-items:center;gap:12px">
+      ${s.avatar ? `<img src="${s.avatar}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35);flex-shrink:0">` : `<div style="width:36px;height:36px;border-radius:50%;background:rgba(110,84,56,.14);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:.9rem;color:#2f5d45;flex-shrink:0">${initials}</div>`}
+      <div style="flex:1"><p style="font-size:.9rem;font-weight:600;color:#2c1a0e;margin:0">${s.name}</p><p style="font-size:.78rem;color:#6b4e35;margin:0">Invited just now</p></div>
+      <button onclick="inviteSitter('${id}', document.querySelector('[data-sitter-id=\\'${id}\\'] button'))" style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6b4e35;background:none;border:none;cursor:pointer;padding:4px">Undo</button>
+    </div>`;
+  }).join('');
+  filterSitters();
+}
+
+document.querySelectorAll('a[href]').forEach(a => {
+  const href = a.getAttribute('href') || '';
+  if (href.startsWith('#') || href.startsWith('http')) return;
+  const loader = document.querySelector('[data-loader]');
+  if (!loader) return;
+  a.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  });
+});
+</script>
+</body>
+</html>

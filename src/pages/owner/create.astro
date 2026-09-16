@@ -1,8 +1,5 @@
 ---
-import LoadingOverlay from '../../components/LoadingOverlay.astro';
 export const prerender = false;
-
-import '../../styles/global.css';
 import { getSession } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 
@@ -38,101 +35,304 @@ const errorMsg = errorMap[error ?? ''] ?? '';
     <link rel="icon" type="image/png" href="/images/favicon.png" />
     <link rel="apple-touch-icon" href="/images/app-tile.png" />
     <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>Create profile — MYAH</title>
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>Create owner profile — MYAH</title>
+    <style>
+      body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+      * { box-sizing: border-box; }
+      a { color: #2f5d45; }
+      a:hover { color: #2c1a0e; }
+      input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+      @keyframes gs-ring { to { transform: rotate(360deg); } }
+      @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+      @media (max-width: 900px) {
+        [data-topnav] { padding: 14px 24px !important; }
+        [data-pad] { padding: 36px 24px 70px !important; }
+        [data-form-grid] { grid-template-columns: minmax(0,1fr) !important; }
+        [data-aside] { position: static !important; }
+        [data-card] { padding: 26px !important; }
+      }
+    </style>
   </head>
   <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-    </nav>
+    <div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
 
-    <main class="create-wrap">
-      <div class="create-card">
-        <p class="section-label">Owner Portal</p>
-        <h1 class="section-title">Create your profile</h1>
-        <div class="divider"></div>
-        <p class="create-intro">Set up your profile — you'll add your home details, pets, and sit listings next.</p>
-
-        {errorMsg && <p class="create-error">{errorMsg}</p>}
-
-        <form method="POST" action="/api/owner/create" enctype="multipart/form-data" class="create-form">
-          <div class="field">
-            <label for="name">Your name <span class="req">*</span></label>
-            <input type="text" id="name" name="name" placeholder="e.g. Sarah & James" required autocomplete="name" />
-            <p class="field-hint">How you'll appear on your profile.</p>
-          </div>
-
-          <div class="field">
-            <label for="slug">Your profile URL <span class="req">*</span></label>
-            <div class="slug-wrap">
-              <span class="slug-prefix">myah.com/</span>
-              <input type="text" id="slug" name="slug" placeholder="yourname" required pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$" />
-            </div>
-            <p class="field-hint">Lowercase letters, numbers, and hyphens only.</p>
-          </div>
-
-          <div class="field">
-            <label for="location">Location <span class="req">*</span></label>
-            <input type="text" id="location" name="location" placeholder="e.g. Sydney, NSW" required />
-            <p class="field-hint">City or area — helps sitters find you.</p>
-          </div>
-
-          <div class="field">
-            <label for="profile_pic">Profile photo</label>
-            <input type="file" id="profile_pic" name="profile_pic" accept="image/*" />
-          </div>
-
-          <div class="field">
-            <label for="bio">About your home</label>
-            <textarea id="bio" name="bio" rows="5" placeholder="Tell sitters about your home, neighbourhood, and what makes it a great place to stay."></textarea>
-          </div>
-
-          <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Create profile</button>
-        </form>
+      <div id="loader" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+        <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+          <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+          <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+          <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+        </div>
       </div>
-    </main>
+
+      <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+        <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+          <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+          <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+            <span style="color:#2f5d45;line-height:1;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">MYAH</span>
+            <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
+          </span>
+        </a>
+        <a href="/api/auth/logout" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s ease">Log out</a>
+      </nav>
+
+      <main data-pad="1" style="flex:1;padding:52px 48px 80px">
+        <div style="max-width:1100px;margin:0 auto">
+
+          <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:32px">
+            <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
+              <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH owner
+            </p>
+            <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Create your <em style="color:#2f5d45;">profile</em></h1>
+            <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:580px;margin:0">Set up your profile — you'll add your home details, pets and sit listings next.</p>
+          </div>
+
+          {errorMsg && (
+            <div style="background:rgba(185,28,28,.08);border:1px solid rgba(185,28,28,.3);border-radius:12px;padding:14px 20px;margin-bottom:28px;color:#b91c1c;font-size:.92rem;line-height:1.6">{errorMsg}</div>
+          )}
+
+          <div data-form-grid="1" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start">
+
+            <form id="createForm" method="POST" action="/api/owner/create" enctype="multipart/form-data" style="display:flex;flex-direction:column;gap:24px">
+              <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Your details</h2>
+                <div style="width:40px;height:2px;background:#6e5438;margin:0 0 28px"></div>
+
+                <div style="margin-bottom:26px">
+                  <label for="name" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Your name <span style="color:#2f5d45">*</span></label>
+                  <input id="name" name="name" type="text" placeholder="e.g. Sarah &amp; James" required autocomplete="name"
+                    style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .25s ease, box-shadow .25s ease"
+                    onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+                    onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow=''" />
+                  <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">How you'll appear on your profile.</p>
+                </div>
+
+                <div style="margin-bottom:26px">
+                  <label for="slug" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Your profile URL <span style="color:#2f5d45">*</span></label>
+                  <div style="display:flex;align-items:stretch;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;overflow:hidden;background:#faf6ee">
+                    <span style="display:flex;align-items:center;padding:0 14px;font-size:.88rem;color:#6b4e35;background:rgba(44,26,14,.04);border-right:1px solid rgba(44,26,14,.1);white-space:nowrap;flex-shrink:0">myahsits.com/</span>
+                    <input id="slug" name="slug" type="text" placeholder="yourname" required
+                      style="flex:1;min-width:0;border:none;background:transparent;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;outline:none" />
+                  </div>
+                  <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">Lowercase letters, numbers and hyphens only.</p>
+                </div>
+
+                <div style="margin-bottom:26px">
+                  <label for="location" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Location <span style="color:#2f5d45">*</span></label>
+                  <input id="location" name="location" type="text" placeholder="e.g. Sydney, NSW" required
+                    style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .25s ease, box-shadow .25s ease"
+                    onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+                    onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow=''" />
+                  <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">City or area — helps sitters find you.</p>
+                </div>
+
+                <div style="margin-bottom:26px">
+                  <label style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Profile photo</label>
+                  <div style="position:relative">
+                    <input id="profile_pic" name="profile_pic" type="file" accept="image/*"
+                      style="position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2;width:100%;height:100%" />
+                    <div id="fileLabel" style="display:flex;align-items:center;gap:14px;border:2px dashed rgba(110,84,56,.45);border-radius:12px;padding:22px 18px;background:#faf6ee;cursor:pointer;transition:border-color .25s ease, background .25s ease">
+                      <span style="width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg>
+                      </span>
+                      <span id="fileText" style="font-size:.92rem;color:#6b4e35">Choose a photo</span>
+                    </div>
+                  </div>
+                  <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">JPG or PNG, max 5 MB.</p>
+                </div>
+
+                <div>
+                  <label for="bio" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">About your home</label>
+                  <textarea id="bio" name="bio" rows="5" placeholder="Tell sitters about your home, neighbourhood, and what makes it a great place to stay."
+                    style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .25s ease, box-shadow .25s ease"
+                    onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+                    onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow=''"></textarea>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+                <button type="submit"
+                  style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;transition:background .25s ease, transform .15s ease, box-shadow .25s ease"
+                  onmouseover="this.style.background='#3e7a5b';this.style.borderColor='#3e7a5b';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(110,84,56,.36)'"
+                  onmouseout="this.style.background='#2f5d45';this.style.borderColor='#2f5d45';this.style.transform='';this.style.boxShadow='0 6px 20px rgba(110,84,56,.28)'">Create profile</button>
+                <a href="/owner/dashboard"
+                  style="font-size:.8rem;color:#6b4e35;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:color .2s ease"
+                  onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#6b4e35'">Cancel</a>
+              </div>
+            </form>
+
+            <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+              <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+                <div style="padding:20px 24px;border-bottom:1px solid rgba(110,84,56,.2)">
+                  <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">Live preview</p>
+                </div>
+                <div style="padding:28px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;background:#faf6ee">
+                  <div id="pvAvatar" style="width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.5rem;flex-shrink:0;background:rgba(110,84,56,.14);border:2px dashed rgba(110,84,56,.5);color:#2f5d45">?</div>
+                  <p id="pvName" style="font-family:'Marcellus',serif;font-size:1.35rem;color:#2c1a0e;margin:0;line-height:1.2">Your name</p>
+                  <p id="pvLocation" style="font-size:.85rem;color:#2f5d45;font-weight:600;margin:0;display:flex;align-items:center;gap:8px">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span id="pvLocationText">Your location</span>
+                  </p>
+                  <p id="pvBio" style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0">A line about your home appears here</p>
+                  <span id="pvSlug" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;color:#2f5d45;font-weight:600;background:#fff;border:1px solid rgba(110,84,56,.3);border-radius:50px;padding:8px 16px;margin-top:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">myahsits.com/yourname</span>
+                  <span style="display:inline-block;margin-top:8px;background:#2f5d45;color:#fff;font-size:.74rem;font-weight:600;padding:11px 22px;border-radius:50px;letter-spacing:.1em;text-transform:uppercase">Get in touch</span>
+                </div>
+              </div>
+
+              <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
+                <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">What happens next</p>
+                <div style="display:flex;flex-direction:column;gap:12px;font-size:.88rem;color:#6b4e35;line-height:1.6">
+                  <span style="display:flex;gap:11px">
+                    <span style="width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</span>
+                    Add your home photos and amenities
+                  </span>
+                  <span style="display:flex;gap:11px">
+                    <span style="width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</span>
+                    Add your pets and their routines
+                  </span>
+                  <span style="display:flex;gap:11px">
+                    <span style="width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</span>
+                    Post a sit — sitters apply, you pick
+                  </span>
+                </div>
+              </div>
+            </aside>
+
+          </div>
+        </div>
+      </main>
+    </div>
 
     <script>
-      const nameInput = document.getElementById('name') as HTMLInputElement;
-      const slugInput = document.getElementById('slug') as HTMLInputElement;
+      function compressImage(file, maxDim, quality) {
+        return new Promise(resolve => {
+          const img = new Image();
+          img.onload = () => {
+            let { width, height } = img;
+            if (width > maxDim || height > maxDim) {
+              const r = Math.min(maxDim / width, maxDim / height);
+              width = Math.round(width * r);
+              height = Math.round(height * r);
+            }
+            const c = document.createElement('canvas');
+            c.width = width; c.height = height;
+            const ctx = c.getContext('2d');
+            if (!ctx) { resolve(file); return; }
+            ctx.drawImage(img, 0, 0, width, height);
+            c.toBlob(b => {
+              resolve(b ? new File([b], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }) : file);
+            }, 'image/jpeg', quality);
+          };
+          img.onerror = () => resolve(file);
+          img.src = URL.createObjectURL(file);
+        });
+      }
+
+      const loader = document.getElementById('loader');
+      function showLoader() {
+        if (!loader) return;
+        loader.style.opacity = '1';
+        loader.style.pointerEvents = 'all';
+      }
+      document.querySelectorAll('a[href]').forEach(a => {
+        const h = a.getAttribute('href') || '';
+        if (h.startsWith('#') || h.startsWith('http')) return;
+        a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; showLoader(); });
+      });
+
+      const nameEl = document.getElementById('name');
+      const slugEl = document.getElementById('slug');
+      const locationEl = document.getElementById('location');
+      const bioEl = document.getElementById('bio');
+      const fileEl = document.getElementById('profile_pic');
+      const fileLabel = document.getElementById('fileLabel');
+      const fileText = document.getElementById('fileText');
+      const pvAvatar = document.getElementById('pvAvatar');
+      const pvName = document.getElementById('pvName');
+      const pvLocationText = document.getElementById('pvLocationText');
+      const pvBio = document.getElementById('pvBio');
+      const pvSlug = document.getElementById('pvSlug');
+
       let slugEdited = false;
-      slugInput?.addEventListener('input', () => { slugEdited = true; });
-      nameInput?.addEventListener('input', () => {
-        if (slugEdited) return;
-        slugInput.value = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      let picURL = null;
+
+      function getInitials(name) {
+        return name.trim()
+          ? name.trim().split(/[\s&]+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('')
+          : '?';
+      }
+
+      function updatePreview() {
+        const name = nameEl?.value || '';
+        const slug = slugEl?.value || '';
+        const location = locationEl?.value || '';
+        const bio = bioEl?.value || '';
+
+        pvName.textContent = name.trim() || 'Your name';
+        pvLocationText.textContent = location.trim() || 'Your location';
+
+        const shortBio = bio.trim()
+          ? (bio.length > 110 ? bio.slice(0, 110) + '…' : bio)
+          : 'A line about your home appears here';
+        pvBio.textContent = shortBio;
+        pvSlug.textContent = 'myahsits.com/' + (slug.trim() || 'yourname');
+
+        if (picURL) {
+          Object.assign(pvAvatar.style, {
+            backgroundImage: 'url(' + picURL + ')',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            border: '2px solid rgba(110,84,56,.45)',
+            background: ''
+          });
+          pvAvatar.textContent = '';
+        } else {
+          Object.assign(pvAvatar.style, {
+            backgroundImage: '',
+            background: 'rgba(110,84,56,.14)',
+            border: '2px dashed rgba(110,84,56,.5)',
+            color: '#2f5d45'
+          });
+          pvAvatar.textContent = getInitials(name);
+        }
+      }
+
+      nameEl?.addEventListener('input', () => {
+        if (!slugEdited) {
+          slugEl.value = nameEl.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        }
+        updatePreview();
+      });
+      slugEl?.addEventListener('input', () => { slugEdited = true; updatePreview(); });
+      locationEl?.addEventListener('input', updatePreview);
+      bioEl?.addEventListener('input', updatePreview);
+
+      fileEl?.addEventListener('change', () => {
+        const f = fileEl.files?.[0];
+        if (!f) return;
+        if (picURL) URL.revokeObjectURL(picURL);
+        picURL = URL.createObjectURL(f);
+        fileText.textContent = f.name;
+        fileText.style.color = '#2c1a0e';
+        fileText.style.fontWeight = '700';
+        fileLabel.style.borderStyle = 'solid';
+        fileLabel.style.borderColor = '#2f5d45';
+        fileLabel.style.background = 'rgba(110,84,56,.06)';
+        updatePreview();
+      });
+
+      document.getElementById('createForm')?.addEventListener('submit', async e => {
+        e.preventDefault();
+        showLoader();
+        const f = fileEl?.files?.[0];
+        if (f) {
+          const compressed = await compressImage(f, 1000, 0.82);
+          const dt = new DataTransfer();
+          dt.items.add(compressed);
+          fileEl.files = dt.files;
+        }
+        e.target.submit();
       });
     </script>
-
-    <style>
-      body { min-height: 100vh; display: flex; flex-direction: column; }
-      nav { position: static; border-bottom: 1px solid rgba(47,93,69,0.2); padding: 18px 48px; }
-      .create-wrap { flex: 1; display: flex; justify-content: center; padding: 60px 24px; }
-      .create-card {
-        background: #fff; border-radius: 12px; padding: 48px; width: 100%; max-width: 520px;
-        box-shadow: 0 4px 32px rgba(44,26,14,0.08); align-self: flex-start;
-      }
-      .create-intro { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.6; margin-bottom: 24px; }
-      .create-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; font-size: 0.9rem; margin-bottom: 20px; }
-      .create-form { display: flex; flex-direction: column; gap: 20px; }
-      .field { display: flex; flex-direction: column; gap: 6px; }
-      .field label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--myah-tan); text-transform: uppercase; }
-      .req { color: var(--myah-forest); }
-      .field input[type="text"], .field input[type="file"], .field textarea {
-        border: 1.5px solid rgba(44,26,14,0.2); border-radius: 6px; padding: 11px 14px;
-        font-size: 1rem; font-family: "Lato", sans-serif; color: var(--myah-ink); background: var(--myah-paper);
-        outline: none; transition: border-color 0.2s;
-      }
-      .field input:focus, .field textarea:focus { border-color: var(--myah-forest); }
-      .field textarea { resize: vertical; }
-      .field-hint { font-size: 0.78rem; color: var(--myah-tan); }
-      .slug-wrap { display: flex; align-items: center; gap: 0; }
-      .slug-prefix {
-        background: rgba(44,26,14,0.06); border: 1.5px solid rgba(44,26,14,0.2); border-right: none;
-        border-radius: 6px 0 0 6px; padding: 11px 12px; font-size: 0.85rem; color: var(--myah-tan);
-        white-space: nowrap;
-      }
-      .slug-wrap input { border-radius: 0 6px 6px 0 !important; flex: 1; }
-    </style>
-    <LoadingOverlay />
-</body>
+  </body>
 </html>

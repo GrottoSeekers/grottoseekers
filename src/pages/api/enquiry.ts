@@ -41,7 +41,7 @@ export const POST: APIRoute = async ({ request }) => {
     const dates = dateFrom && dateTo ? `${dateFrom} to ${dateTo}` : 'Not specified';
 
     await resend.emails.send({
-      from: 'MYAH <enquiries@mail.myah.com>',
+      from: 'MYAH <enquiries@mail.myahsits.com>',
       to: profile.contact_email,
       replyTo: email,
       subject: `New enquiry from ${fullName}`,

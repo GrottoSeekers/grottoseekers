@@ -1,0 +1,503 @@
+---
+export const prerender = false;
+
+import { getSession } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { id } = Astro.params;
+
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('id, profile_type, user_id')
+  .eq('user_id', session.userId)
+  .single();
+
+if (!profile) return Astro.redirect('/profile/create');
+
+// Load confirmed sit — graceful fallback if table doesn't exist yet
+let sit: any = null;
+let listing: any = null;
+let ownerProfile: any = null;
+let sitterProfile: any = null;
+
+try {
+  const { data: sitRow } = await supabase
+    .from('sits')
+    .select('*, listings!inner(*, profiles!inner(*))')
+    .eq('id', id)
+    .single();
+
+  if (sitRow) {
+    sit = sitRow;
+    listing = sitRow.listings;
+    ownerProfile = sitRow.listings?.profiles;
+  }
+} catch (_) {}
+
+// Only show this sit to the sitter or owner involved
+if (sit) {
+  const isOwner = ownerProfile?.user_id === session.userId;
+  const isSitter = sit.sitter_user_id === session.userId;
+  if (!isOwner && !isSitter) return Astro.redirect('/dashboard');
+}
+
+// Load sitter profile for the people panel
+try {
+  if (sit?.sitter_profile_id) {
+    const { data } = await supabase
+      .from('profiles')
+      .select('id, display_name, full_name, avatar_url, sits_count, location')
+      .eq('id', sit.sitter_profile_id)
+      .single();
+    sitterProfile = data;
+  }
+} catch (_) {}
+
+// Derive display values (use sit data or sensible placeholders)
+const sitTitle = listing?.title ?? 'Your confirmed sit';
+const sitLocation = ownerProfile?.location ?? listing?.location ?? '';
+const startDateRaw = sit?.start_date ?? '';
+const endDateRaw = sit?.end_date ?? '';
+
+function fmtDate(d: string, opts?: Intl.DateTimeFormatOptions) {
+  if (!d) return '';
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', opts ?? { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function nightsBetween(a: string, b: string) {
+  if (!a || !b) return 0;
+  return Math.round((new Date(b + 'T00:00:00').getTime() - new Date(a + 'T00:00:00').getTime()) / 86400000);
+}
+
+function daysToGo(d: string) {
+  if (!d) return 0;
+  const diff = new Date(d + 'T00:00:00').getTime() - Date.now();
+  return Math.max(0, Math.ceil(diff / 86400000));
+}
+
+const nights = nightsBetween(startDateRaw, endDateRaw);
+const daysUntil = daysToGo(startDateRaw);
+const dateRange = startDateRaw ? `${fmtDate(startDateRaw)} – ${fmtDate(endDateRaw)} · ${nights} ${nights === 1 ? 'night' : 'nights'}` : '';
+
+const ownerName = (ownerProfile?.display_name ?? ownerProfile?.full_name ?? 'Owner') as string;
+const ownerAvatar = (ownerProfile?.avatar_url ?? '') as string;
+const ownerLocation = (ownerProfile?.location ?? '') as string;
+
+const sitterName = (sitterProfile?.display_name ?? sitterProfile?.full_name ?? 'Sitter') as string;
+const sitterAvatar = (sitterProfile?.avatar_url ?? '') as string;
+const sitterSits = (sitterProfile?.sits_count ?? 0) as number;
+
+// Pets from owner profile
+const pets: any[] = (() => {
+  try {
+    const p = ownerProfile?.pets_json;
+    return Array.isArray(p) ? p : [];
+  } catch (_) { return []; }
+})();
+
+// House notes from listing/owner profile
+const houseNotesRaw: any[] = (() => {
+  try {
+    const n = listing?.house_notes_json ?? ownerProfile?.house_notes_json;
+    return Array.isArray(n) ? n : [];
+  } catch (_) { return []; }
+})();
+
+// Emergency contacts from listing/owner profile
+const emergencyRaw: any[] = (() => {
+  try {
+    const e = listing?.emergency_json ?? ownerProfile?.emergency_json;
+    return Array.isArray(e) ? e : [];
+  } catch (_) { return []; }
+})();
+
+// Checklist state stored in sit row
+let checklistDone: Record<string, boolean> = {};
+try {
+  const cd = sit?.checklist_done_json;
+  if (cd && typeof cd === 'object') checklistDone = cd as Record<string, boolean>;
+} catch (_) {}
+
+const CHECKS = [
+  'Handover call booked',
+  'Arrival time agreed',
+  'Keys arranged',
+  'Vet details confirmed',
+  'Wifi password shared',
+  'Emergency contact swapped',
+];
+const checksDone = CHECKS.filter((_, i) => checklistDone[String(i)]).length;
+
+// Facts for section 01
+type Fact = { label: string; value: string; note: string };
+const facts: Fact[] = [
+  { label: 'Dates', value: startDateRaw ? `${fmtDate(startDateRaw, { weekday:'short', day:'numeric', month:'short', year:'numeric' })} — ${fmtDate(endDateRaw, { weekday:'short', day:'numeric', month:'short', year:'numeric' })}` : 'Dates TBC', note: nights ? `${nights} nights` : '' },
+  { label: 'Arrival', value: sit?.arrival_details ?? 'To be confirmed', note: sit?.arrival_note ?? '' },
+  { label: 'Address', value: ownerProfile?.full_address ?? sitLocation, note: ownerProfile?.address_note ?? '' },
+  { label: 'Keys', value: listing?.keys_details ?? 'Agreed with owner', note: listing?.keys_note ?? '' },
+  { label: 'Pets', value: pets.map((p: any) => p.name ?? '').filter(Boolean).join(' & ') || 'See care routine below', note: '' },
+  { label: 'Owner away in', value: sit?.owner_destination ?? 'To be confirmed', note: sit?.owner_contact_note ?? '' },
+].filter(f => f.value);
+
+// Conversation ID for message link
+const conversationId = sit?.conversation_id ?? '';
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{sitTitle} — MYAH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 1000px) {
+      [data-topnav] { padding: 14px 24px !important; }
+      [data-pad] { padding: 34px 20px 80px !important; }
+      [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+      [data-card] { padding: 26px 22px !important; }
+      [data-facts] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-pet] { grid-template-columns: minmax(0,1fr) !important; }
+    }
+    @media print {
+      [data-topnav], [data-noprint] { display: none !important; }
+      body { background: #fff; }
+    }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="/dashboard"
+        style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s"
+        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'"
+        onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
+      <a href={conversationId ? `/messages/${conversationId}` : '/messages'}
+        style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
+        onmouseover="this.style.color='#2c1a0e'"
+        onmouseout="this.style.color='#2f5d45'">Messages</a>
+      {sit && (
+        <a href={`/review/${sit.id}`}
+          style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s"
+          onmouseover="this.style.color='#2f5d45'"
+          onmouseout="this.style.color='#5c3d20'">Leave a review</a>
+      )}
+    </div>
+  </nav>
+
+  <main data-pad="1" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1120px;margin:0 auto">
+
+      <!-- Hero banner -->
+      <div style="background:#2c1a0e;border-radius:20px;padding:38px 40px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap">
+        <div style="min-width:0">
+          <p style="font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px">
+            <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Confirmed sit
+          </p>
+          <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#fff;line-height:1.15;margin:0 0 12px">
+            {sitTitle}{sitLocation && sitLocation !== sitTitle ? `, <em style="color:#2f5d45;">${sitLocation}</em>` : ''}
+          </h1>
+          <p style="font-size:1rem;color:rgba(255,255,255,.75);line-height:1.7;margin:0">
+            {dateRange}
+            {ownerName && sitterName ? ` · ${ownerName} & ${sitterName}` : ''}
+          </p>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <p style="font-family:'Marcellus',serif;font-size:3.4rem;color:#6e5438;margin:0;line-height:1">{daysUntil}</p>
+          <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:6px 0 0">days to go</p>
+        </div>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:26px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <!-- Section 01: The basics -->
+          <section data-card="1"
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px">
+              <span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">01</span>
+              <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The basics</h2>
+            </div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
+            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Dates, arrival and keys from the listing &middot; address from the owner&rsquo;s profile</p>
+            {facts.length > 0 ? (
+              <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:22px 30px">
+                {facts.map(f => (
+                  <div>
+                    <p style="font-size:.72rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#2f5d45;margin:0 0 7px">{f.label}</p>
+                    <p style="font-size:.98rem;color:#2c1a0e;line-height:1.6;margin:0">{f.value}</p>
+                    {f.note && <p style="font-size:.86rem;color:#6b4e35;line-height:1.6;margin:5px 0 0">{f.note}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Details will appear here once the sit is set up by the owner.</p>
+            )}
+          </section>
+
+          <!-- Section 02: Care routine -->
+          <section data-card="1"
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px">
+              <span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">02</span>
+              <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Care routine</h2>
+            </div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
+            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Pets and their routines from the owner&rsquo;s profile</p>
+            {pets.length > 0 ? (
+              <div style="display:flex;flex-direction:column;gap:18px">
+                {pets.map((p: any) => {
+                  const lines: any[] = Array.isArray(p.routine) ? p.routine : [];
+                  const petPhoto = p.photo_url ?? p.photo ?? '';
+                  const petName = p.name ?? 'Pet';
+                  const petMeta = [p.breed, p.age ? `${p.age} ${p.age === 1 ? 'year' : 'years'}` : '', p.personality].filter(Boolean).join(' · ');
+                  const petWarn = p.warning ?? p.warn ?? '';
+                  return (
+                    <div data-pet="1" style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:20px;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:22px 24px">
+                      <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+                        {petPhoto ? (
+                          <img src={petPhoto} alt="" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
+                        ) : (
+                          <div style="width:76px;height:76px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.5rem;border:2px solid rgba(110,84,56,.35)">
+                            {petName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <p style="font-family:'Marcellus',serif;font-size:1.05rem;color:#2c1a0e;margin:0;text-align:center">{petName}</p>
+                      </div>
+                      <div style="min-width:0">
+                        {petMeta && <p style="font-size:.8rem;color:#2f5d45;font-weight:600;margin:0 0 14px">{petMeta}</p>}
+                        {lines.length > 0 && (
+                          <div style="display:flex;flex-direction:column;gap:10px">
+                            {lines.map((l: any) => (
+                              <div style="display:flex;gap:14px;align-items:baseline">
+                                <span style="font-size:.76rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6e5438;width:82px;flex-shrink:0">{l.when ?? l.time}</span>
+                                <span style="font-size:.93rem;color:#6b4e35;line-height:1.65">{l.what ?? l.note}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        {!lines.length && p.notes && <p style="font-size:.93rem;color:#6b4e35;line-height:1.65;margin:0">{p.notes}</p>}
+                        {petWarn && <p style="font-size:.88rem;color:#b91c1c;font-weight:600;line-height:1.65;margin:14px 0 0">{petWarn}</p>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Pet care details will be added by the owner before the sit.</p>
+            )}
+          </section>
+
+          <!-- Section 03: The house -->
+          <section data-card="1"
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px">
+              <span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">03</span>
+              <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The house</h2>
+            </div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
+            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">House notes from the handover details</p>
+            {houseNotesRaw.length > 0 ? (
+              <div style="display:flex;flex-direction:column;gap:14px">
+                {houseNotesRaw.map((n: any) => (
+                  <div style="display:flex;gap:14px;align-items:baseline;padding-bottom:14px;border-bottom:1px solid rgba(44,26,14,.07)">
+                    <span style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;width:110px;flex-shrink:0">{n.label}</span>
+                    <span style="font-size:.95rem;color:#6b4e35;line-height:1.7">{n.value}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">House notes will appear here once added by the owner.</p>
+            )}
+          </section>
+
+          <!-- Section 04: If something goes wrong -->
+          <section data-card="1" style="background:#fff;border:1px solid rgba(185,28,28,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px">
+              <span style="font-family:'Marcellus',serif;font-size:.92rem;color:#b91c1c;letter-spacing:.08em">04</span>
+              <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">If something goes wrong</h2>
+            </div>
+            <div style="width:40px;height:2px;background:#b91c1c;margin:0 0 26px"></div>
+            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Vet, neighbour and contact numbers from the handover details</p>
+            {emergencyRaw.length > 0 ? (
+              <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:20px 30px">
+                {emergencyRaw.map((e: any) => (
+                  <div>
+                    <p style="font-size:.72rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#b91c1c;margin:0 0 7px">{e.label}</p>
+                    <p style="font-size:.98rem;color:#2c1a0e;line-height:1.6;margin:0 0 3px">{e.value}</p>
+                    {e.note && <p style="font-size:.86rem;color:#6b4e35;line-height:1.6;margin:0">{e.note}</p>}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Emergency contacts will be added by the owner before the sit begins.</p>
+            )}
+          </section>
+
+        </div>
+
+        <!-- Aside -->
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+
+          <!-- Checklist -->
+          <div
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px 26px 28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px">
+              <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">Before the handover</p>
+              <span id="checkCount" style="font-size:.78rem;color:#6b4e35">{checksDone} of {CHECKS.length} done</span>
+            </div>
+            <div style="height:6px;border-radius:50px;background:rgba(44,26,14,.08);overflow:hidden;margin:12px 0 20px">
+              <div id="checkBar" style={`height:100%;width:${Math.round((checksDone/CHECKS.length)*100)}%;border-radius:50px;background:linear-gradient(90deg,#2f5d45,#c4ab8a);transition:width .4s ease`}></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:11px">
+              {CHECKS.map((label, i) => {
+                const on = !!checklistDone[String(i)];
+                return (
+                  <button
+                    type="button"
+                    data-check={i}
+                    onclick={`toggleCheck(${i})`}
+                    style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:'Montserrat',sans-serif;background:none;border:none;padding:2px 0;cursor:pointer">
+                    <span data-box={i} style={`width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0;transition:background .2s ease, color .2s ease, border-color .2s ease;${on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:transparent;border:1.5px solid rgba(44,26,14,.18);'}`}>&#10003;</span>
+                    <span data-lbl={i} style={`font-size:.93rem;line-height:1.5;transition:color .2s ease;${on ? 'color:#6e5438;text-decoration:line-through;' : 'color:#2c1a0e;'}`}>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <!-- People panel -->
+          <div data-noprint="1" style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Both of you</p>
+            <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">
+              {[
+                { name: ownerName, role: `Owner${ownerLocation ? ` · ${ownerLocation}` : ''}`, photo: ownerAvatar },
+                { name: sitterName, role: `Sitter${sitterSits ? ` · ${sitterSits} sits` : ''}`, photo: sitterAvatar },
+              ].filter(p => p.name).map(p => (
+                <div style="display:flex;gap:13px;align-items:center">
+                  {p.photo ? (
+                    <img src={p.photo} alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+                  ) : (
+                    <div style="width:44px;height:44px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1rem;flex-shrink:0;border:2px solid rgba(110,84,56,.35)">
+                      {p.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div style="min-width:0">
+                    <p style="font-size:.95rem;font-weight:600;color:#2c1a0e;margin:0 0 2px">{p.name}</p>
+                    <p style="font-size:.8rem;color:#6b4e35;margin:0">{p.role}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <a href={conversationId ? `/messages/${conversationId}` : '/messages'}
+              style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease"
+              onmouseover="this.style.background='#3e7a5b';this.style.borderColor='#3e7a5b';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(110,84,56,.36)'"
+              onmouseout="this.style.background='#2f5d45';this.style.borderColor='#2f5d45';this.style.transform='translateY(0)';this.style.boxShadow='0 6px 20px rgba(110,84,56,.28)'">Message</a>
+            <button
+              type="button"
+              onclick="window.print()"
+              style="width:100%;margin-top:10px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:14px 20px;cursor:pointer;transition:background .25s ease, border-color .25s ease"
+              onmouseover="this.style.background='rgba(110,84,56,.1)';this.style.borderColor='#2f5d45'"
+              onmouseout="this.style.background='#fff';this.style.borderColor='rgba(110,84,56,.45)'">Print this pack</button>
+          </div>
+
+          <!-- Plans changed -->
+          <div data-noprint="1" style="background:#fff;border:1px solid rgba(44,26,14,.1);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 14px">Plans changed?</p>
+            <a href={conversationId ? `/messages/${conversationId}` : '/messages'}
+              style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#b91c1c;text-decoration:none;border-bottom:1px solid rgba(185,28,28,.35);padding-bottom:2px;transition:color .2s"
+              onmouseover="this.style.color='#2c1a0e'"
+              onmouseout="this.style.color='#b91c1c'">Cancel this sit</a>
+          </div>
+
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script define:vars={{ sitId: id, initialChecks: checklistDone, totalChecks: CHECKS.length }}>
+let done = { ...initialChecks };
+
+function toggleCheck(i) {
+  done[String(i)] = !done[String(i)];
+  const on = done[String(i)];
+
+  const box = document.querySelector('[data-box="' + i + '"]');
+  const lbl = document.querySelector('[data-lbl="' + i + '"]');
+  if (box) {
+    box.style.background = on ? '#2f5d45' : '#fff';
+    box.style.color = on ? '#fff' : 'transparent';
+    box.style.borderColor = on ? '#2f5d45' : 'rgba(44,26,14,.18)';
+  }
+  if (lbl) {
+    lbl.style.color = on ? '#6e5438' : '#2c1a0e';
+    lbl.style.textDecoration = on ? 'line-through' : '';
+  }
+
+  const count = Object.values(done).filter(Boolean).length;
+  const bar = document.getElementById('checkBar');
+  const cc = document.getElementById('checkCount');
+  if (bar) bar.style.width = Math.round((count / totalChecks) * 100) + '%';
+  if (cc) cc.textContent = count + ' of ' + totalChecks + ' done';
+
+  // Persist
+  fetch('/api/sits/checklist', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ sitId, index: i, value: on }),
+  }).catch(() => {});
+}
+
+// Loader on nav
+const loader = document.querySelector('[data-loader]');
+document.querySelectorAll('a[href]').forEach(a => {
+  const href = a.getAttribute('href') || '';
+  if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+  a.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  });
+});
+</script>
+</body>
+</html>
