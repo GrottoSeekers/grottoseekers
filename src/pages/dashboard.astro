@@ -1,8 +1,6 @@
 ---
-import LoadingOverlay from '../components/LoadingOverlay.astro';
 export const prerender = false;
 
-import '../styles/global.css';
 import { getSession } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 
@@ -38,10 +36,6 @@ const { data: listings } = await supabase
 
 const sits = (listings ?? []) as any[];
 
-function formatDate(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
 function formatDateLong(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
@@ -50,664 +44,488 @@ function daysBetween(from: string, to: string) {
   const ms = new Date(to + 'T00:00:00').getTime() - new Date(from + 'T00:00:00').getTime();
   return Math.ceil(ms / 86400000);
 }
+
+const strengthItems = [
+  { label: 'Bio written', done: !!(profile?.bio) },
+  { label: 'Hero photos added', done: heroImages.length > 0 },
+  { label: 'Gallery photos added', done: gallery.length > 0 },
+  { label: 'Reviews collected', done: reviews.length > 0 },
+  { label: 'Platform links added', done: platforms.length > 0 },
+  { label: 'Colours customised', done: !!(profile?.theme_json && Object.keys(profile.theme_json).length > 0) },
+];
+const strengthDone = strengthItems.filter(i => i.done).length;
+const strengthPct = Math.round((strengthDone / strengthItems.length) * 100);
 ---
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>Dashboard — MYAH</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-      <a href="/api/auth/logout" class="nav-logout">Log out</a>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Dashboard — MYAH</title>
+  <style>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; }
+    a:hover { color:#2c1a0e; }
+    input::placeholder { color:rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform:rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    @keyframes toast-in { from { transform:translateX(120%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+    @keyframes toast-out { from { transform:translateX(0); opacity:1; } to { transform:translateX(120%); opacity:0; } }
+    @media (max-width:900px) {
+      [data-topnav] { padding:12px 24px !important; }
+      [data-acct-links] { display:none !important; }
+      [data-dash-pad] { padding:28px 24px 60px !important; }
+      [data-dash-grid] { grid-template-columns:minmax(0,1fr) !important; }
+      [data-stats] { flex-direction:row !important; }
+    }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
 
-    <div class="nav-strip">
-      <button class="nav-tab active" data-tab="dashboard">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
-        <span>Dashboard</span>
-      </button>
-      <button class="nav-tab" data-tab="sits">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>Sits</span>
-      </button>
-      <a href="/messages" class="nav-tab">
-        <div class="nav-tab-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-          <span class="nav-tab-badge" id="navMsgBadge" style="display:none">0</span>
-        </div>
-        <span>Messages</span>
-      </a>
-      <a href="/profile/edit" class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Profile</span>
-      </a>
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
     </div>
+  </div>
 
-    <div id="msgToasts" class="msg-toast-container"></div>
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.18)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div data-acct-links="1" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end">
+      <a href="/listings" id="nav-browse" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Browse sits</a>
+      <a href="/saved" id="nav-saved" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Saved</a>
+      <a href="/availability" id="nav-avail" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Availability</a>
+      <a href="/verification" id="nav-verif" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Verification</a>
+      <a href="/notifications" id="nav-notif" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Notifications</a>
+      <a href="/api/auth/logout" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s">Log out</a>
+    </div>
+  </nav>
 
-    <main class="dash-wrap">
-      <div class="section-inner">
+  <div id="tabBar" style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04);position:sticky;top:0;z-index:10">
+    <button type="button" data-tab="dashboard" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#2f5d45;transition:color .2s">
+      <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg></span>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Dashboard</span>
+      <span class="tab-line" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:#2f5d45"></span>
+    </button>
+    <button type="button" data-tab="sits" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#8a6a4f;transition:color .2s">
+      <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Sits</span>
+      <span class="tab-line" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
+    </button>
+    <button type="button" data-tab="messages" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#8a6a4f;transition:color .2s">
+      <span style="display:flex;position:relative">
+        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        <span id="navMsgBadge" style="position:absolute;top:-5px;right:-10px;background:#ef4444;color:#fff;font-size:.55rem;font-weight:700;min-width:16px;height:16px;border-radius:8px;padding:0 4px;display:none;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 4px rgba(239,68,68,.4)">0</span>
+      </span>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Messages</span>
+      <span class="tab-line" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
+    </button>
+    <button type="button" data-tab="profile" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#8a6a4f;transition:color .2s">
+      <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Profile</span>
+      <span class="tab-line" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
+    </button>
+  </div>
 
-        <!-- ═══ DASHBOARD TAB ═══ -->
-        <div class="tab-panel active" id="panel-dashboard">
-          {profile ? (
-            <div class="dash-grid">
-              <div class="dash-card profile-card">
-                <div class="profile-card-inner">
-                  {profile.profile_pic && (
-                    <img src={profile.profile_pic} alt={profile.name} class="profile-avatar" />
-                  )}
-                  <div class="profile-card-info">
-                    <h2 class="profile-name">{profile.name}</h2>
-                    {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
-                    <a href={`/${profile.slug}`} target="_blank" class="profile-link">
-                      myahsits.com/{profile.slug}
-                    </a>
-                  </div>
-                </div>
-                <div class="profile-card-actions">
-                  <a href="/profile/edit" class="btn-primary">Edit profile</a>
-                  <a href={`/${profile.slug}`} target="_blank" class="btn-view">View public page</a>
-                </div>
+  <div id="msgToasts" style="position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
+
+  <main data-dash-pad="1" style="flex:1;padding:44px 48px 70px">
+    <div style="max-width:1100px;margin:0 auto">
+
+      <!-- DASHBOARD TAB -->
+      <div id="panel-dashboard" class="tab-panel" style="display:flex;flex-direction:column;gap:24px">
+        {profile ? (
+          <>
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px">
+              <div>
+                <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your dashboard</p>
+                <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Welcome back, <em style="color:#2f5d45;">{profile.name}</em></h1>
               </div>
-
-              <div class="stats-grid">
-                <div class="stat-card">
-                  <span class="stat-number">{reviewCount}</span>
-                  <span class="stat-label">Reviews</span>
-                </div>
-                <div class="stat-card">
-                  <span class="stat-number">{sits.length}</span>
-                  <span class="stat-label">Sits Available</span>
-                </div>
-              </div>
-
-              <div class="dash-card share-card">
-                <h3>Share your profile</h3>
-                <p>Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
-                <div class="share-url">
-                  <input type="text" readonly value={`https://myahsits.com/${profile.slug}`} id="shareUrl" />
-                  <button onclick="copyUrl()" class="copy-btn">Copy</button>
-                </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap">
+                <a href="/profile/edit#photos" id="btn-photos" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Add photos</a>
+                <a href="/profile/edit#reviews" id="btn-reviews" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Request a review</a>
+                <a href="/profile/edit#headings" id="btn-colours" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Edit colours</a>
               </div>
             </div>
 
-            <div class="page-preview-wrap">
-              <div class="page-preview-header">
-                <div>
-                  <h2 class="section-title preview-title">Your page preview</h2>
-                  <p class="preview-sub">How your public profile currently looks with your colours applied.</p>
-                </div>
-                <a href="/profile/edit" class="preview-edit-link">Edit profile</a>
-              </div>
-              <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#2f5d45'};--pv-accent-light:${t.accent_light || '#3a7356'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
-                <div class="pv-hero">
-                  {heroImages.length > 0 ? (
-                    <img src={heroImages[0].src} alt="" class="pv-hero-img" style={`object-position:${heroImages[0].pos}`} />
+            <div data-dash-grid="1" style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start">
+              <div id="card-profile" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:26px">
+                  {profile.profile_pic ? (
+                    <img src={profile.profile_pic} alt={profile.name} style="width:84px;height:84px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
                   ) : (
-                    <div class="pv-hero-img pv-hero-empty"></div>
+                    <div style="width:84px;height:84px;border-radius:50%;flex-shrink:0;background:#faf6ee;border:2px solid rgba(110,84,56,.35);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:2rem;color:#6e5438">{(profile.name || '?').charAt(0)}</div>
                   )}
-                  <div class="pv-hero-overlay"></div>
-                  <div class="pv-hero-content">
-                    {profile.badge_text && <span class="pv-badge">{profile.badge_text}</span>}
-                    <p class="pv-brand">Grotto <em>Sitters</em></p>
-                    <p class="pv-name">{profile.name}</p>
-                    {profile.tagline && <p class="pv-tagline">{profile.tagline}</p>}
-                    <span class="pv-btn">Book {profile.account_type === 'joint' ? 'Us' : 'Me'} Today</span>
+                  <div style="min-width:0">
+                    <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 7px">{profile.name}</h2>
+                    {profile.tagline && <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0 0 12px">{profile.tagline}</p>}
+                    <a href={`/${profile.slug}`} target="_blank" style="display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.03em;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px">myahsits.com/{profile.slug}</a>
                   </div>
                 </div>
-
-                <div class="pv-section" style="background:var(--pv-bg);">
-                  <p class="pv-label">{h.about_label || (profile.account_type === 'joint' ? 'Who We Are' : 'Who I Am')}</p>
-                  <div class="pv-about-row">
-                    {aboutImages.length > 0 && <img src={aboutImages[0].src} alt="" class="pv-about-img" />}
-                    <div class="pv-about-text">
-                      {profile.bio ? (
-                        <p>{profile.bio.length > 100 ? profile.bio.slice(0, 100) + '...' : profile.bio}</p>
-                      ) : (
-                        <p class="pv-empty">No bio yet</p>
-                      )}
-                    </div>
-                  </div>
+                <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+                  <a href="/profile/edit" id="btn-edit-profile" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Edit profile</a>
+                  <a href={`/${profile.slug}`} target="_blank" style="font-size:.78rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s">View public page</a>
                 </div>
+              </div>
 
-                {reviews.length > 0 && (
-                  <div class="pv-section" style="background:var(--pv-bg);">
-                    <p class="pv-label">{h.reviews_label || 'What Pet Owners Say'}</p>
-                    <div class="pv-reviews-row">
-                      {reviews.slice(0, 3).map((r: any) => (
-                        <div class="pv-review-card">
-                          <span class="pv-stars">★★★★★</span>
-                          <p>"{r.text.length > 50 ? r.text.slice(0, 50) + '...' : r.text}"</p>
-                          <span class="pv-reviewer">— {r.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {gallery.length > 0 && (
-                  <div class="pv-section pv-gallery-section">
-                    <p class="pv-label">{h.gallery_label || (profile.account_type === 'joint' ? "Pets We've Loved" : "Pets I've Loved")}</p>
-                    <div class="pv-gallery-grid">
-                      {gallery.slice(0, 8).map((img: any) => (
-                        <div class="pv-gallery-item"><img src={img.src} alt="" /></div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {platforms.length > 0 && (
-                  <div class="pv-section" style="background:var(--pv-bg);">
-                    <p class="pv-label">{h.platforms_label || (profile.account_type === 'joint' ? 'Find Us Online' : 'Find Me Online')}</p>
-                    <div class="pv-platforms-row">
-                      {platforms.map((p: any) => (
-                        <div class="pv-platform-chip">
-                          <span class="pv-platform-letter">{p.name.charAt(0).toUpperCase()}</span>
-                          <span>{p.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div class="pv-section" style="background:var(--pv-bg);">
-                  <p class="pv-label">{h.enquiry_label || 'Get In Touch'}</p>
-                  <div class="pv-enquiry-mock">
-                    <div class="pv-mock-field"></div>
-                    <div class="pv-mock-field"></div>
-                    <div class="pv-mock-field pv-mock-tall"></div>
-                    <div class="pv-mock-btn">Send Enquiry</div>
-                  </div>
+              <div data-stats="1" style="display:flex;flex-direction:column;gap:16px">
+                <div id="stat-reviews" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                  <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">{reviewCount}</span>
+                  <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Reviews</span>
                 </div>
-
-                <div class="pv-footer">
-                  <p>Grotto <em>Sitters</em></p>
-                  <span>{profile.name}</span>
+                <div id="stat-sits" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                  <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">{sits.length}</span>
+                  <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Sits available</span>
                 </div>
               </div>
             </div>
-          ) : (
-            <div class="no-profile">
-              <div class="no-profile-icon">🐾</div>
-              <h2>You don't have a profile yet</h2>
-              <p>Create your sitter profile to get a shareable page with your bio, photos, and reviews.</p>
-              <a href="/profile/create" class="btn-primary">Create your profile</a>
-            </div>
-          )}
-        </div>
 
-        <!-- ═══ AVAILABLE SITS TAB ═══ -->
-        <div class="tab-panel" id="panel-sits">
-          <header class="sits-header">
-            <div>
-              <h1 class="sits-heading">Find your next sit</h1>
-              <p class="sits-sub">Browse homes looking for trusted sitters. Click any listing to see the full details, meet the pets, and get in touch.</p>
+            <div id="card-share" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Share your profile</h3>
+              <p style="font-size:.93rem;color:#6b4e35;margin:0 0 20px;line-height:1.7;max-width:560px">Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
+              <div style="display:flex;gap:12px;flex-wrap:wrap">
+                <input id="shareUrl" type="text" readonly value={`https://myahsits.com/${profile.slug}`} style="flex:1;min-width:240px;border:1.5px solid rgba(44,26,14,.15);border-radius:10px;padding:13px 16px;font-size:.92rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none" />
+                <button type="button" id="copyBtn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;transition:background .2s, border-color .2s, transform .12s">Copy</button>
+              </div>
             </div>
-          </header>
 
-          {sits.length === 0 ? (
-            <div class="sits-empty">
-              <div class="sits-empty-icon">🔍</div>
-              <h2>No sits available right now</h2>
-              <p>Check back soon — new listings are posted regularly.</p>
+            <div id="card-strength" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+                <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Profile strength</h3>
+                <span style="font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45">{strengthDone} of {strengthItems.length} complete</span>
+              </div>
+              <div style="height:8px;border-radius:50px;background:rgba(110,84,56,.15);overflow:hidden;margin-bottom:22px">
+                <div style={`height:100%;width:${strengthPct}%;border-radius:50px;background:linear-gradient(90deg,#2f5d45 0%,#3e7a5b 100%);transition:width .4s ease`}></div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
+                {strengthItems.map(item => (
+                  <div style="display:flex;align-items:center;gap:11px;font-size:.88rem;color:#2c1a0e">
+                    <span style={`width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;line-height:1;${item.done ? 'background:#2f5d45;color:#fff;' : 'background:transparent;border:1.5px dashed rgba(110,84,56,.55);color:#2f5d45;'}`}>{item.done ? '✓' : ''}</span>
+                    {item.label}
+                  </div>
+                ))}
+              </div>
             </div>
-          ) : (
-            <div class="sits-grid">
-              {sits.map((listing: any) => {
-                const lp = listing.profiles;
-                const pets: any[] = Array.isArray(lp?.pets_json) ? lp.pets_json : [];
-                const lHero: any[] = Array.isArray(lp?.hero_images_json) ? lp.hero_images_json : [];
-                const duration = daysBetween(listing.date_from, listing.date_to);
-                return (
-                  <a href={`/listings/${listing.id}`} class="sit-card">
-                    <div class="sit-card-img">
-                      {lHero.length > 0 ? (
-                        <img src={lHero[0].src} alt="" />
-                      ) : lp?.profile_pic ? (
-                        <img src={lp.profile_pic} alt="" />
-                      ) : (
-                        <div class="sit-card-placeholder"></div>
-                      )}
-                      <span class="sit-card-duration">{duration} day{duration !== 1 ? 's' : ''}</span>
+
+            <div style="margin-top:32px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px">
+                <div>
+                  <h2 style="font-family:'Marcellus',serif;font-size:1.7rem;color:#2c1a0e;margin:0 0 6px">Your page preview</h2>
+                  <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0">How your public profile currently looks with your colours applied.</p>
+                </div>
+                <a href="/profile/edit" style="font-size:.76rem;font-weight:600;color:#2f5d45;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s">Edit profile</a>
+              </div>
+              <div style="background:#faf6ee;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(44,26,14,.12);border:1px solid rgba(44,26,14,.08)" set:html="">
+                <div style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#2f5d45'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'}`}>
+                  <div style="display:flex;align-items:center;gap:14px;padding:13px 18px;background:#fff;border-bottom:1px solid rgba(44,26,14,.08)">
+                    <span style="display:flex;gap:6px;flex-shrink:0">
+                      <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+                      <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+                      <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+                    </span>
+                    <span style="flex:1;background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:50px;padding:7px 16px;font-size:.74rem;color:#6b4e35;letter-spacing:.02em;display:flex;align-items:center;gap:9px;min-width:0">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0"><rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path></svg>
+                      myahsits.com/{profile.slug}
+                    </span>
+                  </div>
+                  <div style="position:relative;height:230px;overflow:hidden">
+                    {heroImages.length > 0 ? (
+                      <img src={heroImages[0].src} alt="" style={`width:100%;height:100%;object-fit:cover;display:block;object-position:${heroImages[0].pos || 'center 30%'}`} />
+                    ) : (
+                      <div style="width:100%;height:100%;background:linear-gradient(135deg,#2c1a0e 0%,#4a3525 100%)"></div>
+                    )}
+                    <div style="position:absolute;inset:0;background:rgba(44,26,14,.55)"></div>
+                    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center;padding:16px">
+                      {profile.badge_text && <span style="font-size:.58rem;background:rgba(255,255,255,.16);border:1px solid rgba(196,171,138,.4);color:#fff;padding:5px 14px;border-radius:50px;margin-bottom:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">{profile.badge_text}</span>}
+                      <p style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:1.9rem;color:#fff;line-height:1;margin:0">MYAH</p>
+                      <p style="font-size:.72rem;color:rgba(255,255,255,.88);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:8px 0 0">{profile.name}</p>
+                      <span style="display:inline-block;margin-top:12px;background:#2f5d45;color:#fff;font-size:.58rem;font-weight:600;padding:8px 18px;border-radius:50px;letter-spacing:.1em;text-transform:uppercase">Book {profile.account_type === 'joint' ? 'Us' : 'Me'} Today</span>
                     </div>
-                    <div class="sit-card-body">
-                      <div class="sit-card-top">
-                        <h3 class="sit-card-title">{listing.title}</h3>
-                        {lp?.profile_pic && <img src={lp.profile_pic} alt="" class="sit-card-avatar" />}
+                  </div>
+                  {aboutImages.length > 0 || profile.bio ? (
+                    <div style="padding:22px 26px">
+                      <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">{h.about_label || (profile.account_type === 'joint' ? 'Who we are' : 'Who I am')}</p>
+                      <div style="display:flex;gap:14px;align-items:flex-start">
+                        {aboutImages.length > 0 && <img src={aboutImages[0].src} alt="" style="width:74px;height:74px;border-radius:10px;object-fit:cover;flex-shrink:0" />}
+                        <p style="font-size:.74rem;color:#6b4e35;line-height:1.7;margin:0">{profile.bio ? (profile.bio.length > 120 ? profile.bio.slice(0, 120) + '…' : profile.bio) : ''}</p>
                       </div>
-                      <p class="sit-card-owner">{lp?.name}{lp?.location ? ` · ${lp.location}` : ''}</p>
-                      <p class="sit-card-dates">{formatDateLong(listing.date_from)} — {formatDateLong(listing.date_to)}</p>
-                      {pets.length > 0 && (
-                        <div class="sit-card-pets">
-                          {pets.slice(0, 3).map((p: any) => (
-                            <span class="sit-card-pet">{p.name}{p.type ? ` · ${p.type}` : ''}</span>
-                          ))}
-                          {pets.length > 3 && <span class="sit-card-pet">+{pets.length - 3} more</span>}
-                        </div>
-                      )}
-                      {listing.description && (
-                        <p class="sit-card-desc">{listing.description.slice(0, 100)}{listing.description.length > 100 ? '...' : ''}</p>
-                      )}
                     </div>
-                  </a>
-                );
-              })}
+                  ) : null}
+                  {reviews.length > 0 && (
+                    <div style="padding:22px 26px">
+                      <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">What pet owners say</p>
+                      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+                        {reviews.slice(0, 3).map((r: any) => (
+                          <div style="background:#fff;border:1px solid rgba(110,84,56,.18);border-radius:10px;padding:13px">
+                            <span style="color:#2f5d45;font-size:.55rem;display:block;margin-bottom:6px;letter-spacing:.2em">★★★★★</span>
+                            <p style="font-size:.64rem;color:#6b4e35;line-height:1.6;font-style:italic;margin:0 0 6px">"{r.text && r.text.length > 60 ? r.text.slice(0, 60) + '…' : r.text}"</p>
+                            <span style="font-size:.56rem;font-weight:700;color:#2f5d45;letter-spacing:.04em">— {r.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {gallery.length > 0 && (
+                    <div style="padding:22px 26px">
+                      <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">Pets we've loved</p>
+                      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px">
+                        {gallery.slice(0, 8).map((img: any) => (
+                          <div style="aspect-ratio:1;border-radius:6px;overflow:hidden;background:#e9e0d2"><img src={img.src} alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div style="background:#2c1a0e;padding:16px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px">
+                    <p style="font-family:'Marcellus',serif;font-size:.82rem;margin:0"><span style="color:#2f5d45">MYAH</span></p>
+                    <span style="font-size:.6rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase">{profile.name}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
-        </div>
-
+          </>
+        ) : (
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+            <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">You don't have a profile yet</h2>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Create your sitter profile to get a shareable page with your bio, photos, and reviews.</p>
+            <a href="/profile/create" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Create your profile</a>
+          </div>
+        )}
       </div>
-    </main>
 
-    <script>
-      function copyUrl() {
-        const input = document.getElementById('shareUrl') as HTMLInputElement;
-        input?.select();
-        navigator.clipboard?.writeText(input?.value ?? '').then(() => {
-          const btn = document.querySelector('.copy-btn') as HTMLButtonElement;
-          if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
-        });
-      }
+      <!-- SITS TAB -->
+      <div id="panel-sits" class="tab-panel" style="display:none">
+        <div style="margin-bottom:34px">
+          <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Available sits</p>
+          <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;margin:0 0 10px;line-height:1.2">Find your <em style="color:#2f5d45;">next sit</em></h1>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;max-width:600px;margin:0">Browse homes looking for trusted sitters. Open any listing to see the full details, meet the pets, and get in touch.</p>
+        </div>
+        {sits.length === 0 ? (
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:520px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
+            <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No sits available right now</h2>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0">Check back soon — new listings are posted regularly.</p>
+          </div>
+        ) : (
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px">
+            {sits.map((listing: any) => {
+              const lp = listing.profiles;
+              const pets: any[] = Array.isArray(lp?.pets_json) ? lp.pets_json : [];
+              const lHero: any[] = Array.isArray(lp?.hero_images_json) ? lp.hero_images_json : [];
+              const duration = daysBetween(listing.date_from, listing.date_to);
+              return (
+                <a href={`/listings/${listing.id}`} class="sit-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 1px 2px rgba(44,26,14,.04);display:block;transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+                  <div style="position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#e9e0d2">
+                    {lHero.length > 0 ? (
+                      <img src={lHero[0].src} alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
+                    ) : lp?.profile_pic ? (
+                      <img src={lp.profile_pic} alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
+                    ) : (
+                      <div style="width:100%;height:100%;background:linear-gradient(135deg,#e8dcc8 0%,#d4c4a8 100%)"></div>
+                    )}
+                    <span style="position:absolute;top:14px;left:14px;background:#fff;color:#2c1a0e;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:7px 15px;border-radius:50px;box-shadow:0 2px 8px rgba(0,0,0,.14)">{duration} day{duration !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div style="padding:20px 22px 24px">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                      <h3 style="font-family:'Marcellus',serif;font-size:1.12rem;color:#2c1a0e;line-height:1.3;margin:0;flex:1">{listing.title}</h3>
+                      {lp?.profile_pic && <img src={lp.profile_pic} alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.25)" />}
+                    </div>
+                    <p style="font-size:.83rem;color:#6b4e35;margin:6px 0 10px">{lp?.name}{lp?.location ? ` · ${lp.location}` : ''}</p>
+                    <p style="font-size:.83rem;color:#5c3d20;font-weight:700;margin:0 0 12px">{formatDateLong(listing.date_from)} — {formatDateLong(listing.date_to)}</p>
+                    {pets.length > 0 && (
+                      <div style="display:flex;flex-wrap:wrap;gap:7px">
+                        {pets.slice(0, 3).map((p: any) => (
+                          <span style="background:rgba(110,84,56,.08);color:#5c3d20;font-size:.74rem;font-weight:700;padding:5px 13px;border-radius:50px;border:1px solid rgba(110,84,56,.22)">{p.name}{p.type ? ` · ${p.type}` : ''}</span>
+                        ))}
+                        {pets.length > 3 && <span style="background:rgba(110,84,56,.08);color:#5c3d20;font-size:.74rem;font-weight:700;padding:5px 13px;border-radius:50px;border:1px solid rgba(110,84,56,.22)">+{pets.length - 3} more</span>}
+                      </div>
+                    )}
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-      function switchTab(tab: string) {
-        document.querySelectorAll('.nav-tab[data-tab]').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.querySelector(`.nav-tab[data-tab="${tab}"]`)?.classList.add('active');
-        document.getElementById(`panel-${tab}`)?.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      <!-- MESSAGES TAB -->
+      <div id="panel-messages" class="tab-panel" style="display:none">
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+          <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>
+          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No messages yet</h2>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">When an owner gets in touch about a sit, the conversation will appear here.</p>
+          <a href="/messages" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Open messages</a>
+        </div>
+      </div>
 
-      document.querySelectorAll('.nav-tab[data-tab]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          switchTab((btn as HTMLElement).dataset.tab!);
-        });
-      });
+      <!-- PROFILE TAB -->
+      <div id="panel-profile" class="tab-panel" style="display:none">
+        <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+          <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">Edit your profile</h2>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Update your bio, photos, reviews, platform links and colours — everything that appears on your public page.</p>
+          <a href="/profile/edit" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Open profile editor</a>
+        </div>
+      </div>
 
-      // ── MESSAGE NOTIFICATIONS ──
-      (function() {
-        const seenIds = new Set();
-        let isFirst = true;
+    </div>
+  </main>
+</div>
 
-        function playNotifSound() {
-          try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.setValueAtTime(660, ctx.currentTime);
-            osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
-            osc.type = 'sine';
-            gain.gain.setValueAtTime(0.08, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-            osc.start(ctx.currentTime);
-            osc.stop(ctx.currentTime + 0.4);
-          } catch {}
-        }
+<style>
+  .sit-card:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.12); border-color:rgba(110,84,56,.45) !important; }
+  #btn-edit-profile:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
+  #btn-edit-profile:active { transform:translateY(0) scale(.98); }
+  #copyBtn:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
+  #copyBtn:active { transform:translateY(0) scale(.98); }
+  #card-profile:hover, #card-share:hover, #card-strength:hover, #stat-reviews:hover, #stat-sits:hover { box-shadow:0 10px 34px rgba(44,26,14,.08); border-color:rgba(110,84,56,.4) !important; }
+  #btn-photos:hover, #btn-reviews:hover, #btn-colours:hover { background:#2f5d45; color:#fff; border-color:#2f5d45 !important; }
+  [data-acct-links] a:hover { color:#2f5d45 !important; }
+  .msg-toast { background:#fff; border-radius:14px; padding:14px 18px; box-shadow:0 8px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08); display:flex; gap:12px; align-items:center; pointer-events:auto; cursor:pointer; text-decoration:none; color:inherit; transform:translateX(120%); animation:toast-in .4s cubic-bezier(.34,1.56,.64,1) forwards; max-width:380px; border-left:4px solid #2f5d45; }
+  .msg-toast.toast-out { animation:toast-out .3s ease forwards; }
+  .msg-toast-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+  .msg-toast-avatar-ph { width:42px; height:42px; border-radius:50%; flex-shrink:0; background:rgba(47,93,69,.12); color:#2f5d45; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; font-family:"Marcellus",serif; }
+  .msg-toast-body { flex:1; min-width:0; }
+  .msg-toast-name { font-weight:700; font-size:.88rem; color:#2c1a0e; }
+  .msg-toast-preview { font-size:.82rem; color:#6b4e35; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+</style>
 
-        function esc(str) {
-          const d = document.createElement('div');
-          d.textContent = str;
-          return d.innerHTML;
-        }
+<script>
+  // Tab switching
+  const tabs = document.querySelectorAll('[data-tab]');
+  const panels = { dashboard: document.getElementById('panel-dashboard'), sits: document.getElementById('panel-sits'), messages: document.getElementById('panel-messages'), profile: document.getElementById('panel-profile') };
 
-        function showToast(msg) {
-          const container = document.getElementById('msgToasts');
-          if (!container) return;
-          const sender = msg.sender || {};
-          const initial = (sender.name || '?').charAt(0).toUpperCase();
-          const avatar = sender.profile_pic
-            ? `<img src="${esc(sender.profile_pic)}" class="msg-toast-avatar" />`
-            : `<div class="msg-toast-avatar-ph">${initial}</div>`;
-          const toast = document.createElement('a');
-          toast.href = `/messages/${msg.conversation_id}`;
-          toast.className = 'msg-toast';
-          toast.innerHTML = `${avatar}<div class="msg-toast-body"><div class="msg-toast-name">${esc(sender.name || 'Someone')}</div><div class="msg-toast-preview">${esc((msg.body || '').slice(0, 80))}</div></div>`;
-          container.appendChild(toast);
-          setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 5000);
-        }
+  function switchTab(id: string) {
+    tabs.forEach(btn => {
+      const on = (btn as HTMLElement).dataset.tab === id;
+      (btn as HTMLElement).style.color = on ? '#2f5d45' : '#8a6a4f';
+      const line = btn.querySelector('.tab-line') as HTMLElement | null;
+      if (line) line.style.background = on ? '#2f5d45' : 'transparent';
+    });
+    Object.entries(panels).forEach(([key, el]) => {
+      if (el) el.style.display = key === id ? (key === 'dashboard' ? 'flex' : 'block') : 'none';
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
-        function updateBadge(count) {
-          const nav = document.getElementById('navMsgBadge');
-          const label = count > 99 ? '99+' : String(count);
-          if (!nav) return;
-          if (count > 0) { nav.textContent = label; nav.style.display = 'inline-flex'; }
-          else { nav.style.display = 'none'; }
-        }
+  tabs.forEach(btn => btn.addEventListener('click', () => switchTab((btn as HTMLElement).dataset.tab!)));
 
-        async function checkUnread() {
-          try {
-            const res = await fetch('/api/messages/unread');
-            const data = await res.json();
-            updateBadge(data.count || 0);
-            if (data.messages) {
-              if (!isFirst) {
-                const fresh = data.messages.filter(m => !seenIds.has(m.id));
-                if (fresh.length > 0) {
-                  playNotifSound();
-                  fresh.slice(0, 3).forEach(showToast);
-                }
-              }
-              data.messages.forEach(m => seenIds.add(m.id));
+  // Copy URL
+  const copyBtn = document.getElementById('copyBtn');
+  copyBtn?.addEventListener('click', () => {
+    const input = document.getElementById('shareUrl') as HTMLInputElement;
+    input?.select();
+    navigator.clipboard?.writeText(input?.value ?? '').then(() => {
+      if (copyBtn) { copyBtn.textContent = 'Copied!'; setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000); }
+    });
+  });
+
+  // Loading overlay
+  const loader = document.querySelector('[data-loader]') as HTMLElement | null;
+  const showLoader = () => {
+    if (!loader) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+  };
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
+    a.addEventListener('click', (e: Event) => { if ((e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey || (e as MouseEvent).shiftKey) return; showLoader(); });
+  });
+  window.addEventListener('pageshow', e => {
+    if (e.persisted && loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
+  });
+
+  // Message notifications
+  (function() {
+    const seenIds = new Set<string>();
+    let isFirst = true;
+
+    function playNotifSound() {
+      try {
+        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(660, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      } catch {}
+    }
+
+    function esc(str: string) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    function showToast(msg: any) {
+      const container = document.getElementById('msgToasts');
+      if (!container) return;
+      const sender = msg.sender || {};
+      const initial = (sender.name || '?').charAt(0).toUpperCase();
+      const avatar = sender.profile_pic
+        ? `<img src="${esc(sender.profile_pic)}" class="msg-toast-avatar" />`
+        : `<div class="msg-toast-avatar-ph">${initial}</div>`;
+      const toast = document.createElement('a') as HTMLAnchorElement;
+      toast.href = `/messages/${msg.conversation_id}`;
+      toast.className = 'msg-toast';
+      toast.innerHTML = `${avatar}<div class="msg-toast-body"><div class="msg-toast-name">${esc(sender.name || 'Someone')}</div><div class="msg-toast-preview">${esc((msg.body || '').slice(0, 80))}</div></div>`;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 5000);
+    }
+
+    function updateBadge(count: number) {
+      const nav = document.getElementById('navMsgBadge') as HTMLElement | null;
+      if (!nav) return;
+      const label = count > 99 ? '99+' : String(count);
+      if (count > 0) { nav.textContent = label; nav.style.display = 'inline-flex'; }
+      else { nav.style.display = 'none'; }
+    }
+
+    async function checkUnread() {
+      try {
+        const res = await fetch('/api/messages/unread');
+        const data = await res.json();
+        updateBadge(data.count || 0);
+        if (data.messages) {
+          if (!isFirst) {
+            const fresh = data.messages.filter((m: any) => !seenIds.has(m.id));
+            if (fresh.length > 0) {
+              playNotifSound();
+              fresh.slice(0, 3).forEach(showToast);
             }
-            isFirst = false;
-          } catch {}
+          }
+          data.messages.forEach((m: any) => seenIds.add(m.id));
         }
+        isFirst = false;
+      } catch {}
+    }
 
-        checkUnread();
-        setInterval(checkUnread, 8000);
-      })();
-    </script>
-
-    <style is:global>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
-
-      nav {
-        position: static;
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 14px 48px; background: #fff;
-        border-bottom: 1px solid rgba(47,93,69,0.15);
-        backdrop-filter: none;
-      }
-      .nav-logout {
-        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--myah-forest); text-decoration: none;
-      }
-      .nav-logout:hover { color: var(--myah-ink); }
-
-      /* ── NAV STRIP ──────────────────────────────────────── */
-      .nav-strip {
-        display: flex; background: #fff;
-        border-bottom: 1px solid rgba(44,26,14,0.08);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        position: sticky; top: 0; z-index: 10;
-      }
-      .nav-tab {
-        flex: 1; display: flex; flex-direction: column;
-        align-items: center; gap: 3px;
-        padding: 10px 4px 8px;
-        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.02em;
-        color: #aaa; text-decoration: none;
-        border: none; background: none; cursor: pointer;
-        position: relative; transition: color 0.2s;
-        font-family: "Lato", sans-serif;
-      }
-      .nav-tab:hover { color: var(--myah-forest); }
-      .nav-tab.active { color: var(--myah-forest); }
-      .nav-tab.active::after {
-        content: ''; position: absolute;
-        bottom: 0; left: 20%; right: 20%;
-        height: 3px; background: var(--myah-forest);
-        border-radius: 3px 3px 0 0;
-      }
-      .nav-tab-icon-wrap { position: relative; display: flex; }
-      .nav-tab-badge {
-        position: absolute; top: -5px; right: -10px;
-        background: #ef4444; color: #fff; font-size: 0.55rem; font-weight: 700;
-        min-width: 16px; height: 16px; border-radius: 8px; padding: 0 4px;
-        display: inline-flex; align-items: center; justify-content: center;
-        line-height: 1; box-shadow: 0 1px 4px rgba(239,68,68,0.4);
-      }
-
-      /* ── TOAST NOTIFICATIONS ──────────────────────────────── */
-      .msg-toast-container {
-        position: fixed; top: 20px; right: 20px; z-index: 1000;
-        display: flex; flex-direction: column; gap: 10px;
-        pointer-events: none;
-      }
-      .msg-toast {
-        background: #fff; border-radius: 14px; padding: 14px 18px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
-        display: flex; gap: 12px; align-items: center;
-        pointer-events: auto; cursor: pointer; text-decoration: none; color: inherit;
-        transform: translateX(120%); animation: toast-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
-        max-width: 380px; border-left: 4px solid var(--myah-forest, #2f5d45);
-      }
-      .msg-toast.toast-out { animation: toast-out 0.3s ease forwards; }
-      @keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-      @keyframes toast-out { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
-      .msg-toast-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-      .msg-toast-avatar-ph {
-        width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
-        background: rgba(47,93,69,0.12); color: var(--myah-forest, #2f5d45);
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 1rem; font-family: "Marcellus", serif;
-      }
-      .msg-toast-body { flex: 1; min-width: 0; }
-      .msg-toast-name { font-weight: 700; font-size: 0.88rem; color: var(--brown-dark, #2c1a0e); }
-      .msg-toast-preview { font-size: 0.82rem; color: var(--text-soft, #6b4e35); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-      /* ── TAB PANELS ───────────────────────────────────────── */
-      .tab-panel { display: none; }
-      .tab-panel.active { display: block; }
-
-      .dash-wrap { flex: 1; padding: 40px 48px 60px; }
-
-      /* ── DASHBOARD TAB ────────────────────────────────────── */
-      .dash-grid {
-        display: grid;
-        grid-template-columns: 1fr 260px;
-        grid-template-rows: auto auto;
-        gap: 24px;
-      }
-
-      .dash-card {
-        background: #fff; border-radius: 12px; padding: 32px;
-        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
-      }
-
-      .profile-card { grid-column: 1; grid-row: 1; }
-      .profile-card-inner { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 24px; }
-      .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-      .profile-name { font-family: "Marcellus", serif; font-size: 1.4rem; color: var(--myah-ink); margin-bottom: 6px; }
-      .profile-tagline { font-size: 0.9rem; color: var(--myah-tan); line-height: 1.5; margin-bottom: 10px; }
-      .profile-link { font-size: 0.8rem; color: var(--myah-forest); font-weight: 700; text-decoration: none; letter-spacing: 0.03em; }
-      .profile-link:hover { text-decoration: underline; }
-      .profile-card-actions { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 24px; display: flex; gap: 16px; align-items: center; }
-      .btn-view { font-size: 0.82rem; color: var(--myah-forest); font-weight: 700; text-decoration: none; letter-spacing: 0.04em; }
-      .btn-view:hover { text-decoration: underline; }
-
-      .stats-grid { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 16px; }
-      .stat-card {
-        background: #fff; border-radius: 12px; padding: 24px;
-        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
-        text-align: center; flex: 1; display: flex; flex-direction: column; gap: 6px;
-      }
-      .stat-number { font-family: "Marcellus", serif; font-size: 2rem; color: var(--myah-forest); font-weight: 700; }
-      .stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--myah-tan); }
-
-      .share-card { grid-column: 1 / -1; grid-row: 2; }
-      .share-card h3 { font-family: "Marcellus", serif; font-size: 1.2rem; color: var(--myah-ink); margin-bottom: 8px; }
-      .share-card p { font-size: 0.9rem; color: var(--myah-tan); margin-bottom: 16px; line-height: 1.6; }
-      .share-url { display: flex; gap: 10px; }
-      .share-url input {
-        flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
-        padding: 10px 14px; font-size: 0.9rem; font-family: "Lato", sans-serif;
-        color: var(--myah-ink); background: var(--myah-paper); outline: none;
-      }
-      .copy-btn {
-        background: var(--myah-forest); color: #fff; border: none; border-radius: 6px;
-        padding: 10px 20px; font-size: 0.85rem; font-weight: 700;
-        cursor: pointer; white-space: nowrap; transition: background 0.2s;
-      }
-      .copy-btn:hover { background: #3a7356; }
-
-      .no-profile {
-        background: #fff; border-radius: 12px; padding: 80px 48px; text-align: center;
-        box-shadow: 0 2px 16px rgba(44,26,14,0.06); max-width: 520px; margin: 0 auto;
-      }
-      .no-profile-icon { font-size: 3rem; margin-bottom: 20px; }
-      .no-profile h2 { font-family: "Marcellus", serif; font-size: 1.6rem; color: var(--myah-ink); margin-bottom: 12px; }
-      .no-profile p { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; margin-bottom: 32px; }
-
-      /* ── AVAILABLE SITS TAB ───────────────────────────────── */
-      .sits-header { margin-bottom: 32px; }
-      .sits-heading {
-        font-family: "Marcellus", serif; font-size: 2rem;
-        color: var(--myah-ink); margin-bottom: 8px;
-      }
-      .sits-sub { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; max-width: 600px; }
-
-      .sits-empty {
-        background: #fff; border-radius: 16px; padding: 80px 48px; text-align: center;
-        box-shadow: 0 2px 12px rgba(44,26,14,0.05); max-width: 520px; margin: 0 auto;
-      }
-      .sits-empty-icon { font-size: 3rem; margin-bottom: 20px; }
-      .sits-empty h2 { font-family: "Marcellus", serif; font-size: 1.5rem; color: var(--myah-ink); margin-bottom: 12px; }
-      .sits-empty p { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; }
-
-      .sits-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: 28px;
-      }
-
-      .sit-card {
-        background: #fff; border-radius: 16px; overflow: hidden;
-        text-decoration: none; color: inherit;
-        box-shadow: 0 1px 6px rgba(44,26,14,0.06);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-      .sit-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(44,26,14,0.13);
-      }
-
-      .sit-card-img {
-        position: relative; width: 100%; aspect-ratio: 16/10; overflow: hidden;
-        background: linear-gradient(135deg, #e8dcc8 0%, #d4c4a8 100%);
-      }
-      .sit-card-img img {
-        width: 100%; height: 100%; object-fit: cover; display: block;
-        transition: transform 0.4s ease;
-      }
-      .sit-card:hover .sit-card-img img { transform: scale(1.06); }
-      .sit-card-placeholder {
-        width: 100%; height: 100%;
-        background: linear-gradient(135deg, #e8dcc8 0%, #d4c4a8 100%);
-      }
-      .sit-card-duration {
-        position: absolute; top: 14px; left: 14px;
-        background: #fff; color: var(--myah-ink); font-size: 0.75rem; font-weight: 700;
-        padding: 6px 14px; border-radius: 24px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-      }
-
-      .sit-card-body { padding: 18px 20px 22px; }
-      .sit-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-      .sit-card-title {
-        font-family: "Marcellus", serif; font-size: 1.1rem;
-        color: var(--myah-ink); line-height: 1.3; flex: 1;
-      }
-      .sit-card-avatar {
-        width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
-        flex-shrink: 0; border: 2px solid rgba(47,93,69,0.2);
-      }
-      .sit-card-owner { font-size: 0.82rem; color: var(--myah-tan); margin-top: 4px; margin-bottom: 10px; }
-      .sit-card-dates {
-        font-size: 0.82rem; color: var(--myah-tan); font-weight: 600; margin-bottom: 12px;
-      }
-      .sit-card-pets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-      .sit-card-pet {
-        background: rgba(47,93,69,0.08); color: var(--myah-tan);
-        font-size: 0.75rem; font-weight: 600; padding: 4px 12px;
-        border-radius: 20px; border: 1px solid rgba(47,93,69,0.15);
-      }
-      .sit-card-desc {
-        font-size: 0.85rem; color: var(--myah-tan); line-height: 1.6;
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-      }
-
-      /* ── FULL PAGE PREVIEW ────────────────────────────────── */
-      .page-preview-wrap { margin-top: 56px; }
-      .page-preview-header {
-        display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;
-      }
-      .preview-title { font-size: 1.6rem; margin-bottom: 4px; }
-      .preview-sub { font-size: 0.9rem; color: var(--myah-tan); line-height: 1.6; }
-      .preview-edit-link {
-        font-size: 0.78rem; font-weight: 700; color: var(--myah-forest);
-        text-decoration: none; letter-spacing: 0.04em; white-space: nowrap; margin-top: 6px;
-      }
-      .preview-edit-link:hover { text-decoration: underline; }
-
-      .page-preview {
-        background: var(--pv-bg); border-radius: 12px; overflow: hidden;
-        box-shadow: 0 4px 24px rgba(44,26,14,0.12); border: 1px solid rgba(44,26,14,0.08);
-      }
-
-      .pv-hero { position: relative; height: 220px; overflow: hidden; }
-      .pv-hero-img { width: 100%; height: 100%; object-fit: cover; display: block; }
-      .pv-hero-empty { background: linear-gradient(135deg, #2c1a0e 0%, #4a3525 100%); height: 100%; }
-      .pv-hero-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.5); }
-      .pv-hero-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; text-align: center; padding: 16px; }
-      .pv-badge { font-size: 0.6rem; background: rgba(255,255,255,0.15); color: #fff; padding: 4px 12px; border-radius: 50px; margin-bottom: 8px; font-weight: 700; letter-spacing: 0.06em; }
-      .pv-brand { font-family: "Marcellus", serif; font-size: 1.8rem; color: #fff; line-height: 1; }
-      .pv-brand em { color: var(--pv-accent); font-style: italic; }
-      .pv-name { font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 700; letter-spacing: 0.06em; margin-top: 6px; }
-      .pv-tagline { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
-      .pv-btn { display: inline-block; margin-top: 10px; background: var(--pv-accent); color: #fff; font-size: 0.6rem; font-weight: 700; padding: 6px 16px; border-radius: 6px; letter-spacing: 0.06em; text-transform: uppercase; }
-
-      .pv-section { padding: 20px 24px; }
-      .pv-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--pv-accent); margin-bottom: 10px; }
-
-      .pv-about-row { display: flex; gap: 14px; align-items: flex-start; }
-      .pv-about-img { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-      .pv-about-text p { font-size: 0.72rem; color: var(--pv-text-soft); line-height: 1.6; }
-      .pv-empty { font-style: italic; opacity: 0.4; }
-
-      .pv-reviews-row { display: flex; gap: 10px; overflow: hidden; }
-      .pv-review-card { flex: 1; min-width: 0; background: var(--pv-bg); border: 1px solid rgba(47,93,69,0.1); border-radius: 8px; padding: 12px; }
-      .pv-stars { color: var(--pv-accent); font-size: 0.55rem; display: block; margin-bottom: 4px; }
-      .pv-review-card p { font-size: 0.62rem; color: var(--pv-text-soft); line-height: 1.5; font-style: italic; margin-bottom: 4px; }
-      .pv-reviewer { font-size: 0.55rem; font-weight: 700; color: var(--pv-accent); }
-
-      .pv-gallery-section { background: var(--pv-bg); }
-      .pv-gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
-      .pv-gallery-item { aspect-ratio: 1; border-radius: 4px; overflow: hidden; }
-      .pv-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-      .pv-platforms-row { display: flex; flex-wrap: wrap; gap: 8px; }
-      .pv-platform-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(47,93,69,0.08); border-radius: 6px; font-size: 0.65rem; font-weight: 600; color: var(--pv-text); }
-      .pv-platform-letter { font-family: "Marcellus", serif; font-size: 0.6rem; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; background: var(--pv-accent); color: #fff; display: flex; align-items: center; justify-content: center; }
-
-      .pv-enquiry-mock { display: flex; flex-direction: column; gap: 6px; max-width: 240px; }
-      .pv-mock-field { height: 18px; background: rgba(44,26,14,0.04); border: 1px solid rgba(44,26,14,0.08); border-radius: 3px; }
-      .pv-mock-tall { height: 32px; }
-      .pv-mock-btn { background: var(--pv-accent); color: #fff; text-align: center; padding: 6px; border-radius: 4px; font-size: 0.55rem; font-weight: 700; }
-
-      .pv-footer { background: var(--pv-text, #2c1a0e); padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
-      .pv-footer p { font-family: "Marcellus", serif; font-size: 0.75rem; color: rgba(255,255,255,0.7); }
-      .pv-footer p em { color: var(--pv-accent); font-style: italic; }
-      .pv-footer span { font-size: 0.6rem; color: rgba(255,255,255,0.4); }
-
-      @media (max-width: 768px) {
-        nav { padding: 12px 20px; }
-        .nav-strip { position: sticky; top: 0; }
-        .nav-tab { padding: 8px 4px 6px; font-size: 0.64rem; }
-        .nav-tab svg { width: 20px; height: 20px; }
-        .dash-wrap { padding: 28px 20px; }
-        .dash-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
-        .stats-grid { grid-column: 1; grid-row: 2; flex-direction: row; }
-        .share-card { grid-column: 1; grid-row: 3; }
-        .share-url { flex-direction: column; }
-        .sits-grid { grid-template-columns: 1fr; }
-        .sits-heading { font-size: 1.5rem; }
-        .no-profile { padding: 48px 24px; }
-        .page-preview-header { flex-direction: column; gap: 8px; }
-      }
-    </style>
-    <LoadingOverlay />
+    checkUnread();
+    setInterval(checkUnread, 8000);
+  })();
+</script>
 </body>
 </html>
