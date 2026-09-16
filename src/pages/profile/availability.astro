@@ -1,0 +1,554 @@
+---
+export const prerender = false;
+
+import { getSession } from '../../lib/auth';
+import { supabase } from '../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: profile } = await supabase
+  .from('profiles')
+  .select('*')
+  .eq('user_id', session.userId)
+  .single();
+
+if (!profile) return Astro.redirect('/profile/create');
+
+// Load saved availability days (stored as JSON object { "YYYY-MM-DD": "free"|"maybe" })
+let savedDays: Record<string, string> = {};
+try {
+  if (profile.availability_json && typeof profile.availability_json === 'object') {
+    savedDays = profile.availability_json as Record<string, string>;
+  }
+} catch (_) {}
+
+// Load saved preferences
+let savedPrefs: { lengths: string[]; pets: string[]; notice: string } = {
+  lengths: [],
+  pets: [],
+  notice: 'Any time',
+};
+try {
+  if (profile.availability_prefs_json && typeof profile.availability_prefs_json === 'object') {
+    const p = profile.availability_prefs_json as any;
+    savedPrefs = {
+      lengths: Array.isArray(p.lengths) ? p.lengths : [],
+      pets: Array.isArray(p.pets) ? p.pets : [],
+      notice: typeof p.notice === 'string' ? p.notice : 'Any time',
+    };
+  }
+} catch (_) {}
+
+const sitCount = (profile.sits_count ?? profile.reviews_count ?? 0) as number;
+const displayName = (profile.display_name ?? profile.full_name ?? 'You') as string;
+const location = (profile.location ?? '') as string;
+const avatarUrl = (profile.avatar_url ?? '') as string;
+
+// Count open sits for the "matching sits" link
+let matchCount = 0;
+try {
+  const { count } = await supabase
+    .from('listings')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'active');
+  matchCount = count ?? 0;
+} catch (_) {}
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Availability — MYAH</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 1000px) {
+      [data-topnav] { padding: 14px 24px !important; }
+      [data-pad] { padding: 34px 20px 130px !important; }
+      [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+      [data-card] { padding: 26px 22px !important; }
+      [data-months] { grid-template-columns: minmax(0,1fr) !important; }
+    }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="/dashboard"
+        style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s"
+        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'"
+        onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
+      <a href={`/profile/${profile.id}`}
+        style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
+        onmouseover="this.style.color='#2c1a0e'"
+        onmouseout="this.style.color='#2f5d45'">View my page</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" style="flex:1;padding:52px 48px 130px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
+          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH sitter
+        </p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">When you&rsquo;re <em style="color:#2f5d45;">free</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">This is your availability, and owners can see it. Mark the days you could sit and your profile shows them at a glance &mdash; you&rsquo;ll turn up in their date searches, and they won&rsquo;t need to ask.</p>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <!-- Calendar card -->
+          <div data-card="1"
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:24px">
+              <div style="display:flex;gap:9px;flex-wrap:wrap" id="brushBar">
+                {[
+                  { key: 'free', label: 'Free', colour: '#2f5d45' },
+                  { key: 'maybe', label: 'Maybe', colour: 'rgba(110,84,56,.3)' },
+                  { key: 'clear', label: 'Clear', colour: '#faf6ee' },
+                ].map(b => (
+                  <button
+                    type="button"
+                    data-brush={b.key}
+                    onclick={`setBrush('${b.key}')`}
+                    style={`display:inline-flex;align-items:center;gap:9px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;padding:10px 18px;border-radius:50px;cursor:pointer;transition:background .2s ease, border-color .2s ease, color .2s ease;${b.key === 'free' ? 'background:rgba(110,84,56,.14);color:#2f5d45;border:1.5px solid rgba(110,84,56,.5);' : 'background:#fff;color:#6b4e35;border:1.5px solid rgba(44,26,14,.1);'}`}>
+                    <span style={`width:12px;height:12px;border-radius:4px;display:block;flex-shrink:0;background:${b.colour};border:1px solid rgba(44,26,14,.15);`}></span>
+                    {b.label}
+                  </button>
+                ))}
+              </div>
+              <div style="display:flex;gap:9px;align-items:center">
+                <button type="button" onclick="shiftOffset(-1)" style="width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid rgba(110,84,56,.35);color:#2f5d45;font-size:.9rem;cursor:pointer;transition:background .2s ease, border-color .2s ease">&larr;</button>
+                <span id="rangeLabel" style="font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;min-width:120px;text-align:center">Sep — Oct 2026</span>
+                <button type="button" onclick="shiftOffset(1)" style="width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid rgba(110,84,56,.35);color:#2f5d45;font-size:.9rem;cursor:pointer;transition:background .2s ease, border-color .2s ease">&rarr;</button>
+              </div>
+            </div>
+
+            <div data-months="1" id="calGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:30px">
+              <!-- rendered by JS -->
+            </div>
+
+            <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:26px;padding-top:22px;border-top:1px solid rgba(44,26,14,.08)">
+              {[
+                { label: 'Free', colour: '#2f5d45' },
+                { label: 'Maybe', colour: 'rgba(110,84,56,.22)' },
+                { label: 'Not available', colour: '#faf6ee' },
+                { label: 'Booked sit', colour: '#2c1a0e' },
+              ].map(l => (
+                <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:#6b4e35">
+                  <span style={`width:14px;height:14px;border-radius:5px;display:block;flex-shrink:0;background:${l.colour};border:1px solid rgba(44,26,14,.12);`}></span>
+                  {l.label}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <!-- Preferences card -->
+          <div data-card="1"
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.25rem;color:#2c1a0e;margin:0 0 8px">The sits you&rsquo;ll take</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 24px;max-width:480px">These narrow what owners can ask you for, and what we put in your alerts.</p>
+
+            <div style="margin-bottom:26px">
+              <span style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Length of sit</span>
+              <div style="display:flex;gap:10px;flex-wrap:wrap" id="lengthChips">
+                {['A few days', '1–2 weeks', '2–4 weeks', 'A month or more'].map(l => (
+                  <button
+                    type="button"
+                    data-pref-field="lengths"
+                    data-pref-value={l}
+                    data-pref-multi="1"
+                    onclick="togglePref(this)"
+                    style={`font-family:'Montserrat',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;${savedPrefs.lengths.includes(l) ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#faf6ee;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);'}`}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style="margin-bottom:26px">
+              <span style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Pets you&rsquo;re happy with</span>
+              <div style="display:flex;gap:10px;flex-wrap:wrap" id="petChips">
+                {['Dogs', 'Cats', 'Birds', 'Rabbits', 'Horses', 'Livestock'].map(p => (
+                  <button
+                    type="button"
+                    data-pref-field="pets"
+                    data-pref-value={p}
+                    data-pref-multi="1"
+                    onclick="togglePref(this)"
+                    style={`font-family:'Montserrat',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;${savedPrefs.pets.includes(p) ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#faf6ee;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);'}`}>
+                    {p}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <span style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Notice you need</span>
+              <div style="display:flex;gap:10px;flex-wrap:wrap" id="noticeChips">
+                {['Any time', '1 week', '2 weeks', 'A month'].map(n => (
+                  <button
+                    type="button"
+                    data-pref-field="notice"
+                    data-pref-value={n}
+                    data-pref-multi="0"
+                    onclick="togglePref(this)"
+                    style={`font-family:'Montserrat',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;${savedPrefs.notice === n ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#faf6ee;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);'}`}>
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Aside -->
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+
+          <!-- Free stretches card -->
+          <div
+            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px 26px 28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Your next free stretches</p>
+            <div id="stretchList" style="display:flex;flex-direction:column;gap:12px"></div>
+            <p id="stretchEmpty" style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0;display:none">Nothing marked yet &mdash; drag across the calendar to block out when you&rsquo;re free.</p>
+          </div>
+
+          <!-- What owners see card -->
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">What owners see</p>
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.25);border-radius:14px;padding:18px 20px">
+              <div style="display:flex;gap:13px;align-items:center;margin-bottom:14px">
+                {avatarUrl ? (
+                  <img src={avatarUrl} alt="" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35);flex-shrink:0" />
+                ) : (
+                  <div style="width:46px;height:46px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.1rem;border:2px solid rgba(110,84,56,.35);flex-shrink:0">
+                    {displayName.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div style="min-width:0">
+                  <p style="font-family:'Marcellus',serif;font-size:1.02rem;color:#2c1a0e;margin:0 0 2px">{displayName}</p>
+                  <p style="font-size:.78rem;color:#6b4e35;margin:0">{sitCount} sits{location ? ` · ${location}` : ''}</p>
+                </div>
+              </div>
+              <span id="cardPill" style="display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;padding:6px 14px;border-radius:50px;background:rgba(44,26,14,.07);color:#6b4e35;">No dates set</span>
+            </div>
+            <p id="matchLine" style="font-size:.84rem;color:#6b4e35;line-height:1.65;margin:14px 0 0">Without dates your card shows nothing here, and date filters skip you entirely.</p>
+          </div>
+
+          <!-- Matching sits card -->
+          <div style="background:#fff;border:1px solid rgba(44,26,14,.1);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 12px">Sits matching these dates</p>
+            <a id="matchCountLink" href="/listings"
+              style="display:inline-flex;align-items:center;gap:8px;font-size:.76rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:gap .2s, color .2s"
+              onmouseover="this.style.gap='12px';this.style.color='#2c1a0e'"
+              onmouseout="this.style.gap='8px';this.style.color='#2f5d45'">{matchCount} open sits &rarr;</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <!-- Save bar -->
+  <div id="saveBar" style="position:fixed;left:0;right:0;bottom:0;z-index:40;padding:16px 48px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid rgba(110,84,56,.28);box-shadow:0 -6px 24px rgba(44,26,14,.06);transition:transform .3s ease, opacity .3s ease;transform:translateY(100%);opacity:0;pointer-events:none">
+    <div style="max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <p id="saveBarText" style="font-size:.88rem;color:#6b4e35;margin:0;line-height:1.5">0 days marked free — not saved yet.</p>
+      <button
+        type="button"
+        onclick="saveAvailability()"
+        id="saveBtn"
+        style="font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease">
+        Save availability
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script define:vars={{ initialDays: savedDays, matchCount }}>
+const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const WEEKDAYS = ['M','T','W','T','F','S','S'];
+
+let days = { ...initialDays };
+let brush = 'free';
+let offset = 0;
+let dragging = false;
+let dirty = false;
+
+const now = new Date();
+const BASE_YEAR = now.getFullYear();
+const BASE_MONTH = now.getMonth();
+
+function isoKey(y, m, d) {
+  return y + '-' + String(m + 1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+}
+
+function fmtKey(k) {
+  const [,m,d] = k.split('-').map(Number);
+  return d + ' ' + MONTH_NAMES[m - 1].slice(0,3);
+}
+
+function paint(k) {
+  if (brush === 'clear') delete days[k];
+  else days[k] = brush;
+  dirty = true;
+  renderCalendar();
+  updateAside();
+  updateSaveBar();
+}
+
+function setBrush(b) {
+  brush = b;
+  document.querySelectorAll('[data-brush]').forEach(btn => {
+    const active = btn.getAttribute('data-brush') === b;
+    btn.style.background = active ? 'rgba(110,84,56,.14)' : '#fff';
+    btn.style.color = active ? '#2f5d45' : '#6b4e35';
+    btn.style.borderColor = active ? 'rgba(110,84,56,.5)' : 'rgba(44,26,14,.1)';
+  });
+}
+
+function shiftOffset(delta) {
+  offset += delta;
+  renderCalendar();
+}
+
+function buildMonthCells(year, monthIdx) {
+  const first = new Date(year, monthIdx, 1);
+  const startDow = (first.getDay() + 6) % 7;
+  const total = new Date(year, monthIdx + 1, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < startDow; i++) cells.push(null);
+  for (let d = 1; d <= total; d++) cells.push({ day: d, k: isoKey(year, monthIdx, d) });
+  return cells;
+}
+
+function renderCalendar() {
+  const base = new Date(BASE_YEAR, BASE_MONTH + offset, 1);
+  const y1 = base.getFullYear(), m1 = base.getMonth();
+  const base2 = new Date(y1, m1 + 1, 1);
+  const y2 = base2.getFullYear(), m2 = base2.getMonth();
+
+  const ml1 = MONTH_NAMES[m1] + ' ' + y1;
+  const ml2 = MONTH_NAMES[m2] + ' ' + y2;
+
+  document.getElementById('rangeLabel').textContent =
+    MONTH_NAMES[m1].slice(0,3) + ' — ' + MONTH_NAMES[m2].slice(0,3) + ' ' + y2;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = [[y1,m1,ml1],[y2,m2,ml2]].map(([y,m,label]) => {
+    const cells = buildMonthCells(y, m);
+    const dayBtns = cells.map(c => {
+      if (!c) return `<div style="height:34px;visibility:hidden"></div>`;
+      const v = days[c.k];
+      let style = 'height:34px;border-radius:8px;font-family:\'Montserrat\',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .15s ease, color .15s ease, border-color .15s ease;width:100%;';
+      if (v === 'free') style += 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;';
+      else if (v === 'maybe') style += 'background:rgba(110,84,56,.22);color:#5c3d20;border:1.5px solid rgba(110,84,56,.4);';
+      else style += 'background:#faf6ee;color:#6b4e35;border:1.5px solid rgba(44,26,14,.08);';
+      return `<button type="button" data-day="${c.k}" style="${style}" onmousedown="startDrag('${c.k}')" onmouseenter="onEnter('${c.k}')">${c.day}</button>`;
+    }).join('');
+    const wds = WEEKDAYS.map(w => `<span style="text-align:center;font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a6a4f">${w}</span>`).join('');
+    return `<div>
+      <p style="font-family:'Marcellus',serif;font-size:1.12rem;color:#2c1a0e;margin:0 0 14px">${label}</p>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px">${wds}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px">${dayBtns}</div>
+    </div>`;
+  }).join('');
+}
+
+function startDrag(k) {
+  dragging = true;
+  paint(k);
+}
+
+function onEnter(k) {
+  if (dragging) paint(k);
+}
+
+document.addEventListener('mouseup', () => { dragging = false; });
+
+function getStretches() {
+  const keys = Object.keys(days).filter(k => days[k] === 'free').sort();
+  const runs = [];
+  let run = [];
+  const dn = k => Math.round(new Date(k + 'T00:00:00').getTime() / 86400000);
+  keys.forEach(k => {
+    if (run.length && dn(k) - dn(run[run.length-1]) !== 1) { runs.push(run); run = []; }
+    run.push(k);
+  });
+  if (run.length) runs.push(run);
+  return runs.sort((a,b) => b.length - a.length);
+}
+
+function updateAside() {
+  const stretches = getStretches().slice(0,3);
+  const freeCount = Object.values(days).filter(v => v === 'free').length;
+  const longest = stretches[0] ? stretches[0].length : 0;
+
+  // Stretches list
+  const sl = document.getElementById('stretchList');
+  const se = document.getElementById('stretchEmpty');
+  if (!stretches.length) {
+    sl.innerHTML = '';
+    se.style.display = '';
+  } else {
+    se.style.display = 'none';
+    sl.innerHTML = stretches.map(run => {
+      const pill = run.length >= 14 ? 'Long sit' : run.length >= 7 ? 'A week+' : 'Short';
+      const pillStyle = run.length >= 14
+        ? 'background:#2f5d45;color:#fff;'
+        : 'background:rgba(110,84,56,.14);color:#2f5d45;';
+      return `<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:12px;padding:14px 16px">
+        <div style="min-width:0">
+          <p style="font-size:.92rem;font-weight:600;color:#2c1a0e;margin:0 0 3px">${fmtKey(run[0])} — ${fmtKey(run[run.length-1])}</p>
+          <p style="font-size:.8rem;color:#6b4e35;margin:0">${run.length} ${run.length === 1 ? 'day' : 'days'}</p>
+        </div>
+        <span style="font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:50px;white-space:nowrap;flex-shrink:0;${pillStyle}">${pill}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Card pill
+  const pill = document.getElementById('cardPill');
+  if (freeCount) {
+    pill.textContent = 'Available ' + (longest >= 14 ? 'for long sits' : 'for short sits') + ' · ' + freeCount + ' days marked';
+    pill.style.background = 'rgba(110,84,56,.14)';
+    pill.style.color = '#2f5d45';
+  } else {
+    pill.textContent = 'No dates set';
+    pill.style.background = 'rgba(44,26,14,.07)';
+    pill.style.color = '#6b4e35';
+  }
+
+  // Match line
+  document.getElementById('matchLine').textContent = freeCount
+    ? 'Owners searching those dates see this badge on your card, and you appear in their filtered results.'
+    : 'Without dates your card shows nothing here, and date filters skip you entirely.';
+
+  // Match count link
+  document.getElementById('matchCountLink').textContent = (freeCount ? matchCount + ' open sits' : 'Browse all open sits') + ' →';
+}
+
+function updateSaveBar() {
+  const bar = document.getElementById('saveBar');
+  const freeCount = Object.values(days).filter(v => v === 'free').length;
+  document.getElementById('saveBarText').textContent = freeCount + ' days marked free — not saved yet.';
+  if (dirty) {
+    bar.style.transform = 'translateY(0)';
+    bar.style.opacity = '1';
+    bar.style.pointerEvents = 'all';
+  }
+}
+
+function togglePref(btn) {
+  const multi = btn.getAttribute('data-pref-multi') === '1';
+  const field = btn.getAttribute('data-pref-field');
+  const container = btn.parentElement;
+  if (multi) {
+    const isOn = btn.style.background.includes('#2f5d45');
+    btn.style.background = isOn ? '#faf6ee' : '#2f5d45';
+    btn.style.color = isOn ? '#5c3d20' : '#fff';
+    btn.style.borderColor = isOn ? 'rgba(110,84,56,.32)' : '#2f5d45';
+  } else {
+    container.querySelectorAll('[data-pref-field="' + field + '"]').forEach(b => {
+      b.style.background = '#faf6ee';
+      b.style.color = '#5c3d20';
+      b.style.borderColor = 'rgba(110,84,56,.32)';
+    });
+    btn.style.background = '#2f5d45';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#2f5d45';
+  }
+  dirty = true;
+  updateSaveBar();
+}
+
+async function saveAvailability() {
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+
+  const prefs = { lengths: [], pets: [], notice: 'Any time' };
+  document.querySelectorAll('[data-pref-field="lengths"]').forEach(b => {
+    if (b.style.background.includes('#2f5d45')) prefs.lengths.push(b.getAttribute('data-pref-value'));
+  });
+  document.querySelectorAll('[data-pref-field="pets"]').forEach(b => {
+    if (b.style.background.includes('#2f5d45')) prefs.pets.push(b.getAttribute('data-pref-value'));
+  });
+  document.querySelectorAll('[data-pref-field="notice"]').forEach(b => {
+    if (b.style.background.includes('#2f5d45')) prefs.notice = b.getAttribute('data-pref-value');
+  });
+
+  try {
+    await fetch('/api/profile/availability', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ days, prefs }),
+    });
+    dirty = false;
+    const bar = document.getElementById('saveBar');
+    bar.style.transform = 'translateY(100%)';
+    bar.style.opacity = '0';
+    bar.style.pointerEvents = 'none';
+    btn.textContent = 'Saved';
+  } catch (e) {
+    btn.textContent = 'Save availability';
+  }
+  btn.disabled = false;
+}
+
+// Init
+renderCalendar();
+updateAside();
+
+// Loader on nav
+const loader = document.querySelector('[data-loader]');
+document.querySelectorAll('a[href]').forEach(a => {
+  const href = a.getAttribute('href') || '';
+  if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+  a.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  });
+});
+</script>
+</body>
+</html>
