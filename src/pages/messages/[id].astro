@@ -1,8 +1,5 @@
 ---
-import LoadingOverlay from '../../components/LoadingOverlay.astro';
 export const prerender = false;
-
-import '../../styles/global.css';
 import { getSession } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 
@@ -19,6 +16,7 @@ if (!profile) return Astro.redirect('/login');
 
 const dashUrl = profile.profile_type === 'owner' ? '/owner/dashboard' : '/dashboard';
 const profileUrl = profile.profile_type === 'owner' ? '/owner/edit' : '/profile/edit';
+const sitsUrl = profile.profile_type === 'owner' ? '/owner/dashboard' : '/listings';
 
 const convId = Astro.params.id;
 
@@ -28,7 +26,7 @@ const { data: conv } = await supabase
     id, listing_id,
     sitter:profiles!conversations_sitter_profile_id_fkey(id, name, profile_pic, slug),
     owner:profiles!conversations_owner_profile_id_fkey(id, name, profile_pic, slug),
-    listings(title)
+    listings(id, title)
   `)
   .eq('id', convId)
   .single();
@@ -44,466 +42,278 @@ if (sitter?.id !== profile.id && owner?.id !== profile.id) {
 
 const other = sitter?.id === profile.id ? owner : sitter;
 const listingTitle = (conv.listings as any)?.title ?? '';
+const listingId = (conv.listings as any)?.id ?? '';
+const otherInitials = (other?.name || '?').split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
 ---
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>Chat with {other?.name} — MYAH</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-      <a href="/api/auth/logout" class="nav-logout">Log out</a>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" type="image/png" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Chat with {other?.name} — MYAH</title>
+  <style>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; height:100vh; height:100dvh; overflow:hidden; display:flex; flex-direction:column; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; text-decoration:none; }
+    a:hover { color:#2c1a0e; }
+    input::placeholder { color:rgba(44,26,14,.4); }
+    @keyframes gs-ring { to { transform:rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    @keyframes msg-pop { from { opacity:0; transform:translateY(12px) scale(.97); } to { opacity:1; transform:none; } }
+    @media (max-width:900px) {
+      [data-topnav] { padding:12px 24px !important; }
+    }
+  </style>
+</head>
+<body>
 
-    <div class="nav-strip">
-      <a href={dashUrl} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
-        <span>Dashboard</span>
+  <!-- Loading overlay -->
+  <div id="loader" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <!-- Top nav -->
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.18);flex-shrink:0">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end">
+      <a href={dashUrl}
+        style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s"
+        onmouseover="this.style.color='#2f5d45'"
+        onmouseout="this.style.color='#5c3d20'"
+      >Dashboard</a>
+      <a href="/api/auth/logout"
+        style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s"
+        onmouseover="this.style.color='#2c1a0e'"
+        onmouseout="this.style.color='#2f5d45'"
+      >Log out</a>
+    </div>
+  </nav>
+
+  <!-- Tab bar -->
+  <div style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04);flex-shrink:0">
+    <a href={dashUrl} style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s" onmouseover="this.style.color='#2f5d45'" onmouseout="this.style.color='#8a6a4f'">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Dashboard</span>
+    </a>
+    <a href={sitsUrl} style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s" onmouseover="this.style.color='#2f5d45'" onmouseout="this.style.color='#8a6a4f'">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Sits</span>
+    </a>
+    <span style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;color:#2f5d45;position:relative;cursor:default">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Messages</span>
+      <span style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:#2f5d45"></span>
+    </span>
+    <a href={profileUrl} style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;text-decoration:none;color:#8a6a4f;position:relative;transition:color .2s" onmouseover="this.style.color='#2f5d45'" onmouseout="this.style.color='#8a6a4f'">
+      <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Profile</span>
+    </a>
+  </div>
+
+  <!-- Thread panel -->
+  <div style="flex:1;min-height:0;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-top:none;display:flex;flex-direction:column;max-width:900px;margin:0 auto;width:100%;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+
+    <!-- Thread header -->
+    <div style="display:flex;align-items:center;gap:13px;padding:14px 20px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2);flex-shrink:0">
+      <a href="/messages" style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;color:#2f5d45;transition:background .15s;flex-shrink:0;text-decoration:none" onmouseover="this.style.background='rgba(110,84,56,.1)'" onmouseout="this.style.background='transparent'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
       </a>
-      <a href={dashUrl + '?tab=sits'} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>{profile.profile_type === 'owner' ? 'My Sits' : 'Sits'}</span>
-      </a>
-      <a href="/messages" class="nav-tab active">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-        <span>Messages</span>
-      </a>
-      <a href={profileUrl} class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Profile</span>
-      </a>
+      {other?.profile_pic ? (
+        <img src={other.profile_pic} alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.3)" />
+      ) : (
+        <div style="width:44px;height:44px;border-radius:50%;background:#2f5d45;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid rgba(110,84,56,.3)">{otherInitials}</div>
+      )}
+      <div style="flex:1;min-width:0">
+        <p style="font-weight:600;font-size:1rem;color:#2c1a0e;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{other?.name}</p>
+        {listingTitle && <p style="font-size:.75rem;color:#2f5d45;font-weight:600;letter-spacing:.03em;margin:2px 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{listingTitle}</p>}
+      </div>
+      {listingId && (
+        <a href={`/listings/${listingId}`}
+          style="font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border:1.5px solid rgba(110,84,56,.4);border-radius:50px;padding:9px 18px;white-space:nowrap;transition:background .2s,color .2s,border-color .2s;flex-shrink:0"
+          onmouseover="this.style.background='#2f5d45';this.style.color='#fff';this.style.borderColor='#2f5d45'"
+          onmouseout="this.style.background='transparent';this.style.color='#2f5d45';this.style.borderColor='rgba(110,84,56,.4)'"
+        >View sit</a>
+      )}
     </div>
 
-    <div class="chat-layout">
-      <!-- Chat header -->
-      <header class="chat-header">
-        <a href="/messages" class="chat-back">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </a>
-        <a href={`/${other?.slug}`} class="chat-user">
-          {other?.profile_pic ? (
-            <img src={other.profile_pic} alt="" class="chat-user-avatar" />
-          ) : (
-            <div class="chat-user-avatar chat-avatar-placeholder">{(other?.name || '?').charAt(0).toUpperCase()}</div>
-          )}
-          <div>
-            <p class="chat-user-name">{other?.name}</p>
-            {listingTitle && <p class="chat-listing-ref">{listingTitle}</p>}
-          </div>
-        </a>
-      </header>
-
-      <!-- Messages area -->
-      <div class="chat-messages" id="chatMessages">
-        <div class="loading">Loading messages...</div>
-      </div>
-
-      <!-- Compose bar -->
-      <div class="chat-compose">
-        <form id="composeForm" class="compose-form">
-          <input type="text" id="msgInput" placeholder="Type a message..." autocomplete="off" />
-          <button type="submit" class="send-btn" id="sendBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-          </button>
-        </form>
-      </div>
+    <!-- Messages scroll area -->
+    <div id="chatMessages" style="flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:3px;background:#faf6ee">
+      <div style="display:flex;align-items:center;justify-content:center;padding:40px;color:#8a6a4f;font-size:.88rem">Loading…</div>
     </div>
 
-    <script define:vars={{ convId, myProfileId: profile.id, otherName: other?.name || 'Unknown' }}>
-      const chatMessages = document.getElementById('chatMessages');
-      const composeForm = document.getElementById('composeForm');
-      const msgInput = document.getElementById('msgInput');
-      const sendBtn = document.getElementById('sendBtn');
-      const knownIds = new Set();
-      let firstLoad = true;
+    <!-- Compose bar -->
+    <form id="composeForm" style="display:flex;gap:10px;align-items:center;padding:14px 18px;background:#fff;border-top:1px solid rgba(110,84,56,.2);flex-shrink:0">
+      <input
+        id="msgInput"
+        type="text"
+        placeholder="Type a message…"
+        autocomplete="off"
+        style="flex:1;border:1.5px solid rgba(110,84,56,.3);border-radius:50px;padding:13px 20px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s,box-shadow .2s"
+        onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+        onblur="this.style.borderColor='rgba(110,84,56,.3)';this.style.boxShadow='none'"
+      />
+      <button
+        type="submit"
+        id="sendBtn"
+        aria-label="Send message"
+        style="width:48px;height:48px;border-radius:50%;border:1.5px solid #2f5d45;background:#2f5d45;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(110,84,56,.3);transition:background .2s,border-color .2s,transform .12s"
+        onmouseover="this.style.background='#3e7a5b';this.style.borderColor='#3e7a5b';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(110,84,56,.36)'"
+        onmouseout="this.style.background='#2f5d45';this.style.borderColor='#2f5d45';this.style.transform='translateY(0)';this.style.boxShadow='0 6px 18px rgba(110,84,56,.3)'"
+        onmousedown="this.style.transform='translateY(0) scale(.96)'"
+        onmouseup="this.style.transform='translateY(0)'"
+      >
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      </button>
+    </form>
+  </div>
 
-      function playNotifSound() {
-        try {
-          const ctx = new (window.AudioContext || window.webkitAudioContext)();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          osc.frequency.setValueAtTime(660, ctx.currentTime);
-          osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
-          osc.type = 'sine';
-          gain.gain.setValueAtTime(0.08, ctx.currentTime);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 0.4);
-        } catch {}
-      }
+  <script define:vars={{ convId, myProfileId: profile.id, otherName: other?.name || 'Unknown' }}>
+    const chatMessages = document.getElementById('chatMessages');
+    const composeForm = document.getElementById('composeForm');
+    const msgInput = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const knownIds = new Set();
+    let firstLoad = true;
 
-      async function loadMessages() {
-        try {
-          const res = await fetch(`/api/messages/${convId}`);
-          const data = await res.json();
+    function playNotifSound() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.frequency.setValueAtTime(660, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.4);
+      } catch {}
+    }
 
-          if (!Array.isArray(data)) {
-            chatMessages.innerHTML = '<p class="error-msg">Failed to load messages.</p>';
-            return;
-          }
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
 
-          if (data.length === 0) {
-            chatMessages.innerHTML = `
-              <div class="chat-start">
-                <p>Start your conversation with <strong>${otherName}</strong></p>
-              </div>`;
-            firstLoad = false;
-            return;
-          }
+    function scrollToBottom() {
+      requestAnimationFrame(() => { chatMessages.scrollTop = chatMessages.scrollHeight; });
+    }
 
-          const newMsgIds = new Set();
-          data.forEach(m => { if (!knownIds.has(m.id)) newMsgIds.add(m.id); });
+    async function loadMessages() {
+      try {
+        const res = await fetch(`/api/messages/${convId}`);
+        const data = await res.json();
 
-          const newFromOther = data.filter(m => newMsgIds.has(m.id) && m.sender_profile_id !== myProfileId);
-
-          let html = '';
-          let lastDate = '';
-
-          data.forEach((msg, i) => {
-            const d = new Date(msg.created_at);
-            const dateStr = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-            if (dateStr !== lastDate) {
-              html += `<div class="date-divider"><span>${dateStr}</span></div>`;
-              lastDate = dateStr;
-            }
-
-            const mine = msg.sender_profile_id === myProfileId;
-            const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-            const read = msg.read_at ? true : false;
-            const isNew = !firstLoad && newMsgIds.has(msg.id);
-
-            const prev = i > 0 ? data[i - 1] : null;
-            const sameSenderAsPrev = prev && prev.sender_profile_id === msg.sender_profile_id;
-            const sameDateAsPrev = prev && new Date(prev.created_at).toLocaleDateString() === d.toLocaleDateString();
-            const showTail = !sameSenderAsPrev || !sameDateAsPrev || dateStr !== lastDate;
-
-            const next = i < data.length - 1 ? data[i + 1] : null;
-            const sameSenderAsNext = next && next.sender_profile_id === msg.sender_profile_id;
-            const isLast = !sameSenderAsNext;
-
-            const check = mine
-              ? (read ? '<span class="msg-check read">✓✓</span>' : '<span class="msg-check">✓</span>')
-              : '';
-
-            html += `
-              <div class="msg ${mine ? 'msg-mine' : 'msg-theirs'} ${showTail ? 'msg-tail' : ''} ${isLast ? 'msg-last' : ''} ${isNew ? 'msg-new' : ''}">
-                <div class="msg-bubble">
-                  <span class="msg-text">${escapeHtml(msg.body)}</span><span class="msg-meta"><span class="msg-time">${time}</span>${check}</span>
-                </div>
-              </div>`;
-          });
-
-          chatMessages.innerHTML = html;
-
-          if (newMsgIds.size > 0 || firstLoad) scrollToBottom();
-
-          if (!firstLoad && newFromOther.length > 0) {
-            playNotifSound();
-          }
-
-          data.forEach(m => knownIds.add(m.id));
-          firstLoad = false;
-        } catch {
-          chatMessages.innerHTML = '<p class="error-msg">Failed to load messages.</p>';
+        if (!Array.isArray(data)) {
+          chatMessages.innerHTML = '<div style="text-align:center;padding:40px;color:#b91c1c;font-size:.88rem">Failed to load messages.</div>';
+          return;
         }
-      }
 
-      function escapeHtml(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-      }
+        if (data.length === 0) {
+          chatMessages.innerHTML = `<div style="flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:40px"><p style="font-size:.88rem;color:#8a6a4f;background:rgba(255,255,255,.85);padding:10px 20px;border-radius:50px;box-shadow:0 1px 2px rgba(44,26,14,.06)">Start your conversation with <strong>${escapeHtml(otherName)}</strong></p></div>`;
+          firstLoad = false;
+          return;
+        }
 
-      function scrollToBottom() {
-        requestAnimationFrame(() => {
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+        const newMsgIds = new Set();
+        data.forEach(m => { if (!knownIds.has(m.id)) newMsgIds.add(m.id); });
+        const newFromOther = data.filter(m => newMsgIds.has(m.id) && m.sender_profile_id !== myProfileId);
+
+        let html = '';
+        let lastDate = '';
+
+        data.forEach((msg, i) => {
+          const d = new Date(msg.created_at);
+          const dateStr = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+          if (dateStr !== lastDate) {
+            html += `<div style="text-align:center;margin:4px 0 14px;align-self:center"><span style="background:rgba(110,84,56,.14);color:#5c3d20;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:6px 14px;border-radius:50px;display:inline-block">${escapeHtml(dateStr)}</span></div>`;
+            lastDate = dateStr;
+          }
+
+          const mine = msg.sender_profile_id === myProfileId;
+          const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+          const read = !!msg.read_at;
+          const isNew = !firstLoad && newMsgIds.has(msg.id);
+
+          const checkHtml = mine
+            ? `<span style="font-size:.7rem;letter-spacing:-2px;${read ? 'color:#2f5d45;' : 'color:rgba(44,26,14,.4);'}">${read ? '✓✓' : '✓'}</span>`
+            : '';
+
+          const bubbleStyle = mine
+            ? 'background:#e9e0d2;border:1px solid rgba(110,84,56,.35);border-bottom-right-radius:5px;'
+            : 'background:#fff;border:1px solid rgba(44,26,14,.08);border-bottom-left-radius:5px;box-shadow:0 1px 2px rgba(44,26,14,.04);';
+
+          html += `<div style="display:flex;padding:0 2px;margin-bottom:6px;justify-content:${mine ? 'flex-end' : 'flex-start'}${isNew ? ';animation:msg-pop .3s ease' : ''}">
+            <div style="max-width:78%;padding:11px 15px;border-radius:16px;word-wrap:break-word;${bubbleStyle}">
+              <span style="font-size:.92rem;line-height:1.55;color:#2c1a0e">${escapeHtml(msg.body)}</span>
+              <span style="display:flex;align-items:center;justify-content:flex-end;gap:5px;margin-top:5px">
+                <span style="font-size:.66rem;color:rgba(44,26,14,.45)">${time}</span>
+                ${checkHtml}
+              </span>
+            </div>
+          </div>`;
         });
+
+        chatMessages.innerHTML = html;
+        if (newMsgIds.size > 0 || firstLoad) scrollToBottom();
+        if (!firstLoad && newFromOther.length > 0) playNotifSound();
+        data.forEach(m => knownIds.add(m.id));
+        firstLoad = false;
+      } catch {
+        chatMessages.innerHTML = '<div style="text-align:center;padding:40px;color:#b91c1c;font-size:.88rem">Failed to load messages.</div>';
       }
+    }
 
-      composeForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const body = msgInput.value.trim();
-        if (!body) return;
+    composeForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const body = msgInput.value.trim();
+      if (!body) return;
+      sendBtn.disabled = true;
+      msgInput.value = '';
+      try {
+        await fetch('/api/messages/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ conversation_id: convId, body }),
+        });
+        await loadMessages();
+      } catch {}
+      sendBtn.disabled = false;
+      msgInput.focus();
+    });
 
-        sendBtn.disabled = true;
-        msgInput.value = '';
-
-        try {
-          await fetch('/api/messages/send', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ conversation_id: convId, body }),
-          });
-          await loadMessages();
-        } catch {}
-
-        sendBtn.disabled = false;
-        msgInput.focus();
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http')) return;
+      a.addEventListener('click', e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        const loader = document.getElementById('loader');
+        if (loader) { loader.style.opacity = '1'; loader.style.pointerEvents = 'all'; }
       });
+    });
 
-      loadMessages();
-
-      setInterval(loadMessages, 3000);
-    </script>
-
-    <style is:global>
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { background: #e5ddd5; height: 100vh; height: 100dvh; overflow: hidden;
-        font-family: "Lato", -apple-system, BlinkMacSystemFont, sans-serif;
-        display: flex; flex-direction: column; }
-
-      nav {
-        position: static;
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 10px 48px; background: #fff;
-        border-bottom: 1px solid rgba(47,93,69,0.15);
-        backdrop-filter: none; flex-shrink: 0;
-      }
-      .nav-logout {
-        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--myah-forest, #2f5d45); text-decoration: none;
-      }
-      .nav-logout:hover { color: var(--brown-dark, #2c1a0e); }
-
-      .nav-strip {
-        display: flex; background: #fff;
-        border-bottom: 1px solid rgba(44,26,14,0.08);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        flex-shrink: 0;
-      }
-      .nav-tab {
-        flex: 1; display: flex; flex-direction: column;
-        align-items: center; gap: 2px;
-        padding: 8px 4px 6px;
-        font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em;
-        color: #aaa; text-decoration: none;
-        border: none; background: none; cursor: pointer;
-        position: relative; transition: color 0.2s;
-        font-family: "Lato", sans-serif;
-      }
-      .nav-tab:hover { color: var(--myah-forest, #2f5d45); }
-      .nav-tab.active { color: var(--myah-forest, #2f5d45); }
-      .nav-tab.active::after {
-        content: ''; position: absolute;
-        bottom: 0; left: 20%; right: 20%;
-        height: 3px; background: var(--myah-forest, #2f5d45);
-        border-radius: 3px 3px 0 0;
-      }
-
-      .chat-layout {
-        display: flex; flex-direction: column;
-        flex: 1; min-height: 0;
-        max-width: 780px; margin: 0 auto; width: 100%;
-      }
-
-      /* ── HEADER ───────────────────────────────────────────── */
-      .chat-header {
-        display: flex; align-items: center; gap: 6px;
-        padding: 0 10px; height: 56px;
-        background: #ededed; flex-shrink: 0;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        z-index: 2;
-      }
-      .chat-back {
-        color: #2f5d45; text-decoration: none;
-        width: 36px; height: 36px; border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0; transition: background 0.15s;
-      }
-      .chat-back:hover { background: rgba(0,0,0,0.05); }
-      .chat-user {
-        display: flex; align-items: center; gap: 10px;
-        text-decoration: none; color: inherit; flex: 1; min-width: 0;
-        padding: 4px 6px; border-radius: 8px; transition: background 0.15s;
-      }
-      .chat-user:hover { background: rgba(0,0,0,0.04); }
-      .chat-user-avatar {
-        width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
-        border: 2px solid rgba(47,93,69,0.2);
-      }
-      .chat-avatar-placeholder {
-        display: flex; align-items: center; justify-content: center;
-        background: #ddd; color: #fff;
-        font-family: "Marcellus", serif; font-size: 1.1rem; font-weight: 700;
-        border: none;
-      }
-      .chat-user-name {
-        font-weight: 700; font-size: 1rem; color: #111;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-      .chat-listing-ref {
-        font-size: 0.72rem; color: #2f5d45; margin-top: 1px;
-        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      }
-
-      /* ── MESSAGES ─────────────────────────────────────────── */
-      .chat-messages {
-        flex: 1; overflow-y: auto;
-        padding: 6px 14px 10px;
-        display: flex; flex-direction: column;
-        background: #e5ddd5;
-        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5c1.2 0 2.3.4 3.2 1.1l.6.5c.8.8 1.2 1.8 1.2 2.9 0 1-.4 2-1 2.8l-.3.3c-.9.9-2 1.4-3.2 1.4h-.5c-1 0-2-.4-2.8-1.1l-.5-.5c-.8-.8-1.2-1.8-1.2-2.9s.4-2 1.1-2.8l.4-.4c.8-.8 1.9-1.3 3-1.3zm0 46c1.2 0 2.3.4 3.2 1.1l.6.5c.8.8 1.2 1.8 1.2 2.9 0 1-.4 2-1 2.8l-.3.3c-.9.9-2 1.4-3.2 1.4h-.5c-1 0-2-.4-2.8-1.1l-.5-.5c-.8-.8-1.2-1.8-1.2-2.9s.4-2 1.1-2.8l.4-.4c.8-.8 1.9-1.3 3-1.3z' fill='%23dbd4ca' fill-opacity='.3'/%3E%3C/svg%3E");
-      }
-
-      .date-divider {
-        text-align: center; margin: 12px 0 6px; align-self: center;
-      }
-      .date-divider span {
-        background: rgba(225,218,208,0.95); color: #54656f;
-        font-size: 0.73rem; font-weight: 500; padding: 5px 12px;
-        border-radius: 7px; display: inline-block;
-        box-shadow: 0 1px 1px rgba(0,0,0,0.06);
-      }
-
-      .msg {
-        display: flex; margin-bottom: 1px;
-        padding: 0 8px;
-      }
-      .msg-last { margin-bottom: 8px; }
-      .msg-tail { margin-top: 4px; }
-
-      .msg-new { animation: msg-pop-in 0.3s ease; }
-      @keyframes msg-pop-in {
-        0% { opacity: 0; transform: translateY(14px) scale(0.96); }
-        100% { opacity: 1; transform: translateY(0) scale(1); }
-      }
-      .msg-mine { justify-content: flex-end; }
-      .msg-theirs { justify-content: flex-start; }
-
-      .msg-bubble {
-        max-width: 80%; padding: 6px 8px 6px 9px;
-        border-radius: 8px; position: relative;
-        word-wrap: break-word; overflow-wrap: break-word;
-      }
-
-      /* ── SENT BUBBLES ─── */
-      .msg-mine .msg-bubble {
-        background: #d9fdd3;
-        border-radius: 8px;
-        margin-right: 0;
-      }
-      .msg-tail.msg-mine .msg-bubble {
-        border-top-right-radius: 0;
-        margin-right: 8px;
-      }
-      .msg-tail.msg-mine .msg-bubble::after {
-        content: '';
-        position: absolute; top: 0; right: -8px;
-        width: 0; height: 0;
-        border-left: 8px solid #d9fdd3;
-        border-bottom: 10px solid transparent;
-      }
-
-      /* ── RECEIVED BUBBLES ─── */
-      .msg-theirs .msg-bubble {
-        background: #fff;
-        border-radius: 8px;
-        margin-left: 0;
-      }
-      .msg-tail.msg-theirs .msg-bubble {
-        border-top-left-radius: 0;
-        margin-left: 8px;
-      }
-      .msg-tail.msg-theirs .msg-bubble::before {
-        content: '';
-        position: absolute; top: 0; left: -8px;
-        width: 0; height: 0;
-        border-right: 8px solid #fff;
-        border-bottom: 10px solid transparent;
-      }
-
-      /* ── MESSAGE TEXT & META ─── */
-      .msg-text {
-        font-size: 0.9rem; line-height: 1.4; color: #111;
-      }
-      .msg-meta {
-        display: inline-flex; align-items: center; gap: 3px;
-        float: right;
-        margin: 4px 0 -4px 10px;
-        white-space: nowrap;
-      }
-      .msg-time {
-        font-size: 0.65rem; color: rgba(0,0,0,0.4);
-      }
-      .msg-check {
-        font-size: 0.72rem; color: rgba(0,0,0,0.35);
-        letter-spacing: -2px; margin-left: 1px;
-      }
-      .msg-check.read {
-        color: #53bdeb;
-      }
-
-      .chat-start {
-        flex: 1; display: flex; align-items: center; justify-content: center;
-        text-align: center; padding: 40px;
-      }
-      .chat-start p {
-        font-size: 0.88rem; color: #667781;
-        background: rgba(255,255,255,0.85); padding: 10px 20px;
-        border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-      }
-
-      .loading {
-        flex: 1; display: flex; align-items: center; justify-content: center;
-        color: #667781; font-size: 0.88rem;
-      }
-      .error-msg { text-align: center; color: #b91c1c; padding: 40px; font-size: 0.88rem; }
-
-      /* ── COMPOSE ──────────────────────────────────────────── */
-      .chat-compose {
-        padding: 6px 10px; background: #f0f0f0;
-        flex-shrink: 0;
-      }
-      .compose-form {
-        display: flex; gap: 8px; align-items: flex-end;
-      }
-      .compose-form input {
-        flex: 1; border: none; border-radius: 21px;
-        padding: 10px 18px; font-size: 0.92rem;
-        font-family: "Lato", -apple-system, sans-serif;
-        color: #111; background: #fff; outline: none;
-        min-height: 42px;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.06);
-      }
-      .compose-form input::placeholder { color: #999; }
-      .send-btn {
-        width: 44px; height: 44px; border-radius: 50%; border: none;
-        background: #2f5d45; color: #fff; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        flex-shrink: 0; transition: all 0.15s;
-        box-shadow: 0 2px 6px rgba(47,93,69,0.35);
-      }
-      .send-btn:hover { background: #b8862e; transform: scale(1.04); }
-      .send-btn:active { transform: scale(0.96); }
-      .send-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
-
-      @media (max-width: 768px) {
-        nav { padding: 8px 16px; }
-        .nav-tab { padding: 6px 4px 5px; font-size: 0.6rem; }
-        .nav-tab svg { width: 18px; height: 18px; }
-        .chat-header { padding: 0 6px; height: 48px; gap: 2px; }
-        .chat-user-avatar { width: 36px; height: 36px; }
-        .chat-user-name { font-size: 0.92rem; }
-        .chat-messages { padding: 4px 6px 8px; }
-        .msg { padding: 0 4px; }
-        .msg-bubble { max-width: 88%; }
-        .chat-compose { padding: 5px 6px; }
-        .compose-form input { padding: 9px 14px; font-size: 0.88rem; min-height: 38px; }
-        .send-btn { width: 40px; height: 40px; }
-      }
-    </style>
-    <LoadingOverlay />
+    loadMessages();
+    setInterval(loadMessages, 3000);
+  </script>
 </body>
 </html>

@@ -1,17 +1,13 @@
 ---
-import LoadingOverlay from '../../components/LoadingOverlay.astro';
 export const prerender = false;
-
-import '../../styles/global.css';
 import { supabase } from '../../lib/supabase';
 
 const { token } = Astro.params;
 
-const success = Astro.url.searchParams.get('success') === 'true';
+const success = Astro.url.searchParams.get('success') === '1';
 const errorKey = Astro.url.searchParams.get('error') ?? '';
 const errorMap: Record<string, string> = {
   missing: 'Please fill in your name and review.',
-  invalid: 'This review link has already been used or is no longer valid.',
   server: 'Something went wrong. Please try again.',
 };
 const errorMsg = errorMap[errorKey] ?? '';
@@ -39,164 +35,319 @@ if (token) {
     }
   }
 }
+
+const CATS = [
+  { key: 'cleanliness', label: 'Cleanliness', hint: 'How you found the home on your return' },
+  { key: 'communication', label: 'Communication', hint: 'Updates, replies and clarity' },
+  { key: 'pet_care', label: 'Care of pets', hint: 'Routines, walks and affection' },
+  { key: 'reliability', label: 'Reliability', hint: 'Turning up and doing what was agreed' },
+  { key: 'extra_mile', label: 'Going the extra mile', hint: 'The things nobody asked for' },
+];
+
+const view = success ? 'success' : !valid ? 'invalid' : 'form';
 ---
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>{success ? 'Thank you!' : `Leave a review for ${sitterName || 'this sitter'}`} — MYAH</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" type="image/png" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>{success ? 'Thank you!' : `Leave a review for ${sitterName || 'this sitter'}`} — MYAH</title>
+  <style>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; }
+    a:hover { color:#2c1a0e; }
+    input::placeholder, textarea::placeholder { color:rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform:rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    @keyframes card-in { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
+    @media (max-width:700px) {
+      [data-topnav] { padding:14px 24px !important; }
+      [data-wrap] { padding:36px 20px !important; }
+      [data-card] { padding:32px 24px !important; }
+    }
+  </style>
+</head>
+<body style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
 
-    <main class="review-wrap">
-      {success ? (
-        <div class="review-card success-card">
-          <div class="success-icon">&#10003;</div>
-          <h1>Thank you!</h1>
-          <p>Your review has been submitted and will appear on {sitterName ? `${sitterName}'s` : 'their'} profile.</p>
-          <a href="/" class="btn-primary">Visit MYAH</a>
+  <!-- Loading overlay -->
+  <div id="loader" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <!-- Nav (centered) -->
+  <nav data-topnav="1" style="display:flex;justify-content:center;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/"
+      style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;transition:transform .25s ease"
+      onmouseover="this.style.transform='translateY(-1px)'"
+      onmouseout="this.style.transform='none'"
+    >
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+  </nav>
+
+  <!-- Main -->
+  <main data-wrap="1" style="flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px">
+
+    {view === 'form' && (
+      <div data-card="1"
+        style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:20px;padding:48px;box-shadow:0 4px 28px rgba(44,26,14,.07);max-width:580px;width:100%;animation:card-in .4s ease;transition:box-shadow .3s ease,border-color .3s ease"
+        onmouseover="this.style.boxShadow='0 14px 44px rgba(44,26,14,.1)';this.style.borderColor='rgba(110,84,56,.4)'"
+        onmouseout="this.style.boxShadow='0 4px 28px rgba(44,26,14,.07)';this.style.borderColor='rgba(110,84,56,.22)'"
+      >
+        <!-- Sitter header -->
+        <div style="display:flex;gap:20px;align-items:center;margin-bottom:26px">
+          {sitterPhoto ? (
+            <img src={sitterPhoto} alt={sitterName} style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:3px solid rgba(110,84,56,.32);flex-shrink:0" />
+          ) : (
+            <div style="width:76px;height:76px;border-radius:50%;background:#2f5d45;color:#fff;font-family:'Montserrat',sans-serif;font-weight:700;font-size:1.5rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:3px solid rgba(110,84,56,.32)">
+              {(sitterName || 'S').split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()}
+            </div>
+          )}
+          <div style="min-width:0">
+            <p style="font-size:.74rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#6e5438;margin:0 0 8px;display:flex;align-items:center;gap:10px">
+              <span style="width:22px;height:1px;background:#2f5d45;display:block;flex-shrink:0"></span>Leave a review for
+            </p>
+            <h1 style="font-family:'Marcellus',serif;font-size:1.95rem;color:#2c1a0e;line-height:1.2;margin:0">{sitterName}</h1>
+          </div>
         </div>
-      ) : !valid ? (
-        <div class="review-card invalid-card">
-          <h1>Link not valid</h1>
-          <p>{errorMsg || 'This review link has already been used or is no longer valid. If you think this is a mistake, ask your sitter to send you a new link.'}</p>
-          <a href="/" class="btn-primary">Visit MYAH</a>
-        </div>
-      ) : (
-        <div class="review-card">
-          <div class="sitter-info">
-            {sitterPhoto && <img src={sitterPhoto} alt={sitterName} class="sitter-photo" />}
+
+        <!-- Intro -->
+        <p style="font-size:.95rem;color:#6b4e35;line-height:1.8;margin:0 0 28px;padding-bottom:26px;border-bottom:1px solid rgba(44,26,14,.08)">{sitterName} has asked you to share your experience. Your review will appear on their MYAH profile page.</p>
+
+        {errorMsg && (
+          <div style="background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;border-radius:10px;padding:14px 18px;font-size:.9rem;margin-bottom:24px">{errorMsg}</div>
+        )}
+
+        <!-- Star ratings box -->
+        <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:26px 24px;margin-bottom:26px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-bottom:20px">
             <div>
-              <p class="review-label">Leave a review for</p>
-              <h1>{sitterName}</h1>
+              <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 6px">Rate your sit</p>
+              <p style="font-size:.85rem;color:#6b4e35;margin:0;line-height:1.6">Tap the stars for each part of the stay.</p>
+            </div>
+            <div id="avgBox" style="text-align:center;min-width:126px;padding:14px 18px;border-radius:14px;background:#fff;transition:border-color .3s ease,box-shadow .3s ease;border:1.5px solid rgba(110,84,56,.3)">
+              <span id="avgValue" style="font-family:'Marcellus',serif;font-size:1.9rem;color:#6e5438;line-height:1">—</span>
+              <span id="avgStars" style="display:block;color:#2f5d45;font-size:.8rem;letter-spacing:.2em;margin-top:2px">☆☆☆☆☆</span>
+              <span id="avgLabel" style="display:block;font-size:.66rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin-top:6px">Not rated yet</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px">
+            {CATS.map(cat => (
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;padding:11px 0;border-top:1px solid rgba(44,26,14,.08);flex-wrap:wrap">
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                  <span style="font-size:.9rem;font-weight:600;color:#2c1a0e">{cat.label}</span>
+                  <span style="font-size:.78rem;color:#6b4e35">{cat.hint}</span>
+                </span>
+                <span style="display:flex;align-items:center;gap:5px;flex-shrink:0">
+                  {[1,2,3,4,5].map(n => (
+                    <button
+                      type="button"
+                      data-star-cat={cat.key}
+                      data-star-n={n}
+                      aria-label={`${n} star${n === 1 ? '' : 's'} for ${cat.label}`}
+                      onclick={`setStar('${cat.key}',${n})`}
+                      style="border:none;background:none;cursor:pointer;padding:2px;font-size:1.35rem;line-height:1;font-family:'Montserrat',sans-serif;transition:color .2s ease,transform .15s ease;color:rgba(110,84,56,.3)"
+                      onmouseover={`hoverStar('${cat.key}',${n})`}
+                      onmouseout={`unhoverStar('${cat.key}')`}
+                    >★</button>
+                  ))}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Review form -->
+        <form id="reviewForm" action="/api/review/submit" method="POST" style="display:flex;flex-direction:column;gap:22px">
+          <input type="hidden" name="token" value={token} />
+          <input type="hidden" name="ratings" id="ratingsInput" value="{}" />
+
+          <div>
+            <label for="rname" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Your name <span style="color:#2f5d45">*</span></label>
+            <input
+              type="text" id="rname" name="name" required
+              placeholder="e.g. Sarah &amp; Tom"
+              autocomplete="name"
+              style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .25s ease,box-shadow .25s ease"
+              onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+              onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow='none'"
+            />
+            <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">This will be shown alongside your review.</p>
+          </div>
+
+          <div>
+            <label for="rtext" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Your review <span style="color:#2f5d45">*</span></label>
+            <textarea
+              id="rtext" name="text" rows="5" required
+              placeholder="What was your experience like? How did they look after your pets and home?"
+              style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .25s ease,box-shadow .25s ease"
+              onfocus="this.style.borderColor='#2f5d45';this.style.boxShadow='0 0 0 3px rgba(110,84,56,.15)'"
+              onblur="this.style.borderColor='rgba(44,26,14,.18)';this.style.boxShadow='none'"
+              oninput="updateCount(this)"
+            ></textarea>
+            <div style="display:flex;justify-content:space-between;gap:16px;margin-top:8px">
+              <p style="font-size:.82rem;color:#6b4e35;margin:0;line-height:1.6">Be as detailed as you like — pet owners love reading real experiences.</p>
+              <p id="charCount" style="font-size:.78rem;color:#6b4e35;margin:0;white-space:nowrap;font-weight:600"></p>
             </div>
           </div>
 
-          <p class="review-intro">
-            {sitterName} has asked you to share your experience. Your review will appear on their MYAH profile page.
-          </p>
+          <button
+            type="submit"
+            style="display:inline-flex;align-items:center;justify-content:center;gap:8px;align-self:flex-start;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;transition:background .25s ease,border-color .25s ease,transform .15s ease,box-shadow .25s ease"
+            onmouseover="this.style.background='#3e7a5b';this.style.borderColor='#3e7a5b';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(110,84,56,.36)'"
+            onmouseout="this.style.background='#2f5d45';this.style.borderColor='#2f5d45';this.style.transform='translateY(0)';this.style.boxShadow='0 6px 20px rgba(110,84,56,.28)'"
+            onmousedown="this.style.transform='translateY(0) scale(.98)'"
+            onmouseup="this.style.transform='translateY(-2px) scale(1)'"
+          >Submit review</button>
+        </form>
+      </div>
+    )}
 
-          {errorMsg && <div class="error-banner">{errorMsg}</div>}
+    {view === 'success' && (
+      <div data-card="1"
+        style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:20px;padding:56px 48px;box-shadow:0 4px 28px rgba(44,26,14,.07);max-width:520px;width:100%;text-align:center;animation:card-in .4s ease;transition:box-shadow .3s ease,border-color .3s ease"
+        onmouseover="this.style.boxShadow='0 14px 44px rgba(44,26,14,.1)';this.style.borderColor='rgba(110,84,56,.4)'"
+        onmouseout="this.style.boxShadow='0 4px 28px rgba(44,26,14,.07)';this.style.borderColor='rgba(110,84,56,.22)'"
+      >
+        <span style="width:70px;height:70px;border-radius:50%;background:rgba(110,84,56,.12);border:1px solid rgba(110,84,56,.35);color:#2f5d45;display:inline-flex;align-items:center;justify-content:center;margin-bottom:24px">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        </span>
+        <h1 style="font-family:'Marcellus',serif;font-size:2rem;color:#2c1a0e;margin:0 0 14px">Thank you!</h1>
+        <div style="width:48px;height:2px;background:#6e5438;margin:0 auto 22px"></div>
+        <p style="font-size:.97rem;color:#6b4e35;line-height:1.8;margin:0 0 30px">Your review has been submitted and will appear on {sitterName ? `${sitterName}'s` : 'their'} profile.</p>
+        <a href="/"
+          style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease,border-color .25s ease,transform .15s ease,box-shadow .25s ease"
+          onmouseover="this.style.background='#3e7a5b';this.style.borderColor='#3e7a5b';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(110,84,56,.36)'"
+          onmouseout="this.style.background='#2f5d45';this.style.borderColor='#2f5d45';this.style.transform='translateY(0)';this.style.boxShadow='0 6px 20px rgba(110,84,56,.28)'"
+        >Visit MYAH</a>
+      </div>
+    )}
 
-          <form action="/api/review/submit" method="POST" class="review-form">
-            <input type="hidden" name="token" value={token} />
+    {view === 'invalid' && (
+      <div data-card="1"
+        style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:20px;padding:56px 48px;box-shadow:0 4px 28px rgba(44,26,14,.07);max-width:520px;width:100%;text-align:center;animation:card-in .4s ease;transition:box-shadow .3s ease,border-color .3s ease"
+        onmouseover="this.style.boxShadow='0 14px 44px rgba(44,26,14,.1)';this.style.borderColor='rgba(110,84,56,.4)'"
+        onmouseout="this.style.boxShadow='0 4px 28px rgba(44,26,14,.07)';this.style.borderColor='rgba(110,84,56,.22)'"
+      >
+        <span style="width:70px;height:70px;border-radius:50%;background:#faf6ee;border:1px solid rgba(110,84,56,.35);color:#2f5d45;display:inline-flex;align-items:center;justify-content:center;margin-bottom:24px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 13.4a3 3 0 0 0 4.2 0l3.2-3.2a3 3 0 0 0-4.2-4.2l-.6.6"></path><path d="M13.4 10.6a3 3 0 0 0-4.2 0l-3.2 3.2a3 3 0 0 0 4.2 4.2l.6-.6"></path></svg>
+        </span>
+        <h1 style="font-family:'Marcellus',serif;font-size:2rem;color:#2c1a0e;margin:0 0 14px">Link not valid</h1>
+        <div style="width:48px;height:2px;background:#6e5438;margin:0 auto 22px"></div>
+        <p style="font-size:.97rem;color:#6b4e35;line-height:1.8;margin:0 0 30px">This review link has already been used or is no longer valid. If you think this is a mistake, ask your sitter to send you a new link.</p>
+        <a href="/"
+          style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease,border-color .25s ease,transform .15s ease,box-shadow .25s ease"
+          onmouseover="this.style.background='#3e7a5b';this.style.borderColor='#3e7a5b';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(110,84,56,.36)'"
+          onmouseout="this.style.background='#2f5d45';this.style.borderColor='#2f5d45';this.style.transform='translateY(0)';this.style.boxShadow='0 6px 20px rgba(110,84,56,.28)'"
+        >Visit MYAH</a>
+      </div>
+    )}
 
-            <div class="field">
-              <label for="name">Your name <span class="req">*</span></label>
-              <input type="text" id="name" name="name" required placeholder="e.g. Sarah & Tom" autocomplete="name" />
-              <p class="field-hint">This will be shown alongside your review.</p>
-            </div>
+  </main>
 
-            <div class="field">
-              <label for="text">Your review <span class="req">*</span></label>
-              <textarea id="text" name="text" rows="5" required placeholder="What was your experience like? How did they look after your pets and home?"></textarea>
-              <p class="field-hint">Be as detailed as you like — pet owners love reading real experiences.</p>
-            </div>
+  {view === 'form' && (
+    <script define:vars={{ CATS }}>
+      const ratings = {};
 
-            <button type="submit" class="btn-primary btn-submit">Submit review</button>
-          </form>
-        </div>
-      )}
-    </main>
-
-    <style>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
-
-      nav {
-        position: static;
-        border-bottom: 1px solid rgba(47,93,69,0.2);
-        padding: 18px 48px;
-        display: flex; justify-content: center; align-items: center;
+      function renderStars() {
+        CATS.forEach(cat => {
+          const val = ratings[cat.key] || 0;
+          document.querySelectorAll(`[data-star-cat="${cat.key}"]`).forEach(btn => {
+            const n = parseInt(btn.dataset.starN);
+            btn.style.color = n <= val ? '#2f5d45' : 'rgba(110,84,56,.3)';
+          });
+        });
+        updateAvg();
+        document.getElementById('ratingsInput').value = JSON.stringify(ratings);
       }
 
-      .review-wrap {
-        flex: 1; display: flex; align-items: center; justify-content: center;
-        padding: 60px 24px;
+      function setStar(cat, n) {
+        ratings[cat] = (ratings[cat] === n) ? 0 : n;
+        renderStars();
       }
 
-      .review-card {
-        background: #fff; border-radius: 16px; padding: 48px;
-        box-shadow: 0 4px 24px rgba(44,26,14,0.08);
-        max-width: 560px; width: 100%;
+      function hoverStar(cat, n) {
+        document.querySelectorAll(`[data-star-cat="${cat}"]`).forEach(btn => {
+          const bn = parseInt(btn.dataset.starN);
+          btn.style.color = bn <= n ? '#3e7a5b' : 'rgba(110,84,56,.3)';
+          btn.style.transform = bn <= n ? 'scale(1.15)' : 'scale(1)';
+        });
       }
 
-      .sitter-info { display: flex; gap: 20px; align-items: center; margin-bottom: 24px; }
-      .sitter-photo {
-        width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
-        border: 3px solid rgba(47,93,69,0.3); flex-shrink: 0;
-      }
-      .review-label {
-        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
-        text-transform: uppercase; color: var(--myah-forest); margin-bottom: 4px;
-      }
-      .sitter-info h1 {
-        font-family: "Marcellus", serif; font-size: 1.8rem;
-        color: var(--myah-ink); line-height: 1.2;
+      function unhoverStar(cat) {
+        const val = ratings[cat] || 0;
+        document.querySelectorAll(`[data-star-cat="${cat}"]`).forEach(btn => {
+          const n = parseInt(btn.dataset.starN);
+          btn.style.color = n <= val ? '#2f5d45' : 'rgba(110,84,56,.3)';
+          btn.style.transform = 'scale(1)';
+        });
       }
 
-      .review-intro {
-        font-size: 0.92rem; color: var(--myah-tan); line-height: 1.7;
-        margin-bottom: 28px; padding-bottom: 24px;
-        border-bottom: 1px solid rgba(44,26,14,0.08);
+      function updateAvg() {
+        const given = CATS.map(c => ratings[c.key]).filter(Boolean);
+        const avg = given.length ? given.reduce((a, b) => a + b, 0) / given.length : 0;
+        const rounded = Math.round(avg * 10) / 10;
+        const full = Math.round(avg);
+
+        const box = document.getElementById('avgBox');
+        const valEl = document.getElementById('avgValue');
+        const starsEl = document.getElementById('avgStars');
+        const labelEl = document.getElementById('avgLabel');
+
+        valEl.textContent = given.length ? rounded.toFixed(1) : '—';
+        starsEl.textContent = given.length
+          ? '★★★★★'.slice(0, full) + '☆☆☆☆☆'.slice(0, 5 - full)
+          : '☆☆☆☆☆';
+        labelEl.textContent = given.length === CATS.length
+          ? 'Overall rating'
+          : given.length ? `${given.length} of ${CATS.length} rated`
+          : 'Not rated yet';
+
+        if (given.length === CATS.length) {
+          box.style.borderColor = '#2f5d45';
+          box.style.boxShadow = '0 6px 18px rgba(110,84,56,.18)';
+        } else {
+          box.style.borderColor = 'rgba(110,84,56,.3)';
+          box.style.boxShadow = 'none';
+        }
       }
 
-      .error-banner {
-        background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px;
-        padding: 14px 18px; color: #b91c1c; font-size: 0.9rem; margin-bottom: 20px;
+      function updateCount(el) {
+        const n = el.value.trim().length;
+        const c = document.getElementById('charCount');
+        c.textContent = n > 0 ? n + ' characters' : '';
       }
 
-      .review-form { display: flex; flex-direction: column; gap: 20px; }
-
-      .field { display: flex; flex-direction: column; gap: 6px; }
-      label { font-size: 0.85rem; font-weight: 700; color: var(--myah-ink); letter-spacing: 0.02em; }
-      .req { color: var(--myah-forest); }
-      .field-hint { font-size: 0.78rem; color: var(--myah-tan); line-height: 1.5; }
-
-      input[type="text"], textarea {
-        width: 100%; box-sizing: border-box;
-        border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px;
-        padding: 12px 16px; font-size: 0.95rem; font-family: "Lato", sans-serif;
-        color: var(--myah-ink); background: var(--myah-paper); outline: none;
-        transition: border-color 0.2s;
-      }
-      input:focus, textarea:focus { border-color: var(--myah-forest); }
-      textarea { resize: vertical; line-height: 1.6; }
-
-      .btn-submit { padding: 14px 36px; font-size: 0.95rem; align-self: flex-start; }
-
-      .success-card, .invalid-card { text-align: center; }
-      .success-icon {
-        width: 64px; height: 64px; border-radius: 50%;
-        background: #dcfce7; color: #166534; font-size: 2rem;
-        display: flex; align-items: center; justify-content: center;
-        margin: 0 auto 20px;
-      }
-      .success-card h1, .invalid-card h1 {
-        font-family: "Marcellus", serif; font-size: 1.8rem;
-        color: var(--myah-ink); margin-bottom: 12px;
-      }
-      .success-card p, .invalid-card p {
-        font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; margin-bottom: 28px;
+      function showLoader() {
+        const loader = document.getElementById('loader');
+        loader.style.opacity = '1';
+        loader.style.pointerEvents = 'all';
       }
 
-      @media (max-width: 768px) {
-        nav { padding: 14px 24px; }
-        .review-wrap { padding: 40px 16px; }
-        .review-card { padding: 32px 24px; }
-        .sitter-info h1 { font-size: 1.4rem; }
-      }
-    </style>
-    <LoadingOverlay />
+      document.getElementById('reviewForm')?.addEventListener('submit', () => showLoader());
+
+      document.querySelectorAll('a[href]').forEach(a => {
+        const href = a.getAttribute('href') || '';
+        if (href.startsWith('#') || href.startsWith('http')) return;
+        a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; showLoader(); });
+      });
+    </script>
+  )}
 </body>
 </html>
