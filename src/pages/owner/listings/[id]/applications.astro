@@ -1,0 +1,389 @@
+---
+export const prerender = false;
+
+import { getSession } from '../../../../lib/auth';
+import { supabase } from '../../../../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { id } = Astro.params;
+
+const { data: ownerProfile } = await supabase
+  .from('profiles')
+  .select('id, name, profile_type')
+  .eq('user_id', session.userId)
+  .single();
+
+if ((ownerProfile as any)?.profile_type !== 'owner') {
+  return Astro.redirect('/dashboard');
+}
+
+const { data: listingData } = await supabase
+  .from('listings')
+  .select('*')
+  .eq('id', id)
+  .eq('profile_id', (ownerProfile as any).id)
+  .single();
+const listing = listingData as any;
+if (!listing) return Astro.redirect('/owner/dashboard');
+
+let applications: any[] = [];
+try {
+  const { data } = await supabase
+    .from('applications')
+    .select('id, created_at, status, message, profile_id, profiles(id, name, avatar_url, slug, bio, sits_count, reviews_json, verified_id, location)')
+    .eq('listing_id', id)
+    .order('created_at', { ascending: false });
+  applications = (data ?? []) as any[];
+} catch { /* table may not exist yet */ }
+
+function fmt(d: string) {
+  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+function fmtAgo(d: string) {
+  const ms = Date.now() - new Date(d).getTime();
+  const days = Math.floor(ms / 86400000);
+  if (days === 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return `${days} days ago`;
+  return `${Math.floor(days / 7)} week${Math.floor(days / 7) === 1 ? '' : 's'} ago`;
+}
+
+const listingTitle = listing.title || 'Untitled sit';
+const dateRange = listing.date_from && listing.date_to ? `${fmt(listing.date_from)} – ${fmt(listing.date_to)}` : '';
+const newCount = applications.filter((a: any) => !a.status || a.status === 'new').length;
+const shortlistCount = applications.filter((a: any) => a.status === 'shortlisted').length;
+const declinedCount = applications.filter((a: any) => a.status === 'declined').length;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Applications — {listingTitle} — MYAH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+  * { box-sizing:border-box; }
+  a { color:#2f5d45; }
+  a:hover { color:#2c1a0e; }
+  @keyframes gs-ring { to { transform:rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+  @media (max-width:1000px) {
+    [data-topnav] { padding:14px 24px !important; }
+    [data-pad] { padding:34px 20px 80px !important; }
+    [data-row] { grid-template-columns:minmax(0,1fr) !important; }
+    [data-rowmeta] { border-left:none !important; border-top:1px solid rgba(44,26,14,.08) !important; padding-top:20px !important; }
+  }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="/owner/dashboard" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s,color .2s"
+        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'" onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
+      <a href="/messages" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
+        onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#2f5d45'">Messages</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1120px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
+          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>{listingTitle}{dateRange ? ` · ${dateRange}` : ''}
+        </p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Who&rsquo;s <em style="color:#2f5d45;">applied</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:600px;margin:0">
+          {applications.length === 0
+            ? 'No applications yet. Share your listing link to spread the word.'
+            : `${newCount} still to look at, ${shortlistCount} shortlisted. Shortlist the ones you like, then offer the sit.`}
+        </p>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:26px">
+        <div style="display:flex;gap:9px;flex-wrap:wrap" id="tabBar">
+          {[
+            { key: 'new', label: 'New', count: newCount },
+            { key: 'shortlist', label: 'Shortlisted', count: shortlistCount },
+            { key: 'declined', label: 'Declined', count: declinedCount },
+            { key: 'all', label: 'Everyone', count: applications.length },
+          ].map(t => (
+            <button type="button" data-tab={t.key} onclick={`setTab('${t.key}')`}
+              style={`display:inline-flex;align-items:center;gap:9px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease,color .25s ease,border-color .25s ease;${t.key === 'new' ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);'}`}>
+              {t.label}
+              <span style={`font-size:.7rem;padding:2px 8px;border-radius:50px;${t.key === 'new' ? 'background:rgba(255,255,255,.25);color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;'}`}>{t.count}</span>
+            </button>
+          ))}
+        </div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+          <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Sort</span>
+          {[{ key: 'recent', label: 'Most recent' }, { key: 'reviews', label: 'Most reviewed' }].map(s => (
+            <button type="button" data-sort={s.key} onclick={`setSort('${s.key}')`}
+              style={`font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.06em;padding:9px 16px;border-radius:50px;cursor:pointer;transition:background .2s ease,color .2s ease,border-color .2s ease;${s.key === 'recent' ? 'background:rgba(110,84,56,.14);color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);' : 'background:#fff;color:#6b4e35;border:1.5px solid rgba(44,26,14,.1);'}`}>
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {applications.length === 0 ? (
+        <div style="display:flex;flex-direction:column;align-items:flex-start;background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px">
+          <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">Nothing yet</p>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 20px;max-width:420px">Applications will appear here as sitters apply to your listing. You can also browse sitters and invite them directly.</p>
+          <a href={`/owner/find-sitter?listing=${id}`} style="display:inline-flex;align-items:center;justify-content:center;font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:12px 28px;text-decoration:none;transition:background .25s ease"
+            onmouseover="this.style.background='#3e7a5b'" onmouseout="this.style.background='#2f5d45'">Find a sitter</a>
+        </div>
+      ) : (
+        <div style="display:flex;flex-direction:column;gap:16px" id="applicantList">
+          {applications.map((a: any) => {
+            const p = (a.profiles as any) || {};
+            const reviews: any[] = Array.isArray(p.reviews_json) ? p.reviews_json : [];
+            const avgRating = reviews.length ? Math.round(reviews.reduce((sum: number, r: any) => sum + (r.rating || 0), 0) / reviews.length) : 0;
+            const stars = '★'.repeat(avgRating) + '☆'.repeat(5 - avgRating);
+            const initials = (p.name || 'S').split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
+            const status = a.status || 'new';
+            const isVerified = p.verified_id === true;
+            return (
+              <article data-app-id={a.id} data-status={status}
+                style={`display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);background:#fff;border-radius:18px;overflow:hidden;transition:border-color .3s ease,box-shadow .3s ease,opacity .3s ease;${status === 'shortlisted' ? 'border:1.5px solid #2f5d45;box-shadow:0 10px 30px rgba(110,84,56,.16);' : status === 'declined' ? 'border:1px solid rgba(44,26,14,.1);opacity:.5;' : 'border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);'}`}>
+                <div style="padding:26px 28px;display:flex;gap:20px;align-items:flex-start;min-width:0">
+                  <div style="position:relative;flex-shrink:0">
+                    {p.avatar_url ? (
+                      <img src={p.avatar_url} alt="" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
+                    ) : (
+                      <div style="width:76px;height:76px;border-radius:50%;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.5rem;color:#2f5d45">{initials}</div>
+                    )}
+                    {isVerified && (
+                      <span style="position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.7rem;display:flex;align-items:center;justify-content:center;border:2px solid #fff">★</span>
+                    )}
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px">
+                      <h2 style="font-family:'Marcellus',serif;font-size:1.28rem;color:#2c1a0e;margin:0;line-height:1.25">{p.name || 'Sitter'}</h2>
+                      <span style={`font-size:.64rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:50px;${status === 'shortlisted' ? 'background:#2f5d45;color:#fff;' : status === 'declined' ? 'background:rgba(44,26,14,.1);color:#6b4e35;' : 'background:rgba(110,84,56,.14);color:#2f5d45;'}`}>
+                        {status === 'shortlisted' ? 'Shortlisted' : status === 'declined' ? 'Declined' : 'New'}
+                      </span>
+                    </div>
+                    <p style="font-size:.84rem;color:#2f5d45;font-weight:600;margin:0 0 14px">
+                      {[isVerified && 'Verified ID', p.sits_count && `${p.sits_count} sits`].filter(Boolean).join(' · ') || 'Sitter'}
+                    </p>
+                    {a.message && (
+                      <p style="font-size:.95rem;color:#6b4e35;line-height:1.75;margin:0 0 16px;max-width:520px">&ldquo;{a.message}&rdquo;</p>
+                    )}
+                  </div>
+                </div>
+
+                <div data-rowmeta="1" style="padding:26px 28px;border-left:1px solid rgba(44,26,14,.08);display:flex;flex-direction:column;gap:18px;justify-content:space-between">
+                  <div style="display:flex;flex-direction:column;gap:12px">
+                    {avgRating > 0 && (
+                      <div style="display:flex;align-items:center;gap:10px">
+                        <span style="font-size:.9rem;color:#2f5d45;letter-spacing:.08em">{stars}</span>
+                        <span style="font-size:.82rem;color:#6b4e35">{reviews.length} review{reviews.length === 1 ? '' : 's'}</span>
+                      </div>
+                    )}
+                    {p.location && (
+                      <div style="display:flex;align-items:center;gap:9px;font-size:.85rem;color:#6b4e35">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 21s-7-4.6-7-10a7 7 0 0 1 14 0c0 5.4-7 10-7 10z"></path><circle cx="12" cy="11" r="2.4"></circle></svg>
+                        {p.location}
+                      </div>
+                    )}
+                    <p style="font-size:.78rem;color:#8a6a4f;margin:0">Applied {fmtAgo(a.created_at)}</p>
+                  </div>
+
+                  <div style="display:flex;flex-direction:column;gap:10px">
+                    <button type="button" onclick={`toggleShortlist('${a.id}', this)`}
+                      data-shortlisted={status === 'shortlisted' ? '1' : '0'}
+                      style={`font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:13px 20px;cursor:pointer;width:100%;transition:background .25s ease,color .25s ease,border-color .25s ease,transform .15s ease;${status === 'shortlisted' ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;box-shadow:0 6px 18px rgba(110,84,56,.28);' : 'background:#fff;color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);'}`}
+                      onmouseover="if(!this.dataset.shortlisted||this.dataset.shortlisted==='0'){this.style.background='rgba(110,84,56,.08)'}"
+                      onmouseout="if(!this.dataset.shortlisted||this.dataset.shortlisted==='0'){this.style.background='#fff'}">
+                      {status === 'shortlisted' ? '✓ Shortlisted' : 'Shortlist'}
+                    </button>
+                    <div style="display:flex;gap:10px">
+                      <a href={`/messages?with=${p.id}`} style="flex:1;text-align:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:11px 10px;transition:background .25s ease,border-color .25s ease"
+                        onmouseover="this.style.background='rgba(110,84,56,.1)';this.style.borderColor='#2f5d45'" onmouseout="this.style.background='';this.style.borderColor='rgba(110,84,56,.45)'">Message</a>
+                      <button type="button" onclick={`toggleDecline('${a.id}', this)`}
+                        data-declined={status === 'declined' ? '1' : '0'}
+                        style="flex:1;font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:11px 10px;cursor:pointer;background:none;color:#6b4e35;border:1.5px solid rgba(44,26,14,.15);transition:border-color .2s ease,color .2s ease"
+                        onmouseover="this.style.borderColor='rgba(110,84,56,.35)';this.style.color='#2c1a0e'" onmouseout="this.style.borderColor='rgba(44,26,14,.15)';this.style.color='#6b4e35'">
+                        {status === 'declined' ? 'Undo' : 'Decline'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      <div id="decideBar" style={`margin-top:28px;padding:24px 30px;border-radius:18px;background:rgba(110,84,56,.1);border:1px solid rgba(110,84,56,.35);align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;${shortlistCount > 0 ? 'display:flex;' : 'display:none;'}`}>
+        <p style="font-size:.92rem;color:#2c1a0e;margin:0;line-height:1.6;max-width:520px" id="decideText">
+          {shortlistCount === 1 ? `One name on the shortlist. Offer them the sit and the others are told politely.` : `${shortlistCount} on the shortlist. Pick one to offer and the rest are told politely.`}
+        </p>
+        <a href="/messages" style="display:inline-flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;text-decoration:none;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease,transform .15s ease"
+          onmouseover="this.style.background='#3e7a5b';this.style.transform='translateY(-2px)'" onmouseout="this.style.background='#2f5d45';this.style.transform='translateY(0)'">Offer the sit</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script define:vars={{ listingId: id }}>
+let currentTab = 'new';
+let currentSort = 'recent';
+let statuses = {};
+
+document.querySelectorAll('[data-app-id]').forEach(el => {
+  statuses[el.dataset.appId] = el.dataset.status || 'new';
+});
+
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    const active = btn.dataset.tab === tab;
+    btn.style.background = active ? '#2f5d45' : '#fff';
+    btn.style.color = active ? '#fff' : '#5c3d20';
+    btn.style.borderColor = active ? '#2f5d45' : 'rgba(110,84,56,.32)';
+    const span = btn.querySelector('span');
+    if (span) {
+      span.style.background = active ? 'rgba(255,255,255,.25)' : 'rgba(110,84,56,.14)';
+      span.style.color = active ? '#fff' : '#2f5d45';
+    }
+  });
+  filterApps();
+}
+
+function setSort(sort) {
+  currentSort = sort;
+  document.querySelectorAll('[data-sort]').forEach(btn => {
+    const active = btn.dataset.sort === sort;
+    btn.style.background = active ? 'rgba(110,84,56,.14)' : '#fff';
+    btn.style.color = active ? '#2f5d45' : '#6b4e35';
+    btn.style.borderColor = active ? 'rgba(110,84,56,.45)' : 'rgba(44,26,14,.1)';
+  });
+}
+
+function filterApps() {
+  document.querySelectorAll('[data-app-id]').forEach(el => {
+    const st = statuses[el.dataset.appId] || 'new';
+    let show = true;
+    if (currentTab === 'new') show = st === 'new';
+    else if (currentTab === 'shortlist') show = st === 'shortlisted';
+    else if (currentTab === 'declined') show = st === 'declined';
+    el.style.display = show ? '' : 'none';
+  });
+}
+
+function updateTabCounts() {
+  const counts = { new: 0, shortlist: 0, declined: 0, all: 0 };
+  Object.values(statuses).forEach(st => {
+    counts.all++;
+    if (st === 'shortlisted') counts.shortlist++;
+    else if (st === 'declined') counts.declined++;
+    else counts.new++;
+  });
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    const key = btn.dataset.tab;
+    const span = btn.querySelector('span');
+    if (span) {
+      const n = key === 'shortlist' ? counts.shortlist : key === 'declined' ? counts.declined : key === 'all' ? counts.all : counts.new;
+      span.textContent = n;
+    }
+  });
+  const shortlisted = Object.values(statuses).filter(s => s === 'shortlisted').length;
+  const bar = document.getElementById('decideBar');
+  if (bar) bar.style.display = shortlisted > 0 ? 'flex' : 'none';
+  const decideText = document.getElementById('decideText');
+  if (decideText) decideText.textContent = shortlisted === 1 ? 'One name on the shortlist. Offer them the sit and the others are told politely.' : `${shortlisted} on the shortlist. Pick one to offer and the rest are told politely.`;
+}
+
+function toggleShortlist(appId, btn) {
+  const el = document.querySelector(`[data-app-id="${appId}"]`);
+  if (!el) return;
+  const cur = statuses[appId];
+  const next = cur === 'shortlisted' ? 'new' : 'shortlisted';
+  statuses[appId] = next;
+  el.dataset.status = next;
+  if (next === 'shortlisted') {
+    el.style.border = '1.5px solid #2f5d45';
+    el.style.boxShadow = '0 10px 30px rgba(110,84,56,.16)';
+    el.style.opacity = '1';
+    btn.style.background = '#2f5d45';
+    btn.style.color = '#fff';
+    btn.style.borderColor = '#2f5d45';
+    btn.textContent = '✓ Shortlisted';
+    btn.dataset.shortlisted = '1';
+    const statusSpan = el.querySelector('[data-status-label]');
+    if (statusSpan) { statusSpan.textContent = 'Shortlisted'; statusSpan.style.background = '#2f5d45'; statusSpan.style.color = '#fff'; }
+  } else {
+    el.style.border = '1px solid rgba(110,84,56,.22)';
+    el.style.boxShadow = '0 1px 2px rgba(44,26,14,.04)';
+    btn.style.background = '#fff';
+    btn.style.color = '#2f5d45';
+    btn.style.borderColor = 'rgba(110,84,56,.45)';
+    btn.textContent = 'Shortlist';
+    btn.dataset.shortlisted = '0';
+  }
+  updateTabCounts();
+  filterApps();
+  fetch('/api/applications/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: appId, status: next }) }).catch(() => {});
+}
+
+function toggleDecline(appId, btn) {
+  const el = document.querySelector(`[data-app-id="${appId}"]`);
+  if (!el) return;
+  const cur = statuses[appId];
+  const next = cur === 'declined' ? 'new' : 'declined';
+  statuses[appId] = next;
+  el.dataset.status = next;
+  if (next === 'declined') {
+    el.style.border = '1px solid rgba(44,26,14,.1)';
+    el.style.opacity = '.5';
+    btn.textContent = 'Undo';
+  } else {
+    el.style.border = '1px solid rgba(110,84,56,.22)';
+    el.style.opacity = '1';
+    btn.textContent = 'Decline';
+  }
+  updateTabCounts();
+  filterApps();
+  fetch('/api/applications/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: appId, status: next }) }).catch(() => {});
+}
+
+document.querySelectorAll('a[href]').forEach(a => {
+  const href = a.getAttribute('href') || '';
+  if (href.startsWith('#') || href.startsWith('http')) return;
+  const loader = document.querySelector('[data-loader]');
+  if (!loader) return;
+  a.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  });
+});
+</script>
+</body>
+</html>

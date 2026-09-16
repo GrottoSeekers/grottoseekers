@@ -1,0 +1,299 @@
+---
+export const prerender = false;
+
+import { getSession } from '../lib/auth';
+import { supabase } from '../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: profileData } = await supabase
+  .from('profiles')
+  .select('id, name, profile_type, profile_pic')
+  .eq('user_id', session.userId)
+  .single();
+const profile = profileData as any;
+const isOwner = profile?.profile_type === 'owner';
+const dashUrl = isOwner ? '/owner/dashboard' : '/dashboard';
+const profileUrl = isOwner ? '/owner/edit' : '/profile/edit';
+
+let notifications: any[] = [];
+try {
+  const { data } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', session.userId)
+    .order('created_at', { ascending: false })
+    .limit(50);
+  notifications = data ?? [];
+} catch { /* table may not exist yet */ }
+
+const unreadCount = notifications.filter(n => !n.read).length;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notifications — MYAH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+  * { box-sizing:border-box; }
+  a { color:#2f5d45; }
+  a:hover { color:#2c1a0e; }
+  @keyframes gs-ring { to { transform:rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+  @media (max-width:1000px) {
+    [data-topnav] { padding:14px 24px !important; }
+    [data-pad] { padding:34px 20px 80px !important; }
+    [data-two-col] { grid-template-columns:minmax(0,1fr) !important; }
+    [data-aside] { position:static !important; }
+    [data-row] { grid-template-columns:minmax(0,1fr) !important; }
+    [data-row] [data-actions] { padding:0 22px 20px !important; justify-content:flex-start !important; }
+    [data-safety] { grid-template-columns:minmax(0,1fr) !important; }
+  }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href={dashUrl} style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s,color .2s"
+        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'" onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
+      <a href="/messages" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
+        onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#2f5d45'">Messages</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
+          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your account
+        </p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">What&rsquo;s <em style="color:#2f5d45;">happened</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">
+          {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}.` : 'You\'re all caught up.'}
+        </p>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px">
+            <div style="display:flex;gap:9px;flex-wrap:wrap" id="tabBar">
+              {[
+                { key: 'all', label: 'All', count: notifications.length },
+                { key: 'unread', label: 'Unread', count: unreadCount },
+              ].map(t => (
+                <button type="button" data-tab={t.key} onclick={`setTab('${t.key}')`}
+                  style={`display:inline-flex;align-items:center;gap:9px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease,color .25s ease,border-color .25s ease;${t.key === 'all' ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);'}`}>
+                  {t.label}
+                  <span style={`font-size:.7rem;padding:2px 8px;border-radius:50px;${t.key === 'all' ? 'background:rgba(255,255,255,.25);color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;'}`}>{t.count}</span>
+                </button>
+              ))}
+            </div>
+            <button type="button" onclick="markAllRead()" style="font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:none;border:none;cursor:pointer;padding:4px 0;transition:color .2s"
+              onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#2f5d45'">Mark all read</button>
+          </div>
+
+          <div id="notifList" style="display:flex;flex-direction:column;gap:11px">
+            {notifications.length === 0 ? (
+              <div style="background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px">
+                <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">All caught up</p>
+                <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0;max-width:420px">Nothing unread. Anything new lands here and, if you want it to, in your inbox.</p>
+              </div>
+            ) : (
+              notifications.map((n: any) => (
+                <article data-notif={n.id} data-read={n.read ? '1' : '0'}
+                  style={`display:grid;grid-template-columns:minmax(0,1fr) auto;background:#fff;border-radius:18px;overflow:hidden;transition:border-color .3s ease,box-shadow .3s ease;${!n.read ? 'border:1.5px solid rgba(110,84,56,.35);box-shadow:0 2px 8px rgba(44,26,14,.06);' : 'border:1px solid rgba(110,84,56,.18);opacity:.75;'}`}>
+                  <div style="display:flex;gap:16px;align-items:flex-start;padding:20px 22px;min-width:0">
+                    <span style={`width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;${!n.read ? 'background:#2f5d45;color:#fff;' : 'background:rgba(110,84,56,.12);color:#6b4e35;'}`}>✦</span>
+                    <div style="flex:1;min-width:0">
+                      <p style={`font-size:.95rem;font-weight:700;color:#2c1a0e;margin:0 0 5px;${!n.read ? '' : 'font-weight:600;'}`}>{n.title || n.message}</p>
+                      <p style="font-size:.92rem;color:#6b4e35;line-height:1.7;margin:0 0 4px">{n.body || ''}</p>
+                      <p style="font-size:.79rem;color:#8a6a4f;margin:0">{new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                    </div>
+                  </div>
+                  <div data-actions="1" style="display:flex;align-items:center;gap:10px;padding:20px 22px;justify-content:flex-end;flex-wrap:wrap">
+                    {n.link && (
+                      <a href={n.link} style="font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border-radius:50px;padding:10px 18px;text-decoration:none;white-space:nowrap;transition:background .25s ease"
+                        onmouseover="this.style.background='#3e7a5b'" onmouseout="this.style.background='#2f5d45'">View</a>
+                    )}
+                    {!n.read && (
+                      <button type="button" onclick={`markRead('${n.id}')`} style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6b4e35;background:none;border:1px solid rgba(44,26,14,.15);border-radius:50px;padding:9px 14px;cursor:pointer;white-space:nowrap;transition:border-color .2s"
+                        onmouseover="this.style.borderColor='rgba(110,84,56,.4)'" onmouseout="this.style.borderColor='rgba(44,26,14,.15)'">Mark read</button>
+                    )}
+                  </div>
+                </article>
+              ))
+            )}
+          </div>
+
+          {notifications.length === 0 && (
+            <div style="display:flex;flex-direction:column;gap:11px;margin-top:22px">
+              <div style="background:#fff;border:1px solid rgba(110,84,56,.18);border-radius:18px;overflow:hidden;opacity:.4">
+                <div style="display:flex;gap:16px;align-items:flex-start;padding:20px 22px">
+                  <span style="width:36px;height:36px;border-radius:50%;background:rgba(110,84,56,.12);display:block;flex-shrink:0"></span>
+                  <div style="flex:1">
+                    <div style="height:14px;width:70%;background:rgba(110,84,56,.12);border-radius:6px;margin-bottom:10px"></div>
+                    <div style="height:11px;width:90%;background:rgba(110,84,56,.08);border-radius:6px;margin-bottom:6px"></div>
+                    <div style="height:11px;width:50%;background:rgba(110,84,56,.06);border-radius:6px"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <section style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;margin-top:28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">If something goes wrong</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.93rem;color:#6b4e35;line-height:1.75;margin:0 0 26px;max-width:520px">Sits mostly go fine. When they don&rsquo;t, here is exactly what to do &mdash; no hunting through a help centre at eleven at night.</p>
+            <div data-safety="1" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              {[
+                { title: 'Pet is unwell', body: 'Contact the vet whose number is on the sit page. Let the owner know right away.', link: 'Get vet details', href: '#' },
+                { title: 'You need to leave early', body: 'Message the owner first. We can help find emergency cover if needed.', link: 'Message the owner', href: '/messages' },
+                { title: 'Something broken or damaged', body: 'Document it with photos. Tell the owner before they get home.', link: 'Read our policy', href: '#' },
+                { title: 'You feel unsafe', body: 'Leave immediately. Call 999 if needed. Message us after you are safe.', link: 'Contact MYAH', href: '#' },
+              ].map(s => (
+                <a href={s.href} style="background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:20px 22px;text-decoration:none;display:block;transition:border-color .25s ease,background .25s ease"
+                  onmouseover="this.style.borderColor='rgba(110,84,56,.45)';this.style.background='#f0e8dc'" onmouseout="this.style.borderColor='rgba(110,84,56,.2)';this.style.background='#faf6ee'">
+                  <p style="font-family:'Marcellus',serif;font-size:1.02rem;color:#2c1a0e;margin:0 0 6px">{s.title}</p>
+                  <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0 0 12px">{s.body}</p>
+                  <span style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45">{s.link} &rarr;</span>
+                </a>
+              ))}
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:14px;background:#fdeeee;border:1px solid #f7cfcf;border-radius:14px;padding:18px 20px;margin-top:20px">
+              <span style="width:26px;height:26px;border-radius:50%;background:#b91c1c;color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">!</span>
+              <p style="font-size:.92rem;color:#5c3d20;line-height:1.7;margin:0">If an animal is hurt or someone is in danger, call a vet or the emergency services first. Tell us afterwards &mdash; we are not an emergency service and we would rather you got help fast.</p>
+            </div>
+          </section>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 8px">What reaches you</p>
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 20px">Everything shows on this page. Choose what also leaves it.</p>
+            <div style="display:flex;flex-direction:column;gap:14px" id="prefList">
+              {[
+                { key: 'applications', label: 'Applications', note: 'When someone applies to your sit' },
+                { key: 'messages', label: 'Messages', note: 'New conversations and replies' },
+                { key: 'sit', label: 'Sit reminders', note: 'Countdowns and checklist nudges' },
+                { key: 'matches', label: 'Sit matches', note: 'New sits matching your saved searches' },
+                { key: 'product', label: 'MYAH news', note: 'New features and tips' },
+              ].map((p, i) => (
+                <div style="display:flex;align-items:center;gap:14px">
+                  <div style="flex:1;min-width:0">
+                    <p style="font-size:.92rem;font-weight:600;color:#2c1a0e;margin:0 0 2px">{p.label}</p>
+                    <p style="font-size:.79rem;color:#6b4e35;margin:0">{p.note}</p>
+                  </div>
+                  <button type="button" data-pref={p.key} onclick={`togglePref('${p.key}', this)`}
+                    style={`position:relative;width:44px;height:26px;border-radius:50px;border:none;cursor:pointer;transition:background .25s ease;padding:0;${i < 3 ? 'background:#2f5d45;' : 'background:rgba(44,26,14,.2);'}`}>
+                    <span style={`position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .25s ease;${i < 3 ? 'left:21px;' : 'left:3px;'}`}></span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0">Notifications stay on this page for 90 days. Email alerts are sent to the address on your account.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script define:vars={{ notifIds: notifications.map((n: any) => n.id) }}>
+let currentTab = 'all';
+
+function setTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('[data-tab]').forEach(btn => {
+    const active = btn.dataset.tab === tab;
+    btn.style.background = active ? '#2f5d45' : '#fff';
+    btn.style.color = active ? '#fff' : '#5c3d20';
+    btn.style.borderColor = active ? '#2f5d45' : 'rgba(110,84,56,.32)';
+    const count = btn.querySelector('span');
+    if (count) {
+      count.style.background = active ? 'rgba(255,255,255,.25)' : 'rgba(110,84,56,.14)';
+      count.style.color = active ? '#fff' : '#2f5d45';
+    }
+  });
+  document.querySelectorAll('[data-notif]').forEach(el => {
+    const isUnread = el.dataset.read === '0';
+    if (tab === 'unread') {
+      el.style.display = isUnread ? '' : 'none';
+    } else {
+      el.style.display = '';
+    }
+  });
+}
+
+function markRead(id) {
+  const el = document.querySelector(`[data-notif="${id}"]`);
+  if (!el) return;
+  el.dataset.read = '1';
+  el.style.border = '1px solid rgba(110,84,56,.18)';
+  el.style.boxShadow = 'none';
+  el.style.opacity = '.75';
+  const btn = el.querySelector('button');
+  if (btn) btn.remove();
+  fetch('/api/notifications/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }).catch(() => {});
+}
+
+function markAllRead() {
+  document.querySelectorAll('[data-notif]').forEach(el => {
+    markRead(el.dataset.notif);
+  });
+}
+
+function togglePref(key, btn) {
+  const isOn = btn.style.background === 'rgb(47, 93, 69)' || btn.style.background === '#2f5d45';
+  btn.style.background = isOn ? 'rgba(44,26,14,.2)' : '#2f5d45';
+  const knob = btn.querySelector('span');
+  if (knob) knob.style.left = isOn ? '3px' : '21px';
+}
+
+document.querySelectorAll('a[href]').forEach(a => {
+  const href = a.getAttribute('href') || '';
+  if (href.startsWith('#') || href.startsWith('http')) return;
+  const loader = document.querySelector('[data-loader]');
+  if (!loader) return;
+  a.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  });
+});
+</script>
+</body>
+</html>

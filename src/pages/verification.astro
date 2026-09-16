@@ -1,0 +1,320 @@
+---
+export const prerender = false;
+
+import { getSession } from '../lib/auth';
+import { supabase } from '../lib/supabase';
+
+const session = await getSession(Astro.request);
+if (!session) return Astro.redirect('/login');
+
+const { data: profileData } = await supabase
+  .from('profiles')
+  .select('id, name, avatar_url, profile_type, verified_id, verified_selfie, slug')
+  .eq('user_id', session.userId)
+  .single();
+const profile = profileData as any;
+const isOwner = profile?.profile_type === 'owner';
+const dashUrl = isOwner ? '/owner/dashboard' : '/dashboard';
+const profilePageUrl = profile?.slug ? `/${profile.slug}` : '/dashboard';
+
+const idStatus: 'verified' | 'pending' | 'none' = profile?.verified_id === true ? 'verified' : profile?.verified_id === 'pending' ? 'pending' : 'none';
+const selfieStatus: 'verified' | 'pending' | 'none' = profile?.verified_selfie === true ? 'verified' : profile?.verified_selfie === 'pending' ? 'pending' : 'none';
+
+const trustLevels = [
+  { name: 'Not started', pct: 0, note: 'No verification yet.', emblemLine: 'No badge on your profile.' },
+  { name: 'ID submitted', pct: 40, note: 'We\'re reviewing your documents.', emblemLine: 'Badge pending — shows once approved.' },
+  { name: 'ID verified', pct: 70, note: 'Photo ID confirmed.', emblemLine: 'ID verified badge live on your profile.' },
+  { name: 'Fully verified', pct: 100, note: 'Photo ID and selfie both confirmed.', emblemLine: 'Full verification badge — owners trust this most.' },
+];
+const trustIdx = idStatus === 'verified' && selfieStatus === 'verified' ? 3
+  : idStatus === 'verified' ? 2
+  : idStatus === 'pending' || selfieStatus === 'pending' ? 1
+  : 0;
+const trust = trustLevels[trustIdx];
+
+const initials = (profile?.name || 'U').split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
+
+const STEPS = [
+  {
+    key: 'id',
+    title: 'Photo ID',
+    icon: 'id',
+    body: 'A passport, driving licence or national ID card. We check the document is genuine and matches the name on your account.',
+    stages: [
+      { num: '1', title: 'Upload', body: 'A clear photo of your document — front and back for a driving licence.' },
+      { num: '2', title: 'Review', body: 'Our team checks it, usually within one working day.' },
+      { num: '3', title: 'Verified', body: 'The badge goes live on your profile and in browse results.' },
+    ],
+    status: idStatus,
+    actionLabel: idStatus === 'verified' ? '✓ Verified' : idStatus === 'pending' ? 'In review' : 'Upload ID',
+  },
+  {
+    key: 'selfie',
+    title: 'Selfie check',
+    icon: 'selfie',
+    body: 'A short selfie video to confirm you are the person in the ID. Takes about 90 seconds — no app needed.',
+    stages: [
+      { num: '1', title: 'Record', body: 'Turn your head left and right to camera — we check it\'s a real person.' },
+      { num: '2', title: 'Match', body: 'We compare your face to the ID photo automatically.' },
+      { num: '3', title: 'Done', body: 'Second badge added — owners can see both are confirmed.' },
+    ],
+    status: selfieStatus,
+    actionLabel: selfieStatus === 'verified' ? '✓ Verified' : selfieStatus === 'pending' ? 'In review' : 'Record selfie',
+  },
+];
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Verification — MYAH</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+  * { box-sizing:border-box; }
+  a { color:#2f5d45; }
+  a:hover { color:#2c1a0e; }
+  @keyframes gs-ring { to { transform:rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+  @media (max-width:1000px) {
+    [data-topnav] { padding:14px 24px !important; }
+    [data-pad] { padding:34px 20px 80px !important; }
+    [data-two-col] { grid-template-columns:minmax(0,1fr) !important; }
+    [data-aside] { position:static !important; }
+    [data-card] { padding:26px 22px !important; }
+    [data-step] { grid-template-columns:minmax(0,1fr) !important; }
+    [data-stages] { grid-template-columns:minmax(0,1fr) !important; }
+  }
+</style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href={dashUrl} style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s,color .2s"
+        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'" onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
+      <a href={profilePageUrl} style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
+        onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#2f5d45'">View my page</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
+          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH sitter
+        </p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Getting <em style="color:#2f5d45;">verified</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">Owners are handing you their keys and their animals. Verify your ID once and the badge shows on your page and in browse &mdash; verified sitters hear back far more often.</p>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          {STEPS.map(step => {
+            const isVerified = step.status === 'verified';
+            const isPending = step.status === 'pending';
+            const pillBg = isVerified ? '#2f5d45' : isPending ? 'rgba(110,84,56,.16)' : 'rgba(44,26,14,.08)';
+            const pillColor = isVerified ? '#fff' : isPending ? '#2f5d45' : '#6b4e35';
+            const pillLabel = isVerified ? 'Verified' : isPending ? 'In review' : 'Not started';
+            const iconPaths: Record<string, string[]> = {
+              id: ['M3 6.5h18v11H3z', 'M7.5 11.6a1.6 1.6 0 1 0 0-.1', 'M6 15c.5-1.2 1.6-1.8 2.8-1.8s2.3.6 2.8 1.8', 'M14.5 10.5h4', 'M14.5 13.5h3'],
+              selfie: ['M4 8.5h3l1.4-2h7.2L17 8.5h3V19H4z', 'M12 16.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z'],
+            };
+            const btnStyle = isVerified
+              ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;cursor:default;'
+              : isPending
+                ? 'background:rgba(110,84,56,.16);color:#2f5d45;border:1.5px solid rgba(110,84,56,.35);cursor:default;'
+                : 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;cursor:pointer;';
+            return (
+              <section data-card="1" style={`background:#fff;border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease;${isVerified ? 'border:1.5px solid #2f5d45;' : 'border:1px solid rgba(110,84,56,.22);'}`}
+                onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+                onmouseout={`this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='${isVerified ? '#2f5d45' : 'rgba(110,84,56,.22)'}'`}>
+                <div data-step="1" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:start">
+                  <span style={`width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;${isVerified ? 'background:#2f5d45;color:#fff;' : 'background:rgba(110,84,56,.12);color:#2f5d45;'}`}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                      {iconPaths[step.icon]?.map((d, i) => <path key={i} d={d} />)}
+                    </svg>
+                  </span>
+                  <div style="min-width:0">
+                    <div style="display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;margin-bottom:8px">
+                      <h2 style="font-family:'Marcellus',serif;font-size:1.28rem;color:#2c1a0e;margin:0;line-height:1.25">{step.title}</h2>
+                      <span style={`font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:${pillBg};color:${pillColor}`}>{pillLabel}</span>
+                    </div>
+                    <p style="font-size:.95rem;color:#6b4e35;line-height:1.75;margin:0 0 8px;max-width:520px">{step.body}</p>
+
+                    <div data-stages="1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px">
+                      {step.stages.map((g, gi) => {
+                        const done = (gi === 0 && (step.status !== 'none')) || (gi === 1 && (step.status === 'verified' || step.status === 'pending')) || (gi === 2 && step.status === 'verified');
+                        return (
+                          <div style={`border-radius:12px;padding:18px 18px 20px;border:1px solid rgba(44,26,14,.1);${done ? 'background:rgba(47,93,69,.06);border-color:rgba(47,93,69,.25);' : 'background:#faf6ee;'}`}>
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+                              <span style={`width:22px;height:22px;border-radius:50%;font-size:.72rem;font-weight:600;display:flex;align-items:center;justify-content:center;${done ? 'background:#2f5d45;color:#fff;' : 'background:rgba(44,26,14,.1);color:#6b4e35;'}`}>{done ? '✓' : g.num}</span>
+                              <span style={`font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;${done ? 'color:#2f5d45;' : 'color:#8a6a4f;'}`}>{done ? 'Done' : 'Pending'}</span>
+                            </div>
+                            <p style="font-size:.88rem;font-weight:700;color:#2c1a0e;margin:0 0 4px">{g.title}</p>
+                            <p style="font-size:.82rem;color:#6b4e35;line-height:1.6;margin:0">{g.body}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px">
+                      <button type="button" disabled={isVerified || isPending}
+                        style={`font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:13px 26px;transition:background .25s ease,transform .15s ease;${btnStyle}`}
+                        onmouseover={isVerified || isPending ? '' : "this.style.background='#3e7a5b';this.style.transform='translateY(-2px)'"}
+                        onmouseout={isVerified || isPending ? '' : "this.style.background='#2f5d45';this.style.transform='translateY(0)'"}>
+                        {step.actionLabel}
+                      </button>
+                      {!isVerified && !isPending && (
+                        <span style="font-size:.84rem;color:#8a6a4f">Takes about 2 minutes</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </section>
+            );
+          })}
+
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.22rem;color:#2c1a0e;margin:0 0 8px">What the badge changes</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
+            <div style="display:flex;flex-direction:column;gap:0">
+              {[
+                { mark: '✓', title: 'You appear higher in search', body: 'Verified sitters rank above unverified ones when an owner searches the same dates and location.' },
+                { mark: '✓', title: 'Owners message you first', body: 'The badge signals that someone has looked at who you actually are. Most owners filter for it.' },
+                { mark: '✓', title: 'Your applications stand out', body: 'On an applications page, verified sitters get a star. Unverified ones don\'t — even with more reviews.' },
+              ].map((u, i, arr) => (
+                <div style={`display:flex;gap:14px;align-items:flex-start;padding:18px 0;${i < arr.length - 1 ? 'border-bottom:1px solid rgba(44,26,14,.07);' : ''}`}>
+                  <span style="width:28px;height:28px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">{u.mark}</span>
+                  <div style="flex:1;min-width:0">
+                    <p style="font-size:.94rem;font-weight:700;color:#2c1a0e;margin:0 0 3px">{u.title}</p>
+                    <p style="font-size:.87rem;color:#6b4e35;line-height:1.65;margin:0">{u.body}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.22rem;color:#2c1a0e;margin:0 0 8px">What we do with your document</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              {[
+                'We check the document is genuine using an automated service, then delete the original within 24 hours.',
+                'Only the verified status and name are stored against your account — not the document itself.',
+                'We never share your documents or verification status with owners beyond the badge.',
+                'You can remove your verified status at any time from your account settings.',
+              ].map(p => (
+                <div style="display:flex;gap:13px;align-items:flex-start">
+                  <span style="width:20px;height:20px;border-radius:50%;background:rgba(110,84,56,.16);color:#2f5d45;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">✓</span>
+                  <p style="font-size:.93rem;color:#6b4e35;line-height:1.7;margin:0">{p}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+
+          <div style="background:#2c1a0e;border-radius:18px;padding:28px 26px 30px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Your trust level</p>
+            <p style="font-family:'Marcellus',serif;font-size:2rem;color:#fff;margin:0 0 6px;line-height:1.1">{trust.name}</p>
+            <p style="font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.65;margin:0 0 20px">{trust.note}</p>
+            <div style="height:7px;border-radius:50px;background:rgba(255,255,255,.14);overflow:hidden;margin-bottom:20px">
+              <div style={`height:100%;width:${trust.pct}%;background:#2f5d45;border-radius:50px;transition:width .6s ease`}></div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12)">
+              <span style={`width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:600;flex-shrink:0;${trustIdx >= 2 ? 'background:#2f5d45;color:#fff;' : 'background:rgba(255,255,255,.12);color:rgba(255,255,255,.4);'}`}>✓</span>
+              <p style="font-size:.87rem;color:rgba(255,255,255,.72);line-height:1.6;margin:0">{trust.emblemLine}</p>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:24px 26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
+            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
+            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">On your card</p>
+            <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:14px;padding:18px 20px">
+              <div style="display:flex;gap:13px;align-items:center;margin-bottom:14px">
+                <div style="position:relative;flex-shrink:0">
+                  {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
+                  ) : (
+                    <div style="width:48px;height:48px;border-radius:50%;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.1rem;color:#2f5d45">{initials}</div>
+                  )}
+                  {idStatus === 'verified' && (
+                    <span style="position:absolute;right:-2px;bottom:-2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.6rem;font-weight:600;display:flex;align-items:center;justify-content:center;border:2px solid #fff">✓</span>
+                  )}
+                </div>
+                <div style="min-width:0">
+                  <p style="font-family:'Marcellus',serif;font-size:1.04rem;color:#2c1a0e;margin:0 0 2px">{profile?.name || 'Your name'}</p>
+                  <p style="font-size:.78rem;color:#6b4e35;margin:0">Sitter</p>
+                </div>
+              </div>
+              <div style="display:flex;gap:7px;flex-wrap:wrap">
+                {idStatus === 'verified' && (
+                  <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:#2f5d45;color:#fff">ID verified</span>
+                )}
+                {selfieStatus === 'verified' && (
+                  <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:rgba(110,84,56,.14);color:#5c3d20">Selfie verified</span>
+                )}
+                {idStatus !== 'verified' && selfieStatus !== 'verified' && (
+                  <p style="font-size:.82rem;color:#8a6a4f;margin:0">No badges yet &mdash; owners see a plain card.</p>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.88rem;color:#6b4e35;line-height:1.7;margin:0">
+              {trustIdx === 0 ? 'Most sits in the UK go to verified sitters. ID takes two minutes and the badge is instant once approved.' : trustIdx < 3 ? 'Add the selfie check to get the full badge — owners trust this most.' : 'Full verification complete. Your badge is live and visible on your profile.'}
+            </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('a[href]').forEach(a => {
+  const href = a.getAttribute('href') || '';
+  if (href.startsWith('#') || href.startsWith('http')) return;
+  const loader = document.querySelector('[data-loader]');
+  if (!loader) return;
+  a.addEventListener('click', e => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    (loader as HTMLElement).style.opacity = '1';
+    (loader as HTMLElement).style.pointerEvents = 'all';
+    setTimeout(() => { (loader as HTMLElement).style.opacity = '0'; (loader as HTMLElement).style.pointerEvents = 'none'; }, 1600);
+  });
+});
+</script>
+</body>
+</html>
