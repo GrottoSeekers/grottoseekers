@@ -111,7 +111,7 @@ function daysBetween(from: string, to: string) {
                     <h2 class="profile-name">{profile.name}</h2>
                     {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
                     <a href={`/${profile.slug}`} target="_blank" class="profile-link">
-                      myah.com/{profile.slug}
+                      myahsits.com/{profile.slug}
                     </a>
                   </div>
                 </div>
@@ -136,7 +136,7 @@ function daysBetween(from: string, to: string) {
                 <h3>Share your profile</h3>
                 <p>Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
                 <div class="share-url">
-                  <input type="text" readonly value={`https://myah.com/${profile.slug}`} id="shareUrl" />
+                  <input type="text" readonly value={`https://myahsits.com/${profile.slug}`} id="shareUrl" />
                   <button onclick="copyUrl()" class="copy-btn">Copy</button>
                 </div>
               </div>

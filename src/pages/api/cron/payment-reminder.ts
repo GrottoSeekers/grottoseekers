@@ -37,7 +37,7 @@ export const GET: APIRoute = async ({ request }) => {
   for (const user of users) {
     try {
       await resend.emails.send({
-        from: 'MYAH <hello@myah.com>',
+        from: 'MYAH <hello@myahsits.com>',
         to: user.email,
         subject: 'Your free month is almost up — continue with MYAH',
         html: `
@@ -56,7 +56,7 @@ export const GET: APIRoute = async ({ request }) => {
         <!-- Header -->
         <tr>
           <td style="background:#2f5d45;padding:32px 40px;text-align:center;">
-            <img src="https://myah.com/images/logo-mark-cream.png" width="64" height="64" alt="MYAH" style="display:block;margin:0 auto 12px;" />
+            <img src="https://myahsits.com/images/logo-mark-cream.png" width="64" height="64" alt="MYAH" style="display:block;margin:0 auto 12px;" />
             <p style="margin:0;font-size:1rem;font-weight:600;color:#e9e0d2;letter-spacing:0.28em;text-transform:uppercase;">
               MYAH
             </p>
@@ -91,7 +91,7 @@ export const GET: APIRoute = async ({ request }) => {
             <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
               <tr>
                 <td style="background:#2f5d45;border-radius:999px;padding:14px 36px;">
-                  <a href="https://myah.com/dashboard" style="color:#ffffff;font-size:0.9rem;font-weight:600;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
+                  <a href="https://myahsits.com/dashboard" style="color:#ffffff;font-size:0.9rem;font-weight:600;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
                     Go to my dashboard
                   </a>
                 </td>
@@ -109,7 +109,7 @@ export const GET: APIRoute = async ({ request }) => {
           <td style="background:#faf6ee;padding:24px 40px;border-top:1px solid rgba(47,93,69,0.15);">
             <p style="margin:0;font-size:0.78rem;color:#8a6a4f;text-align:center;line-height:1.6;">
               © ${new Date().getFullYear()} MYAH &nbsp;·&nbsp;
-              <a href="https://myah.com" style="color:#2f5d45;text-decoration:none;">myah.com</a>
+              <a href="https://myahsits.com" style="color:#2f5d45;text-decoration:none;">myahsits.com</a>
             </p>
           </td>
         </tr>

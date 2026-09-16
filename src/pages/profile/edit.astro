@@ -481,7 +481,7 @@ const savedMsg = saved ? 'Changes saved!' : '';
               <div class="new-link-box">
                 <p class="new-link-label">Your new review link (copy and send to a pet owner):</p>
                 <div class="share-url">
-                  <input type="text" readonly value={`https://myah.com/review/${newToken}`} id="reviewUrl" class="review-link-input" />
+                  <input type="text" readonly value={`https://myahsits.com/review/${newToken}`} id="reviewUrl" class="review-link-input" />
                   <button type="button" onclick="copyReviewUrl()" class="btn-primary btn-sm copy-review-btn">Copy</button>
                 </div>
               </div>
@@ -501,10 +501,10 @@ const savedMsg = saved ? 'Changes saved!' : '';
                 {reviewRequests.filter((r: any) => r.status === 'pending').map((req: any) => (
                   <div class="item-card pending-card">
                     <div class="item-content">
-                      <p class="item-meta pending-url">myah.com/review/{req.token}</p>
+                      <p class="item-meta pending-url">myahsits.com/review/{req.token}</p>
                       <p class="item-desc">Created {new Date(req.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                     </div>
-                    <button type="button" class="btn-copy-small" data-url={`https://myah.com/review/${req.token}`} onclick={`navigator.clipboard.writeText(this.dataset.url);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)`}>Copy</button>
+                    <button type="button" class="btn-copy-small" data-url={`https://myahsits.com/review/${req.token}`} onclick={`navigator.clipboard.writeText(this.dataset.url);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',2000)`}>Copy</button>
                   </div>
                 ))}
               </div>

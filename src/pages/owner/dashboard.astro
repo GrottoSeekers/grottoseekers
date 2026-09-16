@@ -123,7 +123,7 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
                       {profile.location && <p class="profile-location">{profile.location}</p>}
                       {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
                       <a href={`/${profile.slug}`} target="_blank" class="profile-link">
-                        myah.com/{profile.slug}
+                        myahsits.com/{profile.slug}
                       </a>
                     </div>
                   </div>
@@ -179,7 +179,7 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
                 <h3>Share your profile</h3>
                 <p>Send this link so sitters can see your home, pets, and get in touch.</p>
                 <div class="share-url">
-                  <input type="text" readonly value={`https://myah.com/${profile.slug}`} id="shareUrl" />
+                  <input type="text" readonly value={`https://myahsits.com/${profile.slug}`} id="shareUrl" />
                   <button onclick="copyUrl()" class="copy-btn">Copy</button>
                 </div>
               </div>
