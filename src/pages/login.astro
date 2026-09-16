@@ -1,8 +1,5 @@
 ---
-import LoadingOverlay from '../components/LoadingOverlay.astro';
 export const prerender = false;
-
-import '../styles/global.css';
 import { getSession } from '../lib/auth';
 
 const session = await getSession(Astro.request);
@@ -15,136 +12,113 @@ const errorMessages: Record<string, string> = {
 };
 const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please try again.') : null;
 ---
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>Log in — MYAH</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Log in — MYAH</title>
+  <style>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; }
+    a:hover { color:#2c1a0e; }
+    input::placeholder { color:rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform:rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    @media (max-width:700px) {
+      [data-auth-nav] { padding:14px 24px !important; }
+      [data-auth-card] { padding:34px 26px !important; }
+    }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
 
-    <main class="auth-wrap">
-      <div class="auth-card">
-        <p class="section-label">MYAH</p>
-        <h1 class="section-title">Welcome back</h1>
-        <div class="divider"></div>
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
 
-        {errorText && <p class="auth-error">{errorText}</p>}
+  <nav data-auth-nav="1" style="padding:16px 48px;border-bottom:1px solid rgba(110,84,56,.2);background:#faf6ee">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+  </nav>
 
-        <form method="POST" action="/api/auth/login" class="auth-form">
-          <label>
-            Email address
-            <input type="email" name="email" required autocomplete="email" />
-          </label>
-          <label>
-            Password
-            <div class="password-wrap">
-              <input type="password" name="password" required autocomplete="current-password" />
-              <button type="button" class="pw-toggle" aria-label="Show password">Show</button>
-            </div>
-          </label>
-          <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Log in</button>
-        </form>
+  <main style="flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px">
+    <div data-auth-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:20px;padding:48px;width:100%;max-width:440px;box-shadow:0 4px 32px rgba(44,26,14,.08)">
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH</p>
+      <h1 style="font-family:'Marcellus',serif;font-size:2.2rem;color:#2c1a0e;line-height:1.2;margin:0">Welcome back</h1>
+      <div style="width:48px;height:2px;background:#6e5438;margin:20px 0 24px"></div>
+      <p style="font-size:.98rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Log in to manage your page, enquiries and sits.</p>
 
-        <p class="auth-footer">
-          Don't have an account? <a href="/signup">Sign up</a>
-        </p>
-      </div>
-    </main>
+      {errorText && (
+        <div style="background:#fff3f0;border:1px solid rgba(164,68,46,.3);border-radius:10px;padding:14px 16px;margin-bottom:22px;font-size:.9rem;color:#a4442e;line-height:1.5">
+          {errorText}
+        </div>
+      )}
 
-    <style>
-      body { min-height: 100vh; display: flex; flex-direction: column; }
-      nav { position: static; border-bottom: 1px solid rgba(47,93,69,0.2); padding: 18px 48px; }
-      .auth-wrap {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 24px;
-      }
-      .auth-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 48px;
-        width: 100%;
-        max-width: 420px;
-        box-shadow: 0 4px 32px rgba(44,26,14,0.08);
-      }
-      .auth-error {
-        background: #fef2f2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-        border-radius: 6px;
-        padding: 12px 16px;
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-      }
-      .auth-form {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      .auth-form label {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        color: var(--myah-tan);
-        text-transform: uppercase;
-      }
-      .auth-form input {
-        border: 1.5px solid rgba(44,26,14,0.2);
-        border-radius: 6px;
-        padding: 11px 14px;
-        font-size: 1rem;
-        font-family: "Lato", sans-serif;
-        color: var(--myah-ink);
-        background: var(--myah-paper);
-        outline: none;
-        transition: border-color 0.2s;
-      }
-      .auth-form input:focus { border-color: var(--myah-forest); }
-      .auth-footer {
-        margin-top: 24px;
-        text-align: center;
-        font-size: 0.9rem;
-        color: var(--myah-tan);
-      }
-      .auth-footer a { color: var(--myah-forest); font-weight: 700; text-decoration: none; }
-      .auth-footer a:hover { text-decoration: underline; }
-      .password-wrap { position: relative; }
-      .password-wrap input { width: 100%; padding-right: 60px; }
-      .pw-toggle {
-        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-        background: none; border: none; color: var(--myah-forest); font-size: 0.78rem;
-        font-weight: 700; letter-spacing: 0.04em; cursor: pointer; padding: 4px 8px;
-        text-transform: uppercase; font-family: "Lato", sans-serif;
-      }
-      .pw-toggle:hover { color: var(--myah-ink); }
-    </style>
-    <script>
-      document.querySelectorAll('.pw-toggle').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const input = btn.previousElementSibling as HTMLInputElement;
-          const showing = input.type === 'text';
-          input.type = showing ? 'password' : 'text';
-          btn.textContent = showing ? 'Show' : 'Hide';
-        });
-      });
-    </script>
-    <LoadingOverlay />
+      <form method="POST" action="/api/auth/login" style="display:flex;flex-direction:column;gap:22px">
+        <label style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;color:#5c3d20;text-transform:uppercase">
+          Email address
+          <input type="email" name="email" required autocomplete="email" placeholder="you@example.com" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:13px 15px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+        </label>
+
+        <label style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;color:#5c3d20;text-transform:uppercase">
+          Password
+          <span style="position:relative;display:block">
+            <input type="password" id="pw-input" name="password" required autocomplete="current-password" placeholder="Your password" style="width:100%;padding:13px 74px 13px 15px;border:1.5px solid rgba(44,26,14,.2);border-radius:10px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <button type="button" id="pw-toggle" aria-label="Show password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#2f5d45;font-size:.74rem;font-weight:600;letter-spacing:.08em;cursor:pointer;padding:4px 8px;text-transform:uppercase;font-family:'Montserrat',sans-serif;transition:color .2s">Show</button>
+          </span>
+        </label>
+
+        <button type="submit" id="login-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:4px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Log in</button>
+      </form>
+
+      <p style="margin:26px 0 0;text-align:center;font-size:.92rem;color:#6b4e35">Don't have an account? <a href="/signup" style="color:#2f5d45;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:1px">Sign up</a></p>
+    </div>
+  </main>
+</div>
+
+<style>
+  #login-btn:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
+  #login-btn:active { transform:translateY(0) scale(.98); }
+  input:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; }
+</style>
+
+<script>
+  const pwInput = document.getElementById('pw-input') as HTMLInputElement | null;
+  const pwToggle = document.getElementById('pw-toggle');
+  pwToggle?.addEventListener('click', () => {
+    if (!pwInput) return;
+    const showing = pwInput.type === 'text';
+    pwInput.type = showing ? 'password' : 'text';
+    pwToggle.textContent = showing ? 'Show' : 'Hide';
+  });
+
+  const loader = document.querySelector('[data-loader]') as HTMLElement | null;
+  document.querySelectorAll('form').forEach(f => {
+    f.addEventListener('submit', () => {
+      if (loader) { loader.style.opacity = '1'; loader.style.pointerEvents = 'all'; }
+    });
+  });
+  window.addEventListener('pageshow', e => {
+    if (e.persisted && loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
+  });
+</script>
 </body>
 </html>

@@ -1,8 +1,5 @@
 ---
-import LoadingOverlay from '../components/LoadingOverlay.astro';
 export const prerender = false;
-
-import '../styles/global.css';
 import { getSession } from '../lib/auth';
 
 const session = await getSession(Astro.request);
@@ -20,186 +17,160 @@ const errorMessages: Record<string, string> = {
 };
 const errorText = error ? (errorMessages[error] ?? 'Something went wrong. Please try again.') : null;
 ---
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>Sign up — MYAH</title>
-  </head>
-  <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Sign up — MYAH</title>
+  <style>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; }
+    a:hover { color:#2c1a0e; }
+    input::placeholder { color:rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform:rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    @media (max-width:700px) {
+      [data-auth-nav] { padding:14px 24px !important; }
+      [data-auth-card] { padding:34px 26px !important; }
+    }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
 
-    <main class="auth-wrap">
-      <div class="auth-card">
-        <p class="section-label">MYAH</p>
-        <h1 class="section-title">Create your account</h1>
-        <div class="divider"></div>
-        <p class="auth-intro">Join MYAH — whether you're offering pet sitting services or looking for a trusted sitter.</p>
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
 
-        {errorText && <p class="auth-error">{errorText}</p>}
+  <nav data-auth-nav="1" style="padding:16px 48px;border-bottom:1px solid rgba(110,84,56,.2);background:#faf6ee">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+        <span style="color:#2f5d45;line-height:1">MYAH</span>
+        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+      </span>
+    </a>
+  </nav>
 
-        <form method="POST" action="/api/auth/signup" class="auth-form">
-          <div class="role-picker">
-            <p class="role-label">I am a...</p>
-            <div class="role-options">
-              <label class="role-option">
-                <input type="radio" name="role" value="sitter" checked />
-                <div class="role-card">
-                  <span class="role-icon">🐾</span>
-                  <span class="role-name">Pet Sitter</span>
-                  <span class="role-desc">I look after pets & homes</span>
-                </div>
-              </label>
-              <label class="role-option">
-                <input type="radio" name="role" value="owner" />
-                <div class="role-card">
-                  <span class="role-icon">🏠</span>
-                  <span class="role-name">Pet Owner</span>
-                  <span class="role-desc">I need a trusted sitter</span>
-                </div>
-              </label>
-            </div>
+  <main style="flex:1;display:flex;align-items:center;justify-content:center;padding:60px 24px">
+    <div data-auth-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:20px;padding:48px;width:100%;max-width:460px;box-shadow:0 4px 32px rgba(44,26,14,.08)">
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH</p>
+      <h1 style="font-family:'Marcellus',serif;font-size:2.2rem;color:#2c1a0e;line-height:1.2;margin:0">Create your account</h1>
+      <div style="width:48px;height:2px;background:#6e5438;margin:20px 0 24px"></div>
+      <p style="font-size:.98rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Join MYAH — whether you're offering house &amp; pet sitting services or looking for a trusted sitter.</p>
+
+      {errorText && (
+        <div style="background:#fff3f0;border:1px solid rgba(164,68,46,.3);border-radius:10px;padding:14px 16px;margin-bottom:22px;font-size:.9rem;color:#a4442e;line-height:1.5">
+          {errorText}
+        </div>
+      )}
+
+      <form method="POST" action="/api/auth/signup" style="display:flex;flex-direction:column;gap:22px">
+        <div>
+          <p style="font-size:.78rem;font-weight:600;letter-spacing:.1em;color:#5c3d20;text-transform:uppercase;margin:0 0 12px">I am a…</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <label id="card-sitter" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px 12px;border:2px solid #2f5d45;background:rgba(110,84,56,.07);border-radius:14px;text-align:center;cursor:pointer;transition:border-color .2s, background .2s">
+              <input type="radio" name="role" value="sitter" checked style="display:none" />
+              <span style="width:42px;height:42px;border-radius:12px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;margin-bottom:2px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+              <span style="font-family:'Marcellus',serif;font-size:1.05rem;color:#2c1a0e">Pet Sitter</span>
+              <span style="font-size:.76rem;color:#6b4e35;line-height:1.4">I look after pets &amp; homes</span>
+            </label>
+            <label id="card-owner" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:22px 12px;border:2px solid rgba(44,26,14,.12);background:#fff;border-radius:14px;text-align:center;cursor:pointer;transition:border-color .2s, background .2s">
+              <input type="radio" name="role" value="owner" style="display:none" />
+              <span style="width:42px;height:42px;border-radius:12px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;margin-bottom:2px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
+              <span style="font-family:'Marcellus',serif;font-size:1.05rem;color:#2c1a0e">Pet Owner</span>
+              <span style="font-size:.76rem;color:#6b4e35;line-height:1.4">I need a trusted sitter</span>
+            </label>
           </div>
-          <label>
-            Email address
-            <input type="email" name="email" required autocomplete="email" />
-          </label>
-          <label>
-            Password
-            <div class="password-wrap">
-              <input type="password" name="password" required autocomplete="new-password" minlength="8" />
-              <button type="button" class="pw-toggle" aria-label="Show password">Show</button>
-            </div>
-          </label>
-          <label>
-            Confirm password
-            <div class="password-wrap">
-              <input type="password" name="confirm" required autocomplete="new-password" minlength="8" />
-              <button type="button" class="pw-toggle" aria-label="Show password">Show</button>
-            </div>
-          </label>
-          <button type="submit" class="btn-primary" style="width:100%;margin-top:8px;">Create account</button>
-        </form>
+        </div>
 
-        <p class="auth-footer">
-          Already have an account? <a href="/login">Log in</a>
-        </p>
-      </div>
-    </main>
+        <label style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;color:#5c3d20;text-transform:uppercase">
+          Email address
+          <input type="email" name="email" required autocomplete="email" placeholder="you@example.com" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:13px 15px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+        </label>
 
-    <style>
-      body { min-height: 100vh; display: flex; flex-direction: column; }
-      nav { position: static; border-bottom: 1px solid rgba(47,93,69,0.2); padding: 18px 48px; }
-      .auth-wrap {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 60px 24px;
-      }
-      .auth-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 48px;
-        width: 100%;
-        max-width: 420px;
-        box-shadow: 0 4px 32px rgba(44,26,14,0.08);
-      }
-      .auth-intro {
-        font-size: 0.95rem;
-        color: var(--myah-tan);
-        line-height: 1.6;
-        margin-bottom: 24px;
-      }
-      .auth-error {
-        background: #fef2f2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
-        border-radius: 6px;
-        padding: 12px 16px;
-        font-size: 0.9rem;
-        margin-bottom: 20px;
-      }
-      .auth-form {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      .auth-form label {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        font-size: 0.85rem;
-        font-weight: 700;
-        letter-spacing: 0.06em;
-        color: var(--myah-tan);
-        text-transform: uppercase;
-      }
-      .auth-form input {
-        border: 1.5px solid rgba(44,26,14,0.2);
-        border-radius: 6px;
-        padding: 11px 14px;
-        font-size: 1rem;
-        font-family: "Lato", sans-serif;
-        color: var(--myah-ink);
-        background: var(--myah-paper);
-        outline: none;
-        transition: border-color 0.2s;
-      }
-      .auth-form input:focus { border-color: var(--myah-forest); }
-      .auth-footer {
-        margin-top: 24px;
-        text-align: center;
-        font-size: 0.9rem;
-        color: var(--myah-tan);
-      }
-      .auth-footer a { color: var(--myah-forest); font-weight: 700; text-decoration: none; }
-      .auth-footer a:hover { text-decoration: underline; }
+        <label style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;color:#5c3d20;text-transform:uppercase">
+          Password
+          <span style="position:relative;display:block">
+            <input type="password" id="pw1" name="password" required autocomplete="new-password" minlength="8" placeholder="At least 8 characters" style="width:100%;padding:13px 74px 13px 15px;border:1.5px solid rgba(44,26,14,.2);border-radius:10px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <button type="button" id="pw1-toggle" aria-label="Show password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#2f5d45;font-size:.74rem;font-weight:600;letter-spacing:.08em;cursor:pointer;padding:4px 8px;text-transform:uppercase;font-family:'Montserrat',sans-serif;transition:color .2s">Show</button>
+          </span>
+        </label>
 
-      .role-picker { margin-bottom: 4px; }
-      .role-label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--myah-tan); text-transform: uppercase; margin-bottom: 10px; }
-      .role-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-      .role-option { cursor: pointer; }
-      .role-option input { display: none; }
-      .role-card {
-        display: flex; flex-direction: column; align-items: center; gap: 4px;
-        padding: 20px 12px; border: 2px solid rgba(44,26,14,0.12); border-radius: 10px;
-        text-align: center; transition: border-color 0.2s, background 0.2s;
-      }
-      .role-option input:checked + .role-card { border-color: var(--myah-forest); background: rgba(47,93,69,0.06); }
-      .role-icon { font-size: 1.6rem; }
-      .role-name { font-family: "Marcellus", serif; font-size: 1rem; font-weight: 700; color: var(--myah-ink); }
-      .role-desc { font-size: 0.75rem; color: var(--myah-tan); }
-      .password-wrap { position: relative; }
-      .password-wrap input { width: 100%; padding-right: 60px; }
-      .pw-toggle {
-        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-        background: none; border: none; color: var(--myah-forest); font-size: 0.78rem;
-        font-weight: 700; letter-spacing: 0.04em; cursor: pointer; padding: 4px 8px;
-        text-transform: uppercase; font-family: "Lato", sans-serif;
-      }
-      .pw-toggle:hover { color: var(--myah-ink); }
-    </style>
-    <script>
-      document.querySelectorAll('.pw-toggle').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const input = btn.previousElementSibling as HTMLInputElement;
-          const showing = input.type === 'text';
-          input.type = showing ? 'password' : 'text';
-          btn.textContent = showing ? 'Show' : 'Hide';
-        });
-      });
-    </script>
-    <LoadingOverlay />
+        <label style="display:flex;flex-direction:column;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;color:#5c3d20;text-transform:uppercase">
+          Confirm password
+          <span style="position:relative;display:block">
+            <input type="password" id="pw2" name="confirm" required autocomplete="new-password" minlength="8" placeholder="Repeat your password" style="width:100%;padding:13px 74px 13px 15px;border:1.5px solid rgba(44,26,14,.2);border-radius:10px;font-size:1rem;font-family:'Montserrat',sans-serif;font-weight:400;letter-spacing:0;text-transform:none;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <button type="button" id="pw2-toggle" aria-label="Show password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#2f5d45;font-size:.74rem;font-weight:600;letter-spacing:.08em;cursor:pointer;padding:4px 8px;text-transform:uppercase;font-family:'Montserrat',sans-serif;transition:color .2s">Show</button>
+          </span>
+        </label>
+
+        <button type="submit" id="signup-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:4px;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Create account</button>
+      </form>
+
+      <p style="margin:26px 0 0;text-align:center;font-size:.92rem;color:#6b4e35">Already have an account? <a href="/login" style="color:#2f5d45;font-weight:700;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:1px">Log in</a></p>
+    </div>
+  </main>
+</div>
+
+<style>
+  #signup-btn:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
+  #signup-btn:active { transform:translateY(0) scale(.98); }
+  input:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; }
+</style>
+
+<script>
+  function setupToggle(inputId: string, btnId: string) {
+    const input = document.getElementById(inputId) as HTMLInputElement | null;
+    const btn = document.getElementById(btnId);
+    btn?.addEventListener('click', () => {
+      if (!input) return;
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      if (btn) btn.textContent = showing ? 'Show' : 'Hide';
+    });
+  }
+  setupToggle('pw1', 'pw1-toggle');
+  setupToggle('pw2', 'pw2-toggle');
+
+  // Role card selection
+  const cardSitter = document.getElementById('card-sitter');
+  const cardOwner = document.getElementById('card-owner');
+  const radioSitter = cardSitter?.querySelector('input[type=radio]') as HTMLInputElement | null;
+  const radioOwner = cardOwner?.querySelector('input[type=radio]') as HTMLInputElement | null;
+
+  function updateCards() {
+    if (!cardSitter || !cardOwner) return;
+    const sitterSelected = radioSitter?.checked;
+    cardSitter.style.border = sitterSelected ? '2px solid #2f5d45' : '2px solid rgba(44,26,14,.12)';
+    cardSitter.style.background = sitterSelected ? 'rgba(110,84,56,.07)' : '#fff';
+    cardOwner.style.border = sitterSelected ? '2px solid rgba(44,26,14,.12)' : '2px solid #2f5d45';
+    cardOwner.style.background = sitterSelected ? '#fff' : 'rgba(110,84,56,.07)';
+  }
+  cardSitter?.addEventListener('click', () => { if (radioSitter) radioSitter.checked = true; updateCards(); });
+  cardOwner?.addEventListener('click', () => { if (radioOwner) radioOwner.checked = true; updateCards(); });
+
+  const loader = document.querySelector('[data-loader]') as HTMLElement | null;
+  document.querySelectorAll('form').forEach(f => {
+    f.addEventListener('submit', () => {
+      if (loader) { loader.style.opacity = '1'; loader.style.pointerEvents = 'all'; }
+    });
+  });
+  window.addEventListener('pageshow', e => {
+    if (e.persisted && loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
+  });
+</script>
 </body>
 </html>
