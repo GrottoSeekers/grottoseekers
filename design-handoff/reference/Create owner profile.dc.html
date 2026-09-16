@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 900px) {
+    [data-topnav] { padding: 14px 24px !important; }
+    [data-pad] { padding: 36px 24px 70px !important; }
+    [data-form-grid] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-aside] { position: static !important; }
+    [data-card] { padding: 26px !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;transition:transform .25s ease;letter-spacing:.28em" style-hover="transform:translateY(-1px)">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <a href="Log in.dc.html" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s ease" style-hover="color:#2c1a0e">Log out</a>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Create owner profile" style="flex:1;padding:52px 48px 80px">
+    <div style="max-width:1100px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:32px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH owner</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Create your <em style="color:#2f5d45;">profile</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:580px;margin:0">Set up your profile — you'll add your home details, pets and sit listings next.</p>
+      </div>
+
+      <div data-form-grid="1" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <form data-create="1" data-go="Owner dashboard.dc.html" style="display:flex;flex-direction:column;gap:24px">
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Your details</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 28px"></div>
+
+            <div style="margin-bottom:26px">
+              <label for="name" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Your name <span style="color:#2f5d45">*</span></label>
+              <input data-name="1" type="text" id="name" placeholder="e.g. Sarah &amp; James" required="required" autocomplete="name" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .25s ease, box-shadow .25s ease" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+              <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">How you'll appear on your profile.</p>
+            </div>
+
+            <div style="margin-bottom:26px">
+              <label for="slug" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Your profile URL <span style="color:#2f5d45">*</span></label>
+              <div style="display:flex;align-items:stretch;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;overflow:hidden;background:#faf6ee">
+                <span style="display:flex;align-items:center;padding:0 14px;font-size:.88rem;color:#6b4e35;background:rgba(44,26,14,.04);border-right:1px solid rgba(44,26,14,.1);white-space:nowrap;flex-shrink:0">myahsits.com/</span>
+                <input data-slug="1" type="text" id="slug" placeholder="yourname" required="required" style="flex:1;min-width:0;border:none;background:transparent;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;outline:none" />
+              </div>
+              <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">Lowercase letters, numbers and hyphens only.</p>
+            </div>
+
+            <div style="margin-bottom:26px">
+              <label for="location" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Location <span style="color:#2f5d45">*</span></label>
+              <input data-location="1" type="text" id="location" placeholder="e.g. Sydney, NSW" required="required" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .25s ease, box-shadow .25s ease" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+              <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">City or area — helps sitters find you.</p>
+            </div>
+
+            <div style="margin-bottom:26px">
+              <label style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Profile photo</label>
+              <div style="position:relative">
+                <input data-file="1" type="file" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer;z-index:2;width:100%;height:100%" />
+                <div data-file-label="1" style="display:flex;align-items:center;gap:14px;border:2px dashed rgba(110,84,56,.45);border-radius:12px;padding:22px 18px;background:#faf6ee;cursor:pointer;transition:border-color .25s ease, background .25s ease" style-hover="border-color:#2f5d45;background:rgba(110,84,56,.06)">
+                  <span style="width:42px;height:42px;border-radius:12px;background:#fff;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg></span>
+                  <span data-file-text="1" style="font-size:.92rem;color:#6b4e35">Choose a photo</span>
+                </div>
+              </div>
+              <p style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6">JPG or PNG, max 5 MB.</p>
+            </div>
+
+            <div>
+              <label for="bio" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">About your home</label>
+              <textarea data-bio="1" id="bio" rows="5" placeholder="Tell sitters about your home, neighbourhood, and what makes it a great place to stay." style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .25s ease, box-shadow .25s ease" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)"></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
+            <button type="submit" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease, box-shadow .25s ease" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Create profile</button>
+            <a href="Owner dashboard.dc.html" style="font-size:.8rem;color:#6b4e35;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;font-weight:600;transition:color .2s ease" style-hover="color:#2c1a0e">Cancel</a>
+          </div>
+        </form>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="padding:20px 24px;border-bottom:1px solid rgba(110,84,56,.2)">
+              <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">Live preview</p>
+            </div>
+            <div style="padding:28px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;background:#faf6ee">
+              <div style="{{ avatarStyle }}">{{ initials }}</div>
+              <p style="font-family:'Marcellus',serif;font-size:1.35rem;color:#2c1a0e;margin:0;line-height:1.2">{{ previewName }}</p>
+              <p style="font-size:.85rem;color:#2f5d45;font-weight:600;margin:0;display:flex;align-items:center;gap:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>{{ previewLocation }}</p>
+              <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0">{{ previewBio }}</p>
+              <span style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;color:#2f5d45;font-weight:600;background:#fff;border:1px solid rgba(110,84,56,.3);border-radius:50px;padding:8px 16px;margin-top:4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">myahsits.com/{{ previewSlug }}</span>
+              <span style="display:inline-block;margin-top:8px;background:#2f5d45;color:#fff;font-size:.74rem;font-weight:600;padding:11px 22px;border-radius:50px;letter-spacing:.1em;text-transform:uppercase">Get in touch</span>
+            </div>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px;transition:border-color .3s ease" style-hover="border-color:rgba(110,84,56,.5)">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">What happens next</p>
+            <div style="display:flex;flex-direction:column;gap:12px;font-size:.88rem;color:#6b4e35;line-height:1.6">
+              <span style="display:flex;gap:11px"><span style="width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</span>Add your home photos and amenities</span>
+              <span style="display:flex;gap:11px"><span style="width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</span>Add your pets and their routines</span>
+              <span style="display:flex;gap:11px"><span style="width:20px;height:20px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</span>Post a sit — sitters apply, you pick</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:880}}">
+class Component extends DCLogic {
+  state = { name: '', slug: '', location: '', bio: '', pic: '' };
+
+  renderVals() {
+    const { name, slug, location, bio, pic } = this.state;
+    const initials = name.trim()
+      ? name.trim().split(/[\s&]+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('')
+      : '?';
+    const shortBio = bio.trim()
+      ? (bio.trim().length > 110 ? bio.trim().slice(0, 110) + '…' : bio.trim())
+      : 'A line about your home appears here';
+    return {
+      previewName: name.trim() || 'Your name',
+      previewLocation: location.trim() || 'Your location',
+      previewSlug: slug.trim() || 'yourname',
+      previewBio: shortBio,
+      initials: pic ? '' : initials,
+      avatarStyle: 'width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:\'Marcellus\',serif;font-size:1.5rem;flex-shrink:0;' +
+        (pic
+          ? 'background-image:url(' + pic + ');background-size:cover;background-position:center;border:2px solid rgba(110,84,56,.45);'
+          : 'background:rgba(110,84,56,.14);border:2px dashed rgba(110,84,56,.5);color:#2f5d45;')
+    };
+  }
+
+  componentDidMount() {
+    document.querySelectorAll('form[data-go]').forEach(f => f.addEventListener('submit', e => {
+      e.preventDefault(); e.stopImmediatePropagation();
+      const target = f.getAttribute('data-go');
+      const l = document.querySelector('[data-loader]');
+      if (l) { l.style.opacity = '1'; l.style.pointerEvents = 'all'; }
+      setTimeout(() => { window.location.href = target; }, l ? 700 : 150);
+    }, true));
+    const q = s => document.querySelector(s);
+
+    const loader = q('[data-loader]');
+    const show = () => {
+      if (!loader) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(this.hideT);
+      this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    };
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http')) return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+    });
+
+    const nameInput = q('[data-name]');
+    const slugInput = q('[data-slug]');
+    let slugEdited = false;
+
+    slugInput && slugInput.addEventListener('input', () => {
+      slugEdited = true;
+      this.setState({ slug: slugInput.value });
+    });
+
+    nameInput && nameInput.addEventListener('input', () => {
+      const next = { name: nameInput.value };
+      if (!slugEdited) {
+        const auto = nameInput.value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        slugInput.value = auto;
+        next.slug = auto;
+      }
+      this.setState(next);
+    });
+
+    const bind = (sel, key) => {
+      const el = q(sel);
+      el && el.addEventListener('input', () => this.setState({ [key]: el.value }));
+    };
+    bind('[data-location]', 'location');
+    bind('[data-bio]', 'bio');
+
+    const file = q('[data-file]');
+    const fileLabel = q('[data-file-label]');
+    const fileText = q('[data-file-text]');
+    file && file.addEventListener('change', () => {
+      const f = file.files && file.files[0];
+      if (!f) return;
+      fileText.textContent = f.name;
+      fileText.style.color = '#2c1a0e';
+      fileText.style.fontWeight = '700';
+      fileLabel.style.borderStyle = 'solid';
+      fileLabel.style.borderColor = '#2f5d45';
+      fileLabel.style.background = 'rgba(110,84,56,.06)';
+      this.setState({ pic: URL.createObjectURL(f) });
+    });
+
+    const form = q('[data-create]');
+    form && form.addEventListener('submit', e => { e.preventDefault(); show(); });
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); }
+}
+</script>
+</body>
+</html>

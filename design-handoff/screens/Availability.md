@@ -1,0 +1,134 @@
+# Availability — element-by-element spec
+
+Generated from the approved design file `reference/Availability.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+- `/images/couple-bw-1.jpg`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `min-height:100vh; display:flex; flex-direction:column; background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<nav>` **Top nav** `[data-topnav]`
+      - style: `display:flex; justify-content:space-between; align-items:center; padding:16px 48px; background:#fff; border-bottom:1px solid rgba(110,84,56,.2)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.35rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:44px; width:44px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<div>`
+        - style: `display:flex; align-items:center; gap:22px`
+        - `<a>` → `Dashboard.dc.html`
+          - style: `display:inline-flex; align-items:center; gap:9px; font-size:.78rem; color:#6b4e35; font-weight:600; letter-spacing:.1em; text-transform:uppercase; transition:gap .2s, color .2s`
+          - :hover `gap:13px;color:#2f5d45`
+          - text: "← Dashboard"
+        - `<a>` → `Sitter profile.dc.html`
+          - style: `font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#2f5d45; transition:color .2s`
+          - :hover `color:#2c1a0e`
+          - text: "View my page"
+    - `<main>` **Availability** `[data-pad]`
+      - style: `flex:1; padding:52px 48px 130px`
+      - `<div>`
+        - style: `max-width:1180px; margin:0 auto`
+        - `<div>`
+          - style: `border-bottom:1px solid rgba(110,84,56,.3)`
+          - `<p>`
+            - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 16px; display:flex; align-items:center; gap:12px`
+            - text: "MYAH sitter"
+            - `<span>`
+              - style: `width:26px; height:1px; background:#6e5438; display:block`
+          - `<h1>`
+            - style: `font-family:'Marcellus',serif; font-size:2.5rem; color:#2c1a0e; line-height:1.15; margin:0 0 18px`
+            - text: "When you’re"
+            - `<em>`
+              - style: `color:#2f5d45`
+              - text: "free"
+          - `<p>`
+            - style: `color:#6b4e35; font-size:1rem; line-height:1.75; max-width:620px; margin:0`
+            - text: "This is your availability, and owners can see it. Mark the days you could sit and your profile shows them at a glance — you’ll turn up in their date searches, a…"
+        - `<div>` `[data-two-col]`
+          - style: `display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:28px; align-items:start`
+          - `<div>`
+            - style: `display:flex; flex-direction:column; gap:24px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px 34px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>`
+                - style: `display:flex; align-items:center; justify-content:space-between; gap:18px`
+              - `<div>` `[data-months]`
+                - style: `display:grid; grid-template-columns:1fr 1fr; gap:30px`
+              - `<div>`
+                - style: `display:flex; gap:20px; border-top:1px solid rgba(44,26,14,.08)`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:32px 34px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<h2>`
+                - style: `font-family:'Marcellus',serif; font-size:1.25rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "The sits you’ll take"
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 12px`
+              - `<p>`
+                - style: `font-size:.9rem; color:#6b4e35; line-height:1.7; margin:0 0 24px; max-width:480px`
+                - text: "These narrow what owners can ask you for, and what we put in your alerts."
+              - `<div>`
+              - `<div>`
+              - `<div>`
+          - `<aside>` `[data-aside]`
+            - style: `position:sticky; top:28px; display:flex; flex-direction:column; gap:20px`
+            - `<div>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:26px 26px 28px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 18px`
+                - text: "Your next free stretches"
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:12px`
+              - `<p>`
+                - text: "Nothing marked yet — drag across the calendar to block out when you’re free."
+            - `<div>`
+              - style: `background:#faf6ee; border:1px solid rgba(110,84,56,.28); border-radius:18px; padding:24px 26px`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 14px`
+                - text: "What owners see"
+              - `<div>`
+                - style: `background:#fff; border:1px solid rgba(110,84,56,.25); border-radius:14px; padding:18px 20px`
+              - `<p>`
+                - style: `font-size:.84rem; color:#6b4e35; line-height:1.65; margin:14px 0 0`
+                - text: "{{ matchLine }}"
+            - `<div>`
+              - style: `background:#fff; border:1px solid rgba(44,26,14,.1); border-radius:18px; padding:22px 24px`
+              - `<p>`
+                - style: `font-size:.86rem; color:#6b4e35; line-height:1.7; margin:0 0 12px`
+                - text: "Sits matching these dates"
+              - `<a>` → `Browse sits.dc.html`
+                - style: `display:inline-flex; align-items:center; gap:8px; font-size:.76rem; font-weight:600; letter-spacing:.11em; text-transform:uppercase; color:#2f5d45; border-bottom:1px solid rgba(110,84,56,.4); transition:gap .2s, color .2s`
+                - :hover `gap:12px;color:#2c1a0e`
+                - text: "{{ matchCount }} →"
+    - `<div>`
+      - `<div>`
+        - style: `max-width:1180px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px`
+        - `<p>`
+          - style: `font-size:.88rem; color:#6b4e35; margin:0; line-height:1.5`
+          - text: "{{ saveBarText }}"
+        - `<button>`
+          - text: "{{ saveLabel }}"

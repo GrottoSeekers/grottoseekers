@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder { color: rgba(44,26,14,.35); }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 1000px) {
+    [data-topnav] { padding: 14px 24px !important; }
+    [data-pad] { padding: 34px 20px 80px !important; }
+    [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-aside] { position: static !important; }
+    [data-cards] { grid-template-columns: minmax(0,1fr) !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="Owner dashboard.dc.html" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s" style-hover="gap:13px;color:#2f5d45">&larr; Dashboard</a>
+      <a href="Applications.dc.html" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s" style-hover="color:#2c1a0e">Applications</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Find a sitter" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH owner</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Find a <em style="color:#2f5d45;">sitter</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">Rather than waiting for applications, go and look. Everyone here has marked themselves free for your dates &mdash; invite the ones you like and they&rsquo;ll get a message with your sit attached.</p>
+      </div>
+
+      <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:22px 24px;margin-bottom:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:18px">
+          <input data-search="1" type="text" placeholder="Search by name, place or experience" style="flex:1;min-width:220px;border:1.5px solid rgba(44,26,14,.18);border-radius:50px;padding:13px 20px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" style-focus="border-color:#2f5d45;box-shadow:0 0 0 3px rgba(110,84,56,.15)" />
+          <div style="display:flex;align-items:center;gap:10px;background:#faf6ee;border:1.5px solid rgba(110,84,56,.3);border-radius:50px;padding:11px 20px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+            <span style="font-size:.86rem;font-weight:600;color:#5c3d20">4 &ndash; 18 Oct 2026</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:9px;flex-wrap:wrap">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="5">
+            <button type="button" onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+            <p style="font-size:.88rem;color:#6b4e35;margin:0">{{ resultLine }}</p>
+            <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Sort</span>
+              <sc-for list="{{ sorts }}" as="s" hint-placeholder-count="3">
+                <button type="button" onClick="{{ s.onClick }}" style="{{ s.style }}">{{ s.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+
+          <div data-cards="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+            <sc-for list="{{ sitters }}" as="s" hint-placeholder-count="4">
+              <article style="{{ s.wrapStyle }}">
+                <div style="padding:24px 24px 0;display:flex;gap:16px;align-items:flex-start">
+                  <div style="position:relative;flex-shrink:0">
+                    <img src="{{ s.photo }}" alt="" style="{{ s.photoStyle }}" />
+                    <span style="{{ s.initialsStyle }}">{{ s.initials }}</span>
+                    <span style="{{ s.tickStyle }}">✓</span>
+                  </div>
+                  <div style="flex:1;min-width:0">
+                    <h2 style="font-family:'Marcellus',serif;font-size:1.16rem;color:#2c1a0e;margin:0 0 5px;line-height:1.3">{{ s.name }}</h2>
+                    <p style="font-size:.81rem;color:#2f5d45;font-weight:700;margin:0 0 7px">{{ s.meta }}</p>
+                    <p style="font-size:.84rem;color:#6b4e35;margin:0">{{ s.stars }} &nbsp;{{ s.reviews }}</p>
+                  </div>
+                </div>
+                <div style="padding:18px 24px 24px;display:flex;flex-direction:column;gap:14px;flex:1">
+                  <p style="font-size:.92rem;color:#6b4e35;line-height:1.7;margin:0">{{ s.blurb }}</p>
+                  <div style="display:flex;gap:7px;flex-wrap:wrap">
+                    <sc-for list="{{ s.tags }}" as="t" hint-placeholder-count="3">
+                      <span style="font-size:.74rem;font-weight:600;color:#6b4e35;background:#faf6ee;border:1px solid rgba(110,84,56,.28);padding:5px 13px;border-radius:50px">{{ t }}</span>
+                    </sc-for>
+                  </div>
+                  <div style="{{ s.fitStyle }}">{{ s.fit }}</div>
+                  <div style="display:flex;gap:10px;margin-top:auto">
+                    <button type="button" onClick="{{ s.onInvite }}" style="{{ s.inviteStyle }}">{{ s.inviteLabel }}</button>
+                    <a href="Sitter profile.dc.html" style="font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;text-decoration:none;border:1.5px solid rgba(44,26,14,.15);border-radius:50px;padding:11px 18px;transition:border-color .2s, color .2s" style-hover="border-color:#2f5d45;color:#2f5d45">Profile</a>
+                  </div>
+                </div>
+              </article>
+            </sc-for>
+          </div>
+
+          <div style="{{ emptyStyle }}">
+            <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">No one matches all that</p>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 22px;max-width:420px">Loosen a filter &mdash; distance is usually the one worth dropping first.</p>
+            <button type="button" onClick="{{ onClearFilters }}" style="font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:12px 28px;cursor:pointer;transition:background .25s ease, border-color .25s ease" style-hover="background:rgba(110,84,56,.1);border-color:#2f5d45">Clear filters</button>
+          </div>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Inviting them to</p>
+            <div style="display:flex;gap:14px;align-items:flex-start;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:14px;padding:16px 18px">
+              <img src="public/images/solomon-1.jpg" alt="" style="width:46px;height:46px;border-radius:10px;object-fit:cover;flex-shrink:0" />
+              <div style="min-width:0">
+                <p style="font-family:'Marcellus',serif;font-size:1.02rem;color:#2c1a0e;margin:0 0 4px;line-height:1.3">Cosy cottage with two spaniels</p>
+                <p style="font-size:.8rem;color:#6b4e35;margin:0">4 &ndash; 18 Oct 2026 &middot; Woolley, near Bath</p>
+              </div>
+            </div>
+            <p style="font-size:.85rem;color:#6b4e35;line-height:1.7;margin:16px 0 0">An invite sends them the listing and opens a conversation. They can still say no.</p>
+          </div>
+
+          <div style="{{ invitedPanelStyle }}">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Invited</p>
+            <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:18px">
+              <sc-for list="{{ invited }}" as="i" hint-placeholder-count="2">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <img src="{{ i.photo }}" alt="" style="{{ i.photoStyle }}" />
+                  <span style="{{ i.initialsStyle }}">{{ i.initials }}</span>
+                  <div style="flex:1;min-width:0">
+                    <p style="font-size:.9rem;font-weight:600;color:#2c1a0e;margin:0">{{ i.name }}</p>
+                    <p style="font-size:.78rem;color:#6b4e35;margin:0">Invited just now</p>
+                  </div>
+                  <button type="button" onClick="{{ i.onUndo }}" style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6b4e35;background:none;border:none;cursor:pointer;padding:4px;transition:color .2s" style-hover="color:#b91c1c">Undo</button>
+                </div>
+              </sc-for>
+            </div>
+            <a href="Messages.dc.html" style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)">Go to messages</a>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0">{{ tip }}</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:940}}">
+const SITTERS = [
+  { id: 'p1', name: 'Callum & Niamh', photo: 'public/images/couple-bw-1.jpg', base: 'Bristol', miles: 18, sits: 41, rating: 5, reviews: 27, verified: true, joint: true,
+    blurb: 'Six years of sitting together, from a farmhouse in Devon to a flat in Lisbon. One of us works from home, so the dogs are rarely alone.',
+    tags: ['Dogs', 'Off-lead walks', 'Works from home'], free: true },
+  { id: 'p2', name: 'Marianne Ellis', photo: '', base: 'Bath', miles: 4, sits: 12, rating: 5, reviews: 12, verified: true, joint: false,
+    blurb: 'Retired vet nurse. Medication is second nature and I know Bath well — I have sat twice in the village already.',
+    tags: ['Dogs', 'Vet nurse', 'Local'], free: true },
+  { id: 'p3', name: 'Rosa & Ade Oyelaran', photo: 'public/images/couple-dinner-1.jpg', base: 'Oxford', miles: 62, sits: 23, rating: 5, reviews: 19, verified: true, joint: true,
+    blurb: 'Two weeks between lets and Bath is on our list. Used to bouncy young dogs — our last sit was a pair of springers on a farm.',
+    tags: ['Dogs', 'Young dogs', 'Rural sits'], free: true },
+  { id: 'p4', name: 'Jonah Price', photo: '', base: 'Cardiff', miles: 90, sits: 6, rating: 4, reviews: 6, verified: false, joint: false,
+    blurb: 'Travelling the south west this autumn. Out walking most days, so plenty of exercise for a pair of spaniels.',
+    tags: ['Dogs', 'Active'], free: false },
+  { id: 'p5', name: 'Sofia Marchetti', photo: '', base: 'Bristol', miles: 16, sits: 31, rating: 5, reviews: 24, verified: true, joint: false,
+    blurb: 'I sit full time and stay put — no day trips, no evenings out. Happiest with older dogs and a quiet house.',
+    tags: ['Dogs', 'Cats', 'Senior pets'], free: true },
+  { id: 'p6', name: 'Dev Mahal', photo: '', base: 'London', miles: 112, sits: 2, rating: 4, reviews: 2, verified: false, joint: false,
+    blurb: 'New to the site but grew up with dogs, and I have references from two neighbours whose houses I sit.',
+    tags: ['Dogs', 'New sitter'], free: true }
+];
+
+class Component extends DCLogic {
+  state = { filters: { verified: true, free: true, nearby: false, joint: false, experienced: false }, sort: 'best', invited: {}, q: '' };
+
+  renderVals() {
+    const s = this.state;
+    const f = s.filters;
+
+    let list = SITTERS.filter(x => {
+      if (f.verified && !x.verified) return false;
+      if (f.free && !x.free) return false;
+      if (f.nearby && x.miles > 30) return false;
+      if (f.joint && !x.joint) return false;
+      if (f.experienced && x.sits < 20) return false;
+      if (s.q) {
+        const hay = (x.name + ' ' + x.base + ' ' + x.blurb + ' ' + x.tags.join(' ')).toLowerCase();
+        if (!hay.includes(s.q.toLowerCase())) return false;
+      }
+      return true;
+    });
+
+    if (s.sort === 'near') list = [...list].sort((a, b) => a.miles - b.miles);
+    else if (s.sort === 'reviews') list = [...list].sort((a, b) => b.reviews - a.reviews);
+    else list = [...list].sort((a, b) => (b.verified - a.verified) || (b.sits - a.sits));
+
+    const invitedList = SITTERS.filter(x => s.invited[x.id]);
+
+    const chip = on => 'font-family:\'Montserrat\',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;padding:10px 18px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;' +
+      (on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#faf6ee;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);');
+
+    return {
+      filters: [
+        { key: 'free', label: 'Free for my dates' },
+        { key: 'verified', label: 'ID verified' },
+        { key: 'nearby', label: 'Within 30 miles' },
+        { key: 'joint', label: 'Couples' },
+        { key: 'experienced', label: '20+ sits' }
+      ].map(x => ({
+        label: x.label,
+        style: chip(f[x.key]),
+        onClick: () => this.setState(st => ({ filters: { ...st.filters, [x.key]: !st.filters[x.key] } }))
+      })),
+      sorts: [
+        { key: 'best', label: 'Best match' },
+        { key: 'reviews', label: 'Most reviewed' },
+        { key: 'near', label: 'Nearest' }
+      ].map(x => ({
+        label: x.label,
+        style: 'font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.06em;padding:9px 16px;border-radius:50px;cursor:pointer;transition:background .2s ease, color .2s ease, border-color .2s ease;' +
+          (s.sort === x.key ? 'background:rgba(110,84,56,.14);color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);' : 'background:#fff;color:#6b4e35;border:1.5px solid rgba(44,26,14,.1);'),
+        onClick: () => this.setState({ sort: x.key })
+      })),
+      resultLine: list.length + (list.length === 1 ? ' sitter' : ' sitters') + ' match — ' + (invitedList.length ? invitedList.length + ' invited so far.' : 'none invited yet.'),
+
+      sitters: list.map(x => {
+        const inv = !!s.invited[x.id];
+        return {
+          name: x.name, photo: x.photo || 'public/images/logo-mark.png', blurb: x.blurb, tags: x.tags,
+          photoStyle: 'width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35);' + (x.photo ? 'display:block;' : 'display:none;'),
+          initials: x.name.split(/[^A-Za-z]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join(''),
+          initialsStyle: 'width:64px;height:64px;border-radius:50%;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);color:#2f5d45;font-family:\'Marcellus\',serif;font-size:1.3rem;align-items:center;justify-content:center;' + (x.photo ? 'display:none;' : 'display:flex;'),
+          meta: (x.joint ? 'Joint sitters' : 'Solo sitter') + ' · ' + x.sits + ' sits · ' + x.base,
+          stars: '★★★★★'.slice(0, x.rating) + '☆☆☆☆☆'.slice(0, 5 - x.rating),
+          reviews: x.reviews + (x.reviews === 1 ? ' review' : ' reviews'),
+          tickStyle: 'position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;display:flex;align-items:center;justify-content:center;border:2px solid #fff;' + (x.verified ? '' : 'display:none;'),
+          fit: x.free ? '✓ Free 4 – 18 Oct · ' + x.miles + ' miles away' : 'Not free for your dates · ' + x.miles + ' miles away',
+          fitStyle: 'font-size:.85rem;font-weight:' + (x.free ? '700' : '400') + ';color:' + (x.free ? '#2f5d45' : '#8a6a4f') + ';background:' + (x.free ? 'rgba(110,84,56,.1)' : 'rgba(44,26,14,.04)') + ';border-radius:10px;padding:10px 14px;',
+          wrapStyle: 'display:flex;flex-direction:column;background:#fff;border-radius:18px;overflow:hidden;transition:border-color .3s ease, box-shadow .3s ease;' +
+            (inv ? 'border:1.5px solid #2f5d45;box-shadow:0 10px 30px rgba(110,84,56,.16);' : 'border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);'),
+          inviteLabel: inv ? '✓ Invited' : 'Invite to sit',
+          inviteStyle: 'flex:1;font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:11px 12px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease, transform .15s ease;' +
+            (inv ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);'),
+          onInvite: () => this.setState(st => ({ invited: { ...st.invited, [x.id]: !st.invited[x.id] } }))
+        };
+      }),
+
+      emptyStyle: 'flex-direction:column;align-items:flex-start;background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px;' + (list.length === 0 ? 'display:flex;' : 'display:none;'),
+      onClearFilters: () => this.setState({ filters: { verified: false, free: false, nearby: false, joint: false, experienced: false }, q: '' }),
+
+      invitedPanelStyle: 'background:#fff;border:1.5px solid #2f5d45;border-radius:18px;padding:26px;box-shadow:0 10px 30px rgba(110,84,56,.14);' + (invitedList.length ? '' : 'display:none;'),
+      invited: invitedList.map(x => ({
+        name: x.name,
+        photo: x.photo || 'public/images/logo-mark.png',
+        photoStyle: 'width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35);' + (x.photo ? 'display:block;' : 'display:none;'),
+        initials: x.name.split(/[^A-Za-z]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join(''),
+        initialsStyle: 'width:38px;height:38px;border-radius:50%;flex-shrink:0;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);color:#2f5d45;font-family:\'Marcellus\',serif;font-size:.86rem;align-items:center;justify-content:center;' + (x.photo ? 'display:none;' : 'display:flex;'),
+        onUndo: () => this.setState(st => ({ invited: { ...st.invited, [x.id]: false } }))
+      })),
+
+      tip: invitedList.length >= 3
+        ? 'Three invites is plenty — more and you will be turning good sitters down.'
+        : 'Sitters who get a personal invite reply about three times as often as ones who find your listing themselves.'
+    };
+  }
+
+  componentDidMount() {
+    const loader = document.querySelector('[data-loader]');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+      a.addEventListener('click', e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        loader.style.opacity = '1';
+        loader.style.pointerEvents = 'all';
+        clearTimeout(this.hideT);
+        this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+      });
+    });
+    const q = document.querySelector('[data-search]');
+    q && q.addEventListener('input', () => this.setState({ q: q.value }));
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); }
+}
+</script>
+</body>
+</html>

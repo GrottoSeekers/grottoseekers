@@ -1,0 +1,107 @@
+# Create owner profile — element-by-element spec
+
+Generated from the approved design file `reference/Create owner profile.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `min-height:100vh; display:flex; flex-direction:column; background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<nav>` **Top nav** `[data-topnav]`
+      - style: `display:flex; justify-content:space-between; align-items:center; padding:16px 48px; background:#fff; border-bottom:1px solid rgba(110,84,56,.2)`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.35rem; transition:transform .25s ease; letter-spacing:.28em`
+        - :hover `transform:translateY(-1px)`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:44px; width:44px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+      - `<a>` → `Log in.dc.html`
+        - style: `font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#2f5d45; transition:color .2s ease`
+        - :hover `color:#2c1a0e`
+        - text: "Log out"
+    - `<main>` **Create owner profile** `[data-pad]`
+      - style: `flex:1; padding:52px 48px 80px`
+      - `<div>`
+        - style: `max-width:1100px; margin:0 auto`
+        - `<div>`
+          - style: `border-bottom:1px solid rgba(110,84,56,.3)`
+          - `<p>`
+            - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 16px; display:flex; align-items:center; gap:12px`
+            - text: "MYAH owner"
+            - `<span>`
+              - style: `width:26px; height:1px; background:#6e5438; display:block`
+          - `<h1>`
+            - style: `font-family:'Marcellus',serif; font-size:2.5rem; color:#2c1a0e; line-height:1.15; margin:0 0 18px`
+            - text: "Create your"
+            - `<em>`
+              - style: `color:#2f5d45`
+              - text: "profile"
+          - `<p>`
+            - style: `color:#6b4e35; font-size:1rem; line-height:1.75; max-width:580px; margin:0`
+            - text: "Set up your profile — you'll add your home details, pets and sit listings next."
+        - `<div>` `[data-form-grid]`
+          - style: `display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:28px; align-items:start`
+          - `<form>` `[data-create] [data-go]`
+            - style: `display:flex; flex-direction:column; gap:24px`
+            - `<div>` `[data-card]`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:36px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<h2>`
+                - style: `font-family:'Marcellus',serif; font-size:1.3rem; color:#2c1a0e; margin:0 0 8px`
+                - text: "Your details"
+              - `<div>`
+                - style: `width:40px; height:2px; background:#6e5438; margin:0 0 28px`
+              - `<div>`
+              - `<div>`
+              - `<div>`
+              - `<div>`
+              - `<div>`
+            - `<div>`
+              - style: `display:flex; align-items:center; gap:24px`
+              - `<button>`
+                - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.82rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; box-shadow:0 6px 20px rgba(110,84,56,.28); padding:16px 36px; font-family:'Montserrat',sans-serif; white-space:nowrap; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .25s ease, border-color .25s ease, transform .15s ease, box-shadow .25s ease`
+                - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+                - :active `transform:translateY(0) scale(.98)`
+                - text: "Create profile"
+              - `<a>` → `Owner dashboard.dc.html`
+                - style: `font-size:.8rem; color:#6b4e35; letter-spacing:.1em; text-transform:uppercase; font-weight:600; transition:color .2s ease`
+                - :hover `color:#2c1a0e`
+                - text: "Cancel"
+          - `<aside>` `[data-aside]`
+            - style: `position:sticky; top:28px; display:flex; flex-direction:column; gap:20px`
+            - `<div>`
+              - style: `background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; overflow:hidden; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:box-shadow .3s ease, border-color .3s ease`
+              - :hover `box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)`
+              - `<div>`
+                - style: `padding:20px 24px; border-bottom:1px solid rgba(110,84,56,.2)`
+              - `<div>`
+                - style: `padding:28px 24px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:12px; background:#faf6ee`
+            - `<div>`
+              - style: `background:#faf6ee; border:1px solid rgba(110,84,56,.28); border-radius:18px; padding:24px 26px; transition:border-color .3s ease`
+              - :hover `border-color:rgba(110,84,56,.5)`
+              - `<p>`
+                - style: `font-size:.7rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:#6e5438; margin:0 0 14px`
+                - text: "What happens next"
+              - `<div>`
+                - style: `display:flex; flex-direction:column; gap:12px; font-size:.88rem; color:#6b4e35; line-height:1.6`

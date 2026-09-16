@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 900px) {
+    [data-topnav] { padding: 12px 24px !important; }
+    [data-dash-pad] { padding: 28px 24px 60px !important; }
+    [data-dash-grid] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-stats] { flex-direction: row !important; }
+    [data-overview] { grid-template-columns: minmax(0,1fr) !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.18)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div data-acct-links="1" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end">
+      <a href="Find a sitter.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Find a sitter</a>
+      <a href="Applications.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Applications</a>
+      <a href="Notifications.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Notifications</a>
+      <a href="Log in.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Log out</a>
+    </div>
+  </nav>
+
+  <div data-screen-label="Tabs" style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04);position:sticky;top:0;z-index:10">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+      <button type="button" onClick="{{ t.onClick }}" style="{{ t.style }}">
+        <span style="display:flex">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" dangerouslySetInnerHTML="{{ t.icon }}"></svg>
+        </span>
+        <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">{{ t.label }}</span>
+        <span style="{{ t.underlineStyle }}"></span>
+      </button>
+    </sc-for>
+  </div>
+
+  <main data-dash-pad="1" style="flex:1;padding:44px 48px 70px">
+    <div style="max-width:1100px;margin:0 auto">
+
+      <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Owner dashboard" style="display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px">
+            <div>
+              <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your dashboard</p>
+              <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Welcome back, <em style="color:#2f5d45;">Thomas</em></h1>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+              <a href="Edit owner profile.dc.html#photos" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">Add photos</a>
+              <a href="Edit owner profile.dc.html#pets" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">Add a pet</a>
+              <a href="Post a sit.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                Post a sit
+              </a>
+            </div>
+          </div>
+
+          <div data-dash-grid="1" style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start">
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+              <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:26px">
+                <img src="public/images/solomon-1.jpg" alt="Thomas James" style="width:84px;height:84px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+                <div style="min-width:0">
+                  <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 5px">Thomas James</h2>
+                  <p style="font-size:.85rem;color:#2f5d45;font-weight:600;letter-spacing:.04em;margin:0 0 7px;display:flex;align-items:center;gap:8px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>Bath, UK</p>
+                  <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0 0 12px">Stone cottage on the edge of the village, home to two cocker spaniels.</p>
+                  <a href="Sit detail.dc.html" style="display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.03em;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px">myahsits.com/thomasjames</a>
+                </div>
+              </div>
+              <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+                <a href="Edit owner profile.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Edit profile</a>
+                <a href="Sit detail.dc.html" style="font-size:.78rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s" style-hover="color:#2c1a0e">View public page</a>
+              </div>
+            </div>
+
+            <div data-stats="1" style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+                <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">2</span>
+                <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Pets</span>
+              </div>
+              <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+                <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">1</span>
+                <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Active sits</span>
+              </div>
+            </div>
+          </div>
+
+          <div data-overview="1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:10px;transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+              <span style="width:44px;height:44px;border-radius:12px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg></span>
+              <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;margin:0;color:#2c1a0e">Home photos</h3>
+              <p style="font-size:.88rem;color:#6b4e35;line-height:1.6;margin:0">6 main photos uploaded</p>
+              <a href="Edit owner profile.dc.html#photos" style="font-size:.76rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;margin-top:auto;padding-top:8px">Manage photos &rarr;</a>
+            </div>
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:10px;transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+              <span style="width:44px;height:44px;border-radius:12px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="2.2"></circle><circle cx="16" cy="9" r="2.2"></circle><circle cx="12" cy="15.5" r="3"></circle></svg></span>
+              <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;margin:0;color:#2c1a0e">Pets</h3>
+              <p style="font-size:.88rem;color:#6b4e35;line-height:1.6;margin:0">Solomon, Chester</p>
+              <a href="Edit owner profile.dc.html#pets" style="font-size:.76rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;margin-top:auto;padding-top:8px">Manage pets &rarr;</a>
+            </div>
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:10px;transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+              <span style="width:44px;height:44px;border-radius:12px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
+              <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;margin:0;color:#2c1a0e">Amenities</h3>
+              <p style="font-size:.88rem;color:#6b4e35;line-height:1.6;margin:0">Wi-Fi, Walled garden, Log fire, Washing machine +3 more</p>
+              <a href="Edit owner profile.dc.html#amenities" style="font-size:.76rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;margin-top:auto;padding-top:8px">Edit amenities &rarr;</a>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+              <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Listing strength</h3>
+              <span style="font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45">{{ strengthLabel }}</span>
+            </div>
+            <div style="height:8px;border-radius:50px;background:rgba(110,84,56,.15);overflow:hidden;margin-bottom:22px">
+              <div style="{{ strengthBar }}"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
+              <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="6">
+                <div style="display:flex;align-items:center;gap:11px;font-size:.88rem;color:#2c1a0e">
+                  <span style="{{ c.markStyle }}">{{ c.mark }}</span>{{ c.label }}
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Share your profile</h3>
+            <p style="font-size:.93rem;color:#6b4e35;margin:0 0 20px;line-height:1.7;max-width:560px">Send this link so sitters can see your home, pets, and get in touch.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <input data-share="1" type="text" readonly="readonly" value="https://myahsits.com/thomasjames" style="flex:1;min-width:240px;border:1.5px solid rgba(44,26,14,.15);border-radius:10px;padding:13px 16px;font-size:.92rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none" />
+              <button type="button" onClick="{{ onCopy }}" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">{{ copyLabel }}</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSits }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="My sits">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px;margin-bottom:34px">
+            <div>
+              <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your listings</p>
+              <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;margin:0 0 10px;line-height:1.2">My <em style="color:#2f5d45;">sits</em></h1>
+              <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;max-width:520px;margin:0">Manage your sit listings. Active sits are visible to sitters browsing the platform.</p>
+            </div>
+            <a href="Post a sit.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              Post a sit
+            </a>
+          </div>
+
+          <sc-for list="{{ groups }}" as="group" hint-placeholder-count="2">
+            <div style="margin-bottom:38px">
+              <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 18px">{{ group.label }}</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px">
+                <sc-for list="{{ group.items }}" as="l" hint-placeholder-count="2">
+                  <div style="{{ l.cardStyle }}">
+                    <span style="{{ l.statusStyle }}">{{ l.status }}</span>
+                    <h3 style="font-family:'Marcellus',serif;font-size:1.18rem;color:#2c1a0e;line-height:1.3;margin:0">{{ l.title }}</h3>
+                    <p style="font-size:.86rem;color:#5c3d20;font-weight:600;margin:0">{{ l.dates }}</p>
+                    <span style="display:inline-block;background:rgba(110,84,56,.12);color:#2f5d45;font-size:.74rem;font-weight:600;padding:5px 14px;border-radius:50px;width:fit-content;letter-spacing:.04em">{{ l.duration }}</span>
+                    <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0">{{ l.desc }}</p>
+                    <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+                      <a href="Sit detail.dc.html" style="display:inline-flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:11px 22px;border-radius:50px;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">View listing</a>
+                      <a href="Edit listing.dc.html" style="display:inline-flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:11px 22px;border-radius:50px;color:#5c3d20;background:#fff;border:1.5px solid rgba(110,84,56,.35);transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">Edit</a>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMessages }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Messages tab" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+          <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>
+          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No messages yet</h2>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0">When a sitter applies for one of your sits, the conversation will appear here.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Profile tab" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+          <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
+          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">Your home &amp; pets</h2>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Update your home photos, pet details and amenities. This information is reused across all your sit listings — you only set it up once.</p>
+          <a href="Edit owner profile.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Set up home &amp; pets</a>
+        </div>
+      </sc-if>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { tab: 'dashboard', copied: false };
+
+  renderVals() {
+    const tab = this.state.tab;
+    const icons = {
+      dashboard: '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect>',
+      sits: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>',
+      messages: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
+      profile: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>'
+    };
+    const tabs = [
+      { id: 'dashboard', label: 'Dashboard' },
+      { id: 'sits', label: 'My sits' },
+      { id: 'messages', label: 'Messages' },
+      { id: 'profile', label: 'Profile' }
+    ].map(t => {
+      const on = tab === t.id;
+      return {
+        label: t.label,
+        icon: { __html: icons[t.id] },
+        style: 'flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:\'Montserrat\',sans-serif;color:' + (on ? '#2f5d45' : '#8a6a4f') + ';transition:color .2s',
+        underlineStyle: 'position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:' + (on ? '#2f5d45' : 'transparent'),
+        onClick: () => { this.setState({ tab: t.id }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      };
+    });
+
+    const items = [
+      { label: 'Home photos added', done: true },
+      { label: 'Pets added', done: true },
+      { label: 'Amenities selected', done: true },
+      { label: 'About your home written', done: true },
+      { label: 'Ideal sitter described', done: true },
+      { label: 'Second sit posted', done: false }
+    ];
+    const done = items.filter(i => i.done).length;
+    const pct = Math.round((done / items.length) * 100);
+
+    const cardStyle = past => 'background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:11px;' + (past ? 'opacity:.7;' : '');
+    const statusStyle = status => {
+      const tone = status === 'Active'
+        ? 'background:rgba(47,125,79,.1);color:#2f7d4f;border:1px solid rgba(47,125,79,.3);'
+        : status === 'Filled'
+          ? 'background:rgba(110,84,56,.12);color:#2f5d45;border:1px solid rgba(110,84,56,.38);'
+          : 'background:#fdeeee;color:#b91c1c;border:1px solid #f7cfcf;';
+      return 'display:inline-block;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;padding:5px 13px;border-radius:50px;width:fit-content;' + tone;
+    };
+    const sit = (status, title, dates, duration, desc, past) => ({
+      status, title, dates, duration, desc,
+      cardStyle: cardStyle(past),
+      statusStyle: statusStyle(status)
+    });
+
+    return {
+      tabs,
+      isDash: tab === 'dashboard',
+      isSits: tab === 'sits',
+      isMessages: tab === 'messages',
+      isProfile: tab === 'profile',
+      checklist: items.map(i => ({
+        label: i.label,
+        mark: i.done ? '✓' : '',
+        markStyle: 'width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;line-height:1;' +
+          (i.done ? 'background:#2f5d45;color:#fff;' : 'background:transparent;border:1.5px dashed rgba(110,84,56,.55);color:#2f5d45;')
+      })),
+      strengthLabel: done + ' of ' + items.length + ' complete',
+      strengthBar: 'height:100%;width:' + pct + '%;border-radius:50px;background:linear-gradient(90deg,#2f5d45 0%,#3e7a5b 100%);transition:width .4s ease',
+      copyLabel: this.state.copied ? 'Copied!' : 'Copy',
+      onCopy: () => {
+        const input = document.querySelector('[data-share]');
+        if (input) {
+          input.select();
+          if (navigator.clipboard) navigator.clipboard.writeText(input.value);
+        }
+        this.setState({ copied: true });
+        clearTimeout(this.copyT);
+        this.copyT = setTimeout(() => this.setState({ copied: false }), 2000);
+      },
+      groups: [
+        {
+          label: 'Active',
+          items: [sit('Active', 'Cosy cottage with two spaniels', '4 Oct — 18 Oct 2026', '14 days', 'Two gentle spaniels, a walled garden and a village pub five minutes away. Happy to leave the car.', false)]
+        },
+        {
+          label: 'Past / closed',
+          items: [
+            sit('Filled', 'Spring week with the dogs', '12 Apr — 19 Apr 2026', '7 days', 'Covered by Callum & Niamh — everything went perfectly.', true),
+            sit('Cancelled', 'Christmas cover', '22 Dec — 29 Dec 2025', '7 days', 'Cancelled — we ended up staying home for the holidays.', true)
+          ]
+        }
+      ]
+    };
+  }
+
+  componentDidMount() {
+    const loader = document.querySelector('[data-loader]');
+    const show = () => {
+      if (!loader) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(this.hideT);
+      this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    };
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+    });
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.hideT);
+    clearTimeout(this.copyT);
+  }
+}
+</script>
+</body>
+</html>

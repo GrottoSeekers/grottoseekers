@@ -1,0 +1,83 @@
+# Log in — element-by-element spec
+
+Generated from the approved design file `reference/Log in.dc.html`. Every style string below is the verbatim inline style on that element. Build the page node for node, in this order, with these values. `:hover` / `:active` lines are real states — implement them as CSS rules.
+
+## Images used
+
+- `/images/logo-mark.png`
+
+## Structure
+
+- `<div>`
+  - `<div>`
+    - style: `min-height:100vh; display:flex; flex-direction:column; background:#faf6ee`
+    - `<div>` `[data-loader]`
+      - style: `position:fixed; inset:0; z-index:9999; background:rgba(250,246,238,.92); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .25s ease`
+      - `<div>`
+        - style: `position:relative; width:132px; height:132px; display:flex; align-items:center; justify-content:center`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid rgba(110,84,56,.18)`
+        - `<div>`
+          - style: `position:absolute; inset:0; border-radius:50%; border:3px solid transparent; animation:gs-ring 1s linear infinite`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `width:74px; height:74px; object-fit:contain; animation:gs-pulse 1.8s ease-in-out infinite`
+    - `<nav>` **Header** `[data-auth-nav]`
+      - style: `padding:16px 48px; border-bottom:1px solid rgba(110,84,56,.2); background:#faf6ee`
+      - `<a>` → `Home.dc.html`
+        - style: `display:inline-flex; align-items:center; gap:14px; line-height:1; font-family:'Montserrat',sans-serif; font-weight:500; font-size:1.4rem; letter-spacing:.28em`
+        - `<img>` src=`public/images/logo-mark.png`
+          - style: `height:46px; width:46px; display:block; object-fit:contain`
+        - `<span>`
+          - style: `display:flex; flex-direction:column; gap:5px; border-left:1px solid rgba(110,84,56,.4)`
+          - `<span>`
+            - style: `color:#2f5d45; line-height:1`
+            - text: "MYAH"
+          - `<span>`
+            - style: `font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; line-height:1`
+            - text: "Make Yourself At Home"
+    - `<main>` **Log in**
+      - style: `flex:1; display:flex; align-items:center; justify-content:center; padding:60px 24px`
+      - `<div>` `[data-auth-card]`
+        - style: `background:#fff; border:1px solid rgba(110,84,56,.2); border-radius:20px; padding:48px; width:100%; max-width:440px; box-shadow:0 4px 32px rgba(44,26,14,.08)`
+        - `<p>`
+          - style: `font-size:.75rem; font-weight:600; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 14px; display:flex; align-items:center; gap:12px`
+          - text: "MYAH"
+          - `<span>`
+            - style: `width:26px; height:1px; background:#6e5438; display:block`
+        - `<h1>`
+          - style: `font-family:'Marcellus',serif; font-size:2.2rem; color:#2c1a0e; line-height:1.2; margin:0`
+          - text: "Welcome back"
+        - `<div>`
+          - style: `width:48px; height:2px; background:#6e5438; margin:20px 0 24px`
+        - `<p>`
+          - style: `font-size:.98rem; color:#6b4e35; line-height:1.7; margin:0 0 28px`
+          - text: "Log in to manage your page, enquiries and sits."
+        - `<form>` `[data-login-form] [data-go]`
+          - style: `display:flex; flex-direction:column; gap:22px`
+          - `<label>`
+            - style: `display:flex; flex-direction:column; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.1em; color:#5c3d20; text-transform:uppercase`
+            - text: "Email address"
+            - `<input>`
+              - style: `border:1.5px solid rgba(44,26,14,.2); border-radius:10px; padding:13px 15px; font-size:1rem; font-family:'Montserrat',sans-serif; font-weight:400; letter-spacing:0; text-transform:none; color:#2c1a0e; background:#faf6ee; transition:border-color .2s, box-shadow .2s`
+          - `<label>`
+            - style: `display:flex; flex-direction:column; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.1em; color:#5c3d20; text-transform:uppercase`
+            - text: "Password"
+            - `<span>`
+              - style: `position:relative; display:block`
+              - `<input>` `[data-pw]`
+                - style: `width:100%; padding:13px 74px 13px 15px; border:1.5px solid rgba(44,26,14,.2); border-radius:10px; font-size:1rem; font-family:'Montserrat',sans-serif; font-weight:400; letter-spacing:0; text-transform:none; color:#2c1a0e; background:#faf6ee; transition:border-color .2s, box-shadow .2s`
+              - `<button>` `[data-pw-toggle]`
+                - style: `position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; color:#2f5d45; font-size:.74rem; font-weight:600; letter-spacing:.08em; padding:4px 8px; text-transform:uppercase; font-family:'Montserrat',sans-serif; transition:color .2s`
+                - :hover `color:#2c1a0e`
+                - text: "Show"
+          - `<button>`
+            - style: `display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:1.5px solid #2f5d45; border-radius:50px; padding:13px 32px; font-family:'Montserrat',sans-serif; white-space:nowrap; box-shadow:0 6px 20px rgba(110,84,56,.28); transition:background .2s, border-color .2s, transform .12s`
+            - :hover `background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)`
+            - :active `transform:translateY(0) scale(.98)`
+            - text: "Log in"
+        - `<p>`
+          - style: `margin:26px 0 0; text-align:center; font-size:.92rem; color:#6b4e35`
+          - text: "Don't have an account?"
+          - `<a>` → `Sign up.dc.html`
+            - style: `color:#2f5d45; font-weight:700; border-bottom:1px solid rgba(110,84,56,.4)`
+            - text: "Sign up"

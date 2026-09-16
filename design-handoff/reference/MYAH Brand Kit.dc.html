@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; }
+  * { box-sizing:border-box; }
+  a { color:#2f5d45; }
+  a:hover { color:#2c1a0e; }
+  @media (max-width: 1000px) {
+    [data-pad] { padding:34px 20px 90px !important; }
+    [data-g2] { grid-template-columns:minmax(0,1fr) !important; }
+    [data-card] { padding:24px 20px !important; }
+  }
+</style>
+</helmet>
+<div style="background:#faf6ee;min-height:100vh">
+
+  <nav style="display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Brand kit &middot; final mark</span>
+  </nav>
+
+  <main data-pad="1" style="padding:60px 48px 110px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <header data-g2="1" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:42px;align-items:center;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:40px;margin-bottom:56px">
+        <div style="{{ heroTileStyle }}">
+          <img src="{{ heroMark }}" alt="MYAH mark" style="width:150px;height:150px;object-fit:contain;display:block" />
+        </div>
+        <div style="min-width:0">
+          <p style="font-size:.74rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>The complete kit</p>
+          <h1 style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:2.6rem;color:#2c1a0e;line-height:1.1;margin:0 0 12px">MYAH</h1>
+          <p style="font-family:'Lato',sans-serif;font-weight:700;font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;color:#2f5d45;margin:0 0 20px">Make Yourself At Home</p>
+          <p style="color:#6b4e35;font-size:1.02rem;line-height:1.8;margin:0;max-width:640px;text-wrap:pretty">The finalised paw-and-keyhole mark, the palette, the type, and ready-made pieces for social, email, print and product. Every asset comes from one folder &mdash; <span style="font-family:'Lato',sans-serif;color:#2c1a0e">public/images/</span> &mdash; so replacing a file rebrands every surface at once.</p>
+        </div>
+      </header>
+
+      <section style="margin-bottom:64px">
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">01</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">The mark</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 14px"></div>
+        <p style="font-size:.96rem;color:#6b4e35;line-height:1.8;margin:0 0 28px;max-width:660px;text-wrap:pretty">A paw print with a keyhole cut through the pad and a globe held inside it. Three ideas in one silhouette: the animal, the front door, and the fact that the door could be anywhere in the world. Single colour always &mdash; never two-tone, never outlined.</p>
+
+        <div data-card="1" data-g2="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px;margin-bottom:22px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:36px;align-items:center">
+          <div style="width:196px;height:196px;border-radius:16px;background:#faf6ee;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <img src="public/images/logo-mark.png" alt="" style="width:156px;height:156px;object-fit:contain;display:block" />
+          </div>
+          <div style="min-width:0;display:flex;flex-direction:column;gap:13px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">What the parts mean</p>
+            <p style="font-size:.93rem;color:#6b4e35;line-height:1.75;margin:0"><strong style="color:#2c1a0e">The paw.</strong> The pet is the reason the trip works at all. Four toes rotated outward, so the arc reads as a print rather than four dots.</p>
+            <p style="font-size:.93rem;color:#6b4e35;line-height:1.75;margin:0"><strong style="color:#2c1a0e">The keyhole.</strong> A true knock-out through the pad &mdash; whatever is behind shows through, so the mark never needs redrawing for a new background.</p>
+            <p style="font-size:.93rem;color:#6b4e35;line-height:1.75;margin:0"><strong style="color:#2c1a0e">The globe.</strong> Held in the bow of the keyhole. It is the only fine detail in the mark and the first thing to close up small &mdash; which is what sets the 32px floor.</p>
+          </div>
+        </div>
+
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8a6a4f;margin:0 0 16px">Inks</p>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:18px;margin-bottom:34px">
+          <sc-for list="{{ inks }}" as="i" hint-placeholder-count="5">
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:16px;overflow:hidden">
+              <div style="{{ i.swatchStyle }}"><img src="{{ i.src }}" alt="" style="width:104px;height:104px;object-fit:contain;display:block" /></div>
+              <div style="padding:16px 18px 18px;border-top:1px solid rgba(110,84,56,.14)">
+                <p style="font-size:.9rem;font-weight:600;color:#2c1a0e;margin:0 0 4px">{{ i.name }}</p>
+                <p style="font-size:.8rem;color:#6b4e35;line-height:1.6;margin:0 0 6px">{{ i.use }}</p>
+                <p style="font-family:'Lato',sans-serif;font-size:.74rem;color:#8a6a4f;margin:0">{{ i.file }}</p>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div data-g2="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 20px">Clearspace</p>
+            <div style="background:#faf6ee;border-radius:14px;padding:30px;display:flex;align-items:center;justify-content:center">
+              <div style="padding:26px;border:1px dashed rgba(47,93,69,.5);border-radius:8px;display:flex;align-items:center;justify-content:center">
+                <img src="public/images/logo-mark.png" alt="" style="width:104px;height:104px;object-fit:contain;display:block" />
+              </div>
+            </div>
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:20px 0 0">One toe width &mdash; 25% of the mark&rsquo;s height &mdash; clear on all four sides. Nothing enters it: no type, no rule, no photo edge, no button.</p>
+          </div>
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 20px">Minimum sizes</p>
+            <div style="background:#faf6ee;border-radius:14px;padding:30px;display:flex;align-items:flex-end;gap:26px;flex-wrap:wrap">
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><img src="public/images/logo-mark.png" alt="" style="width:64px;height:64px;object-fit:contain;display:block" /><span style="font-family:'Lato',sans-serif;font-size:.72rem;color:#8a6a4f">64px</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><img src="public/images/logo-mark.png" alt="" style="width:32px;height:32px;object-fit:contain;display:block" /><span style="font-family:'Lato',sans-serif;font-size:.72rem;color:#8a6a4f">32px floor</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><img src="public/images/logo-tile.png" alt="" style="width:24px;height:24px;display:block;border-radius:6px" /><span style="font-family:'Lato',sans-serif;font-size:.72rem;color:#8a6a4f">24px tile</span></div>
+              <div style="display:flex;flex-direction:column;align-items:center;gap:10px"><img src="public/images/favicon.png" alt="" style="width:16px;height:16px;display:block;border-radius:4px" /><span style="font-family:'Lato',sans-serif;font-size:.72rem;color:#8a6a4f">16px favicon</span></div>
+            </div>
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:20px 0 0">32px is the floor for the bare mark on screen, 12mm in print. Below that, switch to the forest tile &mdash; the globe and keyhole stop reading.</p>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-bottom:64px">
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">02</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">Lockups &amp; containers</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+        <div data-g2="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 22px">Horizontal &mdash; primary</p>
+            <div style="display:inline-flex;align-items:center;gap:16px;line-height:1">
+              <img src="public/images/logo-mark.png" alt="" style="height:62px;width:62px;object-fit:contain;display:block" />
+              <div style="display:flex;flex-direction:column;gap:9px;padding-left:16px;border-left:1px solid rgba(110,84,56,.4)">
+                <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.5rem;letter-spacing:.28em;color:#2f5d45;line-height:1">MYAH</span>
+                <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+              </div>
+            </div>
+            <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:24px 0 0">Site header, email, invoices, decks. Divider rule at 1px; mark height matches the two-line stack.</p>
+          </div>
+          <div data-card="1" style="background:#2f5d45;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(233,224,210,.8);margin:0 0 22px">Stacked &mdash; on forest</p>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+              <img src="public/images/logo-mark-cream.png" alt="" style="height:70px;width:70px;object-fit:contain;display:block" />
+              <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;letter-spacing:.3em;color:#e9e0d2;line-height:1">MYAH</span>
+              <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.56rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(233,224,210,.85);line-height:1">Make Yourself At Home</span>
+            </div>
+            <p style="font-size:.84rem;color:rgba(233,224,210,.88);line-height:1.7;margin:24px 0 0">Covers, merch, welcome cards &mdash; anything square or portrait, and every dark surface.</p>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:18px">
+          <sc-for list="{{ containers }}" as="c" hint-placeholder-count="4">
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:16px;padding:26px;display:flex;flex-direction:column;align-items:center;gap:18px">
+              <img src="{{ c.src }}" alt="" style="{{ c.imgStyle }}" />
+              <div style="text-align:center">
+                <p style="font-size:.9rem;font-weight:600;color:#2c1a0e;margin:0 0 3px">{{ c.name }}</p>
+                <p style="font-family:'Lato',sans-serif;font-size:.78rem;color:#6b4e35;margin:0">{{ c.note }}</p>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="margin-bottom:64px">
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">03</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">Misuse</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(184px,1fr));gap:18px">
+          <sc-for list="{{ misuse }}" as="m" hint-placeholder-count="6">
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:16px;overflow:hidden">
+              <div style="height:136px;background:#faf6ee;display:flex;align-items:center;justify-content:center;position:relative">
+                <img src="{{ m.src }}" alt="" style="{{ m.imgStyle }}" />
+                <span style="position:absolute;top:8px;right:11px;font-size:.95rem;color:#a4442e">&#10005;</span>
+              </div>
+              <div style="padding:14px 16px 16px;border-top:1px solid rgba(110,84,56,.14)">
+                <p style="font-size:.86rem;font-weight:600;color:#2c1a0e;margin:0 0 3px">{{ m.title }}</p>
+                <p style="font-size:.78rem;color:#6b4e35;line-height:1.55;margin:0">{{ m.note }}</p>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </section>
+
+      <section style="margin-bottom:64px">
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">04</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">Colour</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 14px"></div>
+        <p style="font-size:.96rem;color:#6b4e35;line-height:1.8;margin:0 0 28px;max-width:660px;text-wrap:pretty">Paper and ink carry nearly every surface. Forest is the only colour that means &ldquo;do something&rdquo; &mdash; buttons, links, active states &mdash; so it is never used as decoration. Rough split: 60% paper, 25% ink and bark, 10% forest, 5% everything else.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:18px;margin-bottom:22px">
+          <sc-for list="{{ palette }}" as="c" hint-placeholder-count="7">
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:16px;overflow:hidden">
+              <div style="{{ c.chipStyle }}"></div>
+              <div style="padding:15px 17px 17px">
+                <p style="font-size:.9rem;font-weight:600;color:#2c1a0e;margin:0 0 3px">{{ c.name }}</p>
+                <p style="font-family:'Lato',sans-serif;font-size:.8rem;color:#2f5d45;margin:0 0 7px">{{ c.hex }}</p>
+                <p style="font-size:.78rem;color:#6b4e35;line-height:1.55;margin:0 0 6px">{{ c.use }}</p>
+                <p style="font-family:'Lato',sans-serif;font-size:.72rem;color:#8a6a4f;margin:0">{{ c.token }}</p>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 32px">
+          <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Approved pairings</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px">
+            <sc-for list="{{ pairs }}" as="p" hint-placeholder-count="6">
+              <div style="{{ p.rowStyle }}">
+                <span style="{{ p.labelStyle }}">{{ p.label }}</span>
+                <span style="{{ p.ratioStyle }}">{{ p.ratio }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <p style="font-size:.82rem;color:#6b4e35;line-height:1.7;margin:18px 0 0">Tan is the one limit: use it for labels and captions at 13px and up, never for body copy or small print.</p>
+        </div>
+      </section>
+
+      <section style="margin-bottom:64px">
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">05</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">Typography</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+        <div data-g2="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Marcellus &mdash; display</p>
+            <p style="font-family:'Marcellus',serif;font-size:2.6rem;color:#2c1a0e;line-height:1.1;margin:0 0 14px">A key, a paw,<br />a whole house</p>
+            <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:0">Headlines and section titles only. Sentence case, tracking at 0, never below 20px, never for UI labels.</p>
+          </div>
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Montserrat &mdash; wordmark &amp; UI</p>
+            <p style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:2rem;letter-spacing:.28em;color:#2f5d45;margin:0 0 16px">MYAH</p>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.8;margin:0 0 12px">Interface, body copy and buttons. Weights 400, 500 and 600 only &mdash; 700 is reserved for Lato labels.</p>
+            <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:0">The wordmark is fixed: weight 500, tracking .28em, uppercase, never re-spaced.</p>
+          </div>
+        </div>
+        <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 32px">
+          <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 20px">The scale</p>
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <sc-for list="{{ typeScale }}" as="t" hint-placeholder-count="7">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:baseline;padding-bottom:12px;border-bottom:1px solid rgba(110,84,56,.14)">
+                <span style="{{ t.sampleStyle }}">{{ t.sample }}</span>
+                <span style="font-family:'Lato',sans-serif;font-size:.76rem;color:#8a6a4f;white-space:nowrap">{{ t.spec }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-bottom:64px">
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">06</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">Voice</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 14px"></div>
+        <p style="font-size:.96rem;color:#6b4e35;line-height:1.8;margin:0 0 26px;max-width:660px;text-wrap:pretty">We are asking someone to hand over a key. Write like the neighbour who already has one: calm, specific, never salesy.</p>
+        <div data-g2="1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(236px,1fr));gap:18px;margin-bottom:18px">
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px">
+            <p style="font-family:'Marcellus',serif;font-size:1.18rem;color:#2c1a0e;margin:0 0 10px">Plain, not breezy</p>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.75;margin:0">Say the thing. No exclamation marks, no puns on the mark, no &ldquo;furry friends&rdquo;.</p>
+          </div>
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px">
+            <p style="font-family:'Marcellus',serif;font-size:1.18rem;color:#2c1a0e;margin:0 0 10px">Specific over warm</p>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.75;margin:0">&ldquo;Two dogs, ten nights, Bristol&rdquo; reassures more than &ldquo;loving pet care&rdquo; ever will.</p>
+          </div>
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px">
+            <p style="font-family:'Marcellus',serif;font-size:1.18rem;color:#2c1a0e;margin:0 0 10px">Owner first</p>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.75;margin:0">Every line answers the only real question: can I trust this person with my home?</p>
+          </div>
+        </div>
+        <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 32px">
+          <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Say this, not that</p>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ voice }}" as="v" hint-placeholder-count="4">
+              <div data-g2="1" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+                <div style="padding:14px 16px;border-radius:11px;background:rgba(47,93,69,.07);border:1px solid rgba(47,93,69,.22)">
+                  <p style="font-family:'Lato',sans-serif;font-weight:700;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:#2f5d45;margin:0 0 6px">Say</p>
+                  <p style="font-size:.9rem;color:#2c1a0e;line-height:1.6;margin:0">{{ v.good }}</p>
+                </div>
+                <div style="padding:14px 16px;border-radius:11px;background:rgba(164,68,46,.06);border:1px solid rgba(164,68,46,.22)">
+                  <p style="font-family:'Lato',sans-serif;font-weight:700;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:#a4442e;margin:0 0 6px">Not</p>
+                  <p style="font-size:.9rem;color:#6b4e35;line-height:1.6;margin:0">{{ v.bad }}</p>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-bottom:64px">
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">07</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">Social kit</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 14px"></div>
+        <p style="font-size:.96rem;color:#6b4e35;line-height:1.8;margin:0 0 28px;max-width:660px;text-wrap:pretty">Four templates cover everything we post: a full-bleed photo post, a quote card, a listing card, and the story frame. Previews below are to scale &mdash; export sizes are noted on each.</p>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:22px;margin-bottom:22px">
+
+          <div>
+            <div style="width:100%;aspect-ratio:1/1;border-radius:16px;overflow:hidden;position:relative;background:#2c1a0e">
+              <img src="public/images/slideshow-springer-beach.jpeg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />
+              <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(20,12,6,.86) 0%,rgba(20,12,6,.22) 52%,rgba(20,12,6,.35) 100%)"></div>
+              <div style="position:absolute;top:22px;left:24px;display:inline-flex;align-items:center;gap:11px">
+                <img src="public/images/logo-mark-white.png" alt="" style="height:34px;width:34px;object-fit:contain;display:block" />
+                <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:.88rem;letter-spacing:.28em;color:#fff">MYAH</span>
+              </div>
+              <div style="position:absolute;left:24px;right:24px;bottom:24px">
+                <p style="font-family:'Lato',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.82);margin:0 0 10px">Sit of the week &middot; Cornwall</p>
+                <p style="font-family:'Marcellus',serif;font-size:1.5rem;color:#fff;line-height:1.2;margin:0 0 12px;text-wrap:pretty">Nine nights, one springer, and a beach at the end of the lane</p>
+                <span style="display:inline-block;padding:9px 16px;border-radius:999px;background:#2f5d45;font-size:.76rem;font-weight:600;color:#fff">See the sit</span>
+              </div>
+            </div>
+            <p style="font-family:'Lato',sans-serif;font-size:.78rem;color:#8a6a4f;margin:12px 0 0">Photo post &middot; 1080 &times; 1080 &middot; white mark, bottom-left copy</p>
+          </div>
+
+          <div>
+            <div style="width:100%;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#2f5d45;padding:34px;display:flex;flex-direction:column;justify-content:space-between">
+              <img src="public/images/logo-mark-cream.png" alt="" style="height:44px;width:44px;object-fit:contain;display:block" />
+              <div>
+                <p style="font-family:'Marcellus',serif;font-size:1.6rem;color:#f5efe4;line-height:1.3;margin:0 0 16px;text-wrap:pretty">&ldquo;She sent a photo of him asleep on the sofa every night. I stopped worrying by day two.&rdquo;</p>
+                <p style="font-family:'Lato',sans-serif;font-weight:700;font-size:.64rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(245,239,228,.75);margin:0">Niamh, owner &middot; Bristol</p>
+              </div>
+              <p style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:.8rem;letter-spacing:.28em;color:rgba(245,239,228,.85);margin:0">MYAH</p>
+            </div>
+            <p style="font-family:'Lato',sans-serif;font-size:.78rem;color:#8a6a4f;margin:12px 0 0">Quote card &middot; 1080 &times; 1080 &middot; forest ground, cream mark</p>
+          </div>
+
+          <div>
+            <div style="width:100%;aspect-ratio:1/1;border-radius:16px;overflow:hidden;background:#faf6ee;border:1px solid rgba(110,84,56,.22);padding:26px;display:flex;flex-direction:column;gap:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+                <div style="display:inline-flex;align-items:center;gap:10px">
+                  <img src="public/images/logo-mark.png" alt="" style="height:30px;width:30px;object-fit:contain;display:block" />
+                  <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:.78rem;letter-spacing:.28em;color:#2f5d45">MYAH</span>
+                </div>
+                <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:#2f5d45;padding:6px 11px;border:1px solid rgba(47,93,69,.4);border-radius:999px">New sit</span>
+              </div>
+              <div style="flex:1;border-radius:12px;overflow:hidden;min-height:0">
+                <img src="public/images/slideshow-cockapoo-window.jpeg" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
+              </div>
+              <div>
+                <p style="font-family:'Marcellus',serif;font-size:1.22rem;color:#2c1a0e;margin:0 0 6px">Garden flat in Stoke Newington</p>
+                <p style="font-family:'Lato',sans-serif;font-size:.84rem;color:#8a6a4f;margin:0">14&ndash;24 Oct &middot; one cockapoo &middot; ten nights</p>
+              </div>
+            </div>
+            <p style="font-family:'Lato',sans-serif;font-size:.78rem;color:#8a6a4f;margin:12px 0 0">Listing card &middot; 1080 &times; 1080 &middot; paper ground, real listing data</p>
+          </div>
+
+          <div>
+            <div style="width:100%;max-width:230px;aspect-ratio:9/16;border-radius:16px;overflow:hidden;position:relative;background:#2c1a0e;margin:0 auto">
+              <img src="public/images/slideshow-ocean-sunset.jpeg" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" />
+              <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(20,12,6,.5),rgba(20,12,6,.2) 40%,rgba(20,12,6,.9))"></div>
+              <div style="position:absolute;inset:0;padding:26px 22px;display:flex;flex-direction:column;justify-content:space-between;align-items:center;text-align:center">
+                <img src="public/images/logo-mark-white.png" alt="" style="height:40px;width:40px;object-fit:contain;display:block" />
+                <div>
+                  <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#fff;line-height:1.28;margin:0 0 10px;text-wrap:pretty">Go for three weeks. Someone stays with them.</p>
+                  <p style="font-family:'Lato',sans-serif;font-weight:700;font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.8);margin:0">Swipe up &middot; myah.co</p>
+                </div>
+                <span style="display:inline-block;padding:11px 20px;border-radius:999px;background:#f5efe4;font-size:.76rem;font-weight:600;color:#2c1a0e">Find a sitter</span>
+              </div>
+            </div>
+            <p style="font-family:'Lato',sans-serif;font-size:.78rem;color:#8a6a4f;margin:12px 0 0;text-align:center">Story &middot; 1080 &times; 1920 &middot; keep copy inside the middle 80%</p>
+          </div>
+        </div>
+
+        <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 32px;margin-bottom:18px">
+          <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Cover / banner &middot; 1640 &times; 624</p>
+          <div style="width:100%;aspect-ratio:1640/624;border-radius:14px;overflow:hidden;position:relative;background:#2f5d45;display:flex;align-items:center;padding:0 7%">
+            <div style="position:absolute;right:0;top:0;bottom:0;width:46%;opacity:.5"><img src="public/images/slideshow-spaniel-walk.jpeg" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+            <div style="position:absolute;right:0;top:0;bottom:0;width:60%;background:linear-gradient(to right,#2f5d45 12%,rgba(47,93,69,0))"></div>
+            <div style="position:relative;display:flex;align-items:center;gap:20px">
+              <img src="public/images/logo-mark-cream.png" alt="" style="height:64px;width:64px;object-fit:contain;display:block" />
+              <div style="display:flex;flex-direction:column;gap:10px;padding-left:20px;border-left:1px solid rgba(233,224,210,.45)">
+                <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.5rem;letter-spacing:.3em;color:#f5efe4;line-height:1">MYAH</span>
+                <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:rgba(245,239,228,.82);line-height:1">Make Yourself At Home</span>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:16px 0 0">Same artwork crops for LinkedIn (1584 &times; 396), X (1500 &times; 500) and YouTube (2048 &times; 1152) &mdash; keep the lockup inside the left third so nothing is cut by avatar overlays.</p>
+        </div>
+
+        <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 32px">
+          <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Posting rules</p>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0"><strong style="color:#2c1a0e">One mark per frame.</strong> Top-left on photos, or centred on the story frame. Never both.</p>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0"><strong style="color:#2c1a0e">Real photos only.</strong> Sitter and owner photography, shot in daylight, no stock.</p>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0"><strong style="color:#2c1a0e">Caption as you&rsquo;d text.</strong> Two lines, one detail, one link. Three hashtags maximum.</p>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0"><strong style="color:#2c1a0e">Type stays in Marcellus.</strong> Never set post copy in the wordmark tracking.</p>
+          </div>
+        </div>
+      </section>
+
+      <section style="margin-bottom:64px">
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">08</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">Email, print &amp; product</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+
+        <div data-g2="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 32px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Email header &amp; footer</p>
+            <div style="border:1px solid rgba(110,84,56,.2);border-radius:12px;overflow:hidden">
+              <div style="background:#2f5d45;padding:20px 22px;display:flex;align-items:center;gap:12px">
+                <img src="public/images/logo-mark-cream.png" alt="" style="height:32px;width:32px;object-fit:contain;display:block" />
+                <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:.88rem;letter-spacing:.28em;color:#f5efe4">MYAH</span>
+              </div>
+              <div style="padding:22px;background:#fff">
+                <p style="font-family:'Marcellus',serif;font-size:1.1rem;color:#2c1a0e;margin:0 0 8px">Your sit is confirmed</p>
+                <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 14px">Ten nights in Stoke Newington, 14&ndash;24 October. Chester&rsquo;s routine is on the listing.</p>
+                <span style="display:inline-block;padding:9px 16px;border-radius:999px;background:#2f5d45;font-size:.78rem;font-weight:600;color:#fff">View the sit</span>
+              </div>
+              <div style="padding:16px 22px;background:#faf6ee;border-top:1px solid rgba(110,84,56,.16)">
+                <p style="font-family:'Lato',sans-serif;font-size:.72rem;color:#8a6a4f;margin:0">MYAH &middot; Make Yourself At Home &middot; myah.co</p>
+              </div>
+            </div>
+            <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:16px 0 0">600px wide, single column, forest bar at the top. Mark ships as a 64px PNG &mdash; never an SVG in email.</p>
+          </div>
+
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 32px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Signature block</p>
+            <div style="display:flex;align-items:center;gap:16px;padding:20px;border-radius:12px;background:#faf6ee">
+              <img src="public/images/avatar-cream.png" alt="" style="height:58px;width:58px;border-radius:50%;display:block;flex-shrink:0" />
+              <div style="min-width:0">
+                <p style="font-size:.95rem;font-weight:600;color:#2c1a0e;margin:0 0 3px">Niamh Doherty</p>
+                <p style="font-family:'Lato',sans-serif;font-weight:700;font-size:.64rem;letter-spacing:.18em;text-transform:uppercase;color:#2f5d45;margin:0 0 8px">Head of Trust &amp; Safety</p>
+                <p style="font-family:'Lato',sans-serif;font-size:.78rem;color:#8a6a4f;margin:0;line-height:1.6">niamh@myah.co &middot; myah.co<br />MYAH &mdash; Make Yourself At Home</p>
+              </div>
+            </div>
+            <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:16px 0 0">No logo in the signature &mdash; the cream avatar carries the brand. Plain text, no images beyond the avatar.</p>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px">
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Business card &middot; 85 &times; 55mm</p>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="aspect-ratio:85/55;border-radius:10px;background:#2f5d45;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+                <img src="public/images/logo-mark-cream.png" alt="" style="height:44px;width:44px;object-fit:contain;display:block" />
+                <span style="font-family:'Montserrat',sans-serif;font-weight:500;font-size:.8rem;letter-spacing:.3em;color:#f5efe4">MYAH</span>
+              </div>
+              <div style="aspect-ratio:85/55;border-radius:10px;background:#faf6ee;border:1px solid rgba(110,84,56,.2);padding:18px;display:flex;flex-direction:column;justify-content:space-between">
+                <p style="font-family:'Lato',sans-serif;font-weight:700;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:#2f5d45;margin:0">Verified sitter</p>
+                <div>
+                  <p style="font-size:.88rem;font-weight:600;color:#2c1a0e;margin:0 0 3px">Callum Reid</p>
+                  <p style="font-family:'Lato',sans-serif;font-size:.74rem;color:#8a6a4f;margin:0">myah.co/callum &middot; 07&thinsp;&mdash;</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Sticker &amp; stamp</p>
+            <div style="display:flex;align-items:center;justify-content:center;gap:18px;padding:22px 0;background:#faf6ee;border-radius:12px">
+              <img src="public/images/avatar-forest.png" alt="" style="height:86px;width:86px;border-radius:50%;display:block" />
+              <div style="height:86px;width:86px;border-radius:50%;border:2px solid #4a3726;display:flex;align-items:center;justify-content:center">
+                <img src="public/images/logo-mark-ink.png" alt="" style="height:52px;width:52px;object-fit:contain;display:block" />
+              </div>
+            </div>
+            <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:16px 0 0">Die-cut circle for welcome packs; the ringed ink version is the rubber stamp for handwritten cards.</p>
+          </div>
+
+          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Key tag &amp; welcome card</p>
+            <div style="display:flex;align-items:center;gap:16px;padding:20px;background:#faf6ee;border-radius:12px">
+              <div style="width:74px;height:74px;border-radius:14px;background:#4a3726;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+                <img src="public/images/logo-mark-cream.png" alt="" style="height:44px;width:44px;object-fit:contain;display:block" />
+              </div>
+              <div style="min-width:0;flex:1;padding:14px 16px;background:#fff;border:1px solid rgba(110,84,56,.2);border-radius:10px">
+                <p style="font-family:'Marcellus',serif;font-size:.98rem;color:#2c1a0e;margin:0 0 5px">Make yourself at home</p>
+                <p style="font-family:'Lato',sans-serif;font-size:.76rem;color:#8a6a4f;margin:0;line-height:1.6">Chester eats at seven. Spare key is with next door.</p>
+              </div>
+            </div>
+            <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:16px 0 0">Debossed bark tag on the keyring, letterpress card in the pack. One mark, no tagline on the tag.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 6px">09</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.8rem;color:#2c1a0e;margin:0 0 8px">Asset index</h2>
+        <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+        <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:12px 32px 22px">
+          <sc-for list="{{ assets }}" as="a" hint-placeholder-count="12">
+            <div style="display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(110,84,56,.14)">
+              <img src="{{ a.src }}" alt="" style="{{ a.thumbStyle }}" />
+              <div style="min-width:0">
+                <p style="font-family:'Lato',sans-serif;font-size:.86rem;color:#2c1a0e;margin:0 0 3px">{{ a.file }}</p>
+                <p style="font-size:.8rem;color:#6b4e35;margin:0">{{ a.use }}</p>
+              </div>
+              <span style="font-family:'Lato',sans-serif;font-size:.74rem;color:#8a6a4f;white-space:nowrap">{{ a.size }}</span>
+            </div>
+          </sc-for>
+          <p style="font-size:.84rem;color:#6b4e35;line-height:1.7;margin:18px 0 0">All PNG with transparency where the mark is bare. The source drawing is kept untouched as <span style="font-family:'Lato',sans-serif;color:#2c1a0e">logo-mark-original.png</span> &mdash; colour variants are recolours of it, with no change to shape or outline.</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;heroInk&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Cream on forest&quot;,&quot;Bark on paper&quot;,&quot;White on ink&quot;,&quot;Forest on cream&quot;],&quot;default&quot;:&quot;Cream on forest&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Cover&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const card = 'display:flex;align-items:center;justify-content:center;padding:30px;';
+    const inks = [
+      { name: 'Bark — primary', use: 'Default on cream and white.', file: 'logo-mark.png', src: 'public/images/logo-mark.png', bg: '#faf6ee' },
+      { name: 'Cream', use: 'On forest and dark photography.', file: 'logo-mark-cream.png', src: 'public/images/logo-mark-cream.png', bg: '#2f5d45' },
+      { name: 'White', use: 'Over imagery and video only.', file: 'logo-mark-white.png', src: 'public/images/logo-mark-white.png', bg: '#2c1a0e' },
+      { name: 'Forest', use: 'Partner decks and co-branded lockups.', file: 'logo-mark-forest.png', src: 'public/images/logo-mark-forest.png', bg: '#faf6ee' },
+      { name: 'Ink', use: 'Documents, stamps, one-colour print.', file: 'logo-mark-ink.png', src: 'public/images/logo-mark-ink.png', bg: '#faf6ee' }
+    ].map(i => ({ ...i, swatchStyle: card + 'background:' + i.bg }));
+
+    const containers = [
+      { name: 'App icon', note: 'logo-tile.png · 22% radius', src: 'public/images/logo-tile.png', imgStyle: 'width:100px;height:100px;display:block;border-radius:22px' },
+      { name: 'Cream tile', note: 'logo-tile-cream.png · dark themes', src: 'public/images/logo-tile-cream.png', imgStyle: 'width:100px;height:100px;display:block;border-radius:22px' },
+      { name: 'Social avatar', note: 'avatar-forest.png · 1:1', src: 'public/images/avatar-forest.png', imgStyle: 'width:100px;height:100px;display:block;border-radius:50%' },
+      { name: 'Avatar, light', note: 'avatar-cream.png · reply accounts', src: 'public/images/avatar-cream.png', imgStyle: 'width:100px;height:100px;display:block;border-radius:50%' }
+    ];
+
+    const misuse = [
+      { title: 'Do not stretch', note: 'Scale proportionally, always.', src: 'public/images/logo-mark.png', imgStyle: 'width:112px;height:72px;display:block' },
+      { title: 'Do not rotate', note: 'The print stands upright.', src: 'public/images/logo-mark.png', imgStyle: 'width:82px;height:82px;display:block;transform:rotate(18deg)' },
+      { title: 'No drop shadow', note: 'Flat ink, no effects or bevels.', src: 'public/images/logo-mark.png', imgStyle: 'width:82px;height:82px;display:block;filter:drop-shadow(5px 6px 4px rgba(44,26,14,.5))' },
+      { title: 'No off-brand colour', note: 'Only the five approved inks.', src: 'public/images/logo-mark.png', imgStyle: 'width:82px;height:82px;display:block;filter:hue-rotate(220deg) saturate(3)' },
+      { title: 'Not on busy photo', note: 'Needs a calm area or a tile.', src: 'public/images/logo-mark-white.png', imgStyle: 'width:82px;height:82px;display:block;background:url(public/images/slideshow-dogs-couch.jpeg) center/cover' },
+      { title: 'Do not crop', note: 'Never bleed the mark off an edge.', src: 'public/images/logo-mark.png', imgStyle: 'width:82px;height:82px;display:block;clip-path:inset(0 34% 0 0)' }
+    ];
+
+    const palette = [
+      { name: 'Forest', hex: '#2f5d45', use: 'Actions, links, active states, tiles.', token: '--myah-forest' },
+      { name: 'Bark', hex: '#4a3726', use: 'The logo ink and heavy rules.', token: '--myah-bark' },
+      { name: 'Ink', hex: '#2c1a0e', use: 'Headings and body text.', token: '--myah-ink' },
+      { name: 'Cream', hex: '#e9e0d2', use: 'Marks on dark, cards on forest.', token: '--myah-cream' },
+      { name: 'Paper', hex: '#faf6ee', use: 'Page background everywhere.', token: '--myah-paper' },
+      { name: 'Tan', hex: '#8a6a4f', use: 'Labels, captions, meta text.', token: '--myah-tan' },
+      { name: 'Clay', hex: '#a4442e', use: 'Errors and destructive actions only.', token: '--myah-clay' }
+    ].map(c => ({ ...c, chipStyle: 'height:92px;background:' + c.hex + (c.hex === '#faf6ee' ? ';border-bottom:1px solid rgba(110,84,56,.2)' : '') }));
+
+    const pair = (label, fg, bg, ratio, border) => ({
+      label, ratio,
+      rowStyle: 'display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;border-radius:11px;background:' + bg + (border ? ';border:1px solid rgba(110,84,56,.2)' : ''),
+      labelStyle: 'font-size:.86rem;font-weight:500;color:' + fg,
+      ratioStyle: 'font-family:\'Lato\',sans-serif;font-size:.74rem;color:' + fg + ';opacity:.75'
+    });
+    const pairs = [
+      pair('Ink on paper', '#2c1a0e', '#faf6ee', '14.6 : 1', true),
+      pair('Bark on paper', '#4a3726', '#faf6ee', '8.9 : 1', true),
+      pair('Forest on paper', '#2f5d45', '#faf6ee', '6.4 : 1', true),
+      pair('Cream on forest', '#e9e0d2', '#2f5d45', '5.9 : 1', false),
+      pair('Paper on ink', '#faf6ee', '#2c1a0e', '14.6 : 1', false),
+      pair('Cream on bark', '#e9e0d2', '#4a3726', '8.3 : 1', false)
+    ];
+
+    const typeScale = [
+      { sample: 'A key, a paw, a whole house', spec: 'Marcellus 44 / 1.15', style: "font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15" },
+      { sample: 'Sitters you would hand your keys to', spec: 'Marcellus 28 / 1.25', style: "font-family:'Marcellus',serif;font-size:1.55rem;color:#2c1a0e" },
+      { sample: 'MYAH', spec: 'Montserrat 500 · .28em', style: "font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.3rem;letter-spacing:.28em;color:#2f5d45" },
+      { sample: 'Body copy sets at sixteen over one point eight.', spec: 'Montserrat 400 16 / 1.8', style: "font-size:1rem;color:#6b4e35;line-height:1.8" },
+      { sample: 'Request this sit', spec: 'Montserrat 600 15 · buttons', style: "font-family:'Montserrat',sans-serif;font-weight:600;font-size:.94rem;color:#2f5d45" },
+      { sample: 'VERIFIED SITTER', spec: 'Lato 700 11 · .2em caps', style: "font-family:'Lato',sans-serif;font-weight:700;font-size:.69rem;letter-spacing:.2em;color:#8a6a4f" },
+      { sample: 'Three nights · Bristol · two dogs', spec: 'Lato 400 13 · meta', style: "font-family:'Lato',sans-serif;font-size:.81rem;color:#8a6a4f" }
+    ].map(t => ({ sample: t.sample, spec: t.spec, sampleStyle: t.style }));
+
+    const heroInk = this.props.heroInk ?? 'Cream on forest';
+    const heroMap = {
+      'Cream on forest': ['public/images/logo-mark-cream.png', '#2f5d45'],
+      'Bark on paper': ['public/images/logo-mark.png', '#faf6ee'],
+      'White on ink': ['public/images/logo-mark-white.png', '#2c1a0e'],
+      'Forest on cream': ['public/images/logo-mark-forest.png', '#e9e0d2']
+    };
+    const hero = heroMap[heroInk] || heroMap['Cream on forest'];
+
+    const voice = [
+      { good: 'Ten nights in Stoke Newington, one cockapoo.', bad: 'An amazing opportunity in vibrant North London!' },
+      { good: 'Callum has completed 14 sits. ID and address verified.', bad: 'Callum is a superstar sitter with 5-star paw-ratings.' },
+      { good: 'We could not verify this address. Here is what to send.', bad: 'Oops! Something went wrong.' },
+      { good: 'No sits in Bristol this week. Try within 25 miles.', bad: 'Sorry, no results found!' }
+    ];
+
+    const assets = [
+      { file: 'logo-mark.png', use: 'Primary mark, as drawn, transparent', size: '1024px', src: 'public/images/logo-mark.png', bare: true },
+      { file: 'logo-mark-original.png', use: 'Untouched master — do not edit', size: '1024px', src: 'public/images/logo-mark-original.png', bare: true },
+      { file: 'logo-mark-cream.png', use: 'Cream recolour, for forest and photos', size: '512px', src: 'public/images/logo-mark-cream.png', bare: true, dark: true },
+      { file: 'logo-mark-white.png', use: 'White recolour, over imagery and video', size: '512px', src: 'public/images/logo-mark-white.png', bare: true, dark: true },
+      { file: 'logo-mark-ink.png', use: 'Ink recolour, one-colour print', size: '512px', src: 'public/images/logo-mark-ink.png', bare: true },
+      { file: 'logo-mark-forest.png', use: 'Forest recolour, partner lockups', size: '512px', src: 'public/images/logo-mark-forest.png', bare: true },
+      { file: 'logo-tile.png', use: 'App icon, forest squircle', size: '512px', src: 'public/images/logo-tile.png' },
+      { file: 'logo-tile-cream.png', use: 'App icon alternate, dark themes', size: '512px', src: 'public/images/logo-tile-cream.png' },
+      { file: 'avatar-forest.png', use: 'Social avatar, primary', size: '512px', src: 'public/images/avatar-forest.png', round: true },
+      { file: 'avatar-cream.png', use: 'Social avatar, light', size: '512px', src: 'public/images/avatar-cream.png', round: true },
+      { file: 'app-tile.png', use: 'Store listing tile', size: '512px', src: 'public/images/app-tile.png' },
+      { file: 'favicon.png', use: 'Browser tab and bookmarks', size: '256px', src: 'public/images/favicon.png' }
+    ].map(a => ({
+      file: a.file, use: a.use, size: a.size, src: a.src,
+      thumbStyle: 'width:46px;height:46px;display:block;object-fit:contain;flex-shrink:0'
+        + (a.round ? ';border-radius:50%' : a.bare ? '' : ';border-radius:10px')
+        + (a.dark ? ';background:#2f5d45;border-radius:10px;padding:3px' : '')
+    }));
+
+    return {
+      inks, containers, misuse, palette, pairs, typeScale, voice, assets,
+      heroMark: hero[0],
+      heroTileStyle: 'width:212px;height:212px;border-radius:20px;background:' + hero[1]
+        + ';display:flex;align-items:center;justify-content:center'
+        + (hero[1] === '#faf6ee' ? ';border:1px solid rgba(110,84,56,.22)' : '')
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  input::placeholder { color: rgba(44,26,14,.35); }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 900px) {
+    [data-topnav] { padding: 12px 24px !important; }
+    [data-dash-pad] { padding: 28px 24px 60px !important; }
+    [data-dash-grid] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-stats] { flex-direction: row !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.18)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div data-acct-links="1" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end">
+      <a href="Browse sits.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Browse sits</a>
+      <a href="Saved sits.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Saved</a>
+      <a href="Availability.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Availability</a>
+      <a href="Verification.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Verification</a>
+      <a href="Notifications.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Notifications</a>
+      <a href="Log in.dc.html" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s" style-hover="color:#2f5d45">Log out</a>
+    </div>
+  </nav>
+
+  <div data-screen-label="Tabs" style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04);position:sticky;top:0;z-index:10">
+    <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+      <button type="button" onClick="{{ t.onClick }}" style="{{ t.style }}">
+        <span style="{{ t.iconStyle }}">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" dangerouslySetInnerHTML="{{ t.icon }}"></svg>
+        </span>
+        <span style="{{ t.labelStyle }}">{{ t.label }}</span>
+        <span style="{{ t.underlineStyle }}"></span>
+      </button>
+    </sc-for>
+  </div>
+
+  <main data-dash-pad="1" style="flex:1;padding:44px 48px 70px">
+    <div style="max-width:1100px;margin:0 auto">
+
+      <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+        <div data-screen-label="Dashboard" style="display:flex;flex-direction:column;gap:24px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px">
+            <div>
+              <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your dashboard</p>
+              <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Welcome back, <em style="color:#2f5d45;">Callum &amp; Niamh</em></h1>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <a href="Edit profile.dc.html#photos" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">Add photos</a>
+              <a href="Edit profile.dc.html#reviews" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">Request a review</a>
+              <a href="Edit profile.dc.html#headings" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s" style-hover="background:#2f5d45;color:#fff;border-color:#2f5d45">Edit colours</a>
+            </div>
+          </div>
+          <div data-dash-grid="1" style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start">
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+              <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:26px">
+                <img src="public/images/couple-bw-1.jpg" alt="Callum &amp; Niamh" style="width:84px;height:84px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+                <div style="min-width:0">
+                  <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 7px">Callum &amp; Niamh</h2>
+                  <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0 0 12px">Experienced house &amp; pet sitters available worldwide.</p>
+                  <a href="Sitter profile.dc.html" style="display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.03em;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px">myahsits.com/callumandniamh</a>
+                </div>
+              </div>
+              <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+                <a href="Edit profile.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Edit profile</a>
+                <a href="Sitter profile.dc.html" style="font-size:.78rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s" style-hover="color:#2c1a0e">View public page</a>
+              </div>
+            </div>
+
+            <div data-stats="1" style="display:flex;flex-direction:column;gap:16px">
+              <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+                <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">5</span>
+                <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Reviews</span>
+              </div>
+              <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+                <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">6</span>
+                <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Sits available</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Share your profile</h3>
+            <p style="font-size:.93rem;color:#6b4e35;margin:0 0 20px;line-height:1.7;max-width:560px">Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <input data-share="1" type="text" readonly="readonly" value="https://myahsits.com/callumandniamh" style="flex:1;min-width:240px;border:1.5px solid rgba(44,26,14,.15);border-radius:10px;padding:13px 16px;font-size:.92rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none" />
+              <button type="button" onClick="{{ onCopy }}" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">{{ copyLabel }}</button>
+            </div>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+              <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Profile strength</h3>
+              <span style="font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45">{{ strengthLabel }}</span>
+            </div>
+            <div style="height:8px;border-radius:50px;background:rgba(110,84,56,.15);overflow:hidden;margin-bottom:22px">
+              <div style="{{ strengthBar }}"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
+              <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:11px;font-size:.88rem;color:#2c1a0e">
+                  <span style="{{ c.markStyle }}">{{ c.mark }}</span>{{ c.label }}
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="margin-top:32px">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px">
+              <div>
+                <h2 style="font-family:'Marcellus',serif;font-size:1.7rem;color:#2c1a0e;margin:0 0 6px">Your page preview</h2>
+                <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0">How your public profile currently looks with your colours applied.</p>
+              </div>
+              <a href="Edit profile.dc.html" style="font-size:.76rem;font-weight:600;color:#2f5d45;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s" style-hover="color:#2c1a0e">Edit profile</a>
+            </div>
+            <div style="background:#faf6ee;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(44,26,14,.12);border:1px solid rgba(44,26,14,.08)">
+              <div style="display:flex;align-items:center;gap:14px;padding:13px 18px;background:#fff;border-bottom:1px solid rgba(44,26,14,.08)">
+                <span style="display:flex;gap:6px;flex-shrink:0">
+                  <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+                  <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+                  <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+                </span>
+                <span style="flex:1;background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:50px;padding:7px 16px;font-size:.74rem;color:#6b4e35;letter-spacing:.02em;display:flex;align-items:center;gap:9px;min-width:0">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0"><rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path></svg>
+                  myahsits.com/callumandniamh
+                </span>
+              </div>
+              <div style="position:relative;height:230px;overflow:hidden">
+                <img src="public/images/couple-villa-1.jpg" alt="" style="width:100%;height:100%;object-fit:cover;display:block;object-position:center 30%" />
+                <div style="position:absolute;inset:0;background:rgba(44,26,14,.55)"></div>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center;padding:16px">
+                  <span style="font-size:.58rem;background:rgba(255,255,255,.16);border:1px solid rgba(196,171,138,.4);color:#fff;padding:5px 14px;border-radius:50px;margin-bottom:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">Experienced sitters worldwide</span>
+                  <p style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:1.9rem;color:#fff;line-height:1;margin:0">MYAH</p>
+                  <p style="font-size:.72rem;color:rgba(255,255,255,.88);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:8px 0 0">Callum &amp; Niamh</p>
+                  <span style="display:inline-block;margin-top:12px;background:#2f5d45;color:#fff;font-size:.58rem;font-weight:600;padding:8px 18px;border-radius:50px;letter-spacing:.1em;text-transform:uppercase">Book us today</span>
+                </div>
+              </div>
+              <div style="padding:22px 26px">
+                <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">Who we are</p>
+                <div style="display:flex;gap:14px;align-items:flex-start">
+                  <img src="public/images/couple-dinner-1.jpg" alt="" style="width:74px;height:74px;border-radius:10px;object-fit:cover;flex-shrink:0" />
+                  <p style="font-size:.74rem;color:#6b4e35;line-height:1.7;margin:0">We're Callum and Niamh — a couple who have spent the last few years looking after homes and animals across the UK and Australia…</p>
+                </div>
+              </div>
+              <div style="padding:22px 26px">
+                <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">What pet owners say</p>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+                  <sc-for list="{{ pvReviews }}" as="r" hint-placeholder-count="3">
+                    <div style="background:#fff;border:1px solid rgba(110,84,56,.18);border-radius:10px;padding:13px">
+                      <span style="color:#2f5d45;font-size:.55rem;display:block;margin-bottom:6px;letter-spacing:.2em">★★★★★</span>
+                      <p style="font-size:.64rem;color:#6b4e35;line-height:1.6;font-style:italic;margin:0 0 6px">"{{ r.text }}"</p>
+                      <span style="font-size:.56rem;font-weight:700;color:#2f5d45;letter-spacing:.04em">— {{ r.name }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="padding:22px 26px">
+                <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">Pets we've loved</p>
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px">
+                  <sc-for list="{{ pvGallery }}" as="g" hint-placeholder-count="8">
+                    <div style="aspect-ratio:1;border-radius:6px;overflow:hidden;background:#e9e0d2"><img src="{{ g }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="background:#2c1a0e;padding:16px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px">
+                <p style="font-family:'Marcellus',serif;font-size:.82rem;margin:0"><span style="color:#2f5d45">MYAH</span> </p>
+                <span style="font-size:.6rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase">Callum &amp; Niamh</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSits }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Sits tab">
+          <div style="margin-bottom:34px">
+            <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Available sits</p>
+            <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;margin:0 0 10px;line-height:1.2">Find your <em style="color:#2f5d45;">next sit</em></h1>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;max-width:600px;margin:0">Browse homes looking for trusted sitters. Open any listing to see the full details, meet the pets, and get in touch.</p>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px">
+            <sc-for list="{{ sits }}" as="sit" hint-placeholder-count="4">
+              <a href="Sit detail.dc.html" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease" style-hover="transform:translateY(-6px);box-shadow:0 20px 50px rgba(44,26,14,.12);border-color:rgba(110,84,56,.45)">
+                <div style="position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#e9e0d2">
+                  <img src="{{ sit.img }}" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
+                  <span style="position:absolute;top:14px;left:14px;background:#fff;color:#2c1a0e;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:7px 15px;border-radius:50px;box-shadow:0 2px 8px rgba(0,0,0,.14)">{{ sit.duration }}</span>
+                </div>
+                <div style="padding:20px 22px 24px">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                    <h3 style="font-family:'Marcellus',serif;font-size:1.12rem;color:#2c1a0e;line-height:1.3;margin:0;flex:1">{{ sit.title }}</h3>
+                    <img src="{{ sit.pic }}" alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.25)" />
+                  </div>
+                  <p style="font-size:.83rem;color:#6b4e35;margin:6px 0 10px">{{ sit.owner }}</p>
+                  <p style="font-size:.83rem;color:#5c3d20;font-weight:700;margin:0 0 12px">{{ sit.dates }}</p>
+                  <div style="display:flex;flex-wrap:wrap;gap:7px">
+                    <sc-for list="{{ sit.petList }}" as="p" hint-placeholder-count="2">
+                      <span style="background:rgba(110,84,56,.08);color:#5c3d20;font-size:.74rem;font-weight:700;padding:5px 13px;border-radius:50px;border:1px solid rgba(110,84,56,.22)">{{ p }}</span>
+                    </sc-for>
+                  </div>
+                </div>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMessages }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Messages tab" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+          <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>
+          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No messages yet</h2>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0">When an owner gets in touch about a sit, the conversation will appear here.</p>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isProfile }}" hint-placeholder-val="{{ false }}">
+        <div data-screen-label="Profile tab" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+          <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">Edit your profile</h2>
+          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Update your bio, photos, reviews, platform links and colours — everything that appears on your public page.</p>
+          <a href="Edit profile.dc.html" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)" style-active="transform:translateY(0) scale(.98)">Open profile editor</a>
+        </div>
+      </sc-if>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1200,&quot;height&quot;:900}}">
+class Component extends DCLogic {
+  state = { tab: 'dashboard', copied: false };
+
+  renderVals() {
+    const tab = this.state.tab;
+    const icons = {
+      dashboard: '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect>',
+      sits: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>',
+      messages: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
+      profile: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>'
+    };
+    const tabs = [
+      { id: 'dashboard', label: 'Dashboard' },
+      { id: 'sits', label: 'Sits' },
+      { id: 'messages', label: 'Messages' },
+      { id: 'profile', label: 'Profile' }
+    ].map(t => {
+      const on = tab === t.id;
+      return {
+        label: t.label,
+        icon: { __html: icons[t.id] },
+        style: 'flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:\'Montserrat\',sans-serif;color:' + (on ? '#2f5d45' : '#8a6a4f') + ';transition:color .2s',
+        iconStyle: 'display:flex',
+        labelStyle: 'font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase',
+        underlineStyle: 'position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:' + (on ? '#2f5d45' : 'transparent'),
+        onClick: () => { this.setState({ tab: t.id }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      };
+    });
+
+    const items = [
+      { label: 'Bio written', done: true },
+      { label: 'Hero photos added', done: true },
+      { label: 'Gallery photos added', done: true },
+      { label: 'Reviews collected', done: true },
+      { label: 'Platform links added', done: true },
+      { label: 'Colours customised', done: false }
+    ];
+    const done = items.filter(i => i.done).length;
+    const pct = Math.round((done / items.length) * 100);
+    const checklist = items.map(i => ({
+      label: i.label,
+      mark: i.done ? '✓' : '',
+      markStyle: 'width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;line-height:1;' +
+        (i.done ? 'background:#2f5d45;color:#fff;' : 'background:transparent;border:1.5px dashed rgba(110,84,56,.55);color:#2f5d45;')
+    }));
+
+    return {
+      tabs,
+      checklist,
+      strengthLabel: done + ' of ' + items.length + ' complete',
+      strengthBar: 'height:100%;width:' + pct + '%;border-radius:50px;background:linear-gradient(90deg,#2f5d45 0%,#3e7a5b 100%);transition:width .4s ease',
+      isDash: tab === 'dashboard',
+      isSits: tab === 'sits',
+      isMessages: tab === 'messages',
+      isProfile: tab === 'profile',
+      copyLabel: this.state.copied ? 'Copied!' : 'Copy',
+      onCopy: () => {
+        const input = document.querySelector('[data-share]');
+        if (input) {
+          input.select();
+          if (navigator.clipboard) navigator.clipboard.writeText(input.value);
+        }
+        this.setState({ copied: true });
+        clearTimeout(this.copyT);
+        this.copyT = setTimeout(() => this.setState({ copied: false }), 2000);
+      },
+      pvReviews: [
+        { text: 'Super lovely couple who took great care of our cat Rocco!', name: 'Jess & Sam' },
+        { text: "We couldn't have asked for better pet sitters — reliable and caring.", name: 'Libby' },
+        { text: 'They are reliable, trustworthy, and clearly care about his wellbeing.', name: 'Thomas James' }
+      ],
+      pvGallery: [
+        'public/images/alfie-1.jpg', 'public/images/solomon-1.jpg', 'public/images/chester-1.jpg', 'public/images/travis-1.jpg',
+        'public/images/bailey-1.jpg', 'public/images/zeus-1.jpg', 'public/images/orca-3.jpg', 'public/images/solomon-4.jpg'
+      ],
+      sits: [
+        { title: 'Cosy cottage with two spaniels', owner: 'Thomas James · Bath, UK', dates: '4 Oct — 18 Oct 2026', duration: '14 days', img: 'public/images/slideshow-living-room.jpeg', pic: 'public/images/solomon-1.jpg', petList: ['Solomon · Dog', 'Chester · Dog'] },
+        { title: 'Sydney apartment, one cat', owner: 'Jess & Sam · Bondi, Sydney, AU', dates: '26 Sep — 2 Oct 2026', duration: '6 days', img: 'public/images/slideshow-ocean-sunset.jpeg', pic: 'public/images/orca-3.jpg', petList: ['Rocco · Cat'] },
+        { title: 'Farmhouse sit — three dogs', owner: 'Deb Wallace · Peak District, UK', dates: '2 Nov — 30 Nov 2026', duration: '28 days', img: 'public/images/slideshow-dogs-couch.jpeg', pic: 'public/images/travis-1.jpg', petList: ['Travis · Dog', 'Bailey · Dog', '+1 more'] },
+        { title: 'Beach house, two dogs + garden', owner: 'Angela Reid · Byron Bay, AU', dates: '8 Dec — 22 Dec 2026', duration: '14 days', img: 'public/images/slideshow-springer-beach.jpeg', pic: 'public/images/bailey-3.jpg', petList: ['Bailey · Dog', 'Zeus · Dog'] }
+      ]
+    };
+  }
+
+  componentDidMount() {
+    const loader = document.querySelector('[data-loader]');
+    const show = () => {
+      if (!loader) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(this.hideT);
+      this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    };
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
+      a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+    });
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.hideT);
+    clearTimeout(this.copyT);
+  }
+}
+</script>
+</body>
+</html>

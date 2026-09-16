@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="crossorigin" />
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+  * { box-sizing: border-box; }
+  a { color: #2f5d45; }
+  a:hover { color: #2c1a0e; }
+  @keyframes gs-ring { to { transform: rotate(360deg); } }
+  @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+  @media (max-width: 1000px) {
+    [data-topnav] { padding: 14px 24px !important; }
+    [data-pad] { padding: 34px 20px 80px !important; }
+    [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-aside] { position: static !important; }
+    [data-row] { grid-template-columns: minmax(0,1fr) !important; }
+    [data-row] [data-actions] { padding: 0 22px 20px !important; justify-content: flex-start !important; }
+    [data-safety] { grid-template-columns: minmax(0,1fr) !important; }
+  }
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="public/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="Home.dc.html" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="public/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="Dashboard.dc.html" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s" style-hover="gap:13px;color:#2f5d45">&larr; Dashboard</a>
+      <a href="Messages.dc.html" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s" style-hover="color:#2c1a0e">Messages</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Notifications" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your account</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">What&rsquo;s <em style="color:#2f5d45;">happened</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">{{ introLine }}</p>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px">
+            <div style="display:flex;gap:9px;flex-wrap:wrap">
+              <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+                <button type="button" onClick="{{ t.onClick }}" style="{{ t.style }}">{{ t.label }} <span style="{{ t.countStyle }}">{{ t.count }}</span></button>
+              </sc-for>
+            </div>
+            <button type="button" onClick="{{ onReadAll }}" style="{{ readAllStyle }}">Mark all read</button>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:22px">
+            <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+              <div>
+                <p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 12px">{{ g.label }}</p>
+                <div style="display:flex;flex-direction:column;gap:11px">
+                  <sc-for list="{{ g.items }}" as="n" hint-placeholder-count="4">
+                    <article data-row="1" style="{{ n.wrapStyle }}">
+                      <div style="display:flex;gap:16px;align-items:flex-start;padding:20px 22px;min-width:0">
+                        <span style="{{ n.iconStyle }}">{{ n.icon }}</span>
+                        <div style="flex:1;min-width:0">
+                          <div style="display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:5px">
+                            <p style="{{ n.titleStyle }}">{{ n.title }}</p>
+                            <span style="{{ n.tagStyle }}">{{ n.tag }}</span>
+                          </div>
+                          <p style="font-size:.92rem;color:#6b4e35;line-height:1.7;margin:0 0 4px">{{ n.body }}</p>
+                          <p style="font-size:.79rem;color:#8a6a4f;margin:0">{{ n.when }}</p>
+                        </div>
+                      </div>
+                      <div data-actions="1" style="display:flex;align-items:center;gap:10px;padding:20px 22px;justify-content:flex-end;flex-wrap:wrap">
+                        <a href="{{ n.href }}" style="{{ n.ctaStyle }}">{{ n.cta }}</a>
+                        <button type="button" onClick="{{ n.onRead }}" style="{{ n.readStyle }}">{{ n.readLabel }}</button>
+                      </div>
+                    </article>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="{{ emptyStyle }}">
+            <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">All caught up</p>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0;max-width:420px">Nothing unread. Anything new lands here and, if you want it to, in your inbox.</p>
+          </div>
+
+          <section data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;margin-top:28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">If something goes wrong</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.93rem;color:#6b4e35;line-height:1.75;margin:0 0 26px;max-width:520px">Sits mostly go fine. When they don&rsquo;t, here is exactly what to do &mdash; no hunting through a help centre at eleven at night.</p>
+
+            <div data-safety="1" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <sc-for list="{{ safety }}" as="s" hint-placeholder-count="4">
+                <a href="{{ s.href }}" style="{{ s.wrapStyle }}">
+                  <p style="{{ s.titleStyle }}">{{ s.title }}</p>
+                  <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0 0 12px">{{ s.body }}</p>
+                  <span style="{{ s.linkStyle }}">{{ s.link }} &rarr;</span>
+                </a>
+              </sc-for>
+            </div>
+
+            <div style="display:flex;align-items:flex-start;gap:14px;background:#fdeeee;border:1px solid #f7cfcf;border-radius:14px;padding:18px 20px;margin-top:20px">
+              <span style="width:26px;height:26px;border-radius:50%;background:#b91c1c;color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">!</span>
+              <p style="font-size:.92rem;color:#5c3d20;line-height:1.7;margin:0">If an animal is hurt or someone is in danger, call a vet or the emergency services first. Tell us afterwards &mdash; we are not an emergency service and we would rather you got help fast.</p>
+            </div>
+          </section>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease" style-hover="box-shadow:0 10px 34px rgba(44,26,14,.08);border-color:rgba(110,84,56,.4)">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 8px">What reaches you</p>
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 20px">Everything shows on this page. Choose what also leaves it.</p>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <sc-for list="{{ prefs }}" as="p" hint-placeholder-count="5">
+                <div style="display:flex;align-items:center;gap:14px">
+                  <div style="flex:1;min-width:0">
+                    <p style="font-size:.92rem;font-weight:600;color:#2c1a0e;margin:0 0 2px">{{ p.label }}</p>
+                    <p style="font-size:.79rem;color:#6b4e35;margin:0">{{ p.note }}</p>
+                  </div>
+                  <button type="button" onClick="{{ p.onToggle }}" style="{{ p.switchStyle }}">
+                    <span style="{{ p.knobStyle }}"></span>
+                  </button>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="background:#2c1a0e;border-radius:18px;padding:26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">Your sit starts soon</p>
+            <p style="font-family:'Marcellus',serif;font-size:1.35rem;color:#fff;margin:0 0 8px;line-height:1.25">Cosy cottage with two spaniels</p>
+            <p style="font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.65;margin:0 0 20px">Thomas James &middot; Woolley, near Bath. 4 &ndash; 18 Oct 2026, 20 days away.</p>
+            <a href="Confirmed sit.dc.html" style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2c1a0e;background:#2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;transition:background .25s ease, transform .15s ease" style-hover="background:#3e7a5b;border-color:#3e7a5b;transform:translateY(-2px);box-shadow:0 12px 28px rgba(110,84,56,.36)">Open the sit</a>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0">{{ quietLine }}</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1240,&quot;height&quot;:960}}">
+const ITEMS = [
+  { id: 'n1', kind: 'urgent', group: 'Today', title: 'Thomas James confirmed you for the Bath sit', body: 'Four to eighteen October. His address, wifi and vet details are now on your sit page.', when: '2 hours ago', cta: 'Open the sit', href: 'Confirmed sit.dc.html', read: false },
+  { id: 'n2', kind: 'message', group: 'Today', title: 'Thomas James sent you a message', body: '“Evening before works perfectly — I’ll have the keys and a cup of tea ready.”', when: '5 hours ago', cta: 'Open message', href: 'Messages.dc.html', read: false },
+  { id: 'n3', kind: 'sit', group: 'This week', title: 'Your sit starts in 20 days', body: 'Two things still unticked on the handover checklist — keys and the vet details.', when: 'Monday', cta: 'Open the sit', href: 'Confirmed sit.dc.html', read: false },
+  { id: 'n4', kind: 'review', group: 'This week', title: 'Priya Nandi left you a review', body: '“Chester is a nervous cat and he was sitting on Niamh’s lap by day two. That never happens.”', when: 'Sunday', cta: 'See it on your page', href: 'Sitter profile.dc.html', read: true },
+  { id: 'n5', kind: 'match', group: 'This week', title: '3 new sits match “Long sits in the south west”', body: 'Two in Somerset, one in Devon. All inside the dates you marked free.', when: 'Saturday', cta: 'View matches', href: 'Saved sits.dc.html', read: true },
+  { id: 'n6', kind: 'account', group: 'Earlier', title: 'Photo ID verified', body: 'The badge is live on your profile and in browse results.', when: '12 March', cta: 'View verification', href: 'Verification.dc.html', read: true }
+];
+
+class Component extends DCLogic {
+  state = {
+    tab: 'all',
+    read: ITEMS.reduce((acc, i) => { acc[i.id] = i.read; return acc; }, {}),
+    prefs: { applications: true, messages: true, sit: true, matches: false, product: false }
+  };
+
+  renderVals() {
+    const s = this.state;
+
+    const svg = paths => React.createElement('svg', {
+      width: 19, height: 19, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor',
+      strokeWidth: 1.7, strokeLinecap: 'round', strokeLinejoin: 'round'
+    }, paths.map((d, i) => React.createElement('path', { key: i, d })));
+
+    const ICONS = {
+      urgent: svg(['M20 6.5 9.5 17 4 11.5']),
+      message: svg(['M3.5 6h17v12h-17z', 'm4 6.8 8 5.6 8-5.6']),
+      sit: svg(['M4 10.5 12 4l8 6.5V20a.5.5 0 0 1-.5.5h-15A.5.5 0 0 1 4 20z', 'M10 20.5v-6h4v6']),
+      review: svg(['M4 5.5h16v10H9l-5 4z', 'M8.5 10.5h7']),
+      match: svg(['M18 9a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16S18 14 18 9z', 'M10.4 19a1.9 1.9 0 0 0 3.2 0']),
+      account: svg(['M12 3.5 5 6v6c0 4.2 3 7.3 7 8.5 4-1.2 7-4.3 7-8.5V6z', 'm9.3 12.2 1.9 1.9 3.5-3.6'])
+    };
+    const unread = ITEMS.filter(i => !s.read[i.id]);
+
+    const tabDefs = [
+      { key: 'all', label: 'Everything', count: ITEMS.length },
+      { key: 'unread', label: 'Unread', count: unread.length },
+      { key: 'sits', label: 'My sits', count: ITEMS.filter(i => i.kind === 'sit' || i.kind === 'urgent').length },
+      { key: 'messages', label: 'Messages', count: ITEMS.filter(i => i.kind === 'message').length }
+    ];
+
+    let list = ITEMS;
+    if (s.tab === 'unread') list = ITEMS.filter(i => !s.read[i.id]);
+    if (s.tab === 'sits') list = ITEMS.filter(i => i.kind === 'sit' || i.kind === 'urgent');
+    if (s.tab === 'messages') list = ITEMS.filter(i => i.kind === 'message');
+
+    const tagFor = {
+      urgent: { label: 'Application', bg: '#2f5d45', colour: '#fff' },
+      message: { label: 'Message', bg: 'rgba(110,84,56,.16)', colour: '#2f5d45' },
+      sit: { label: 'Your sit', bg: '#2c1a0e', colour: '#fff' },
+      review: { label: 'Review', bg: 'rgba(110,84,56,.16)', colour: '#2f5d45' },
+      match: { label: 'Alert', bg: 'rgba(44,26,14,.08)', colour: '#6b4e35' },
+      account: { label: 'Account', bg: 'rgba(44,26,14,.08)', colour: '#6b4e35' }
+    };
+
+    const order = ['Today', 'This week', 'Earlier'];
+    const groups = order.map(label => ({
+      label,
+      items: list.filter(i => i.group === label).map(i => {
+        const isRead = s.read[i.id];
+        const tag = tagFor[i.kind];
+        return {
+          icon: ICONS[i.kind],
+          iconStyle: 'width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;transition:background .25s ease, color .25s ease;' +
+            (isRead ? 'background:#faf6ee;color:#8a6a4f;border:1px solid rgba(44,26,14,.08);' : 'background:#2f5d45;color:#fff;'),
+          title: i.title,
+          titleStyle: 'font-size:1rem;margin:0;line-height:1.4;font-weight:' + (isRead ? '400' : '700') + ';color:' + (isRead ? '#6b4e35' : '#2c1a0e') + ';',
+          tag: tag.label,
+          tagStyle: 'font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:' + tag.bg + ';color:' + tag.colour + ';',
+          body: i.body,
+          when: i.when,
+          cta: i.cta,
+          href: i.href,
+          ctaStyle: 'font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border-radius:50px;padding:11px 22px;white-space:nowrap;transition:background .25s ease, border-color .25s ease, color .25s ease, transform .15s ease;' +
+            (isRead
+              ? 'color:#6b4e35;border:1.5px solid rgba(44,26,14,.15);'
+              : 'color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;box-shadow:0 6px 18px rgba(110,84,56,.24);'),
+          readLabel: isRead ? 'Unread' : 'Read',
+          readStyle: 'font-family:\'Montserrat\',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a6a4f;background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s',
+          wrapStyle: 'display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0;border-radius:18px;transition:border-color .25s ease, background .25s ease;' +
+            (isRead ? 'background:#faf6ee;border:1px solid rgba(44,26,14,.08);' : 'background:#fff;border:1px solid rgba(110,84,56,.3);box-shadow:0 1px 2px rgba(44,26,14,.04);'),
+          onRead: () => this.setState(st => ({ read: { ...st.read, [i.id]: !st.read[i.id] } }))
+        };
+      })
+    })).filter(g => g.items.length);
+
+    return {
+      introLine: unread.length
+        ? unread.length + (unread.length === 1 ? ' thing needs' : ' things need') + ' your attention. The rest is here for the record.'
+        : 'Nothing unread. Everything that has happened on your account is kept here.',
+      tabs: tabDefs.map(t => ({
+        label: t.label,
+        count: t.count,
+        style: 'display:inline-flex;align-items:center;gap:9px;font-family:\'Montserrat\',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;' +
+          (s.tab === t.key ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);'),
+        countStyle: 'font-size:.7rem;padding:2px 8px;border-radius:50px;' + (s.tab === t.key ? 'background:rgba(255,255,255,.25);color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;'),
+        onClick: () => this.setState({ tab: t.key })
+      })),
+      readAllStyle: 'font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:10px 22px;cursor:pointer;transition:background .2s ease, border-color .2s ease, color .2s ease;' +
+        (unread.length ? 'background:#fff;color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);' : 'background:none;color:#8a6a4f;border:1.5px solid rgba(44,26,14,.12);'),
+      onReadAll: () => this.setState({ read: ITEMS.reduce((acc, i) => { acc[i.id] = true; return acc; }, {}) }),
+      groups,
+      emptyStyle: 'flex-direction:column;align-items:flex-start;background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px;' + (groups.length ? 'display:none;' : 'display:flex;'),
+
+      safety: [
+        { title: 'The owner has cancelled on you', body: 'Tell us and we will surface sits matching your dates straight away, and flag the cancellation on their side.', link: 'Report a cancellation', href: 'Messages.dc.html', tone: 'warn' },
+        { title: 'Something happened to a pet', body: 'Vet first, always. Then log it here so both sides have a written record of what happened and when.', link: 'Log an incident', href: 'Messages.dc.html', tone: 'warn' },
+        { title: 'Someone made you uncomfortable', body: 'Block them, and tell us why. We read every report and the person is never told who raised it.', link: 'Report a person', href: 'Messages.dc.html', tone: 'plain' },
+        { title: 'Pulling out of a sit', body: 'Life happens. More than two weeks out and it does not touch your record — later than that and the owner is told.', link: 'Read the policy', href: 'Confirmed sit.dc.html', tone: 'plain' }
+      ].map(x => ({
+        title: x.title,
+        titleStyle: 'font-family:\'Marcellus\',serif;font-size:1.08rem;color:#2c1a0e;margin:0 0 8px;line-height:1.3',
+        body: x.body,
+        link: x.link,
+        href: x.href,
+        linkStyle: 'font-size:.74rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:' + (x.tone === 'warn' ? '#b91c1c' : '#2f5d45') + ';',
+        wrapStyle: 'display:block;text-decoration:none;background:#faf6ee;border-radius:14px;padding:22px 24px;transition:border-color .25s ease, transform .2s ease;border:1px solid ' + (x.tone === 'warn' ? 'rgba(185,28,28,.22)' : 'rgba(110,84,56,.25)') + ';'
+      })),
+
+      prefs: [
+        { key: 'applications', label: 'Sit decisions', note: 'An owner shortlists or confirms you' },
+        { key: 'messages', label: 'Messages', note: 'A reply in a conversation' },
+        { key: 'sit', label: 'Sit reminders', note: 'A week before, then the day before' },
+        { key: 'matches', label: 'Saved search alerts', note: 'New sits matching your searches' },
+        { key: 'product', label: 'News from us', note: 'Occasional, never more than monthly' }
+      ].map(p => {
+        const on = s.prefs[p.key];
+        return {
+          label: p.label,
+          note: p.note,
+          switchStyle: 'position:relative;width:44px;height:25px;border-radius:50px;border:none;cursor:pointer;flex-shrink:0;padding:0;transition:background .25s ease;background:' + (on ? '#2f5d45' : 'rgba(44,26,14,.16)') + ';',
+          knobStyle: 'position:absolute;top:3px;left:' + (on ? '22px' : '3px') + ';width:19px;height:19px;border-radius:50%;background:#fff;display:block;transition:left .22s ease;box-shadow:0 1px 3px rgba(44,26,14,.25)',
+          onToggle: () => this.setState(st => ({ prefs: { ...st.prefs, [p.key]: !st.prefs[p.key] } }))
+        };
+      }),
+
+      quietLine: Object.values(s.prefs).filter(Boolean).length <= 2
+        ? 'Quiet setup. Worth keeping sit decisions on at least — owners move quickly once they choose.'
+        : 'We never email during a sit unless it is about that sit.'
+    };
+  }
+
+  componentDidMount() {
+    const loader = document.querySelector('[data-loader]');
+    document.querySelectorAll('a[href]').forEach(a => {
+      const href = a.getAttribute('href') || '';
+      if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+      a.addEventListener('click', e => {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        loader.style.opacity = '1';
+        loader.style.pointerEvents = 'all';
+        clearTimeout(this.hideT);
+        this.hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+      });
+    });
+  }
+
+  componentWillUnmount() { clearTimeout(this.hideT); }
+}
+</script>
+</body>
+</html>
