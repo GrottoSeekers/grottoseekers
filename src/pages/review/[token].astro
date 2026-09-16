@@ -48,12 +48,15 @@ if (token) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>{success ? 'Thank you!' : `Leave a review for ${sitterName || 'this sitter'}`} — Grotto Sitters</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>{success ? 'Thank you!' : `Leave a review for ${sitterName || 'this sitter'}`} — MYAH</title>
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="" class="nav-logo-img" />Grotto <span>Sitters</span></a>
+      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
     </nav>
 
     <main class="review-wrap">
@@ -62,13 +65,13 @@ if (token) {
           <div class="success-icon">&#10003;</div>
           <h1>Thank you!</h1>
           <p>Your review has been submitted and will appear on {sitterName ? `${sitterName}'s` : 'their'} profile.</p>
-          <a href="/" class="btn-primary">Visit Grotto Sitters</a>
+          <a href="/" class="btn-primary">Visit MYAH</a>
         </div>
       ) : !valid ? (
         <div class="review-card invalid-card">
           <h1>Link not valid</h1>
           <p>{errorMsg || 'This review link has already been used or is no longer valid. If you think this is a mistake, ask your sitter to send you a new link.'}</p>
-          <a href="/" class="btn-primary">Visit Grotto Sitters</a>
+          <a href="/" class="btn-primary">Visit MYAH</a>
         </div>
       ) : (
         <div class="review-card">
@@ -81,7 +84,7 @@ if (token) {
           </div>
 
           <p class="review-intro">
-            {sitterName} has asked you to share your experience. Your review will appear on their Grotto Sitters profile page.
+            {sitterName} has asked you to share your experience. Your review will appear on their MYAH profile page.
           </p>
 
           {errorMsg && <div class="error-banner">{errorMsg}</div>}
@@ -108,11 +111,11 @@ if (token) {
     </main>
 
     <style>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
 
       nav {
         position: static;
-        border-bottom: 1px solid rgba(200,150,62,0.2);
+        border-bottom: 1px solid rgba(47,93,69,0.2);
         padding: 18px 48px;
         display: flex; justify-content: center; align-items: center;
       }
@@ -131,19 +134,19 @@ if (token) {
       .sitter-info { display: flex; gap: 20px; align-items: center; margin-bottom: 24px; }
       .sitter-photo {
         width: 72px; height: 72px; border-radius: 50%; object-fit: cover;
-        border: 3px solid rgba(200,150,62,0.3); flex-shrink: 0;
+        border: 3px solid rgba(47,93,69,0.3); flex-shrink: 0;
       }
       .review-label {
         font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em;
-        text-transform: uppercase; color: var(--gold); margin-bottom: 4px;
+        text-transform: uppercase; color: var(--myah-forest); margin-bottom: 4px;
       }
       .sitter-info h1 {
-        font-family: "Playfair Display", serif; font-size: 1.8rem;
-        color: var(--brown-dark); line-height: 1.2;
+        font-family: "Marcellus", serif; font-size: 1.8rem;
+        color: var(--myah-ink); line-height: 1.2;
       }
 
       .review-intro {
-        font-size: 0.92rem; color: var(--text-soft); line-height: 1.7;
+        font-size: 0.92rem; color: var(--myah-tan); line-height: 1.7;
         margin-bottom: 28px; padding-bottom: 24px;
         border-bottom: 1px solid rgba(44,26,14,0.08);
       }
@@ -156,18 +159,18 @@ if (token) {
       .review-form { display: flex; flex-direction: column; gap: 20px; }
 
       .field { display: flex; flex-direction: column; gap: 6px; }
-      label { font-size: 0.85rem; font-weight: 700; color: var(--brown-dark); letter-spacing: 0.02em; }
-      .req { color: var(--gold); }
-      .field-hint { font-size: 0.78rem; color: var(--text-soft); line-height: 1.5; }
+      label { font-size: 0.85rem; font-weight: 700; color: var(--myah-ink); letter-spacing: 0.02em; }
+      .req { color: var(--myah-forest); }
+      .field-hint { font-size: 0.78rem; color: var(--myah-tan); line-height: 1.5; }
 
       input[type="text"], textarea {
         width: 100%; box-sizing: border-box;
         border: 1.5px solid rgba(44,26,14,0.15); border-radius: 8px;
         padding: 12px 16px; font-size: 0.95rem; font-family: "Lato", sans-serif;
-        color: var(--text); background: var(--cream); outline: none;
+        color: var(--myah-ink); background: var(--myah-paper); outline: none;
         transition: border-color 0.2s;
       }
-      input:focus, textarea:focus { border-color: var(--gold); }
+      input:focus, textarea:focus { border-color: var(--myah-forest); }
       textarea { resize: vertical; line-height: 1.6; }
 
       .btn-submit { padding: 14px 36px; font-size: 0.95rem; align-self: flex-start; }
@@ -180,11 +183,11 @@ if (token) {
         margin: 0 auto 20px;
       }
       .success-card h1, .invalid-card h1 {
-        font-family: "Playfair Display", serif; font-size: 1.8rem;
-        color: var(--brown-dark); margin-bottom: 12px;
+        font-family: "Marcellus", serif; font-size: 1.8rem;
+        color: var(--myah-ink); margin-bottom: 12px;
       }
       .success-card p, .invalid-card p {
-        font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 28px;
+        font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; margin-bottom: 28px;
       }
 
       @media (max-width: 768px) {

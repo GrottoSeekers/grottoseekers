@@ -59,12 +59,15 @@ function daysBetween(from: string, to: string) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Dashboard — Grotto Sitters</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>Dashboard — MYAH</title>
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="" class="nav-logo-img" />Grotto <span>Sitters</span></a>
+      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
       <a href="/api/auth/logout" class="nav-logout">Log out</a>
     </nav>
 
@@ -108,7 +111,7 @@ function daysBetween(from: string, to: string) {
                     <h2 class="profile-name">{profile.name}</h2>
                     {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
                     <a href={`/${profile.slug}`} target="_blank" class="profile-link">
-                      grottositters.com/{profile.slug}
+                      myah.com/{profile.slug}
                     </a>
                   </div>
                 </div>
@@ -133,7 +136,7 @@ function daysBetween(from: string, to: string) {
                 <h3>Share your profile</h3>
                 <p>Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
                 <div class="share-url">
-                  <input type="text" readonly value={`https://grottositters.com/${profile.slug}`} id="shareUrl" />
+                  <input type="text" readonly value={`https://myah.com/${profile.slug}`} id="shareUrl" />
                   <button onclick="copyUrl()" class="copy-btn">Copy</button>
                 </div>
               </div>
@@ -147,7 +150,7 @@ function daysBetween(from: string, to: string) {
                 </div>
                 <a href="/profile/edit" class="preview-edit-link">Edit profile</a>
               </div>
-              <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#c8963e'};--pv-accent-light:${t.accent_light || '#e8b96a'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
+              <div class="page-preview" style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#2f5d45'};--pv-accent-light:${t.accent_light || '#3a7356'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'};`}>
                 <div class="pv-hero">
                   {heroImages.length > 0 ? (
                     <img src={heroImages[0].src} alt="" class="pv-hero-img" style={`object-position:${heroImages[0].pos}`} />
@@ -408,20 +411,20 @@ function daysBetween(from: string, to: string) {
     </script>
 
     <style is:global>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--cream); }
+      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
 
       nav {
         position: static;
         display: flex; justify-content: space-between; align-items: center;
         padding: 14px 48px; background: #fff;
-        border-bottom: 1px solid rgba(200,150,62,0.15);
+        border-bottom: 1px solid rgba(47,93,69,0.15);
         backdrop-filter: none;
       }
       .nav-logout {
         font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--gold); text-decoration: none;
+        text-transform: uppercase; color: var(--myah-forest); text-decoration: none;
       }
-      .nav-logout:hover { color: var(--brown-dark); }
+      .nav-logout:hover { color: var(--myah-ink); }
 
       /* ── NAV STRIP ──────────────────────────────────────── */
       .nav-strip {
@@ -440,12 +443,12 @@ function daysBetween(from: string, to: string) {
         position: relative; transition: color 0.2s;
         font-family: "Lato", sans-serif;
       }
-      .nav-tab:hover { color: var(--gold); }
-      .nav-tab.active { color: var(--gold); }
+      .nav-tab:hover { color: var(--myah-forest); }
+      .nav-tab.active { color: var(--myah-forest); }
       .nav-tab.active::after {
         content: ''; position: absolute;
         bottom: 0; left: 20%; right: 20%;
-        height: 3px; background: var(--gold);
+        height: 3px; background: var(--myah-forest);
         border-radius: 3px 3px 0 0;
       }
       .nav-tab-icon-wrap { position: relative; display: flex; }
@@ -469,7 +472,7 @@ function daysBetween(from: string, to: string) {
         display: flex; gap: 12px; align-items: center;
         pointer-events: auto; cursor: pointer; text-decoration: none; color: inherit;
         transform: translateX(120%); animation: toast-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
-        max-width: 380px; border-left: 4px solid var(--gold, #c8963e);
+        max-width: 380px; border-left: 4px solid var(--myah-forest, #2f5d45);
       }
       .msg-toast.toast-out { animation: toast-out 0.3s ease forwards; }
       @keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
@@ -477,9 +480,9 @@ function daysBetween(from: string, to: string) {
       .msg-toast-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
       .msg-toast-avatar-ph {
         width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
-        background: rgba(200,150,62,0.12); color: var(--gold, #c8963e);
+        background: rgba(47,93,69,0.12); color: var(--myah-forest, #2f5d45);
         display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 1rem; font-family: "Playfair Display", serif;
+        font-weight: 700; font-size: 1rem; font-family: "Marcellus", serif;
       }
       .msg-toast-body { flex: 1; min-width: 0; }
       .msg-toast-name { font-weight: 700; font-size: 0.88rem; color: var(--brown-dark, #2c1a0e); }
@@ -507,12 +510,12 @@ function daysBetween(from: string, to: string) {
       .profile-card { grid-column: 1; grid-row: 1; }
       .profile-card-inner { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 24px; }
       .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-      .profile-name { font-family: "Playfair Display", serif; font-size: 1.4rem; color: var(--brown-dark); margin-bottom: 6px; }
-      .profile-tagline { font-size: 0.9rem; color: var(--text-soft); line-height: 1.5; margin-bottom: 10px; }
-      .profile-link { font-size: 0.8rem; color: var(--gold); font-weight: 700; text-decoration: none; letter-spacing: 0.03em; }
+      .profile-name { font-family: "Marcellus", serif; font-size: 1.4rem; color: var(--myah-ink); margin-bottom: 6px; }
+      .profile-tagline { font-size: 0.9rem; color: var(--myah-tan); line-height: 1.5; margin-bottom: 10px; }
+      .profile-link { font-size: 0.8rem; color: var(--myah-forest); font-weight: 700; text-decoration: none; letter-spacing: 0.03em; }
       .profile-link:hover { text-decoration: underline; }
       .profile-card-actions { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 24px; display: flex; gap: 16px; align-items: center; }
-      .btn-view { font-size: 0.82rem; color: var(--gold); font-weight: 700; text-decoration: none; letter-spacing: 0.04em; }
+      .btn-view { font-size: 0.82rem; color: var(--myah-forest); font-weight: 700; text-decoration: none; letter-spacing: 0.04em; }
       .btn-view:hover { text-decoration: underline; }
 
       .stats-grid { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 16px; }
@@ -521,48 +524,48 @@ function daysBetween(from: string, to: string) {
         box-shadow: 0 2px 16px rgba(44,26,14,0.06);
         text-align: center; flex: 1; display: flex; flex-direction: column; gap: 6px;
       }
-      .stat-number { font-family: "Playfair Display", serif; font-size: 2rem; color: var(--gold); font-weight: 700; }
-      .stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-soft); }
+      .stat-number { font-family: "Marcellus", serif; font-size: 2rem; color: var(--myah-forest); font-weight: 700; }
+      .stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--myah-tan); }
 
       .share-card { grid-column: 1 / -1; grid-row: 2; }
-      .share-card h3 { font-family: "Playfair Display", serif; font-size: 1.2rem; color: var(--brown-dark); margin-bottom: 8px; }
-      .share-card p { font-size: 0.9rem; color: var(--text-soft); margin-bottom: 16px; line-height: 1.6; }
+      .share-card h3 { font-family: "Marcellus", serif; font-size: 1.2rem; color: var(--myah-ink); margin-bottom: 8px; }
+      .share-card p { font-size: 0.9rem; color: var(--myah-tan); margin-bottom: 16px; line-height: 1.6; }
       .share-url { display: flex; gap: 10px; }
       .share-url input {
         flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px;
         padding: 10px 14px; font-size: 0.9rem; font-family: "Lato", sans-serif;
-        color: var(--text); background: var(--cream); outline: none;
+        color: var(--myah-ink); background: var(--myah-paper); outline: none;
       }
       .copy-btn {
-        background: var(--gold); color: #fff; border: none; border-radius: 6px;
+        background: var(--myah-forest); color: #fff; border: none; border-radius: 6px;
         padding: 10px 20px; font-size: 0.85rem; font-weight: 700;
         cursor: pointer; white-space: nowrap; transition: background 0.2s;
       }
-      .copy-btn:hover { background: var(--gold-light); }
+      .copy-btn:hover { background: #3a7356; }
 
       .no-profile {
         background: #fff; border-radius: 12px; padding: 80px 48px; text-align: center;
         box-shadow: 0 2px 16px rgba(44,26,14,0.06); max-width: 520px; margin: 0 auto;
       }
       .no-profile-icon { font-size: 3rem; margin-bottom: 20px; }
-      .no-profile h2 { font-family: "Playfair Display", serif; font-size: 1.6rem; color: var(--brown-dark); margin-bottom: 12px; }
-      .no-profile p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; margin-bottom: 32px; }
+      .no-profile h2 { font-family: "Marcellus", serif; font-size: 1.6rem; color: var(--myah-ink); margin-bottom: 12px; }
+      .no-profile p { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; margin-bottom: 32px; }
 
       /* ── AVAILABLE SITS TAB ───────────────────────────────── */
       .sits-header { margin-bottom: 32px; }
       .sits-heading {
-        font-family: "Playfair Display", serif; font-size: 2rem;
-        color: var(--brown-dark); margin-bottom: 8px;
+        font-family: "Marcellus", serif; font-size: 2rem;
+        color: var(--myah-ink); margin-bottom: 8px;
       }
-      .sits-sub { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; max-width: 600px; }
+      .sits-sub { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; max-width: 600px; }
 
       .sits-empty {
         background: #fff; border-radius: 16px; padding: 80px 48px; text-align: center;
         box-shadow: 0 2px 12px rgba(44,26,14,0.05); max-width: 520px; margin: 0 auto;
       }
       .sits-empty-icon { font-size: 3rem; margin-bottom: 20px; }
-      .sits-empty h2 { font-family: "Playfair Display", serif; font-size: 1.5rem; color: var(--brown-dark); margin-bottom: 12px; }
-      .sits-empty p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; }
+      .sits-empty h2 { font-family: "Marcellus", serif; font-size: 1.5rem; color: var(--myah-ink); margin-bottom: 12px; }
+      .sits-empty p { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; }
 
       .sits-grid {
         display: grid;
@@ -596,7 +599,7 @@ function daysBetween(from: string, to: string) {
       }
       .sit-card-duration {
         position: absolute; top: 14px; left: 14px;
-        background: #fff; color: var(--brown-dark); font-size: 0.75rem; font-weight: 700;
+        background: #fff; color: var(--myah-ink); font-size: 0.75rem; font-weight: 700;
         padding: 6px 14px; border-radius: 24px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.12);
       }
@@ -604,25 +607,25 @@ function daysBetween(from: string, to: string) {
       .sit-card-body { padding: 18px 20px 22px; }
       .sit-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
       .sit-card-title {
-        font-family: "Playfair Display", serif; font-size: 1.1rem;
-        color: var(--brown-dark); line-height: 1.3; flex: 1;
+        font-family: "Marcellus", serif; font-size: 1.1rem;
+        color: var(--myah-ink); line-height: 1.3; flex: 1;
       }
       .sit-card-avatar {
         width: 36px; height: 36px; border-radius: 50%; object-fit: cover;
-        flex-shrink: 0; border: 2px solid rgba(200,150,62,0.2);
+        flex-shrink: 0; border: 2px solid rgba(47,93,69,0.2);
       }
-      .sit-card-owner { font-size: 0.82rem; color: var(--text-soft); margin-top: 4px; margin-bottom: 10px; }
+      .sit-card-owner { font-size: 0.82rem; color: var(--myah-tan); margin-top: 4px; margin-bottom: 10px; }
       .sit-card-dates {
-        font-size: 0.82rem; color: var(--brown-mid); font-weight: 600; margin-bottom: 12px;
+        font-size: 0.82rem; color: var(--myah-tan); font-weight: 600; margin-bottom: 12px;
       }
       .sit-card-pets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
       .sit-card-pet {
-        background: rgba(200,150,62,0.08); color: var(--brown-mid);
+        background: rgba(47,93,69,0.08); color: var(--myah-tan);
         font-size: 0.75rem; font-weight: 600; padding: 4px 12px;
-        border-radius: 20px; border: 1px solid rgba(200,150,62,0.15);
+        border-radius: 20px; border: 1px solid rgba(47,93,69,0.15);
       }
       .sit-card-desc {
-        font-size: 0.85rem; color: var(--text-soft); line-height: 1.6;
+        font-size: 0.85rem; color: var(--myah-tan); line-height: 1.6;
         display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
       }
 
@@ -632,9 +635,9 @@ function daysBetween(from: string, to: string) {
         display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;
       }
       .preview-title { font-size: 1.6rem; margin-bottom: 4px; }
-      .preview-sub { font-size: 0.9rem; color: var(--text-soft); line-height: 1.6; }
+      .preview-sub { font-size: 0.9rem; color: var(--myah-tan); line-height: 1.6; }
       .preview-edit-link {
-        font-size: 0.78rem; font-weight: 700; color: var(--gold);
+        font-size: 0.78rem; font-weight: 700; color: var(--myah-forest);
         text-decoration: none; letter-spacing: 0.04em; white-space: nowrap; margin-top: 6px;
       }
       .preview-edit-link:hover { text-decoration: underline; }
@@ -650,7 +653,7 @@ function daysBetween(from: string, to: string) {
       .pv-hero-overlay { position: absolute; inset: 0; background: rgba(44,26,14,0.5); }
       .pv-hero-content { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 2; text-align: center; padding: 16px; }
       .pv-badge { font-size: 0.6rem; background: rgba(255,255,255,0.15); color: #fff; padding: 4px 12px; border-radius: 50px; margin-bottom: 8px; font-weight: 700; letter-spacing: 0.06em; }
-      .pv-brand { font-family: "Playfair Display", serif; font-size: 1.8rem; color: #fff; line-height: 1; }
+      .pv-brand { font-family: "Marcellus", serif; font-size: 1.8rem; color: #fff; line-height: 1; }
       .pv-brand em { color: var(--pv-accent); font-style: italic; }
       .pv-name { font-size: 0.75rem; color: rgba(255,255,255,0.85); font-weight: 700; letter-spacing: 0.06em; margin-top: 6px; }
       .pv-tagline { font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
@@ -665,7 +668,7 @@ function daysBetween(from: string, to: string) {
       .pv-empty { font-style: italic; opacity: 0.4; }
 
       .pv-reviews-row { display: flex; gap: 10px; overflow: hidden; }
-      .pv-review-card { flex: 1; min-width: 0; background: var(--pv-bg); border: 1px solid rgba(200,150,62,0.1); border-radius: 8px; padding: 12px; }
+      .pv-review-card { flex: 1; min-width: 0; background: var(--pv-bg); border: 1px solid rgba(47,93,69,0.1); border-radius: 8px; padding: 12px; }
       .pv-stars { color: var(--pv-accent); font-size: 0.55rem; display: block; margin-bottom: 4px; }
       .pv-review-card p { font-size: 0.62rem; color: var(--pv-text-soft); line-height: 1.5; font-style: italic; margin-bottom: 4px; }
       .pv-reviewer { font-size: 0.55rem; font-weight: 700; color: var(--pv-accent); }
@@ -676,8 +679,8 @@ function daysBetween(from: string, to: string) {
       .pv-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
       .pv-platforms-row { display: flex; flex-wrap: wrap; gap: 8px; }
-      .pv-platform-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(200,150,62,0.08); border-radius: 6px; font-size: 0.65rem; font-weight: 600; color: var(--pv-text); }
-      .pv-platform-letter { font-family: "Playfair Display", serif; font-size: 0.6rem; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; background: var(--pv-accent); color: #fff; display: flex; align-items: center; justify-content: center; }
+      .pv-platform-chip { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: rgba(47,93,69,0.08); border-radius: 6px; font-size: 0.65rem; font-weight: 600; color: var(--pv-text); }
+      .pv-platform-letter { font-family: "Marcellus", serif; font-size: 0.6rem; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; background: var(--pv-accent); color: #fff; display: flex; align-items: center; justify-content: center; }
 
       .pv-enquiry-mock { display: flex; flex-direction: column; gap: 6px; max-width: 240px; }
       .pv-mock-field { height: 18px; background: rgba(44,26,14,0.04); border: 1px solid rgba(44,26,14,0.08); border-radius: 3px; }
@@ -685,7 +688,7 @@ function daysBetween(from: string, to: string) {
       .pv-mock-btn { background: var(--pv-accent); color: #fff; text-align: center; padding: 6px; border-radius: 4px; font-size: 0.55rem; font-weight: 700; }
 
       .pv-footer { background: var(--pv-text, #2c1a0e); padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
-      .pv-footer p { font-family: "Playfair Display", serif; font-size: 0.75rem; color: rgba(255,255,255,0.7); }
+      .pv-footer p { font-family: "Marcellus", serif; font-size: 0.75rem; color: rgba(255,255,255,0.7); }
       .pv-footer p em { color: var(--pv-accent); font-style: italic; }
       .pv-footer span { font-size: 0.6rem; color: rgba(255,255,255,0.4); }
 

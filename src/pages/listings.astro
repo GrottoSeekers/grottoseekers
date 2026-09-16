@@ -25,7 +25,7 @@ function daysBetween(from: string, to: string) {
 }
 ---
 
-<BaseLayout title="Browse sits — Grotto Sitters">
+<BaseLayout title="Browse sits — MYAH">
   <main class="listings-page">
     <div class="section-inner">
       <header class="listings-header">
@@ -82,15 +82,15 @@ function daysBetween(from: string, to: string) {
   <style>
     .listings-page { padding: 80px 48px 100px; }
     .listings-header { text-align: center; margin-bottom: 48px; }
-    .listings-intro { font-size: 1rem; color: var(--text-soft); line-height: 1.7; max-width: 600px; margin: 0 auto; }
+    .listings-intro { font-size: 1rem; color: var(--myah-tan); line-height: 1.7; max-width: 600px; margin: 0 auto; }
 
     .empty-state {
       background: #fff; border-radius: 12px; padding: 80px 48px; text-align: center;
       box-shadow: 0 2px 16px rgba(44,26,14,0.06); max-width: 520px; margin: 0 auto;
     }
     .empty-icon { font-size: 3rem; margin-bottom: 20px; }
-    .empty-state h2 { font-family: "Playfair Display", serif; font-size: 1.6rem; color: var(--brown-dark); margin-bottom: 12px; }
-    .empty-state p { font-size: 0.95rem; color: var(--text-soft); line-height: 1.7; }
+    .empty-state h2 { font-family: "Marcellus", serif; font-size: 1.6rem; color: var(--myah-ink); margin-bottom: 12px; }
+    .empty-state p { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; }
 
     .listings-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px; }
 
@@ -103,16 +103,16 @@ function daysBetween(from: string, to: string) {
 
     .listing-card-header { display: flex; gap: 16px; align-items: flex-start; }
     .listing-avatar { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-    .listing-title { font-family: "Playfair Display", serif; font-size: 1.15rem; color: var(--brown-dark); margin-bottom: 2px; }
-    .listing-owner { font-size: 0.85rem; color: var(--gold); font-weight: 600; }
+    .listing-title { font-family: "Marcellus", serif; font-size: 1.15rem; color: var(--myah-ink); margin-bottom: 2px; }
+    .listing-owner { font-size: 0.85rem; color: var(--myah-forest); font-weight: 600; }
 
-    .listing-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.82rem; color: var(--text-soft); }
+    .listing-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.82rem; color: var(--myah-tan); }
     .listing-duration {
-      background: rgba(200,150,62,0.1); color: var(--gold); font-weight: 700;
+      background: rgba(47,93,69,0.1); color: var(--myah-forest); font-weight: 700;
       padding: 2px 10px; border-radius: 20px; font-size: 0.78rem;
     }
-    .listing-pets { font-size: 0.88rem; color: var(--brown-mid); }
-    .listing-desc { font-size: 0.88rem; color: var(--text-soft); line-height: 1.6; }
+    .listing-pets { font-size: 0.88rem; color: var(--myah-tan); }
+    .listing-desc { font-size: 0.88rem; color: var(--myah-tan); line-height: 1.6; }
 
     @media (max-width: 768px) {
       .listings-page { padding: 60px 24px 80px; }

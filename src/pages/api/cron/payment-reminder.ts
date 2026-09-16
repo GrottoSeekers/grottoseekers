@@ -5,7 +5,6 @@ import { Resend } from 'resend';
 import { supabase } from '../../../lib/supabase';
 
 export const GET: APIRoute = async ({ request }) => {
-  // Protect endpoint — Vercel sends CRON_SECRET in Authorization header
   const authHeader = request.headers.get('authorization');
   const cronSecret = import.meta.env.CRON_SECRET;
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
@@ -14,7 +13,6 @@ export const GET: APIRoute = async ({ request }) => {
 
   const resend = new Resend(import.meta.env.RESEND_API_KEY);
 
-  // Find users whose account is 30 days old (±12 hours to avoid gaps)
   const now = new Date();
   const windowStart = new Date(now.getTime() - 30.5 * 24 * 60 * 60 * 1000);
   const windowEnd   = new Date(now.getTime() - 29.5 * 24 * 60 * 60 * 1000);
@@ -39,16 +37,16 @@ export const GET: APIRoute = async ({ request }) => {
   for (const user of users) {
     try {
       await resend.emails.send({
-        from: 'Grotto Sitters <hello@grottositters.com>',
+        from: 'MYAH <hello@myah.com>',
         to: user.email,
-        subject: 'Your free month is almost up — continue with Grotto Sitters',
+        subject: 'Your free month is almost up — continue with MYAH',
         html: `
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Continue with Grotto Sitters</title>
+  <title>Continue with MYAH</title>
 </head>
 <body style="margin:0;padding:0;background:#faf6ee;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#faf6ee;padding:48px 24px;">
@@ -57,9 +55,13 @@ export const GET: APIRoute = async ({ request }) => {
 
         <!-- Header -->
         <tr>
-          <td style="background:#2c1a0e;padding:32px 40px;text-align:center;">
-            <p style="margin:0;font-size:1.5rem;font-weight:700;color:#ffffff;letter-spacing:0.02em;">
-              Grotto <span style="color:#c8963e;">Sitters</span>
+          <td style="background:#2f5d45;padding:32px 40px;text-align:center;">
+            <img src="https://myah.com/images/logo-mark-cream.png" width="64" height="64" alt="MYAH" style="display:block;margin:0 auto 12px;" />
+            <p style="margin:0;font-size:1rem;font-weight:600;color:#e9e0d2;letter-spacing:0.28em;text-transform:uppercase;">
+              MYAH
+            </p>
+            <p style="margin:4px 0 0;font-size:0.7rem;color:rgba(233,224,210,0.7);letter-spacing:0.22em;text-transform:uppercase;">
+              Make yourself at home
             </p>
           </td>
         </tr>
@@ -67,47 +69,47 @@ export const GET: APIRoute = async ({ request }) => {
         <!-- Body -->
         <tr>
           <td style="padding:40px 40px 32px;">
-            <p style="margin:0 0 8px;font-size:0.75rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#c8963e;">
+            <p style="margin:0 0 8px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:0.75rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#8a6a4f;">
               Your free month
             </p>
             <h1 style="margin:0 0 24px;font-size:1.8rem;color:#2c1a0e;line-height:1.25;font-weight:700;">
-              Thanks for being part of<br />Grotto Sitters
+              Thanks for being part of MYAH
             </h1>
-            <p style="margin:0 0 20px;font-size:1rem;color:#5c3d20;line-height:1.7;">
-              Your free month is coming to an end — we hope you've loved the platform so far.
+            <p style="margin:0 0 20px;font-size:1rem;color:#8a6a4f;line-height:1.7;">
+              Your free month is coming to an end — we hope you have loved the platform so far.
             </p>
-            <p style="margin:0 0 20px;font-size:1rem;color:#5c3d20;line-height:1.7;">
+            <p style="margin:0 0 20px;font-size:1rem;color:#8a6a4f;line-height:1.7;">
               To keep your profile live and continue connecting with sitters and owners,
               your subscription will be <strong style="color:#2c1a0e;">£4.99/month</strong> going forward.
             </p>
-            <p style="margin:0 0 32px;font-size:1rem;color:#5c3d20;line-height:1.7;">
-              We'll be in touch shortly with payment details. In the meantime, your profile
+            <p style="margin:0 0 32px;font-size:1rem;color:#8a6a4f;line-height:1.7;">
+              We will be in touch shortly with payment details. In the meantime, your profile
               stays live and nothing changes on your end.
             </p>
 
             <!-- CTA -->
             <table cellpadding="0" cellspacing="0" style="margin-bottom:32px;">
               <tr>
-                <td style="background:#c8963e;border-radius:6px;padding:14px 36px;">
-                  <a href="https://grottositters.com/dashboard" style="color:#ffffff;font-size:0.9rem;font-weight:700;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
+                <td style="background:#2f5d45;border-radius:999px;padding:14px 36px;">
+                  <a href="https://myah.com/dashboard" style="color:#ffffff;font-size:0.9rem;font-weight:600;text-decoration:none;letter-spacing:0.08em;text-transform:uppercase;">
                     Go to my dashboard
                   </a>
                 </td>
               </tr>
             </table>
 
-            <p style="margin:0;font-size:0.9rem;color:#8b5e3c;line-height:1.7;">
-              Any questions? Just reply to this email — we're always happy to help.
+            <p style="margin:0;font-size:0.9rem;color:#8a6a4f;line-height:1.7;">
+              Any questions? Just reply to this email — we are always happy to help.
             </p>
           </td>
         </tr>
 
         <!-- Footer -->
         <tr>
-          <td style="background:#faf6ee;padding:24px 40px;border-top:1px solid rgba(200,150,62,0.15);">
-            <p style="margin:0;font-size:0.78rem;color:#8b5e3c;text-align:center;line-height:1.6;">
-              © ${new Date().getFullYear()} Grotto Sitters &nbsp;·&nbsp;
-              <a href="https://grottositters.com" style="color:#c8963e;text-decoration:none;">grottositters.com</a>
+          <td style="background:#faf6ee;padding:24px 40px;border-top:1px solid rgba(47,93,69,0.15);">
+            <p style="margin:0;font-size:0.78rem;color:#8a6a4f;text-align:center;line-height:1.6;">
+              © ${new Date().getFullYear()} MYAH &nbsp;·&nbsp;
+              <a href="https://myah.com" style="color:#2f5d45;text-decoration:none;">myah.com</a>
             </p>
           </td>
         </tr>

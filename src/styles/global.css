@@ -1,15 +1,11 @@
 :root {
-  --cream: #faf6ee;
-  --warm-white: #fff9f0;
-  --gold: #c8963e;
-  --gold-light: #e8b96a;
-  --gold-pale: #f5e4c3;
-  --brown-dark: #2c1a0e;
-  --brown-mid: #5c3d20;
-  --brown-light: #8b5e3c;
-  --sage: #7a8c6a;
-  --text: #2c1a0e;
-  --text-soft: #6b4e35;
+  --myah-forest: #2f5d45;
+  --myah-bark:   #4a3726;
+  --myah-ink:    #2c1a0e;
+  --myah-cream:  #e9e0d2;
+  --myah-paper:  #faf6ee;
+  --myah-tan:    #8a6a4f;
+  --myah-clay:   #a4442e;
 }
 
 *,
@@ -25,33 +21,34 @@ html {
 }
 
 body {
-  font-family: "Lato", sans-serif;
-  background: var(--cream);
-  color: var(--text);
+  font-family: "Montserrat", sans-serif;
+  background: var(--myah-paper);
+  color: var(--myah-ink);
   overflow-x: hidden;
 }
 
 /* ── TYPOGRAPHY ── */
 .section-label {
+  font-family: "Lato", sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--myah-tan);
   margin-bottom: 12px;
 }
 
 .section-title {
-  font-family: "Playfair Display", serif;
+  font-family: "Marcellus", serif;
   font-size: 2.2rem;
-  color: var(--brown-dark);
+  color: var(--myah-ink);
   line-height: 1.25;
 }
 
 .divider {
   width: 48px;
   height: 2px;
-  background: var(--gold);
+  background: var(--myah-forest);
   margin: 20px 0 28px;
 }
 
@@ -63,13 +60,14 @@ body {
 /* ── BUTTONS ── */
 .btn-primary {
   display: inline-block;
-  background: var(--gold);
+  background: var(--myah-forest);
   color: #fff;
   padding: 14px 36px;
   border: none;
-  border-radius: 6px;
+  border-radius: 999px;
+  font-family: "Montserrat", sans-serif;
   font-size: 0.9rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   text-decoration: none;
@@ -78,7 +76,7 @@ body {
 }
 
 .btn-primary:hover {
-  background: var(--gold-light);
+  background: #3a7356;
   transform: translateY(-1px);
 }
 
@@ -95,18 +93,20 @@ nav {
   align-items: center;
   background: rgba(250, 246, 238, 0.92);
   backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(200, 150, 62, 0.15);
+  border-bottom: 1px solid rgba(47, 93, 69, 0.15);
 }
 
 .nav-logo {
-  font-family: "Playfair Display", serif;
-  font-size: 1.4rem;
-  color: var(--brown-dark);
-  letter-spacing: 0.02em;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--myah-ink);
   text-decoration: none;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .nav-logo-img {
@@ -116,7 +116,7 @@ nav {
 }
 
 .nav-logo span {
-  color: var(--gold);
+  color: var(--myah-forest);
 }
 
 nav ul {
@@ -127,16 +127,16 @@ nav ul {
 
 nav ul a {
   text-decoration: none;
-  color: var(--brown-mid);
+  color: var(--myah-tan);
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   transition: color 0.2s;
 }
 
 nav ul a:hover {
-  color: var(--gold);
+  color: var(--myah-forest);
 }
 
 /* Brand item inside mobile panel — hidden on desktop */
@@ -158,7 +158,7 @@ nav ul a:hover {
   display: block;
   width: 24px;
   height: 2px;
-  background: var(--brown-dark);
+  background: var(--myah-ink);
   transition: transform 0.3s, opacity 0.3s;
 }
 
@@ -204,24 +204,24 @@ nav ul a:hover {
     display: flex;
     align-items: center;
     height: 62px;
-    border-bottom: 2px solid #c8963e;
+    border-bottom: 2px solid var(--myah-forest);
     padding-right: 44px;
     flex-shrink: 0;
   }
 
   .nav-panel-brand a {
-    font-family: "Playfair Display", serif;
-    font-size: 1.35rem;
-    font-weight: 400;
-    color: #2c1a0e;
-    text-transform: none;
-    letter-spacing: 0.02em;
+    font-family: "Montserrat", sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--myah-ink);
     display: block;
     padding: 0;
   }
 
   .nav-panel-brand a span {
-    color: #c8963e;
+    color: var(--myah-forest);
   }
 
   nav ul li:not(.nav-panel-brand) {
@@ -233,9 +233,9 @@ nav ul a:hover {
   }
 
   nav ul a {
-    color: #2c1a0e;
+    color: var(--myah-ink);
     font-size: 1.05rem;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 0.12em;
     display: flex;
     justify-content: space-between;
@@ -247,7 +247,7 @@ nav ul a:hover {
     content: '›';
     font-size: 1.5rem;
     font-weight: 300;
-    color: #c8963e;
+    color: var(--myah-forest);
     opacity: 0.5;
     line-height: 1;
     transition: opacity 0.2s, transform 0.2s;
@@ -255,7 +255,7 @@ nav ul a:hover {
 
   nav ul a:active,
   nav ul a:hover {
-    color: #c8963e;
+    color: var(--myah-forest);
   }
 
   nav ul a:active::after,
@@ -265,7 +265,7 @@ nav ul a:hover {
   }
 
   .nav-toggle.open span {
-    background: #2c1a0e;
+    background: var(--myah-ink);
   }
 
   .nav-overlay {
@@ -321,7 +321,7 @@ nav ul a:hover {
 
 /* ── FOOTER ── */
 footer {
-  background: var(--brown-dark);
+  background: var(--myah-ink);
   color: rgba(255, 255, 255, 0.7);
   padding: 60px 48px 30px;
 }
@@ -339,14 +339,17 @@ footer {
 }
 
 .footer-brand h2 {
-  font-family: "Playfair Display", serif;
-  font-size: 1.6rem;
+  font-family: "Montserrat", sans-serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
   color: #fff;
   margin-bottom: 12px;
 }
 
 .footer-brand h2 span {
-  color: var(--gold);
+  color: var(--myah-cream);
 }
 
 .footer-brand p {
@@ -378,7 +381,7 @@ footer {
 }
 
 .footer-links a:hover {
-  color: var(--gold);
+  color: var(--myah-cream);
 }
 
 .footer-bottom {
@@ -404,4 +407,51 @@ footer {
   footer {
     padding: 40px 24px 24px;
   }
+}
+
+/* ── LOADING OVERLAY ── */
+#gs-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--myah-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+#gs-loader.visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#gs-loader .loader-stack {
+  position: relative;
+  width: 132px;
+  height: 132px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#gs-loader .loader-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(47, 93, 69, 0.18);
+  border-top-color: #2f5d45;
+  animation: gs-spin 0.8s linear infinite;
+}
+
+#gs-loader img {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+}
+
+@keyframes gs-spin {
+  to { transform: rotate(360deg); }
 }

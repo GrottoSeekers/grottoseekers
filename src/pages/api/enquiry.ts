@@ -41,14 +41,14 @@ export const POST: APIRoute = async ({ request }) => {
     const dates = dateFrom && dateTo ? `${dateFrom} to ${dateTo}` : 'Not specified';
 
     await resend.emails.send({
-      from: 'Grotto Sitters <enquiries@mail.grottositters.com>',
+      from: 'MYAH <enquiries@mail.myah.com>',
       to: profile.contact_email,
       replyTo: email,
       subject: `New enquiry from ${fullName}`,
       html: `
         <div style="font-family:sans-serif;max-width:520px;margin:0 auto;">
           <h2 style="color:#2c1a0e;">New Enquiry</h2>
-          <p>You've received a new enquiry through your Grotto Sitters page.</p>
+          <p>You've received a new enquiry through your MYAH page.</p>
           <table style="width:100%;border-collapse:collapse;margin:20px 0;">
             <tr><td style="padding:8px 0;color:#6b4e35;font-weight:bold;">Name</td><td style="padding:8px 0;">${fullName}</td></tr>
             <tr><td style="padding:8px 0;color:#6b4e35;font-weight:bold;">Email</td><td style="padding:8px 0;"><a href="mailto:${email}">${email}</a></td></tr>

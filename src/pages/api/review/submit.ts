@@ -47,7 +47,7 @@ export const POST: APIRoute = async ({ request }) => {
       .slice(0, 2);
 
     const reviews: any[] = Array.isArray(matchedProfile.reviews_json) ? [...matchedProfile.reviews_json] : [];
-    reviews.push({ text, name, initials, platform: 'Grotto Sitters' });
+    reviews.push({ text, name, initials, platform: 'MYAH' });
 
     const requests: any[] = [...matchedProfile.review_requests_json];
     requests[requestIndex] = { ...requests[requestIndex], status: 'completed', reviewer_name: name };

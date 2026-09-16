@@ -53,12 +53,15 @@ const listingTitle = (conv.listings as any)?.title ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Chat with {other?.name} — Grotto Sitters</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>Chat with {other?.name} — MYAH</title>
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="" class="nav-logo-img" />Grotto <span>Sitters</span></a>
+      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
       <a href="/api/auth/logout" class="nav-logout">Log out</a>
     </nav>
 
@@ -265,12 +268,12 @@ const listingTitle = (conv.listings as any)?.title ?? '';
         position: static;
         display: flex; justify-content: space-between; align-items: center;
         padding: 10px 48px; background: #fff;
-        border-bottom: 1px solid rgba(200,150,62,0.15);
+        border-bottom: 1px solid rgba(47,93,69,0.15);
         backdrop-filter: none; flex-shrink: 0;
       }
       .nav-logout {
         font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--gold, #c8963e); text-decoration: none;
+        text-transform: uppercase; color: var(--myah-forest, #2f5d45); text-decoration: none;
       }
       .nav-logout:hover { color: var(--brown-dark, #2c1a0e); }
 
@@ -290,12 +293,12 @@ const listingTitle = (conv.listings as any)?.title ?? '';
         position: relative; transition: color 0.2s;
         font-family: "Lato", sans-serif;
       }
-      .nav-tab:hover { color: var(--gold, #c8963e); }
-      .nav-tab.active { color: var(--gold, #c8963e); }
+      .nav-tab:hover { color: var(--myah-forest, #2f5d45); }
+      .nav-tab.active { color: var(--myah-forest, #2f5d45); }
       .nav-tab.active::after {
         content: ''; position: absolute;
         bottom: 0; left: 20%; right: 20%;
-        height: 3px; background: var(--gold, #c8963e);
+        height: 3px; background: var(--myah-forest, #2f5d45);
         border-radius: 3px 3px 0 0;
       }
 
@@ -314,7 +317,7 @@ const listingTitle = (conv.listings as any)?.title ?? '';
         z-index: 2;
       }
       .chat-back {
-        color: #c8963e; text-decoration: none;
+        color: #2f5d45; text-decoration: none;
         width: 36px; height: 36px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0; transition: background 0.15s;
@@ -328,12 +331,12 @@ const listingTitle = (conv.listings as any)?.title ?? '';
       .chat-user:hover { background: rgba(0,0,0,0.04); }
       .chat-user-avatar {
         width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
-        border: 2px solid rgba(200,150,62,0.2);
+        border: 2px solid rgba(47,93,69,0.2);
       }
       .chat-avatar-placeholder {
         display: flex; align-items: center; justify-content: center;
         background: #ddd; color: #fff;
-        font-family: "Playfair Display", serif; font-size: 1.1rem; font-weight: 700;
+        font-family: "Marcellus", serif; font-size: 1.1rem; font-weight: 700;
         border: none;
       }
       .chat-user-name {
@@ -341,7 +344,7 @@ const listingTitle = (conv.listings as any)?.title ?? '';
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
       .chat-listing-ref {
-        font-size: 0.72rem; color: #c8963e; margin-top: 1px;
+        font-size: 0.72rem; color: #2f5d45; margin-top: 1px;
         white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
       }
 
@@ -477,10 +480,10 @@ const listingTitle = (conv.listings as any)?.title ?? '';
       .compose-form input::placeholder { color: #999; }
       .send-btn {
         width: 44px; height: 44px; border-radius: 50%; border: none;
-        background: #c8963e; color: #fff; cursor: pointer;
+        background: #2f5d45; color: #fff; cursor: pointer;
         display: flex; align-items: center; justify-content: center;
         flex-shrink: 0; transition: all 0.15s;
-        box-shadow: 0 2px 6px rgba(200,150,62,0.35);
+        box-shadow: 0 2px 6px rgba(47,93,69,0.35);
       }
       .send-btn:hover { background: #b8862e; transform: scale(1.04); }
       .send-btn:active { transform: scale(0.96); }

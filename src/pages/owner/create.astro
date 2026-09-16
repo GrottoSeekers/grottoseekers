@@ -35,12 +35,15 @@ const errorMsg = errorMap[error ?? ''] ?? '';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
-    <title>Create profile — Grotto Sitters</title>
+    <link rel="icon" type="image/png" href="/images/favicon.png" />
+    <link rel="apple-touch-icon" href="/images/app-tile.png" />
+    <meta property="og:image" content="/images/logo-tile.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <title>Create profile — MYAH</title>
   </head>
   <body>
     <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo.png" alt="" class="nav-logo-img" />Grotto <span>Sitters</span></a>
+      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
     </nav>
 
     <main class="create-wrap">
@@ -62,7 +65,7 @@ const errorMsg = errorMap[error ?? ''] ?? '';
           <div class="field">
             <label for="slug">Your profile URL <span class="req">*</span></label>
             <div class="slug-wrap">
-              <span class="slug-prefix">grottositters.com/</span>
+              <span class="slug-prefix">myah.com/</span>
               <input type="text" id="slug" name="slug" placeholder="yourname" required pattern="^[a-z0-9]+(?:-[a-z0-9]+)*$" />
             </div>
             <p class="field-hint">Lowercase letters, numbers, and hyphens only.</p>
@@ -102,30 +105,30 @@ const errorMsg = errorMap[error ?? ''] ?? '';
 
     <style>
       body { min-height: 100vh; display: flex; flex-direction: column; }
-      nav { position: static; border-bottom: 1px solid rgba(200,150,62,0.2); padding: 18px 48px; }
+      nav { position: static; border-bottom: 1px solid rgba(47,93,69,0.2); padding: 18px 48px; }
       .create-wrap { flex: 1; display: flex; justify-content: center; padding: 60px 24px; }
       .create-card {
         background: #fff; border-radius: 12px; padding: 48px; width: 100%; max-width: 520px;
         box-shadow: 0 4px 32px rgba(44,26,14,0.08); align-self: flex-start;
       }
-      .create-intro { font-size: 0.95rem; color: var(--text-soft); line-height: 1.6; margin-bottom: 24px; }
+      .create-intro { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.6; margin-bottom: 24px; }
       .create-error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 6px; padding: 12px 16px; font-size: 0.9rem; margin-bottom: 20px; }
       .create-form { display: flex; flex-direction: column; gap: 20px; }
       .field { display: flex; flex-direction: column; gap: 6px; }
-      .field label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--brown-mid); text-transform: uppercase; }
-      .req { color: var(--gold); }
+      .field label { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.06em; color: var(--myah-tan); text-transform: uppercase; }
+      .req { color: var(--myah-forest); }
       .field input[type="text"], .field input[type="file"], .field textarea {
         border: 1.5px solid rgba(44,26,14,0.2); border-radius: 6px; padding: 11px 14px;
-        font-size: 1rem; font-family: "Lato", sans-serif; color: var(--text); background: var(--cream);
+        font-size: 1rem; font-family: "Lato", sans-serif; color: var(--myah-ink); background: var(--myah-paper);
         outline: none; transition: border-color 0.2s;
       }
-      .field input:focus, .field textarea:focus { border-color: var(--gold); }
+      .field input:focus, .field textarea:focus { border-color: var(--myah-forest); }
       .field textarea { resize: vertical; }
-      .field-hint { font-size: 0.78rem; color: var(--text-soft); }
+      .field-hint { font-size: 0.78rem; color: var(--myah-tan); }
       .slug-wrap { display: flex; align-items: center; gap: 0; }
       .slug-prefix {
         background: rgba(44,26,14,0.06); border: 1.5px solid rgba(44,26,14,0.2); border-right: none;
-        border-radius: 6px 0 0 6px; padding: 11px 12px; font-size: 0.85rem; color: var(--text-soft);
+        border-radius: 6px 0 0 6px; padding: 11px 12px; font-size: 0.85rem; color: var(--myah-tan);
         white-space: nowrap;
       }
       .slug-wrap input { border-radius: 0 6px 6px 0 !important; flex: 1; }
