@@ -22,7 +22,6 @@ try {
 const pets: any[] = Array.isArray(profile?.pets_json) ? profile.pets_json : [];
 const heroImages: any[] = Array.isArray(profile?.hero_images_json) ? profile.hero_images_json : [];
 const amenities: string[] = Array.isArray(profile?.amenities_json) ? profile.amenities_json : [];
-const gallery: any[] = Array.isArray(profile?.gallery_json) ? profile.gallery_json : [];
 
 let listings: any[] = [];
 if (profile) {
@@ -44,10 +43,6 @@ const savedMessages: Record<string, string> = {
 };
 const savedMsg = savedMessages[saved ?? ''] ?? '';
 
-function formatDate(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-}
-
 function formatDateLong(d: string) {
   return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
@@ -57,7 +52,17 @@ function daysBetween(from: string, to: string) {
   return Math.ceil(ms / 86400000);
 }
 
-const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length > 0;
+// Listing strength checklist
+const checklistItems = [
+  { label: 'Home photos added', done: heroImages.length > 0 },
+  { label: 'Pets added', done: pets.length > 0 },
+  { label: 'Amenities selected', done: amenities.length > 0 },
+  { label: 'About your home written', done: !!profile?.bio },
+  { label: 'Ideal sitter described', done: !!profile?.ideal_sitter },
+  { label: 'Second sit posted', done: listings.length >= 2 },
+];
+const donePct = profile ? Math.round((checklistItems.filter(i => i.done).length / checklistItems.length) * 100) : 0;
+const doneCount = checklistItems.filter(i => i.done).length;
 ---
 
 <!doctype html>
@@ -70,167 +75,269 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
     <link rel="icon" type="image/png" href="/images/favicon.png" />
     <link rel="apple-touch-icon" href="/images/app-tile.png" />
     <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
     <title>Dashboard — MYAH</title>
+    <style>
+      body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; display: flex; flex-direction: column; }
+      * { box-sizing: border-box; }
+      a { color: #2f5d45; }
+      a:hover { color: #2c1a0e; }
+      input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+      @keyframes gs-ring { to { transform: rotate(360deg); } }
+      @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+      /* nav hover */
+      [data-acct-link]:hover { color: #2f5d45 !important; }
+      [data-overview-card]:hover { box-shadow: 0 10px 34px rgba(44,26,14,.08) !important; border-color: rgba(110,84,56,.4) !important; }
+      [data-stat-card]:hover { box-shadow: 0 10px 34px rgba(44,26,14,.08) !important; border-color: rgba(110,84,56,.4) !important; }
+      [data-profile-card]:hover { box-shadow: 0 10px 34px rgba(44,26,14,.08) !important; border-color: rgba(110,84,56,.4) !important; }
+      [data-share-card]:hover { box-shadow: 0 10px 34px rgba(44,26,14,.08) !important; border-color: rgba(110,84,56,.4) !important; }
+      [data-strength-card]:hover { box-shadow: 0 10px 34px rgba(44,26,14,.08) !important; border-color: rgba(110,84,56,.4) !important; }
+      [data-primary-btn]:hover { background: #3e7a5b !important; border-color: #3e7a5b !important; transform: translateY(-2px) !important; box-shadow: 0 12px 28px rgba(110,84,56,.36) !important; }
+      [data-outline-btn]:hover { background: #2f5d45 !important; color: #fff !important; border-color: #2f5d45 !important; }
+      [data-sit-card]:hover { box-shadow: 0 10px 34px rgba(44,26,14,.08) !important; }
+      [data-view-btn]:hover { background: #3e7a5b !important; border-color: #3e7a5b !important; transform: translateY(-2px) !important; }
+      [data-edit-btn]:hover { background: #2f5d45 !important; color: #fff !important; border-color: #2f5d45 !important; }
+
+      /* toast notifications */
+      .msg-toast-container { position: fixed; top: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+      .msg-toast { background: #fff; border-radius: 14px; padding: 14px 18px; box-shadow: 0 8px 32px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08); display: flex; gap: 12px; align-items: center; pointer-events: auto; cursor: pointer; text-decoration: none; color: inherit; transform: translateX(120%); animation: toast-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; max-width: 380px; border-left: 4px solid #2f5d45; }
+      .msg-toast.toast-out { animation: toast-out 0.3s ease forwards; }
+      @keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+      @keyframes toast-out { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+      .msg-toast-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+      .msg-toast-avatar-ph { width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; background: rgba(47,93,69,.12); color: #2f5d45; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1rem; font-family: "Marcellus", serif; }
+      .msg-toast-body { flex: 1; min-width: 0; }
+      .msg-toast-name { font-weight: 700; font-size: .88rem; color: #2c1a0e; }
+      .msg-toast-preview { font-size: .82rem; color: #6b4e35; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+      /* save flash */
+      .save-toast { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 20px; font-size: .9rem; margin-bottom: 24px; }
+
+      @media (max-width: 900px) {
+        [data-topnav] { padding: 12px 24px !important; }
+        [data-dash-pad] { padding: 28px 24px 60px !important; }
+        [data-dash-grid] { grid-template-columns: minmax(0,1fr) !important; }
+        [data-stats] { flex-direction: row !important; }
+        [data-overview] { grid-template-columns: minmax(0,1fr) !important; }
+      }
+    </style>
   </head>
   <body>
-    <nav>
-      <a href="/" class="nav-logo"><img src="/images/logo-mark.png" alt="" class="nav-logo-img" />MYAH</a>
-      <a href="/api/auth/logout" class="nav-logout">Log out</a>
-    </nav>
-
-    <div class="nav-strip">
-      <button class="nav-tab active" data-tab="dashboard">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
-        <span>Dashboard</span>
-      </button>
-      <button class="nav-tab" data-tab="sits">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        <span>My Sits</span>
-      </button>
-      <a href="/messages" class="nav-tab">
-        <div class="nav-tab-icon-wrap">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-          <span class="nav-tab-badge" id="navMsgBadge" style="display:none">0</span>
-        </div>
-        <span>Messages</span>
-      </a>
-      <a href="/owner/edit" class="nav-tab">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-        <span>Profile</span>
-      </a>
-    </div>
-
     <div id="msgToasts" class="msg-toast-container"></div>
 
-    <main class="dash-wrap">
-      <div class="section-inner">
+    <!-- TOP NAV -->
+    <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.18)">
+      <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+        <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+        <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
+          <span style="color:#2f5d45;line-height:1">MYAH</span>
+          <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span>
+        </span>
+      </a>
+      <div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end">
+        <a href="/listings" data-acct-link style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Find a sitter</a>
+        <a href="/owner/applications" data-acct-link style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Applications</a>
+        <a href="/notifications" data-acct-link style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Notifications</a>
+        <a href="/api/auth/logout" data-acct-link style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s">Log out</a>
+      </div>
+    </nav>
 
-        {savedMsg && <p class="toast toast-success">{savedMsg}</p>}
+    <!-- TAB BAR -->
+    <div style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04);position:sticky;top:0;z-index:10">
+      <button type="button" id="tab-dashboard" onclick="switchTab('dashboard')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#2f5d45;transition:color .2s">
+        <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg></span>
+        <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Dashboard</span>
+        <span id="line-dashboard" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:#2f5d45"></span>
+      </button>
+      <button type="button" id="tab-sits" onclick="switchTab('sits')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#8a6a4f;transition:color .2s">
+        <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
+        <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">My sits</span>
+        <span id="line-sits" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
+      </button>
+      <button type="button" id="tab-messages" onclick="switchTab('messages')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#8a6a4f;transition:color .2s">
+        <span style="display:flex;position:relative">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <span id="navMsgBadge" style="display:none;position:absolute;top:-5px;right:-10px;background:#ef4444;color:#fff;font-size:.55rem;font-weight:700;min-width:16px;height:16px;border-radius:8px;padding:0 4px;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 4px rgba(239,68,68,.4)">0</span>
+        </span>
+        <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Messages</span>
+        <span id="line-messages" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
+      </button>
+      <button type="button" id="tab-profile" onclick="switchTab('profile')" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#8a6a4f;transition:color .2s">
+        <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+        <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Profile</span>
+        <span id="line-profile" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
+      </button>
+    </div>
+
+    <main data-dash-pad="1" style="flex:1;padding:44px 48px 70px">
+      <div style="max-width:1100px;margin:0 auto">
+
+        {savedMsg && <p class="save-toast">{savedMsg}</p>}
 
         <!-- ═══ DASHBOARD TAB ═══ -->
-        <div class="tab-panel active" id="panel-dashboard">
+        <div id="panel-dashboard">
           {profile ? (
-            <>
-              <div class="dash-grid">
-                <div class="dash-card profile-card">
-                  <div class="profile-card-inner">
-                    {profile.profile_pic && (
-                      <img src={profile.profile_pic} alt={profile.name} class="profile-avatar" />
+            <div style="display:flex;flex-direction:column;gap:24px">
+              <!-- Header row -->
+              <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px">
+                <div>
+                  <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your dashboard</p>
+                  <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Welcome back, <em style="color:#2f5d45">{profile.name?.split(' ')[0] ?? profile.name}</em></h1>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                  <a href="/owner/edit#photos" data-outline-btn style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Add photos</a>
+                  <a href="/owner/edit#pets" data-outline-btn style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Add a pet</a>
+                  <a href="/owner/listings/new" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:9px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+                    Post a sit
+                  </a>
+                </div>
+              </div>
+
+              <!-- Main grid -->
+              <div data-dash-grid="1" style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start">
+                <!-- Profile card -->
+                <div data-profile-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                  <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:26px">
+                    {profile.profile_pic ? (
+                      <img src={profile.profile_pic} alt={profile.name} style="width:84px;height:84px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+                    ) : (
+                      <div style="width:84px;height:84px;border-radius:50%;flex-shrink:0;border:2px solid rgba(110,84,56,.35);background:rgba(47,93,69,.1);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:2rem;color:#2f5d45">{(profile.name ?? 'O').charAt(0)}</div>
                     )}
-                    <div class="profile-card-info">
-                      <h2 class="profile-name">{profile.name}</h2>
-                      {profile.location && <p class="profile-location">{profile.location}</p>}
-                      {profile.tagline && <p class="profile-tagline">{profile.tagline}</p>}
-                      <a href={`/${profile.slug}`} target="_blank" class="profile-link">
-                        myahsits.com/{profile.slug}
-                      </a>
+                    <div style="min-width:0">
+                      <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 5px">{profile.name}</h2>
+                      {profile.location && (
+                        <p style="font-size:.85rem;color:#2f5d45;font-weight:600;letter-spacing:.04em;margin:0 0 7px;display:flex;align-items:center;gap:8px">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                          {profile.location}
+                        </p>
+                      )}
+                      {profile.bio && <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0 0 12px">{profile.bio.slice(0, 120)}{profile.bio.length > 120 ? '…' : ''}</p>}
+                      {profile.slug && <a href={`/${profile.slug}`} target="_blank" style="display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.03em;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px">myahsits.com/{profile.slug}</a>}
                     </div>
                   </div>
-                  <div class="profile-card-actions">
-                    <a href="/owner/edit" class="btn-primary">Edit profile</a>
-                    <a href={`/${profile.slug}`} target="_blank" class="btn-view">View public page</a>
+                  <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+                    <a href="/owner/edit" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Edit profile</a>
+                    {profile.slug && <a href={`/${profile.slug}`} target="_blank" style="font-size:.78rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s">View public page</a>}
                   </div>
                 </div>
 
-                <div class="stats-grid">
-                  <div class="stat-card">
-                    <span class="stat-number">{pets.length}</span>
-                    <span class="stat-label">Pets</span>
+                <!-- Stats -->
+                <div data-stats="1" style="display:flex;flex-direction:column;gap:16px">
+                  <div data-stat-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                    <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">{pets.length}</span>
+                    <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Pets</span>
                   </div>
-                  <div class="stat-card">
-                    <span class="stat-number">{activeListings.length}</span>
-                    <span class="stat-label">Active Sits</span>
+                  <div data-stat-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                    <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">{activeListings.length}</span>
+                    <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Active sits</span>
                   </div>
                 </div>
               </div>
 
-              {!homeSetUp && (
-                <div class="setup-card">
-                  <h3>Set up your home</h3>
-                  <p>Add photos of your home, your pets, and amenities. This info is reused across all your sit listings — you only need to do it once.</p>
-                  <a href="/owner/edit" class="btn-primary">Set up home & pets</a>
+              <!-- Overview cards -->
+              <div data-overview="1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">
+                <div data-overview-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:10px;transition:box-shadow .3s ease, border-color .3s ease">
+                  <span style="width:44px;height:44px;border-radius:12px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="2"></rect><circle cx="12" cy="13" r="3.5"></circle><path d="M8 6l1.5-2h5L16 6"></path></svg></span>
+                  <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;margin:0;color:#2c1a0e">Home photos</h3>
+                  <p style="font-size:.88rem;color:#6b4e35;line-height:1.6;margin:0">{heroImages.length} main photo{heroImages.length !== 1 ? 's' : ''} uploaded</p>
+                  <a href="/owner/edit#photos" style="font-size:.76rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;margin-top:auto;padding-top:8px">Manage photos &rarr;</a>
                 </div>
-              )}
-
-              <div class="overview-grid">
-                <div class="overview-card">
-                  <h3>Home Photos</h3>
-                  <p>{heroImages.length} main photo{heroImages.length !== 1 ? 's' : ''} uploaded</p>
-                  <a href="/owner/edit#home">Manage photos</a>
+                <div data-overview-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:10px;transition:box-shadow .3s ease, border-color .3s ease">
+                  <span style="width:44px;height:44px;border-radius:12px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="9" r="2.2"></circle><circle cx="16" cy="9" r="2.2"></circle><circle cx="12" cy="15.5" r="3"></circle></svg></span>
+                  <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;margin:0;color:#2c1a0e">Pets</h3>
+                  <p style="font-size:.88rem;color:#6b4e35;line-height:1.6;margin:0">{pets.length > 0 ? pets.map((p: any) => p.name).join(', ') : 'No pets added yet'}</p>
+                  <a href="/owner/edit#pets" style="font-size:.76rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;margin-top:auto;padding-top:8px">Manage pets &rarr;</a>
                 </div>
-                <div class="overview-card">
-                  <h3>Pets</h3>
-                  {pets.length > 0 ? (
-                    <p>{pets.map((p: any) => p.name).join(', ')}</p>
-                  ) : (
-                    <p>No pets added yet</p>
-                  )}
-                  <a href="/owner/edit#pets">Manage pets</a>
-                </div>
-                <div class="overview-card">
-                  <h3>Amenities</h3>
-                  <p>{amenities.length > 0 ? amenities.slice(0, 4).join(', ') + (amenities.length > 4 ? ` +${amenities.length - 4} more` : '') : 'None selected'}</p>
-                  <a href="/owner/edit#amenities">Edit amenities</a>
+                <div data-overview-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:10px;transition:box-shadow .3s ease, border-color .3s ease">
+                  <span style="width:44px;height:44px;border-radius:12px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:flex;align-items:center;justify-content:center;margin-bottom:4px"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
+                  <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;margin:0;color:#2c1a0e">Amenities</h3>
+                  <p style="font-size:.88rem;color:#6b4e35;line-height:1.6;margin:0">{amenities.length > 0 ? amenities.slice(0, 4).join(', ') + (amenities.length > 4 ? ` +${amenities.length - 4} more` : '') : 'None selected'}</p>
+                  <a href="/owner/edit#amenities" style="font-size:.76rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;margin-top:auto;padding-top:8px">Edit amenities &rarr;</a>
                 </div>
               </div>
 
-              <div class="dash-card share-card">
-                <h3>Share your profile</h3>
-                <p>Send this link so sitters can see your home, pets, and get in touch.</p>
-                <div class="share-url">
-                  <input type="text" readonly value={`https://myahsits.com/${profile.slug}`} id="shareUrl" />
-                  <button onclick="copyUrl()" class="copy-btn">Copy</button>
+              <!-- Listing strength -->
+              <div data-strength-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+                  <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Listing strength</h3>
+                  <span style="font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45">{doneCount} of {checklistItems.length} complete</span>
+                </div>
+                <div style="height:8px;border-radius:50px;background:rgba(110,84,56,.15);overflow:hidden;margin-bottom:22px">
+                  <div style={`height:100%;width:${donePct}%;border-radius:50px;background:linear-gradient(90deg,#2f5d45 0%,#3e7a5b 100%);transition:width .4s ease`}></div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
+                  {checklistItems.map(item => (
+                    <div style="display:flex;align-items:center;gap:11px;font-size:.88rem;color:#2c1a0e">
+                      <span style={`width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;line-height:1;${item.done ? 'background:#2f5d45;color:#fff;' : 'background:transparent;border:1.5px dashed rgba(110,84,56,.55);color:#2f5d45;'}`}>
+                        {item.done ? '✓' : ''}
+                      </span>
+                      {item.label}
+                    </div>
+                  ))}
                 </div>
               </div>
-            </>
+
+              <!-- Share card -->
+              <div data-share-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+                <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Share your profile</h3>
+                <p style="font-size:.93rem;color:#6b4e35;margin:0 0 20px;line-height:1.7;max-width:560px">Send this link so sitters can see your home, pets, and get in touch.</p>
+                <div style="display:flex;gap:12px;flex-wrap:wrap">
+                  <input id="shareUrl" type="text" readonly value={`https://myahsits.com/${profile.slug ?? ''}`} style="flex:1;min-width:240px;border:1.5px solid rgba(44,26,14,.15);border-radius:10px;padding:13px 16px;font-size:.92rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none" />
+                  <button id="copyBtn" type="button" onclick="copyUrl()" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;transition:background .2s, border-color .2s, transform .12s">Copy</button>
+                </div>
+              </div>
+            </div>
           ) : (
-            <div class="no-profile">
-              <div class="no-profile-icon">🏠</div>
-              <h2>Welcome to MYAH</h2>
-              <p>Create your profile to get started. You'll then set up your home and pets, and post sit listings for sitters to find.</p>
-              <a href="/owner/create" class="btn-primary">Create your profile</a>
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+              <span style="font-size:3rem;display:block;margin-bottom:20px">🏠</span>
+              <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">Welcome to MYAH</h2>
+              <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 32px">Create your profile to get started. You'll then set up your home and pets, and post sit listings for sitters to find.</p>
+              <a href="/owner/create" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Create your profile</a>
             </div>
           )}
         </div>
 
         <!-- ═══ MY SITS TAB ═══ -->
-        <div class="tab-panel" id="panel-sits">
-          <header class="sits-header">
+        <div id="panel-sits" style="display:none">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px;margin-bottom:34px">
             <div>
-              <h1 class="sits-heading">My Sits</h1>
-              <p class="sits-sub">Manage your sit listings. Active sits are visible to sitters browsing the platform.</p>
+              <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your listings</p>
+              <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;margin:0 0 10px;line-height:1.2">My <em style="color:#2f5d45">sits</em></h1>
+              <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;max-width:520px;margin:0">Manage your sit listings. Active sits are visible to sitters browsing the platform.</p>
             </div>
-            <a href="/owner/listings/new" class="btn-primary">+ Post a sit</a>
-          </header>
+            <a href="/owner/listings/new" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:9px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              Post a sit
+            </a>
+          </div>
 
           {listings.length === 0 ? (
-            <div class="sits-empty">
-              <div class="sits-empty-icon">📋</div>
-              <h2>No sit listings yet</h2>
-              <p>Create your first listing so sitters can find your home and get in touch.</p>
-              <a href="/owner/listings/new" class="btn-primary">Post your first sit</a>
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+              <span style="font-size:3rem;display:block;margin-bottom:20px">📋</span>
+              <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 12px">No sit listings yet</h2>
+              <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Create your first listing so sitters can find your home and get in touch.</p>
+              <a href="/owner/listings/new" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Post your first sit</a>
             </div>
           ) : (
             <>
               {activeListings.length > 0 && (
-                <div class="sits-group">
-                  <p class="sits-group-label">Active</p>
-                  <div class="sits-grid">
+                <div style="margin-bottom:38px">
+                  <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 18px">Active</p>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px">
                     {activeListings.map((l: any) => {
                       const duration = daysBetween(l.date_from, l.date_to);
                       return (
-                        <div class="sit-card">
-                          <div class="sit-card-status active">Active</div>
-                          <h3 class="sit-card-title">{l.title}</h3>
-                          <p class="sit-card-dates">{formatDateLong(l.date_from)} — {formatDateLong(l.date_to)}</p>
-                          <span class="sit-card-duration">{duration} day{duration !== 1 ? 's' : ''}</span>
-                          {l.description && (
-                            <p class="sit-card-desc">{l.description.slice(0, 120)}{l.description.length > 120 ? '...' : ''}</p>
-                          )}
-                          <div class="sit-card-actions">
-                            <a href={`/listings/${l.id}`} target="_blank" class="sit-card-btn">View listing</a>
-                            <a href={`/owner/listings/${l.id}/edit`} class="sit-card-btn sit-card-btn-alt">Edit</a>
+                        <div data-sit-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:11px;transition:box-shadow .3s ease">
+                          <span style="display:inline-block;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;padding:5px 13px;border-radius:50px;width:fit-content;background:rgba(47,125,79,.1);color:#2f7d4f;border:1px solid rgba(47,125,79,.3)">Active</span>
+                          <h3 style="font-family:'Marcellus',serif;font-size:1.18rem;color:#2c1a0e;line-height:1.3;margin:0">{l.title}</h3>
+                          <p style="font-size:.86rem;color:#5c3d20;font-weight:600;margin:0">{formatDateLong(l.date_from)} — {formatDateLong(l.date_to)}</p>
+                          <span style="display:inline-block;background:rgba(110,84,56,.12);color:#2f5d45;font-size:.74rem;font-weight:600;padding:5px 14px;border-radius:50px;width:fit-content;letter-spacing:.04em">{duration} day{duration !== 1 ? 's' : ''}</span>
+                          {l.description && <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0">{l.description.slice(0, 120)}{l.description.length > 120 ? '…' : ''}</p>}
+                          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+                            <a href={`/listings/${l.id}`} data-view-btn style="display:inline-flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:11px 22px;border-radius:50px;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;transition:background .2s, border-color .2s, transform .12s">View listing</a>
+                            <a href={`/owner/listings/${l.id}/edit`} data-edit-btn style="display:inline-flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:11px 22px;border-radius:50px;color:#5c3d20;background:#fff;border:1.5px solid rgba(110,84,56,.35);transition:background .2s, color .2s, border-color .2s">Edit</a>
                           </div>
                         </div>
                       );
@@ -240,19 +347,22 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
               )}
 
               {pastListings.length > 0 && (
-                <div class="sits-group">
-                  <p class="sits-group-label">Past / Closed</p>
-                  <div class="sits-grid">
+                <div style="margin-bottom:38px">
+                  <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 18px">Past / Closed</p>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:20px">
                     {pastListings.map((l: any) => {
                       const duration = daysBetween(l.date_from, l.date_to);
+                      const statusTone = l.status === 'filled'
+                        ? 'background:rgba(110,84,56,.12);color:#2f5d45;border:1px solid rgba(110,84,56,.38);'
+                        : 'background:#fdeeee;color:#b91c1c;border:1px solid #f7cfcf;';
                       return (
-                        <div class="sit-card sit-card-past">
-                          <div class={`sit-card-status ${l.status}`}>{l.status}</div>
-                          <h3 class="sit-card-title">{l.title}</h3>
-                          <p class="sit-card-dates">{formatDateLong(l.date_from)} — {formatDateLong(l.date_to)}</p>
-                          <span class="sit-card-duration">{duration} day{duration !== 1 ? 's' : ''}</span>
-                          <div class="sit-card-actions">
-                            <a href={`/owner/listings/${l.id}/edit`} class="sit-card-btn sit-card-btn-alt">Edit</a>
+                        <div data-sit-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:11px;opacity:.7;transition:box-shadow .3s ease">
+                          <span style={`display:inline-block;font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;padding:5px 13px;border-radius:50px;width:fit-content;${statusTone}`}>{l.status.charAt(0).toUpperCase() + l.status.slice(1)}</span>
+                          <h3 style="font-family:'Marcellus',serif;font-size:1.18rem;color:#2c1a0e;line-height:1.3;margin:0">{l.title}</h3>
+                          <p style="font-size:.86rem;color:#5c3d20;font-weight:600;margin:0">{formatDateLong(l.date_from)} — {formatDateLong(l.date_to)}</p>
+                          <span style="display:inline-block;background:rgba(110,84,56,.12);color:#2f5d45;font-size:.74rem;font-weight:600;padding:5px 14px;border-radius:50px;width:fit-content;letter-spacing:.04em">{duration} day{duration !== 1 ? 's' : ''}</span>
+                          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+                            <a href={`/owner/listings/${l.id}/edit`} data-edit-btn style="display:inline-flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;padding:11px 22px;border-radius:50px;color:#5c3d20;background:#fff;border:1.5px solid rgba(110,84,56,.35);transition:background .2s, color .2s, border-color .2s">Edit</a>
                           </div>
                         </div>
                       );
@@ -264,41 +374,62 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
           )}
         </div>
 
+        <!-- ═══ MESSAGES TAB ═══ -->
+        <div id="panel-messages" style="display:none">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>
+            <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No messages yet</h2>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0">When a sitter applies for one of your sits, the conversation will appear here.</p>
+          </div>
+        </div>
+
+        <!-- ═══ PROFILE TAB ═══ -->
+        <div id="panel-profile" style="display:none">
+          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
+            <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">Your home &amp; pets</h2>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Update your home photos, pet details and amenities. This information is reused across all your sit listings — you only set it up once.</p>
+            <a href="/owner/edit" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Set up home &amp; pets</a>
+          </div>
+        </div>
+
       </div>
     </main>
 
     <script>
+      const TABS = ['dashboard', 'sits', 'messages', 'profile'];
+
+      function switchTab(tab: string) {
+        TABS.forEach(t => {
+          const btn = document.getElementById('tab-' + t) as HTMLElement;
+          const line = document.getElementById('line-' + t) as HTMLElement;
+          const panel = document.getElementById('panel-' + t) as HTMLElement;
+          const active = t === tab;
+          if (btn) btn.style.color = active ? '#2f5d45' : '#8a6a4f';
+          if (line) line.style.background = active ? '#2f5d45' : 'transparent';
+          if (panel) panel.style.display = active ? 'block' : 'none';
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
       function copyUrl() {
         const input = document.getElementById('shareUrl') as HTMLInputElement;
-        input?.select();
-        navigator.clipboard?.writeText(input?.value ?? '').then(() => {
-          const btn = document.querySelector('.copy-btn') as HTMLButtonElement;
+        const btn = document.getElementById('copyBtn') as HTMLButtonElement;
+        if (!input) return;
+        input.select();
+        navigator.clipboard?.writeText(input.value).then(() => {
           if (btn) { btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = 'Copy'; }, 2000); }
         });
       }
 
-      function switchTab(tab: string) {
-        document.querySelectorAll('.nav-tab[data-tab]').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-        document.querySelector(`.nav-tab[data-tab="${tab}"]`)?.classList.add('active');
-        document.getElementById(`panel-${tab}`)?.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-
-      document.querySelectorAll('.nav-tab[data-tab]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          switchTab((btn as HTMLElement).dataset.tab!);
-        });
-      });
-
       // ── MESSAGE NOTIFICATIONS ──
       (function() {
-        const seenIds = new Set();
+        const seenIds = new Set<string>();
         let isFirst = true;
 
         function playNotifSound() {
           try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -313,13 +444,13 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
           } catch {}
         }
 
-        function esc(str) {
+        function esc(str: string) {
           const d = document.createElement('div');
           d.textContent = str;
           return d.innerHTML;
         }
 
-        function showToast(msg) {
+        function showToast(msg: any) {
           const container = document.getElementById('msgToasts');
           if (!container) return;
           const sender = msg.sender || {};
@@ -335,12 +466,15 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
           setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 5000);
         }
 
-        function updateBadge(count) {
-          const nav = document.getElementById('navMsgBadge');
-          const label = count > 99 ? '99+' : String(count);
-          if (!nav) return;
-          if (count > 0) { nav.textContent = label; nav.style.display = 'inline-flex'; }
-          else { nav.style.display = 'none'; }
+        function updateBadge(count: number) {
+          const badge = document.getElementById('navMsgBadge');
+          if (!badge) return;
+          if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : String(count);
+            badge.style.display = 'inline-flex';
+          } else {
+            badge.style.display = 'none';
+          }
         }
 
         async function checkUnread() {
@@ -350,13 +484,13 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
             updateBadge(data.count || 0);
             if (data.messages) {
               if (!isFirst) {
-                const fresh = data.messages.filter(m => !seenIds.has(m.id));
+                const fresh = data.messages.filter((m: any) => !seenIds.has(m.id));
                 if (fresh.length > 0) {
                   playNotifSound();
                   fresh.slice(0, 3).forEach(showToast);
                 }
               }
-              data.messages.forEach(m => seenIds.add(m.id));
+              data.messages.forEach((m: any) => seenIds.add(m.id));
             }
             isFirst = false;
           } catch {}
@@ -367,246 +501,6 @@ const homeSetUp = heroImages.length > 0 || pets.length > 0 || amenities.length >
       })();
     </script>
 
-    <style is:global>
-      body { min-height: 100vh; display: flex; flex-direction: column; background: var(--myah-paper); }
-
-      nav {
-        position: static;
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 14px 48px; background: #fff;
-        border-bottom: 1px solid rgba(47,93,69,0.15);
-        backdrop-filter: none;
-      }
-      .nav-logout {
-        font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
-        text-transform: uppercase; color: var(--myah-forest); text-decoration: none;
-      }
-      .nav-logout:hover { color: var(--myah-ink); }
-
-      .nav-strip {
-        display: flex; background: #fff;
-        border-bottom: 1px solid rgba(44,26,14,0.08);
-        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
-        position: sticky; top: 0; z-index: 10;
-      }
-      .nav-tab {
-        flex: 1; display: flex; flex-direction: column;
-        align-items: center; gap: 3px;
-        padding: 10px 4px 8px;
-        font-size: 0.68rem; font-weight: 600; letter-spacing: 0.02em;
-        color: #aaa; text-decoration: none;
-        border: none; background: none; cursor: pointer;
-        position: relative; transition: color 0.2s;
-        font-family: "Lato", sans-serif;
-      }
-      .nav-tab:hover { color: var(--myah-forest); }
-      .nav-tab.active { color: var(--myah-forest); }
-      .nav-tab.active::after {
-        content: ''; position: absolute;
-        bottom: 0; left: 20%; right: 20%;
-        height: 3px; background: var(--myah-forest);
-        border-radius: 3px 3px 0 0;
-      }
-      .nav-tab-icon-wrap { position: relative; display: flex; }
-      .nav-tab-badge {
-        position: absolute; top: -5px; right: -10px;
-        background: #ef4444; color: #fff; font-size: 0.55rem; font-weight: 700;
-        min-width: 16px; height: 16px; border-radius: 8px; padding: 0 4px;
-        display: inline-flex; align-items: center; justify-content: center;
-        line-height: 1; box-shadow: 0 1px 4px rgba(239,68,68,0.4);
-      }
-
-      /* ── TOAST NOTIFICATIONS ──────────────────────────────── */
-      .msg-toast-container {
-        position: fixed; top: 20px; right: 20px; z-index: 1000;
-        display: flex; flex-direction: column; gap: 10px; pointer-events: none;
-      }
-      .msg-toast {
-        background: #fff; border-radius: 14px; padding: 14px 18px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
-        display: flex; gap: 12px; align-items: center;
-        pointer-events: auto; cursor: pointer; text-decoration: none; color: inherit;
-        transform: translateX(120%); animation: toast-in 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
-        max-width: 380px; border-left: 4px solid var(--myah-forest, #2f5d45);
-      }
-      .msg-toast.toast-out { animation: toast-out 0.3s ease forwards; }
-      @keyframes toast-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-      @keyframes toast-out { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
-      .msg-toast-avatar { width: 42px; height: 42px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-      .msg-toast-avatar-ph {
-        width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
-        background: rgba(47,93,69,0.12); color: var(--myah-forest, #2f5d45);
-        display: flex; align-items: center; justify-content: center;
-        font-weight: 700; font-size: 1rem; font-family: "Marcellus", serif;
-      }
-      .msg-toast-body { flex: 1; min-width: 0; }
-      .msg-toast-name { font-weight: 700; font-size: 0.88rem; color: var(--brown-dark, #2c1a0e); }
-      .msg-toast-preview { font-size: 0.82rem; color: var(--text-soft, #6b4e35); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-      /* ── TAB PANELS ───────────────────────────────────────── */
-      .tab-panel { display: none; }
-      .tab-panel.active { display: block; }
-
-      .dash-wrap { flex: 1; padding: 40px 48px 60px; }
-
-      .toast { padding: 12px 20px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 24px; }
-      .toast-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-
-      /* ── DASHBOARD TAB ────────────────────────────────────── */
-      .dash-grid { display: grid; grid-template-columns: 1fr 260px; gap: 24px; margin-bottom: 32px; }
-      .dash-card { background: #fff; border-radius: 12px; padding: 32px; box-shadow: 0 2px 16px rgba(44,26,14,0.06); }
-
-      .profile-card { grid-column: 1; }
-      .profile-card-inner { display: flex; gap: 24px; align-items: flex-start; margin-bottom: 24px; }
-      .profile-avatar { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
-      .profile-name { font-family: "Marcellus", serif; font-size: 1.4rem; color: var(--myah-ink); margin-bottom: 4px; }
-      .profile-location { font-size: 0.85rem; color: var(--myah-forest); font-weight: 600; margin-bottom: 4px; }
-      .profile-tagline { font-size: 0.9rem; color: var(--myah-tan); line-height: 1.5; margin-bottom: 10px; }
-      .profile-link { font-size: 0.8rem; color: var(--myah-forest); font-weight: 700; text-decoration: none; }
-      .profile-link:hover { text-decoration: underline; }
-      .profile-card-actions { border-top: 1px solid rgba(44,26,14,0.08); padding-top: 24px; display: flex; gap: 16px; align-items: center; }
-      .btn-view { font-size: 0.82rem; color: var(--myah-forest); font-weight: 700; text-decoration: none; }
-
-      .stats-grid { grid-column: 2; display: flex; flex-direction: column; gap: 16px; }
-      .stat-card {
-        background: #fff; border-radius: 12px; padding: 24px;
-        box-shadow: 0 2px 16px rgba(44,26,14,0.06); text-align: center;
-        flex: 1; display: flex; flex-direction: column; gap: 6px;
-      }
-      .stat-number { font-family: "Marcellus", serif; font-size: 2rem; color: var(--myah-forest); font-weight: 700; }
-      .stat-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--myah-tan); }
-
-      .setup-card {
-        background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 12px;
-        padding: 28px 32px; margin-bottom: 32px;
-      }
-      .setup-card h3 { font-family: "Marcellus", serif; font-size: 1.15rem; color: var(--myah-ink); margin-bottom: 8px; }
-      .setup-card p { font-size: 0.92rem; color: #92400e; line-height: 1.6; margin-bottom: 18px; }
-
-      .overview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 32px; }
-      .overview-card {
-        background: #fff; border-radius: 12px; padding: 24px;
-        box-shadow: 0 2px 16px rgba(44,26,14,0.06);
-      }
-      .overview-card h3 { font-size: 1rem; margin-bottom: 8px; color: var(--myah-ink); }
-      .overview-card p { font-size: 0.88rem; color: var(--myah-tan); line-height: 1.5; margin-bottom: 12px; }
-      .overview-card a { font-size: 0.8rem; color: var(--myah-forest); font-weight: 700; text-decoration: none; }
-      .overview-card a:hover { text-decoration: underline; }
-
-      .share-card { margin-bottom: 32px; }
-      .share-card h3 { font-family: "Marcellus", serif; font-size: 1.2rem; color: var(--myah-ink); margin-bottom: 8px; }
-      .share-card p { font-size: 0.9rem; color: var(--myah-tan); margin-bottom: 16px; line-height: 1.6; }
-      .share-url { display: flex; gap: 10px; }
-      .share-url input {
-        flex: 1; border: 1.5px solid rgba(44,26,14,0.15); border-radius: 6px; padding: 10px 14px;
-        font-size: 0.9rem; font-family: "Lato", sans-serif; color: var(--myah-ink); background: var(--myah-paper); outline: none;
-      }
-      .copy-btn {
-        background: var(--myah-forest); color: #fff; border: none; border-radius: 6px; padding: 10px 20px;
-        font-size: 0.85rem; font-weight: 700; cursor: pointer; white-space: nowrap;
-      }
-
-      .no-profile {
-        background: #fff; border-radius: 12px; padding: 80px 48px; text-align: center;
-        box-shadow: 0 2px 16px rgba(44,26,14,0.06); max-width: 520px; margin: 0 auto;
-      }
-      .no-profile-icon { font-size: 3rem; margin-bottom: 20px; }
-      .no-profile h2 { font-family: "Marcellus", serif; font-size: 1.6rem; color: var(--myah-ink); margin-bottom: 12px; }
-      .no-profile p { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; margin-bottom: 32px; }
-
-      /* ── MY SITS TAB ──────────────────────────────────────── */
-      .sits-header {
-        display: flex; justify-content: space-between; align-items: flex-start;
-        margin-bottom: 32px; gap: 20px;
-      }
-      .sits-heading {
-        font-family: "Marcellus", serif; font-size: 2rem;
-        color: var(--myah-ink); margin-bottom: 8px;
-      }
-      .sits-sub { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; max-width: 500px; }
-
-      .sits-empty {
-        background: #fff; border-radius: 16px; padding: 80px 48px; text-align: center;
-        box-shadow: 0 2px 12px rgba(44,26,14,0.05); max-width: 520px; margin: 0 auto;
-      }
-      .sits-empty-icon { font-size: 3rem; margin-bottom: 20px; }
-      .sits-empty h2 { font-family: "Marcellus", serif; font-size: 1.5rem; color: var(--myah-ink); margin-bottom: 12px; }
-      .sits-empty p { font-size: 0.95rem; color: var(--myah-tan); line-height: 1.7; margin-bottom: 24px; }
-
-      .sits-group { margin-bottom: 32px; }
-      .sits-group-label {
-        font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-        color: var(--myah-tan); margin-bottom: 16px;
-      }
-
-      .sits-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 20px;
-      }
-
-      .sit-card {
-        background: #fff; border-radius: 16px; padding: 24px;
-        box-shadow: 0 1px 6px rgba(44,26,14,0.06);
-        transition: transform 0.2s, box-shadow 0.2s;
-        display: flex; flex-direction: column; gap: 8px;
-      }
-      .sit-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 32px rgba(44,26,14,0.1);
-      }
-      .sit-card-past { opacity: 0.65; }
-
-      .sit-card-status {
-        display: inline-block; font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
-        letter-spacing: 0.08em; padding: 3px 10px; border-radius: 20px; width: fit-content;
-      }
-      .sit-card-status.active { background: #f0fdf4; color: #166534; }
-      .sit-card-status.filled { background: #dbeafe; color: #1e40af; }
-      .sit-card-status.cancelled { background: #fee2e2; color: #991b1b; }
-
-      .sit-card-title {
-        font-family: "Marcellus", serif; font-size: 1.15rem;
-        color: var(--myah-ink); line-height: 1.3;
-      }
-      .sit-card-dates { font-size: 0.85rem; color: var(--myah-tan); font-weight: 600; }
-      .sit-card-duration {
-        display: inline-block; background: rgba(47,93,69,0.1); color: var(--myah-forest);
-        font-size: 0.75rem; font-weight: 700; padding: 3px 12px; border-radius: 20px;
-        width: fit-content;
-      }
-      .sit-card-desc {
-        font-size: 0.85rem; color: var(--myah-tan); line-height: 1.6;
-        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-      }
-      .sit-card-actions { display: flex; gap: 10px; margin-top: 8px; }
-      .sit-card-btn {
-        font-size: 0.82rem; font-weight: 700; text-decoration: none;
-        padding: 8px 18px; border-radius: 8px; letter-spacing: 0.03em;
-        color: #fff; background: var(--myah-forest); transition: background 0.2s;
-      }
-      .sit-card-btn:hover { background: #3a7356; }
-      .sit-card-btn-alt {
-        color: var(--myah-tan); background: rgba(44,26,14,0.05);
-      }
-      .sit-card-btn-alt:hover { background: rgba(44,26,14,0.1); }
-
-      @media (max-width: 768px) {
-        nav { padding: 12px 20px; }
-        .nav-strip { position: sticky; top: 0; }
-        .nav-tab { padding: 8px 4px 6px; font-size: 0.64rem; }
-        .nav-tab svg { width: 20px; height: 20px; }
-        .dash-wrap { padding: 28px 20px; }
-        .dash-grid { grid-template-columns: 1fr; }
-        .stats-grid { grid-column: 1; flex-direction: row; }
-        .overview-grid { grid-template-columns: 1fr; }
-        .share-url { flex-direction: column; }
-        .sits-header { flex-direction: column; }
-        .sits-heading { font-size: 1.5rem; }
-        .sits-grid { grid-template-columns: 1fr; }
-        .no-profile { padding: 48px 24px; }
-      }
-    </style>
     <LoadingOverlay />
-</body>
+  </body>
 </html>
