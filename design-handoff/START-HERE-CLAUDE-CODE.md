@@ -15,12 +15,29 @@ reference file.
 ```
 node design-handoff/verify.mjs Home        # see what's missing
 # rebuild src/pages/index.astro from design-handoff/screens/Home.md
-node design-handoff/verify.mjs Home        # repeat until PASS
+node design-handoff/verify.mjs Home        # repeat until all checks PASS
 git commit -m "rebuild Home to match design"
 ```
 
+There are three checks per page. All three must pass:
+
+- **VALUES** — every hex, rgba, rem, padding, radius and shadow in the design is present.
+- **COPY** — every line of approved copy is present.
+- **EXTRAS** — no copy in the repo that the design does not contain. This is the one
+  that catches a half-rebuild: if the old "Everything you need in one place" or
+  "Up and running in minutes" sections are still there, EXTRAS fails.
+
+VALUES passing on its own means almost nothing — the old markup can contain the
+right colours in the wrong layout. Do not report a page as done on VALUES alone.
+
 Then the next page in `BUILD-ORDER.md`. **One page per commit.** Do not start a page
-until the previous one reports PASS.
+until the previous one passes all three.
+
+## Never edit the reference
+
+`reference/*.dc.html` is the approved design. If a check seems to contradict it,
+**the check is wrong** — say so in your report and leave both files alone. Do not
+edit a reference file, a spec, or `verify.mjs` to make a page pass.
 
 ## Rules
 
@@ -45,17 +62,22 @@ until the previous one reports PASS.
 ## First correction to make, before any page
 
 `src/styles/global.css` → `--myah-tan: #6e5438;` (currently `#8a6a4f`).
-Then grep the whole repo for `#8a6a4f`, `6d3f9e`, `gold`, `#c9a227`, `#b8860b` and
-remove every hit.
+
+`#8a6a4f` is still a legitimate colour — it is the design's *lighter* tan and the
+specs use it for small meta text. Only the `--myah-tan` variable was wrong. Use
+whichever of the two the spec shows on each element.
+
+Then grep the repo for `6d3f9e`, `gold`, `#c9a227`, `#b8860b`, `#d4af37` and remove
+every hit.
 
 ## Report format after each page
 
 ```
 Page: Home
-verify.mjs: PASS (0 missing)
+VALUES: PASS   COPY: PASS   EXTRAS: PASS
 Sections matched: 9/9
 Could not match: <value> — <why>
 ```
 
-If `verify.mjs` still fails, say which values are missing and why rather than
+If any check still fails, say which values or lines are missing and why rather than
 declaring the page done.
