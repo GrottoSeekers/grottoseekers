@@ -19,24 +19,6 @@
     a { color:#2f5d45; }
     @keyframes gs-ring { to { transform:rotate(360deg); } }
     @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
-
-    @media (max-width:1000px) {
-      [data-header-nav] { display:none !important; }
-      [data-burger] { display:flex !important; }
-      header[data-site-header] { padding: 16px 24px !important; background:rgba(250,246,238,.97) !important; backdrop-filter:blur(12px); }
-      header[data-site-header] [data-nav-logo] { color:#2c1a0e !important; }
-      header[data-site-header] [data-burger-bar] { background:#2c1a0e !important; }
-
-      section[data-hero] { grid-template-columns:minmax(0,1fr) !important; }
-      section[data-hero] [data-hero-photo] { min-height:55vw !important; }
-      section[data-hero] [data-hero-copy] { padding:48px 20px 60px !important; }
-      .two-col-grid { grid-template-columns:minmax(0,1fr) !important; }
-      .three-col-grid { grid-template-columns:minmax(0,1fr) !important; }
-      .four-col-grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important; }
-      .section-inner { padding:0 20px !important; }
-      .footer-grid { grid-template-columns:minmax(0,1fr) !important; gap:40px !important; }
-      .hero-h1 { font-size:2.2rem !important; }
-    }
   </style>
 </head>
 <body>
@@ -428,14 +410,14 @@
     </div>
   </footer>
 
-  <style>
-    /* Green fill pill buttons */
+  <style is:global>
+    /* ── Hover / active states ────────────────────────────────────────── */
     #header-signup-btn:hover,
     #hero-cta:hover,
     [data-mobile-menu] a[href="/signup"]:hover,
     #view-profile-btn:hover,
     #final-cta-btn:hover,
-    #footer-signup-btn:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
+    #footer-signup-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
 
     #header-signup-btn:active,
     #hero-cta:active,
@@ -444,33 +426,57 @@
     #final-cta-btn:active,
     #footer-signup-btn:active { transform:translateY(0) scale(.98); }
 
-    /* Outline pill buttons — sitter / owner CTAs */
     #card-sitters a[href="/signup"]:hover,
-    #card-owners a[href="/signup"]:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
+    #card-owners a[href="/signup"]:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
 
     #card-sitters a[href="/signup"]:active,
     #card-owners a[href="/signup"]:active { transform:translateY(0) scale(.98); }
 
-    /* Hero text CTA */
-    [data-hero-copy] a[href="#example"]:hover { color:#2f5d45; border-color:#2f5d45; }
+    [data-hero-copy] a[href="#example"]:hover { color:#2f5d45 !important; border-color:#2f5d45 !important; }
 
-    /* Sitters / owners section cards */
-    #card-sitters:hover, #card-owners:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.1); }
+    #card-sitters:hover, #card-owners:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.1) !important; }
 
-    /* How it works — step cards */
-    #how-it-works .three-col-grid > div:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.1); }
+    #how-it-works .three-col-grid > div:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.1) !important; }
 
-    /* Review figures */
-    figure:hover { transform:translateY(-6px); background:rgba(255,255,255,.07); border-color:rgba(196,171,138,.4); }
+    figure:hover { transform:translateY(-6px); background:rgba(255,255,255,.07) !important; border-color:rgba(196,171,138,.4) !important; }
 
-    /* Mosaic images */
     .four-col-grid > div > img:hover { transform:scale(1.06); }
 
-    /* Feature cards */
-    #features-section .three-col-grid > div:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.1); border-color:rgba(110,84,56,.45); }
+    #features-section .three-col-grid > div:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.1) !important; border-color:rgba(110,84,56,.45) !important; }
 
-    /* Footer bottom links */
-    footer a[href="#privacy"]:hover, footer a[href="#terms"]:hover { color:#c4ab8a; }
+    footer a[href="#privacy"]:hover, footer a[href="#terms"]:hover { color:#c4ab8a !important; }
+
+    /* ── Mobile 1000px ────────────────────────────────────────────────── */
+    @media (max-width:1000px) {
+      [data-header-nav] { display:none !important; }
+      [data-burger] { display:flex !important; }
+      header[data-site-header] { padding: 16px 24px !important; background:rgba(250,246,238,.97) !important; backdrop-filter:blur(12px); }
+      header[data-site-header] [data-nav-logo] { color:#2c1a0e !important; }
+      header[data-site-header] [data-burger-bar] { background:#2c1a0e !important; }
+
+      section[data-hero] { grid-template-columns:minmax(0,1fr) !important; }
+      section[data-hero] [data-hero-photo] { grid-column:1 !important; grid-row:1 !important; min-height:60vh !important; }
+      section[data-hero] [data-hero-copy] { grid-column:1 !important; grid-row:2 !important; min-height:auto !important; padding:48px 20px 60px !important; }
+
+      .two-col-grid { grid-template-columns:minmax(0,1fr) !important; }
+      .three-col-grid { grid-template-columns:minmax(0,1fr) !important; }
+      .four-col-grid { grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important; }
+      .section-inner { padding:0 20px !important; }
+      .footer-grid { grid-template-columns:minmax(0,1fr) !important; gap:40px !important; }
+      .hero-h1 { font-size:2.2rem !important; }
+    }
+
+    /* ── Mobile 640px ─────────────────────────────────────────────────── */
+    @media (max-width:640px) {
+      .four-col-grid { grid-template-columns:minmax(0,1fr) !important; }
+      .hero-h1 { font-size:clamp(2.4rem, 8vw, 4.2rem) !important; }
+      [data-hero-copy] h1 { font-size:clamp(2.4rem, 8vw, 4.2rem) !important; }
+      [data-hero-copy] p { font-size:1rem !important; }
+      #how-it-works .three-col-grid h3 { font-size:clamp(1.15rem, 3.4vw, 1.35rem) !important; }
+      #features-section .three-col-grid h3 { font-size:clamp(1.15rem, 3.4vw, 1.35rem) !important; }
+      [data-burger] { min-height:44px; min-width:44px; }
+      [data-mm-item] { min-height:44px; }
+    }
   </style>
 
   <script>
