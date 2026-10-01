@@ -103,3 +103,22 @@ DROP TRIGGER IF EXISTS listings_updated_at ON listings;
 CREATE TRIGGER listings_updated_at
   BEFORE UPDATE ON listings
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+
+-- ── APPLICATIONS ─────────────────────────────────────────────────────────────
+-- A sitter applying for an owner's listing. Read by /applications (and counted
+-- on the Edit listing page); the owner shortlists or declines each one.
+CREATE TABLE IF NOT EXISTS applications (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id  UUID        NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  profile_id  UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE, -- the sitter
+  message     TEXT,                                -- the sitter's note to the owner
+  date_fit    TEXT,                                -- e.g. "Free for all 14 days"
+  tags_json   JSONB       NOT NULL DEFAULT '[]',   -- ["Dogs", "Works from home"]
+  status      TEXT        NOT NULL DEFAULT 'new'
+                          CHECK (status IN ('new', 'shortlisted', 'declined')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (listing_id, profile_id)
+);
+
+CREATE INDEX IF NOT EXISTS applications_listing_id_idx ON applications (listing_id);
