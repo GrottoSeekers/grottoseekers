@@ -1,60 +1,418 @@
 ---
-export const prerender = false;
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../lib/auth';
+import {
+  supabase,
+} from '../lib/supabase';
 
-import { getSession } from '../lib/auth';
-import { supabase } from '../lib/supabase';
-
-const session = await getSession(Astro.request);
-if (!session) return Astro.redirect('/login');
-if ((session.role ?? 'sitter') === 'owner') return Astro.redirect('/owner/dashboard');
+const session =
+  await getSession(
+    Astro.request,
+  );
+if (!session) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+const role =
+  session.role ??
+  'sitter';
+if (role === 'owner') {
+  return Astro.redirect(
+    '/owner/dashboard',
+  );
+}
 
 let profile: any = null;
 try {
-  const { data } = await supabase
+  const pr =
+    await supabase
     .from('profiles')
     .select('*')
-    .eq('user_id', session.userId)
+    .eq(
+      'user_id',
+      session.userId,
+    )
     .single();
-  profile = data;
+  profile = pr.data;
 } catch {}
+if (!profile) {
+  return Astro.redirect(
+    '/profile/create',
+  );
+}
 
-const reviewCount = Array.isArray(profile?.reviews_json) ? profile.reviews_json.length : 0;
-const heroImages: any[] = Array.isArray(profile?.hero_images_json) ? profile.hero_images_json : [];
-const aboutImages: any[] = Array.isArray(profile?.about_images_json) ? profile.about_images_json : [];
-const gallery: any[] = Array.isArray(profile?.gallery_json) ? profile.gallery_json : [];
-const reviews: any[] = Array.isArray(profile?.reviews_json) ? profile.reviews_json : [];
-const platforms: any[] = Array.isArray(profile?.platforms_json) ? profile.platforms_json : [];
-const h = (profile?.headings_json ?? {}) as Record<string, string>;
-const t = (profile?.theme_json ?? {}) as Record<string, string>;
-
-const { data: listings } = await supabase
+const lr =
+  await supabase
   .from('listings')
-  .select('id, title, description, date_from, date_to, profile_id, profiles!inner(name, location, slug, profile_pic, pets_json, hero_images_json)')
+  .select(
+    'id, title,' +
+    ' description,' +
+    ' date_from,' +
+    ' date_to,' +
+    ' profile_id,' +
+    ' profiles!inner(' +
+    'name, location,' +
+    ' slug,' +
+    ' profile_pic,' +
+    ' pets_json,' +
+    ' hero_images_json)'
+  )
   .eq('status', 'active')
-  .gte('date_to', new Date().toISOString().slice(0, 10))
-  .order('date_from', { ascending: true });
+  .gte(
+    'date_to',
+    new Date()
+    .toISOString()
+    .slice(0, 10),
+  )
+  .order(
+    'date_from',
+    { ascending: true },
+  );
+const listings: any[] =
+  lr.data ?? [];
 
-const sits = (listings ?? []) as any[];
+const arr = (
+  v: any,
+): any[] => (
+  Array.isArray(v)
+    ? v : []
+);
+const heroImages =
+  arr(
+    profile.hero_images_json,
+  );
+const aboutImages =
+  arr(
+    profile.about_images_json,
+  );
+const gallery = arr(
+  profile.gallery_json,
+);
+const reviews = arr(
+  profile.reviews_json,
+);
+const platforms = arr(
+  profile.platforms_json,
+);
+const theme =
+  profile.theme_json ??
+  {};
 
-function formatDateLong(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+const fmtDate = (
+  d: string,
+) => new Date(
+  d + 'T00:00:00',
+).toLocaleDateString(
+  'en-GB',
+  {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  },
+);
+const daysBetween = (
+  from: string,
+  to: string,
+) => {
+  const a = new Date(
+    to + 'T00:00:00',
+  ).getTime();
+  const b = new Date(
+    from + 'T00:00:00',
+  ).getTime();
+  return Math.ceil(
+    (a - b) / 86400000,
+  );
+};
 
-function daysBetween(from: string, to: string) {
-  const ms = new Date(to + 'T00:00:00').getTime() - new Date(from + 'T00:00:00').getTime();
-  return Math.ceil(ms / 86400000);
-}
+// Design copy — used
+// when a field is empty.
+const tx = (
+  s: string,
+) => s.trim();
+const taglineDef = tx(`
+Experienced house & pet sitters available worldwide.
+`);
+const badgeDef = tx(`
+Experienced sitters worldwide
+`);
+const aboutDef = tx(`
+We're Callum and Niamh — a couple who have spent the last few years looking after homes and animals across the UK and Australia…
+`);
 
-const strengthItems = [
-  { label: 'Bio written', done: !!(profile?.bio) },
-  { label: 'Hero photos added', done: heroImages.length > 0 },
-  { label: 'Gallery photos added', done: gallery.length > 0 },
-  { label: 'Reviews collected', done: reviews.length > 0 },
-  { label: 'Platform links added', done: platforms.length > 0 },
-  { label: 'Colours customised', done: !!(profile?.theme_json && Object.keys(profile.theme_json).length > 0) },
+const name: string =
+  profile.name || '';
+const slug: string =
+  profile.slug || '';
+const pageUrl =
+  'myahsits.com/' +
+  slug;
+const shareUrl =
+  'https://' + pageUrl;
+const publicHref =
+  '/' + slug;
+const tagline =
+  profile.tagline ||
+  taglineDef;
+const badge =
+  profile.badge_text ||
+  badgeDef;
+const pic: string =
+  profile.profile_pic ||
+  '/images/couple-bw-1.jpg';
+const bio: string =
+  profile.bio || '';
+const aboutText =
+  bio
+    ? bio.length > 120
+      ? bio.slice(0, 120) +
+        '…'
+      : bio
+    : aboutDef;
+const pvHero =
+  heroImages[0] || {
+    src:
+      '/images/' +
+      'couple-villa-1.jpg',
+    pos: 'center 30%',
+  };
+const pvHeroStyle =
+  'width:100%;' +
+  'height:100%;' +
+  'object-fit:cover;' +
+  'display:block;' +
+  'object-position:' +
+  (pvHero.pos ||
+    'center 30%');
+const pvAbout: string =
+  aboutImages[0]?.src ||
+  '/images/' +
+  'couple-dinner-1.jpg';
+const clip = (
+  s: string,
+) => (
+  s && s.length > 60
+    ? s.slice(0, 60) +
+      '…'
+    : s || ''
+);
+const pvReviews = reviews
+  .slice(0, 3)
+  .map((r: any) => ({
+    text: clip(r.text),
+    name: r.name || '',
+  }));
+const pvGallery = gallery
+  .slice(0, 8)
+  .map((g: any) => g.src);
+
+const items = [
+  {
+    label: 'Bio written',
+    done: !!bio,
+  },
+  {
+    label:
+      'Hero photos added',
+    done:
+      heroImages.length >
+      0,
+  },
+  {
+    label: tx(`
+Gallery photos added
+`),
+    done:
+      gallery.length > 0,
+  },
+  {
+    label:
+      'Reviews collected',
+    done:
+      reviews.length > 0,
+  },
+  {
+    label: tx(`
+Platform links added
+`),
+    done:
+      platforms.length >
+      0,
+  },
+  {
+    label: tx(`
+Colours customised
+`),
+    done:
+      Object.keys(theme)
+      .length > 0,
+  },
 ];
-const strengthDone = strengthItems.filter(i => i.done).length;
-const strengthPct = Math.round((strengthDone / strengthItems.length) * 100);
+const doneCount = items
+  .filter((i) => i.done)
+  .length;
+const pct = Math.round(
+  (doneCount /
+    items.length) *
+    100,
+);
+const strengthLabel =
+  doneCount +
+  ' of ' +
+  items.length +
+  ' complete';
+const strengthBar =
+  'height:100%;width:' +
+  pct +
+  '%;border-radius:' +
+  '50px;background:' +
+  'linear-gradient(' +
+  '90deg,#2f5d45 0%,' +
+  '#3e7a5b 100%);' +
+  'transition:width ' +
+  '.4s ease';
+const markOn =
+  'background:#2f5d45;' +
+  'color:#fff;';
+const markOff =
+  'background:' +
+  'transparent;' +
+  'border:1.5px dashed' +
+  ' rgba(110,84,56,.55);' +
+  'color:#2f5d45;';
+const markBase =
+  'width:20px;' +
+  'height:20px;' +
+  'border-radius:50%;' +
+  'flex-shrink:0;' +
+  'display:flex;' +
+  'align-items:center;' +
+  'justify-content:' +
+  'center;' +
+  'font-size:.64rem;' +
+  'font-weight:700;' +
+  'line-height:1;';
+const checklist = items
+  .map((i) => ({
+    label: i.label,
+    mark:
+      i.done ? '✓' : '',
+    markStyle:
+      markBase +
+      (i.done
+        ? markOn
+        : markOff),
+  }));
+
+const sits = listings
+  .map((l: any) => {
+    const lp =
+      l.profiles || {};
+    const pets = arr(
+      lp.pets_json,
+    );
+    const lh = arr(
+      lp.hero_images_json,
+    );
+    const n = daysBetween(
+      l.date_from,
+      l.date_to,
+    );
+    const petList = pets
+      .slice(0, 3)
+      .map((p: any) =>
+        p.type
+          ? p.name +
+            ' · ' +
+            p.type
+          : p.name,
+      );
+    if (pets.length > 3) {
+      petList.push(
+        '+' +
+        (pets.length - 3) +
+        ' more',
+      );
+    }
+    return {
+      href:
+        '/listings/' +
+        l.id,
+      title: l.title,
+      owner: lp.location
+        ? lp.name +
+          ' · ' +
+          lp.location
+        : lp.name,
+      dates:
+        fmtDate(
+          l.date_from,
+        ) +
+        ' — ' +
+        fmtDate(
+          l.date_to,
+        ),
+      duration:
+        n +
+        (n === 1
+          ? ' day'
+          : ' days'),
+      img:
+        lh[0]?.src ||
+        lp.profile_pic ||
+        '',
+      pic:
+        lp.profile_pic ||
+        '',
+      petList,
+    };
+  });
+
+const icons = {
+  dashboard: '<rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect>',
+  sits: '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline>',
+  messages: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>',
+  profile: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>'
+};
+const tabs = [
+  {
+    id: 'dashboard',
+    label: 'Dashboard',
+  },
+  {
+    id: 'sits',
+    label: 'Sits',
+  },
+  {
+    id: 'messages',
+    label: 'Messages',
+  },
+  {
+    id: 'profile',
+    label: 'Profile',
+  },
+].map((t, i) => ({
+  ...t,
+  icon: (icons as any)[
+    t.id
+  ],
+  style:
+    'flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:\'Montserrat\',sans-serif;color:' +
+    (i === 0
+      ? '#2f5d45'
+      : '#8a6a4f') +
+    ';transition:color' +
+    ' .2s',
+  underlineStyle:
+    'position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:' +
+    (i === 0
+      ? '#2f5d45'
+      : 'transparent'),
+}));
 ---
 
 <!DOCTYPE html>
@@ -69,23 +427,38 @@ const strengthPct = Math.round((strengthDone / strengthItems.length) * 100);
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
   <title>Dashboard — MYAH</title>
-  <style>
-    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
-    * { box-sizing:border-box; }
-    a { color:#2f5d45; }
-    a:hover { color:#2c1a0e; }
-    input::placeholder { color:rgba(44,26,14,.35); }
-    @keyframes gs-ring { to { transform:rotate(360deg); } }
-    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+  <style is:global>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    input::placeholder { color: rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
     @keyframes toast-in { from { transform:translateX(120%); opacity:0; } to { transform:translateX(0); opacity:1; } }
     @keyframes toast-out { from { transform:translateX(0); opacity:1; } to { transform:translateX(120%); opacity:0; } }
-    @media (max-width:900px) {
-      [data-topnav] { padding:12px 24px !important; }
-      [data-acct-links] { display:none !important; }
-      [data-dash-pad] { padding:28px 24px 60px !important; }
-      [data-dash-grid] { grid-template-columns:minmax(0,1fr) !important; }
-      [data-stats] { flex-direction:row !important; }
+    @media (max-width: 900px) {
+      [data-topnav] { padding: 12px 24px !important; }
+      [data-dash-pad] { padding: 28px 24px 60px !important; }
+      [data-dash-grid] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-stats] { flex-direction: row !important; }
     }
+
+    .db-nav-link:hover { color:#2f5d45 !important; }
+    .db-pill:hover { background:#2f5d45 !important; color:#fff !important; border-color:#2f5d45 !important; }
+    .db-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .db-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px) !important; box-shadow:0 12px 28px rgba(110,84,56,.36) !important; color:#fff !important; }
+    .db-btn:active { transform:translateY(0) scale(.98) !important; }
+    .db-text-link:hover { color:#2c1a0e !important; }
+    .db-sit:hover { transform:translateY(-6px) !important; box-shadow:0 20px 50px rgba(44,26,14,.12) !important; border-color:rgba(110,84,56,.45) !important; }
+
+    .msg-toast { background:#fff; border-radius:14px; padding:14px 18px; box-shadow:0 8px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08); display:flex; gap:12px; align-items:center; pointer-events:auto; cursor:pointer; text-decoration:none; color:inherit; transform:translateX(120%); animation:toast-in .4s cubic-bezier(.34,1.56,.64,1) forwards; max-width:380px; border-left:4px solid #2f5d45; }
+    .msg-toast.toast-out { animation:toast-out .3s ease forwards; }
+    .msg-toast-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+    .msg-toast-avatar-ph { width:42px; height:42px; border-radius:50%; flex-shrink:0; background:rgba(47,93,69,.12); color:#2f5d45; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; font-family:"Marcellus",serif; }
+    .msg-toast-body { flex:1; min-width:0; }
+    .msg-toast-name { font-weight:700; font-size:.88rem; color:#2c1a0e; }
+    .msg-toast-preview { font-size:.82rem; color:#6b4e35; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   </style>
 </head>
 <body>
@@ -102,430 +475,325 @@ const strengthPct = Math.round((strengthDone / strengthItems.length) * 100);
   <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.18)">
     <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
-      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
-        <span style="color:#2f5d45;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
-      </span>
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
     </a>
     <div data-acct-links="1" style="display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:flex-end">
-      <a href="/listings" id="nav-browse" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Browse sits</a>
-      <a href="/saved" id="nav-saved" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Saved</a>
-      <a href="/availability" id="nav-avail" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Availability</a>
-      <a href="/verification" id="nav-verif" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Verification</a>
-      <a href="/notifications" id="nav-notif" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Notifications</a>
-      <a href="/api/auth/logout" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s">Log out</a>
+      <a href="/listings" class="db-nav-link" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Browse sits</a>
+      <a href="/saved" class="db-nav-link" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Saved</a>
+      <a href="/availability" class="db-nav-link" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Availability</a>
+      <a href="/verification" class="db-nav-link" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Verification</a>
+      <a href="/notifications" class="db-nav-link" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Notifications</a>
+      <a href="/api/auth/logout" class="db-nav-link" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;transition:color .2s">Log out</a>
     </div>
   </nav>
 
-  <div id="tabBar" style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04);position:sticky;top:0;z-index:10">
-    <button type="button" data-tab="dashboard" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#2f5d45;transition:color .2s">
-      <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg></span>
-      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Dashboard</span>
-      <span class="tab-line" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:#2f5d45"></span>
-    </button>
-    <button type="button" data-tab="sits" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#6e5438;transition:color .2s">
-      <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>
-      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Sits</span>
-      <span class="tab-line" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
-    </button>
-    <button type="button" data-tab="messages" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#6e5438;transition:color .2s">
-      <span style="display:flex;position:relative">
-        <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-        <span id="navMsgBadge" style="position:absolute;top:-5px;right:-10px;background:#ef4444;color:#fff;font-size:.55rem;font-weight:700;min-width:16px;height:16px;border-radius:8px;padding:0 4px;display:none;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 4px rgba(239,68,68,.4)">0</span>
-      </span>
-      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Messages</span>
-      <span class="tab-line" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
-    </button>
-    <button type="button" data-tab="profile" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:13px 4px 12px;border:none;background:none;cursor:pointer;position:relative;font-family:'Montserrat',sans-serif;color:#6e5438;transition:color .2s">
-      <span style="display:flex"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
-      <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Profile</span>
-      <span class="tab-line" style="position:absolute;bottom:0;left:22%;right:22%;height:3px;border-radius:3px 3px 0 0;background:transparent"></span>
-    </button>
+  <div style="display:flex;background:#fff;border-bottom:1px solid rgba(44,26,14,.08);box-shadow:0 1px 4px rgba(0,0,0,.04);position:sticky;top:0;z-index:10">
+    {tabs.map((t) => (
+      <button type="button" data-tab={t.id} style={t.style}>
+        <span style="display:flex;position:relative">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" set:html={t.icon}></svg>
+          {t.id === 'messages' && (
+            <span data-msg-badge="1" style="position:absolute;top:-5px;right:-10px;background:#a4442e;color:#fff;font-size:.55rem;font-weight:700;min-width:16px;height:16px;border-radius:8px;padding:0 4px;display:none;align-items:center;justify-content:center;line-height:1">0</span>
+          )}
+        </span>
+        <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">{t.label}</span>
+        <span data-tab-line="1" style={t.underlineStyle}></span>
+      </button>
+    ))}
   </div>
 
-  <div id="msgToasts" style="position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
+  <div data-msg-toasts="1" style="position:fixed;top:20px;right:20px;z-index:1000;display:flex;flex-direction:column;gap:10px;pointer-events:none"></div>
 
   <main data-dash-pad="1" style="flex:1;padding:44px 48px 70px">
     <div style="max-width:1100px;margin:0 auto">
 
-      <!-- DASHBOARD TAB -->
-      <div id="panel-dashboard" class="tab-panel" style="display:flex;flex-direction:column;gap:24px">
-        {profile ? (
-          <>
-            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px">
-              <div>
-                <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your dashboard</p>
-                <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Welcome back, <em style="color:#2f5d45;">{profile.name}</em></h1>
-              </div>
-              <div style="display:flex;gap:10px;flex-wrap:wrap">
-                <a href="/profile/edit#photos" id="btn-photos" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Add photos</a>
-                <a href="/profile/edit#reviews" id="btn-reviews" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Request a review</a>
-                <a href="/profile/edit#headings" id="btn-colours" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Edit colours</a>
-              </div>
-            </div>
-
-            <div data-dash-grid="1" style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start">
-              <div id="card-profile" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-                <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:26px">
-                  {profile.profile_pic ? (
-                    <img src={profile.profile_pic} alt={profile.name} style="width:84px;height:84px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
-                  ) : (
-                    <div style="width:84px;height:84px;border-radius:50%;flex-shrink:0;background:#faf6ee;border:2px solid rgba(110,84,56,.35);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:2rem;color:#6e5438">{(profile.name || '?').charAt(0)}</div>
-                  )}
-                  <div style="min-width:0">
-                    <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 7px">{profile.name}</h2>
-                    {profile.tagline && <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0 0 12px">{profile.tagline}</p>}
-                    <a href={`/${profile.slug}`} target="_blank" style="display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.03em;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px">myahsits.com/{profile.slug}</a>
-                  </div>
-                </div>
-                <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
-                  <a href="/profile/edit" id="btn-edit-profile" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Edit profile</a>
-                  <a href={`/${profile.slug}`} target="_blank" style="font-size:.78rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s">View public page</a>
-                </div>
-              </div>
-
-              <div data-stats="1" style="display:flex;flex-direction:column;gap:16px">
-                <div id="stat-reviews" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-                  <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">{reviewCount}</span>
-                  <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Reviews</span>
-                </div>
-                <div id="stat-sits" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-                  <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">{sits.length}</span>
-                  <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Sits available</span>
-                </div>
-              </div>
-            </div>
-
-            <div id="card-share" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-              <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Share your profile</h3>
-              <p style="font-size:.93rem;color:#6b4e35;margin:0 0 20px;line-height:1.7;max-width:560px">Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
-              <div style="display:flex;gap:12px;flex-wrap:wrap">
-                <input id="shareUrl" type="text" readonly value={`https://myahsits.com/${profile.slug}`} style="flex:1;min-width:240px;border:1.5px solid rgba(44,26,14,.15);border-radius:10px;padding:13px 16px;font-size:.92rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none" />
-                <button type="button" id="copyBtn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;transition:background .2s, border-color .2s, transform .12s">Copy</button>
-              </div>
-            </div>
-
-            <div id="card-strength" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:16px">
-                <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Profile strength</h3>
-                <span style="font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45">{strengthDone} of {strengthItems.length} complete</span>
-              </div>
-              <div style="height:8px;border-radius:50px;background:rgba(110,84,56,.15);overflow:hidden;margin-bottom:22px">
-                <div style={`height:100%;width:${strengthPct}%;border-radius:50px;background:linear-gradient(90deg,#2f5d45 0%,#3e7a5b 100%);transition:width .4s ease`}></div>
-              </div>
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
-                {strengthItems.map(item => (
-                  <div style="display:flex;align-items:center;gap:11px;font-size:.88rem;color:#2c1a0e">
-                    <span style={`width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.64rem;font-weight:700;line-height:1;${item.done ? 'background:#2f5d45;color:#fff;' : 'background:transparent;border:1.5px dashed rgba(110,84,56,.55);color:#2f5d45;'}`}>{item.done ? '✓' : ''}</span>
-                    {item.label}
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div style="margin-top:32px">
-              <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px">
-                <div>
-                  <h2 style="font-family:'Marcellus',serif;font-size:1.7rem;color:#2c1a0e;margin:0 0 6px">Your page preview</h2>
-                  <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0">How your public profile currently looks with your colours applied.</p>
-                </div>
-                <a href="/profile/edit" style="font-size:.76rem;font-weight:600;color:#2f5d45;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s">Edit profile</a>
-              </div>
-              <div style="background:#faf6ee;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(44,26,14,.12);border:1px solid rgba(44,26,14,.08)" set:html="">
-                <div style={`--pv-bg:${t.background || '#faf6ee'};--pv-accent:${t.accent || '#2f5d45'};--pv-text:${t.text || '#2c1a0e'};--pv-text-soft:${t.text_soft || '#6b4e35'}`}>
-                  <div style="display:flex;align-items:center;gap:14px;padding:13px 18px;background:#fff;border-bottom:1px solid rgba(44,26,14,.08)">
-                    <span style="display:flex;gap:6px;flex-shrink:0">
-                      <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
-                      <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
-                      <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
-                    </span>
-                    <span style="flex:1;background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:50px;padding:7px 16px;font-size:.74rem;color:#6b4e35;letter-spacing:.02em;display:flex;align-items:center;gap:9px;min-width:0">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0"><rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path></svg>
-                      myahsits.com/{profile.slug}
-                    </span>
-                  </div>
-                  <div style="position:relative;height:230px;overflow:hidden">
-                    {heroImages.length > 0 ? (
-                      <img src={heroImages[0].src} alt="" style={`width:100%;height:100%;object-fit:cover;display:block;object-position:${heroImages[0].pos || 'center 30%'}`} />
-                    ) : (
-                      <div style="width:100%;height:100%;background:linear-gradient(135deg,#2c1a0e 0%,#4a3525 100%)"></div>
-                    )}
-                    <div style="position:absolute;inset:0;background:rgba(44,26,14,.55)"></div>
-                    <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center;padding:16px">
-                      {profile.badge_text && <span style="font-size:.58rem;background:rgba(255,255,255,.16);border:1px solid rgba(196,171,138,.4);color:#fff;padding:5px 14px;border-radius:50px;margin-bottom:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">{profile.badge_text}</span>}
-                      <p style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:1.9rem;color:#fff;line-height:1;margin:0">MYAH</p>
-                      <p style="font-size:.72rem;color:rgba(255,255,255,.88);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:8px 0 0">{profile.name}</p>
-                      <span style="display:inline-block;margin-top:12px;background:#2f5d45;color:#fff;font-size:.58rem;font-weight:600;padding:8px 18px;border-radius:50px;letter-spacing:.1em;text-transform:uppercase">Book {profile.account_type === 'joint' ? 'Us' : 'Me'} Today</span>
-                    </div>
-                  </div>
-                  {aboutImages.length > 0 || profile.bio ? (
-                    <div style="padding:22px 26px">
-                      <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">{h.about_label || (profile.account_type === 'joint' ? 'Who we are' : 'Who I am')}</p>
-                      <div style="display:flex;gap:14px;align-items:flex-start">
-                        {aboutImages.length > 0 && <img src={aboutImages[0].src} alt="" style="width:74px;height:74px;border-radius:10px;object-fit:cover;flex-shrink:0" />}
-                        <p style="font-size:.74rem;color:#6b4e35;line-height:1.7;margin:0">{profile.bio ? (profile.bio.length > 120 ? profile.bio.slice(0, 120) + '…' : profile.bio) : ''}</p>
-                      </div>
-                    </div>
-                  ) : null}
-                  {reviews.length > 0 && (
-                    <div style="padding:22px 26px">
-                      <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">What pet owners say</p>
-                      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
-                        {reviews.slice(0, 3).map((r: any) => (
-                          <div style="background:#fff;border:1px solid rgba(110,84,56,.18);border-radius:10px;padding:13px">
-                            <span style="color:#2f5d45;font-size:.55rem;display:block;margin-bottom:6px;letter-spacing:.2em">★★★★★</span>
-                            <p style="font-size:.64rem;color:#6b4e35;line-height:1.6;font-style:italic;margin:0 0 6px">"{r.text && r.text.length > 60 ? r.text.slice(0, 60) + '…' : r.text}"</p>
-                            <span style="font-size:.56rem;font-weight:700;color:#2f5d45;letter-spacing:.04em">— {r.name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {gallery.length > 0 && (
-                    <div style="padding:22px 26px">
-                      <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">Pets we've loved</p>
-                      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px">
-                        {gallery.slice(0, 8).map((img: any) => (
-                          <div style="aspect-ratio:1;border-radius:6px;overflow:hidden;background:#e9e0d2"><img src={img.src} alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <div style="background:#2c1a0e;padding:16px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px">
-                    <p style="font-family:'Marcellus',serif;font-size:.82rem;margin:0"><span style="color:#2f5d45">MYAH</span></p>
-                    <span style="font-size:.6rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase">{profile.name}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </>
-        ) : (
-          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
-            <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
-            <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">You don't have a profile yet</h2>
-            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Create your sitter profile to get a shareable page with your bio, photos, and reviews.</p>
-            <a href="/profile/create" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Create your profile</a>
+      <div data-panel="dashboard" style="display:flex;flex-direction:column;gap:24px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px">
+          <div>
+            <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your dashboard</p>
+            <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Welcome back, <em style="color:#2f5d45;">{name}</em></h1>
           </div>
-        )}
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <a href="/profile/edit#photos" class="db-pill" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Add photos</a>
+            <a href="/profile/edit#reviews" class="db-pill" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Request a review</a>
+            <a href="/profile/edit#headings" class="db-pill" style="display:inline-flex;align-items:center;gap:8px;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;background:#fff;border:1.5px solid rgba(110,84,56,.35);border-radius:50px;padding:11px 20px;transition:background .2s, color .2s, border-color .2s">Edit colours</a>
+          </div>
+        </div>
+        <div data-dash-grid="1" style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:24px;align-items:start">
+          <div class="db-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;gap:24px;align-items:flex-start;margin-bottom:26px">
+              <img src={pic} alt={name} style="width:84px;height:84px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+              <div style="min-width:0">
+                <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 7px">{name}</h2>
+                <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0 0 12px">{tagline}</p>
+                <a href={publicHref} style="display:inline-flex;align-items:center;gap:8px;font-size:.8rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.03em;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px">{pageUrl}</a>
+              </div>
+            </div>
+            <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:24px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+              <a href="/profile/edit" class="db-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Edit profile</a>
+              <a href={publicHref} class="db-text-link" style="font-size:.78rem;color:#2f5d45;font-weight:600;text-decoration:none;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s">View public page</a>
+            </div>
+          </div>
+
+          <div data-stats="1" style="display:flex;flex-direction:column;gap:16px">
+            <div class="db-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">{reviews.length}</span>
+              <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Reviews</span>
+            </div>
+            <div class="db-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;text-align:center;flex:1;display:flex;flex-direction:column;gap:7px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <span style="font-family:'Marcellus',serif;font-size:2.1rem;color:#6e5438;line-height:1">{sits.length}</span>
+              <span style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Sits available</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="db-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">Share your profile</h3>
+          <p style="font-size:.93rem;color:#6b4e35;margin:0 0 20px;line-height:1.7;max-width:560px">Send this link to pet owners so they can view your full portfolio, reviews, and get in touch.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <input data-share="1" type="text" readonly="readonly" value={shareUrl} style="flex:1;min-width:240px;border:1.5px solid rgba(44,26,14,.15);border-radius:10px;padding:13px 16px;font-size:.92rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none" />
+            <button type="button" data-copy="1" class="db-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Copy</button>
+          </div>
+        </div>
+
+        <div class="db-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;flex-wrap:wrap;margin-bottom:16px">
+            <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Profile strength</h3>
+            <span style="font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45">{strengthLabel}</span>
+          </div>
+          <div style="height:8px;border-radius:50px;background:rgba(110,84,56,.15);overflow:hidden;margin-bottom:22px">
+            <div style={strengthBar}></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px">
+            {checklist.map((c) => (
+              <div style="display:flex;align-items:center;gap:11px;font-size:.88rem;color:#2c1a0e">
+                <span style={c.markStyle}>{c.mark}</span>{c.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div style="margin-top:32px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:18px">
+            <div>
+              <h2 style="font-family:'Marcellus',serif;font-size:1.7rem;color:#2c1a0e;margin:0 0 6px">Your page preview</h2>
+              <p style="font-size:.92rem;color:#6b4e35;line-height:1.6;margin:0">How your public profile currently looks with your colours applied.</p>
+            </div>
+            <a href="/profile/edit" class="db-text-link" style="font-size:.76rem;font-weight:600;color:#2f5d45;text-decoration:none;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:color .2s">Edit profile</a>
+          </div>
+          <div style="background:#faf6ee;border-radius:18px;overflow:hidden;box-shadow:0 8px 32px rgba(44,26,14,.12);border:1px solid rgba(44,26,14,.08)">
+            <div style="display:flex;align-items:center;gap:14px;padding:13px 18px;background:#fff;border-bottom:1px solid rgba(44,26,14,.08)">
+              <span style="display:flex;gap:6px;flex-shrink:0">
+                <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+                <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+                <span style="width:10px;height:10px;border-radius:50%;background:rgba(44,26,14,.14);display:block"></span>
+              </span>
+              <span style="flex:1;background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:50px;padding:7px 16px;font-size:.74rem;color:#6b4e35;letter-spacing:.02em;display:flex;align-items:center;gap:9px;min-width:0">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.8" stroke-linecap="round" style="flex-shrink:0"><rect x="4.5" y="10.5" width="15" height="10" rx="2"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path></svg>
+                {pageUrl}
+              </span>
+            </div>
+            <div style="position:relative;height:230px;overflow:hidden">
+              <img src={pvHero.src} alt="" style={pvHeroStyle} />
+              <div style="position:absolute;inset:0;background:rgba(44,26,14,.55)"></div>
+              <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;text-align:center;padding:16px">
+                <span style="font-size:.58rem;background:rgba(255,255,255,.16);border:1px solid rgba(196,171,138,.4);color:#fff;padding:5px 14px;border-radius:50px;margin-bottom:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase">{badge}</span>
+                <p style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:1.9rem;color:#fff;line-height:1;margin:0">MYAH</p>
+                <p style="font-size:.72rem;color:rgba(255,255,255,.88);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin:8px 0 0">{name}</p>
+                <span style="display:inline-block;margin-top:12px;background:#2f5d45;color:#fff;font-size:.58rem;font-weight:600;padding:8px 18px;border-radius:50px;letter-spacing:.1em;text-transform:uppercase">Book us today</span>
+              </div>
+            </div>
+            <div style="padding:22px 26px">
+              <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">Who we are</p>
+              <div style="display:flex;gap:14px;align-items:flex-start">
+                <img src={pvAbout} alt="" style="width:74px;height:74px;border-radius:10px;object-fit:cover;flex-shrink:0" />
+                <p style="font-size:.74rem;color:#6b4e35;line-height:1.7;margin:0">{aboutText}</p>
+              </div>
+            </div>
+            {pvReviews.length > 0 && (
+              <div style="padding:22px 26px">
+                <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">What pet owners say</p>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+                  {pvReviews.map((r) => (
+                    <div style="background:#fff;border:1px solid rgba(110,84,56,.18);border-radius:10px;padding:13px">
+                      <span style="color:#2f5d45;font-size:.55rem;display:block;margin-bottom:6px;letter-spacing:.2em">★★★★★</span>
+                      <p style="font-size:.64rem;color:#6b4e35;line-height:1.6;font-style:italic;margin:0 0 6px">"{r.text}"</p>
+                      <span style="font-size:.56rem;font-weight:700;color:#2f5d45;letter-spacing:.04em">— {r.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {pvGallery.length > 0 && (
+              <div style="padding:22px 26px">
+                <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">Pets we've loved</p>
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px">
+                  {pvGallery.map((g) => (
+                    <div style="aspect-ratio:1;border-radius:6px;overflow:hidden;background:#e9e0d2"><img src={g} alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div style="background:#2c1a0e;padding:16px 26px;display:flex;justify-content:space-between;align-items:center;gap:16px">
+              <p style="font-family:'Marcellus',serif;font-size:.82rem;margin:0"><span style="color:#2f5d45">MYAH</span> </p>
+              <span style="font-size:.6rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.1em;text-transform:uppercase">{name}</span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- SITS TAB -->
-      <div id="panel-sits" class="tab-panel" style="display:none">
+      <div data-panel="sits" style="display:none">
         <div style="margin-bottom:34px">
           <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Available sits</p>
           <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;margin:0 0 10px;line-height:1.2">Find your <em style="color:#2f5d45;">next sit</em></h1>
           <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;max-width:600px;margin:0">Browse homes looking for trusted sitters. Open any listing to see the full details, meet the pets, and get in touch.</p>
         </div>
-        {sits.length === 0 ? (
-          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:520px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
-            <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span>
-            <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No sits available right now</h2>
-            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0">Check back soon — new listings are posted regularly.</p>
-          </div>
-        ) : (
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px">
-            {sits.map((listing: any) => {
-              const lp = listing.profiles;
-              const pets: any[] = Array.isArray(lp?.pets_json) ? lp.pets_json : [];
-              const lHero: any[] = Array.isArray(lp?.hero_images_json) ? lp.hero_images_json : [];
-              const duration = daysBetween(listing.date_from, listing.date_to);
-              return (
-                <a href={`/listings/${listing.id}`} class="sit-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 1px 2px rgba(44,26,14,.04);display:block;transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
-                  <div style="position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#e9e0d2">
-                    {lHero.length > 0 ? (
-                      <img src={lHero[0].src} alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
-                    ) : lp?.profile_pic ? (
-                      <img src={lp.profile_pic} alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
-                    ) : (
-                      <div style="width:100%;height:100%;background:linear-gradient(135deg,#e8dcc8 0%,#d4c4a8 100%)"></div>
-                    )}
-                    <span style="position:absolute;top:14px;left:14px;background:#fff;color:#2c1a0e;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:7px 15px;border-radius:50px;box-shadow:0 2px 8px rgba(0,0,0,.14)">{duration} day{duration !== 1 ? 's' : ''}</span>
-                  </div>
-                  <div style="padding:20px 22px 24px">
-                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
-                      <h3 style="font-family:'Marcellus',serif;font-size:1.12rem;color:#2c1a0e;line-height:1.3;margin:0;flex:1">{listing.title}</h3>
-                      {lp?.profile_pic && <img src={lp.profile_pic} alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.25)" />}
-                    </div>
-                    <p style="font-size:.83rem;color:#6b4e35;margin:6px 0 10px">{lp?.name}{lp?.location ? ` · ${lp.location}` : ''}</p>
-                    <p style="font-size:.83rem;color:#5c3d20;font-weight:700;margin:0 0 12px">{formatDateLong(listing.date_from)} — {formatDateLong(listing.date_to)}</p>
-                    {pets.length > 0 && (
-                      <div style="display:flex;flex-wrap:wrap;gap:7px">
-                        {pets.slice(0, 3).map((p: any) => (
-                          <span style="background:rgba(110,84,56,.08);color:#5c3d20;font-size:.74rem;font-weight:700;padding:5px 13px;border-radius:50px;border:1px solid rgba(110,84,56,.22)">{p.name}{p.type ? ` · ${p.type}` : ''}</span>
-                        ))}
-                        {pets.length > 3 && <span style="background:rgba(110,84,56,.08);color:#5c3d20;font-size:.74rem;font-weight:700;padding:5px 13px;border-radius:50px;border:1px solid rgba(110,84,56,.22)">+{pets.length - 3} more</span>}
-                      </div>
-                    )}
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      <!-- MESSAGES TAB -->
-      <div id="panel-messages" class="tab-panel" style="display:none">
-        <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
-          <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>
-          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No messages yet</h2>
-          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">When an owner gets in touch about a sit, the conversation will appear here.</p>
-          <a href="/messages" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Open messages</a>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:26px">
+          {sits.map((sit) => (
+            <a href={sit.href} class="db-sit" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;text-decoration:none;color:inherit;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+              <div style="position:relative;width:100%;aspect-ratio:16/10;overflow:hidden;background:#e9e0d2">
+                {sit.img && <img src={sit.img} alt="" style="width:100%;height:100%;object-fit:cover;display:block" />}
+                <span style="position:absolute;top:14px;left:14px;background:#fff;color:#2c1a0e;font-size:.72rem;font-weight:700;letter-spacing:.06em;padding:7px 15px;border-radius:50px;box-shadow:0 2px 8px rgba(0,0,0,.14)">{sit.duration}</span>
+              </div>
+              <div style="padding:20px 22px 24px">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+                  <h3 style="font-family:'Marcellus',serif;font-size:1.12rem;color:#2c1a0e;line-height:1.3;margin:0;flex:1">{sit.title}</h3>
+                  {sit.pic && <img src={sit.pic} alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.25)" />}
+                </div>
+                <p style="font-size:.83rem;color:#6b4e35;margin:6px 0 10px">{sit.owner}</p>
+                <p style="font-size:.83rem;color:#5c3d20;font-weight:700;margin:0 0 12px">{sit.dates}</p>
+                <div style="display:flex;flex-wrap:wrap;gap:7px">
+                  {sit.petList.map((p) => (
+                    <span style="background:rgba(110,84,56,.08);color:#5c3d20;font-size:.74rem;font-weight:700;padding:5px 13px;border-radius:50px;border:1px solid rgba(110,84,56,.22)">{p}</span>
+                  ))}
+                </div>
+              </div>
+            </a>
+          ))}
         </div>
       </div>
 
-      <!-- PROFILE TAB -->
-      <div id="panel-profile" class="tab-panel" style="display:none">
-        <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04)">
-          <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
-          <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">Edit your profile</h2>
-          <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Update your bio, photos, reviews, platform links and colours — everything that appears on your public page.</p>
-          <a href="/profile/edit" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Open profile editor</a>
-        </div>
+      <div data-panel="messages" class="db-card" style="display:none;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+        <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg></span>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">No messages yet</h2>
+        <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0">When an owner gets in touch about a sit, the conversation will appear here.</p>
+      </div>
+
+      <div data-panel="profile" class="db-card" style="display:none;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:80px 48px;text-align:center;max-width:540px;margin:0 auto;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+        <span style="width:58px;height:58px;border-radius:16px;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#6e5438;display:inline-flex;align-items:center;justify-content:center;margin-bottom:22px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+        <h2 style="font-family:'Marcellus',serif;font-size:1.6rem;color:#2c1a0e;margin:0 0 12px">Edit your profile</h2>
+        <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 28px">Update your bio, photos, reviews, platform links and colours — everything that appears on your public page.</p>
+        <a href="/profile/edit" class="db-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Open profile editor</a>
       </div>
 
     </div>
   </main>
 </div>
 
-<style>
-  .sit-card:hover { transform:translateY(-6px); box-shadow:0 20px 50px rgba(44,26,14,.12); border-color:rgba(110,84,56,.45) !important; }
-  #btn-edit-profile:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
-  #btn-edit-profile:active { transform:translateY(0) scale(.98); }
-  #copyBtn:hover { background:#3e7a5b; border-color:#3e7a5b; transform:translateY(-2px); box-shadow:0 12px 28px rgba(110,84,56,.36); }
-  #copyBtn:active { transform:translateY(0) scale(.98); }
-  #card-profile:hover, #card-share:hover, #card-strength:hover, #stat-reviews:hover, #stat-sits:hover { box-shadow:0 10px 34px rgba(44,26,14,.08); border-color:rgba(110,84,56,.4) !important; }
-  #btn-photos:hover, #btn-reviews:hover, #btn-colours:hover { background:#2f5d45; color:#fff; border-color:#2f5d45 !important; }
-  [data-acct-links] a:hover { color:#2f5d45 !important; }
-  .msg-toast { background:#fff; border-radius:14px; padding:14px 18px; box-shadow:0 8px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08); display:flex; gap:12px; align-items:center; pointer-events:auto; cursor:pointer; text-decoration:none; color:inherit; transform:translateX(120%); animation:toast-in .4s cubic-bezier(.34,1.56,.64,1) forwards; max-width:380px; border-left:4px solid #2f5d45; }
-  .msg-toast.toast-out { animation:toast-out .3s ease forwards; }
-  .msg-toast-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0; }
-  .msg-toast-avatar-ph { width:42px; height:42px; border-radius:50%; flex-shrink:0; background:rgba(47,93,69,.12); color:#2f5d45; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; font-family:"Marcellus",serif; }
-  .msg-toast-body { flex:1; min-width:0; }
-  .msg-toast-name { font-weight:700; font-size:.88rem; color:#2c1a0e; }
-  .msg-toast-preview { font-size:.82rem; color:#6b4e35; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-</style>
+<script is:inline>
+(() => {
+  let hideT, copyT;
 
-<script>
-  // Tab switching
-  const tabs = document.querySelectorAll('[data-tab]');
-  const panels = { dashboard: document.getElementById('panel-dashboard'), sits: document.getElementById('panel-sits'), messages: document.getElementById('panel-messages'), profile: document.getElementById('panel-profile') };
-
-  function switchTab(id: string) {
-    tabs.forEach(btn => {
-      const on = (btn as HTMLElement).dataset.tab === id;
-      (btn as HTMLElement).style.color = on ? '#2f5d45' : '#6e5438';
-      const line = btn.querySelector('.tab-line') as HTMLElement | null;
+  // tabs
+  const tabBtns = Array.from(document.querySelectorAll('[data-tab]'));
+  const panels = Array.from(document.querySelectorAll('[data-panel]'));
+  const setTab = id => {
+    tabBtns.forEach(b => {
+      const on = b.getAttribute('data-tab') === id;
+      b.style.color = on ? '#2f5d45' : '#8a6a4f';
+      const line = b.querySelector('[data-tab-line]');
       if (line) line.style.background = on ? '#2f5d45' : 'transparent';
     });
-    Object.entries(panels).forEach(([key, el]) => {
-      if (el) el.style.display = key === id ? (key === 'dashboard' ? 'flex' : 'block') : 'none';
+    panels.forEach(p => {
+      const key = p.getAttribute('data-panel');
+      p.style.display = key === id ? (key === 'dashboard' ? 'flex' : (key === 'sits' ? 'block' : 'block')) : 'none';
     });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
+  };
+  tabBtns.forEach(b => b.addEventListener('click', () => { setTab(b.getAttribute('data-tab')); window.scrollTo({ top: 0, behavior: 'smooth' }); }));
 
-  tabs.forEach(btn => btn.addEventListener('click', () => switchTab((btn as HTMLElement).dataset.tab!)));
-
-  // Copy URL
-  const copyBtn = document.getElementById('copyBtn');
-  copyBtn?.addEventListener('click', () => {
-    const input = document.getElementById('shareUrl') as HTMLInputElement;
-    input?.select();
-    navigator.clipboard?.writeText(input?.value ?? '').then(() => {
-      if (copyBtn) { copyBtn.textContent = 'Copied!'; setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000); }
-    });
+  // copy share link
+  const copyBtn = document.querySelector('[data-copy]');
+  copyBtn && copyBtn.addEventListener('click', () => {
+    const input = document.querySelector('[data-share]');
+    if (input) {
+      input.select();
+      if (navigator.clipboard) navigator.clipboard.writeText(input.value);
+    }
+    copyBtn.textContent = 'Copied!';
+    clearTimeout(copyT);
+    copyT = setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
   });
 
-  // Loading overlay
-  const loader = document.querySelector('[data-loader]') as HTMLElement | null;
-  const showLoader = () => {
+  // loader
+  const loader = document.querySelector('[data-loader]');
+  const show = () => {
     if (!loader) return;
     loader.style.opacity = '1';
     loader.style.pointerEvents = 'all';
+    clearTimeout(hideT);
+    hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
   };
   document.querySelectorAll('a[href]').forEach(a => {
     const href = a.getAttribute('href') || '';
     if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
-    a.addEventListener('click', (e: Event) => { if ((e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey || (e as MouseEvent).shiftKey) return; showLoader(); });
-  });
-  window.addEventListener('pageshow', e => {
-    if (e.persisted && loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
+    a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
   });
 
-  // Message notifications
-  (function() {
-    const seenIds = new Set<string>();
-    let isFirst = true;
-
-    function playNotifSound() {
-      try {
-        const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.frequency.setValueAtTime(660, ctx.currentTime);
-        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
-        osc.type = 'sine';
-        gain.gain.setValueAtTime(0.08, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-        osc.start(ctx.currentTime);
-        osc.stop(ctx.currentTime + 0.4);
-      } catch {}
-    }
-
-    function esc(str: string) {
-      const d = document.createElement('div');
-      d.textContent = str;
-      return d.innerHTML;
-    }
-
-    function showToast(msg: any) {
-      const container = document.getElementById('msgToasts');
-      if (!container) return;
-      const sender = msg.sender || {};
-      const initial = (sender.name || '?').charAt(0).toUpperCase();
-      const avatar = sender.profile_pic
-        ? `<img src="${esc(sender.profile_pic)}" class="msg-toast-avatar" />`
-        : `<div class="msg-toast-avatar-ph">${initial}</div>`;
-      const toast = document.createElement('a') as HTMLAnchorElement;
-      toast.href = `/messages/${msg.conversation_id}`;
-      toast.className = 'msg-toast';
-      toast.innerHTML = `${avatar}<div class="msg-toast-body"><div class="msg-toast-name">${esc(sender.name || 'Someone')}</div><div class="msg-toast-preview">${esc((msg.body || '').slice(0, 80))}</div></div>`;
-      container.appendChild(toast);
-      setTimeout(() => { toast.classList.add('toast-out'); setTimeout(() => toast.remove(), 300); }, 5000);
-    }
-
-    function updateBadge(count: number) {
-      const nav = document.getElementById('navMsgBadge') as HTMLElement | null;
-      if (!nav) return;
-      const label = count > 99 ? '99+' : String(count);
-      if (count > 0) { nav.textContent = label; nav.style.display = 'inline-flex'; }
-      else { nav.style.display = 'none'; }
-    }
-
-    async function checkUnread() {
-      try {
-        const res = await fetch('/api/messages/unread');
-        const data = await res.json();
-        updateBadge(data.count || 0);
-        if (data.messages) {
-          if (!isFirst) {
-            const fresh = data.messages.filter((m: any) => !seenIds.has(m.id));
-            if (fresh.length > 0) {
-              playNotifSound();
-              fresh.slice(0, 3).forEach(showToast);
-            }
-          }
-          data.messages.forEach((m: any) => seenIds.add(m.id));
+  // unread message badge + toasts (kept from the previous dashboard)
+  const seen = new Set();
+  let first = true;
+  const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+  const ping = () => {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(660, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+    } catch {}
+  };
+  const toast = m => {
+    const box = document.querySelector('[data-msg-toasts]');
+    if (!box) return;
+    const s = m.sender || {};
+    const av = s.profile_pic
+      ? '<img src="' + esc(s.profile_pic) + '" class="msg-toast-avatar" />'
+      : '<div class="msg-toast-avatar-ph">' + esc((s.name || '?').charAt(0).toUpperCase()) + '</div>';
+    const t = document.createElement('a');
+    t.href = '/messages/' + m.conversation_id;
+    t.className = 'msg-toast';
+    t.innerHTML = av + '<div class="msg-toast-body"><div class="msg-toast-name">' + esc(s.name || 'Someone') + '</div><div class="msg-toast-preview">' + esc((m.body || '').slice(0, 80)) + '</div></div>';
+    box.appendChild(t);
+    setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 5000);
+  };
+  const badge = n => {
+    const el = document.querySelector('[data-msg-badge]');
+    if (!el) return;
+    if (n > 0) { el.textContent = n > 99 ? '99+' : String(n); el.style.display = 'inline-flex'; }
+    else el.style.display = 'none';
+  };
+  const check = async () => {
+    try {
+      const res = await fetch('/api/messages/unread');
+      const data = await res.json();
+      badge(data.count || 0);
+      if (data.messages) {
+        if (!first) {
+          const fresh = data.messages.filter(m => !seen.has(m.id));
+          if (fresh.length) { ping(); fresh.slice(0, 3).forEach(toast); }
         }
-        isFirst = false;
-      } catch {}
-    }
-
-    checkUnread();
-    setInterval(checkUnread, 8000);
-  })();
+        data.messages.forEach(m => seen.add(m.id));
+      }
+      first = false;
+    } catch {}
+  };
+  check();
+  setInterval(check, 8000);
+})();
 </script>
 </body>
 </html>
