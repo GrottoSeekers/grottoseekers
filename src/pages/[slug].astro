@@ -1,123 +1,343 @@
 ---
-export const prerender = false;
+export const prerender =
+  false;
+import {
+  supabase,
+} from '../lib/supabase';
 
-import { supabase } from '../lib/supabase';
-
-interface HeroImage { src: string; pos: string }
-interface Photo     { src: string; alt: string }
-interface Review    { text: string; name: string; initials: string; platform: string }
-interface Platform  { name: string; url: string; emoji: string; description: string }
-
-const { slug } = Astro.params;
-if (!slug) return Astro.redirect('/');
-
-let profile: any = null;
-try {
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('slug', slug)
-    .single();
-  if (!error) profile = data;
-} catch {}
-
-if (!profile) {
-  Astro.response.status = 404;
+const { slug } =
+  Astro.params;
+let p: any = null;
+if (slug) {
+  try {
+    const res =
+      await supabase
+      .from('profiles')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    if (!res.error) {
+      p = res.data;
+    }
+  } catch {}
+}
+if (!p) {
+  return new Response(
+    'Not found',
+    { status: 404 },
+  );
 }
 
-const heroImages    = (profile?.hero_images_json  ?? []) as HeroImage[];
-const aboutImages   = (profile?.about_images_json ?? []) as Photo[];
-const gallery       = (profile?.gallery_json       ?? []) as Photo[];
-const reviews       = (profile?.reviews_json       ?? []) as Review[];
-const platforms     = (profile?.platforms_json     ?? []) as Platform[];
-const bioParagraphs = ((profile?.bio as string) ?? '').split('\n\n').filter(Boolean);
+// Design copy — used
+// when a profile field
+// is empty.
+const tx = (
+  s: string,
+) => s.trim();
+const at = (
+  f: string,
+) => '/images/' + f;
+const local = (
+  s: string,
+) => s.replace(
+  /^public\//,
+  '/',
+);
 
-const isOwner = profile?.profile_type === 'owner';
-const isSolo = (profile?.account_type ?? 'solo') === 'solo';
-const pets: any[] = (profile?.pets_json ?? []) as any[];
-const amenities: string[] = (profile?.amenities_json ?? []) as string[];
-
-const h = (profile?.headings_json ?? {}) as Record<string, string>;
-const heading = isOwner ? {
-  aboutLabel:     h.about_label     || 'About Our Home',
-  aboutTitle:     h.about_title     || 'A great place to stay — for you and the pets.',
-  reviewsLabel:   h.reviews_label   || 'What Sitters Say',
-  galleryLabel:   h.gallery_label   || 'Meet the Pets',
-  galleryTitle:   h.gallery_title   || 'Our Pets',
-  platformsLabel: h.platforms_label || 'Our Home',
-  platformsTitle: h.platforms_title || 'Gallery',
-  enquiryLabel:   h.enquiry_label   || 'Get In Touch',
-  enquiryTitle:   h.enquiry_title   || (profile ? `Contact ${profile.name}` : ''),
-} : {
-  aboutLabel:     h.about_label     || (isSolo ? 'Who I Am' : 'Who We Are'),
-  aboutTitle:     h.about_title     || 'A home away from home — for you and your pets.',
-  reviewsLabel:   h.reviews_label   || 'What Pet Owners Say',
-  galleryLabel:   h.gallery_label   || (isSolo ? "Pets I've Loved" : "Pets We've Loved"),
-  galleryTitle:   h.gallery_title   || (isSolo ? 'My Sits' : 'Our Sits'),
-  platformsLabel: h.platforms_label || (isSolo ? 'Find Me Online' : 'Find Us Online'),
-  platformsTitle: h.platforms_title || 'Verified Profiles',
-  enquiryLabel:   h.enquiry_label   || 'Get In Touch',
-  enquiryTitle:   h.enquiry_title   || (profile ? (isSolo ? `Book ${profile.name}` : `Book ${profile.name}`) : ''),
+type Pic = {
+  src: string;
+  pos?: string;
+  alt?: string;
 };
-const reviewsHeading = (h.reviews_title) || (reviews.length === 1 ? '1 five-star review.' : `${reviews.length}+ five-star reviews.`);
-const reviewCount = reviews.length;
-const rating = profile?.rating ?? 5.0;
-const location = profile?.location ?? '';
-const whatsapp = profile?.whatsapp_number ?? '';
-const badgeText = profile?.badge_text ?? (isSolo ? 'Experienced sitter worldwide' : 'Experienced sitters worldwide');
-const enquiryDesc = isOwner
-  ? "Tell us about your experience, availability, and why you'd be a great fit."
-  : (isSolo ? "Tell me about your home, your pets, and your dates and I'll get back to you within 24 hours." : "Tell us about your home, your pets, and your dates and we'll get back to you within 24 hours.");
+
+const heroDef: Pic[] = [
+  {
+    src: at(
+      'couple-villa-1.jpg',
+    ),
+    pos: 'center 30%',
+  },
+  {
+    src: at(
+      'couple-boat-1.jpg',
+    ),
+    pos: 'center 30%',
+  },
+  {
+    src: at(
+      'couple-field-1.jpg',
+    ),
+    pos: 'center 25%',
+  },
+  {
+    src: at(
+      'couple-night-1.jpg',
+    ),
+    pos: 'center 30%',
+  },
+];
+
+const aboutDef: Pic[] = [
+  {
+    src: at(
+      'couple-dinner-1.jpg',
+    ),
+    alt: tx(`
+Callum and Niamh at dinner
+`),
+  },
+  {
+    src: at(
+      'couple-airport-1.jpg',
+    ),
+    alt: tx(`
+Callum and Niamh at the airport
+`),
+  },
+  {
+    src: at(
+      'couple-bw-1.jpg',
+    ),
+    alt: tx(`
+Callum and Niamh
+`),
+  },
+];
+
+const badgeDef = tx(`
+Experienced sitters worldwide
+`);
+const taglineDef = tx(`
+Experienced house & pet sitters available worldwide — passionate about caring for homes and animals wherever they go.
+`);
+const bioDef = tx(`
+We're Callum and Niamh. We've cared for all sorts of animals. From cats and dogs to horses and bearded lizards. We've stayed in just as many kinds of home. From high-rise city apartments to farmhouses on a hundred acres.
+
+We treat every sit like it's our own home: daily walks, feeding routines kept to the minute, plants watered, bins out, and regular photo updates so you can relax while you're away.
+`);
+const blurbDef = tx(`
+Callum & Niamh — experienced house and pet sitters.
+`);
+
+const revDef = [
+        { text: 'Super lovely couple who took great care of our cat Rocco! Regular updates, spotless apartment on return. Rocco was extremely happy when we got home.', name: 'Jess & Sam', initials: 'JS', platform: 'TrustedHouseSitters' },
+        { text: "We couldn't have asked for better pet sitters — reliable, trustworthy, and incredibly caring. They left our home spotless and exceeded every expectation.", name: 'Libby', initials: 'L', platform: 'Rover' },
+        { text: "Callum and Niamh have looked after Solomon for four years. They are reliable, trustworthy, and clearly care about his wellbeing. I couldn't recommend them highly enough.", name: 'Thomas James', initials: 'TJ', platform: 'Rover' },
+        { text: 'Came back to a tidy house, a very happy dog and a fridge full of the food we left. Booked them again for the summer before we had even unpacked.', name: 'Angela', initials: 'A', platform: 'TrustedHouseSitters' },
+        { text: 'Daily photos, walks rain or shine, and the garden looked better than when we left. Genuinely the easiest holiday we have had since getting the dogs.', name: 'Deb', initials: 'D', platform: 'Rover' }
+];
+
+const galDef = [
+        { src: 'public/images/alfie-1.jpg', alt: 'Alfie the cockapoo' },
+        { src: 'public/images/solomon-1.jpg', alt: 'Solomon the labradoodle' },
+        { src: 'public/images/chester-1.jpg', alt: 'Chester the cocker spaniel' },
+        { src: 'public/images/travis-1.jpg', alt: 'Travis the Vizsla' },
+        { src: 'public/images/bailey-1.jpg', alt: 'Bailey' },
+        { src: 'public/images/zeus-1.jpg', alt: 'Zeus the Weimaraner' },
+        { src: 'public/images/orca-3.jpg', alt: 'Orca' },
+        { src: 'public/images/solomon-4.jpg', alt: 'Solomon in the snow' }
+];
+
+const platDef = [
+  {
+    name: 'Rover (UK)',
+    url:
+      'https://www.rover.com' +
+      '/sit/callud53623',
+    description: tx(`
+Our UK profile, with verified reviews from owners across the country.
+`),
+  },
+  {
+    name: tx(`
+TrustedHouseSitters (AU)
+`),
+    url:
+      'https://www.' +
+      'trustedhousesitters' +
+      '.com/house-and-' +
+      'pet-sitters/' +
+      'australia/' +
+      'new-south-wales/' +
+      'sydney/l/6979617/',
+    description: tx(`
+Our Sydney-based profile, covering sits across New South Wales.
+`),
+  },
+];
+
+// Profile values
+const list = (
+  v: any,
+  d: any[],
+) => (
+  Array.isArray(v) &&
+  v.length ? v : d
+);
+const name: string =
+  p.name ||
+  'Callum & Niamh';
+const ampAt =
+  name.indexOf(' & ');
+const nameA =
+  ampAt < 0
+    ? name
+    : name.slice(0, ampAt);
+const nameB =
+  ampAt < 0
+    ? ''
+    : name.slice(ampAt + 1);
+const badge =
+  p.badge_text ||
+  badgeDef;
+const tagline =
+  p.tagline ||
+  taglineDef;
+const bioSrc: string =
+  p.bio || bioDef;
+const bioParas =
+  bioSrc
+  .split('\n\n')
+  .map(tx)
+  .filter(Boolean);
+const bio = bioParas
+  .map((t, i) => ({
+    t,
+    m: i ===
+      bioParas.length - 1
+      ? '0'
+      : '0 0 16px',
+  }));
+const hero = list(
+  p.hero_images_json,
+  heroDef,
+).map((h: Pic) => ({
+  src: local(h.src),
+  pos:
+    h.pos ||
+    'center 30%',
+}));
+const about = list(
+  p.about_images_json,
+  aboutDef,
+).map((a: Pic) => ({
+  src: local(a.src),
+  alt: a.alt || '',
+}));
+const reviews = list(
+  p.reviews_json,
+  revDef,
+);
+const gallery = list(
+  p.gallery_json,
+  galDef,
+).map((g: Pic) => ({
+  src: local(g.src),
+  alt: g.alt || '',
+}));
+const platforms = list(
+  p.platforms_json,
+  platDef,
+);
+const ownRevs =
+  Array.isArray(
+    p.reviews_json,
+  ) ?
+    p.reviews_json
+    .length : 0;
+const revCount =
+  ownRevs
+    ? ownRevs + '+'
+    : '40+';
+const plats = platforms
+  .map((x: any) => ({
+    ...x,
+    initial: String(
+      x.name || '',
+    )
+    .charAt(0)
+    .toUpperCase(),
+  }));
+const platCount =
+  String(
+    platforms.length,
+  );
+const rating = '5.0';
+const location =
+  p.location ||
+  'UK & Australia';
+const waNum = String(
+  p.whatsapp_number ||
+  '',
+).replace(
+  /[^0-9]/g,
+  '',
+);
+const waHref =
+  'https://wa.me/' +
+  waNum;
+const blurb =
+  p.name
+    ? name +
+      ' — experienced' +
+      ' house and pet' +
+      ' sitters.'
+    : blurbDef;
+const pageSlug =
+  p.slug || slug;
+const title =
+  name + ' — MYAH';
 ---
 
 <!doctype html>
-{profile ? (
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content={isOwner ? `${profile.name} — looking for a trusted pet sitter.` : `${profile.name} — trusted house & pet sitter${isSolo ? '' : 's'}.`} />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="icon" type="image/png" href="/images/favicon.png" />
+  <meta name="description" content={blurb} />
+  <link rel="icon" href="/images/favicon.png" />
   <link rel="apple-touch-icon" href="/images/app-tile.png" />
   <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-  <title>{profile.name} — MYAH</title>
-  <style>
-    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; overflow-x: hidden; }
-    * { box-sizing: border-box; }
-    a { color: #2f5d45; }
-    a:hover { color: #2c1a0e; }
-    input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
-    @keyframes gs-ring { to { transform: rotate(360deg); } }
-    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-    [data-navlink]:hover { color: #2f5d45 !important; }
-    [data-cta]:hover { background: #3e7a5b !important; border-color: #3e7a5b !important; transform: translateY(-2px) !important; box-shadow: 0 12px 28px rgba(110,84,56,.36) !important; }
-    [data-cta]:active { transform: translateY(0) scale(.98) !important; }
-    [data-revbtn]:hover { background: #2f5d45 !important; color: #fff !important; border-color: #2f5d45 !important; }
-    [data-aboutbtn]:hover { background: #fff !important; }
-    [data-platcard]:hover { transform: translateY(-6px) !important; box-shadow: 0 20px 50px rgba(44,26,14,.1) !important; border-color: rgba(110,84,56,.45) !important; }
-    [data-scrolldown]:hover { background: rgba(250,246,238,.25) !important; transform: translateX(-50%) translateY(3px) !important; }
-    [data-lbclose]:hover { background: rgba(250,246,238,.25) !important; }
-    [data-gallitem]:hover img { transform: scale(1.06); }
-    [data-gallitem]:hover [data-gallovl] { opacity: 1 !important; }
-    [data-field]:focus { border-color: #2f5d45 !important; box-shadow: 0 0 0 3px rgba(110,84,56,.15) !important; }
-    [data-wabtn]:hover { background: #1ebe5d !important; transform: translateY(-2px) !important; }
-    [data-wabtn]:active { transform: translateY(0) scale(.98) !important; }
+  <title>{title}</title>
+  <style is:global>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; overflow-x:hidden; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; }
+    a:hover { color:#2c1a0e; }
+    input::placeholder, textarea::placeholder { color:rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform:rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+
+    .sp-nav-link:hover { color:#2f5d45 !important; }
+    .sp-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px) !important; box-shadow:0 12px 28px rgba(110,84,56,.36) !important; color:#fff !important; }
+    .sp-btn:active { transform:translateY(0) scale(.98) !important; }
+    .sp-scroll:hover { background:rgba(250,246,238,.25) !important; transform:translateX(-50%) translateY(3px) !important; color:#fff !important; }
+    .sp-about-btn:hover { background:#fff !important; }
+    .sp-rev-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .sp-rev-btn:hover { background:#2f5d45 !important; color:#fff !important; border-color:#2f5d45 !important; }
+    .sp-gal-cap:hover { opacity:1 !important; }
+    .sp-plat:hover { transform:translateY(-6px) !important; box-shadow:0 20px 50px rgba(44,26,14,.1) !important; border-color:rgba(110,84,56,.45) !important; }
+    .sp-wa:hover { background:#1ebe5d !important; transform:translateY(-2px) !important; color:#fff !important; }
+    .sp-wa:active { transform:translateY(0) scale(.98) !important; }
+    .sp-field:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; }
+    .sp-lb-close:hover { background:rgba(250,246,238,.25) !important; }
+    .sp-foot-link:hover { color:#c4ab8a !important; }
+
     @media (max-width: 1000px) {
-      [data-headernav] { display: none !important; }
+      [data-header-nav] { display: none !important; }
       [data-topbar] { padding: 14px 24px !important; }
       [data-sec] { padding-left: 24px !important; padding-right: 24px !important; }
       [data-split] { grid-template-columns: minmax(0,1fr) !important; gap: 40px !important; }
-      [data-statgrid] { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
     }
   </style>
 </head>
-<body style="background:#faf6ee">
+<body>
+<div style="background:#faf6ee">
 
-  <!-- Loading overlay -->
-  <div id="loader" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
     <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
       <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
       <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
@@ -125,76 +345,58 @@ const enquiryDesc = isOwner
     </div>
   </div>
 
-  <!-- Fixed header -->
   <header data-topbar="1" style="position:fixed;top:0;left:0;right:0;z-index:210;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;background:rgba(250,246,238,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(110,84,56,.2)">
     <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;flex-shrink:0;letter-spacing:.28em">
       <img src="/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
-      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
-        <span style="color:#2f5d45;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
-      </span>
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
     </a>
-    <nav data-headernav="1" style="display:flex;align-items:center;gap:30px;flex-wrap:nowrap">
-      <a href="#about" data-navlink="1" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">{isOwner ? 'Home' : 'About'}</a>
-      {reviews.length > 0 && <a href="#reviews" data-navlink="1" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Reviews</a>}
-      {gallery.length > 0 && <a href="#gallery" data-navlink="1" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Gallery</a>}
-      {!isOwner && platforms.length > 0 && <a href="#profiles" data-navlink="1" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Profiles</a>}
-      <a href="#enquiry" data-cta="1" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s">
-        {isOwner ? 'Get In Touch' : (isSolo ? 'Book Me Today' : 'Book Us Today')}
-      </a>
+    <nav data-header-nav="1" style="display:flex;align-items:center;gap:30px;flex-wrap:nowrap">
+      <a href="#about" class="sp-nav-link" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">About</a>
+      <a href="#reviews" class="sp-nav-link" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Reviews</a>
+      <a href="#gallery" class="sp-nav-link" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Gallery</a>
+      <a href="/listings" class="sp-nav-link" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Profiles</a>
+      <a href="#enquiry" class="sp-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s">Book us today</a>
     </nav>
   </header>
 
-  <!-- Hero -->
   <section style="min-height:78vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:140px 48px 80px;text-align:center">
     <div style="position:absolute;inset:0;z-index:0;background:#2c1a0e">
-      {heroImages.map((img, i) => (
-        <img data-hero-slide="1" src={img.src} alt="" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${img.pos || 'center 30%'};opacity:${i === 0 ? 1 : 0};transition:opacity 1.2s ease`} />
+      {hero.map((h, i) => (
+        <img data-hero-slide="1" src={h.src} alt="" style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:${h.pos};opacity:${i === 0 ? 1 : 0};transition:opacity 1.2s ease`} />
       ))}
-      {heroImages.length === 0 && (
-        <div style="position:absolute;inset:0;background:linear-gradient(135deg, #2c1a0e 0%, #3d2614 100%)"></div>
-      )}
     </div>
     <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg, rgba(44,26,14,.52) 0%, rgba(44,26,14,.66) 100%)"></div>
     <div style="position:relative;z-index:2;max-width:720px">
-      <p style="display:inline-flex;align-items:center;gap:10px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.45);backdrop-filter:blur(6px);color:#fff;padding:9px 20px;border-radius:50px;font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 26px">{badgeText}</p>
-      <h1 style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:4.6rem;color:#fff;line-height:1;margin:0 0 18px">MYAH<br /><em style="color:#c4ab8a;">{isOwner ? 'Home' : 'Sitters'}</em></h1>
-      <p style="font-size:1.1rem;color:#fff;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 18px">{profile.name}</p>
-      {profile.tagline && <p style="font-size:1.08rem;color:rgba(255,255,255,.85);line-height:1.75;max-width:540px;margin:0 auto 36px">{profile.tagline}</p>}
-      <a href="#enquiry" data-cta="1" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;box-shadow:0 8px 26px rgba(44,26,14,.3);transition:background .2s, border-color .2s, transform .12s">
-        {isOwner ? 'Get In Touch' : (isSolo ? 'Book Me Today' : 'Book Us Today')}
-      </a>
+      <p style="display:inline-flex;align-items:center;gap:10px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.45);backdrop-filter:blur(6px);color:#fff;padding:9px 20px;border-radius:50px;font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 26px">{badge}</p>
+      <h1 style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:4.6rem;color:#fff;line-height:1;margin:0 0 18px">MYAH<br /><em style="color:#c4ab8a;">Sitters</em></h1>
+      <p style="font-size:1.1rem;color:#fff;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 18px">{name}</p>
+      <p style="font-size:1.08rem;color:rgba(255,255,255,.85);line-height:1.75;max-width:540px;margin:0 auto 36px">{tagline}</p>
+      <a href="#enquiry" class="sp-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;box-shadow:0 8px 26px rgba(44,26,14,.3);transition:background .2s, border-color .2s, transform .12s">Book us today</a>
       <div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin:34px 0 0;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.72)">
-        {reviewCount > 0 && <>
-          <span style="display:flex;align-items:center;gap:8px"><span style="color:#c4ab8a;letter-spacing:.2em">★★★★★</span>{rating.toFixed(1)} rating</span>
-          <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
-          <span>{reviewCount}+ reviews</span>
-        </>}
-        {location && <>
-          <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
-          <span>{location}</span>
-        </>}
+        <span style="display:flex;align-items:center;gap:8px"><span style="color:#c4ab8a;letter-spacing:.2em">★★★★★</span>{rating} rating</span>
+        <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
+        <span>{revCount} reviews</span>
+        <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
+        <span>{location}</span>
       </div>
     </div>
-    <a href="#about" aria-label="Scroll to about" data-scrolldown="1" style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid rgba(196,171,138,.5);background:rgba(250,246,238,.12);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;transition:background .2s, transform .2s">
+    <a href="#about" aria-label="Scroll to about" class="sp-scroll" style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid rgba(196,171,138,.5);background:rgba(250,246,238,.12);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;transition:background .2s, transform .2s">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
     </a>
   </section>
 
-  <!-- Credentials bar (sitter only) -->
-  {!isOwner && reviewCount > 0 && (
-  <section data-sec="1" style="background:#2c1a0e;padding:0 48px">
-    <div data-statgrid="1" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-left:1px solid rgba(196,171,138,.18);border-right:1px solid rgba(196,171,138,.18)">
+  <section style="background:#2c1a0e;padding:0 48px" data-sec="1">
+    <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-left:1px solid rgba(196,171,138,.18);border-right:1px solid rgba(196,171,138,.18)">
       <div style="padding:34px 26px;text-align:center;border-right:1px solid rgba(196,171,138,.18)">
-        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">{reviewCount}+</div>
+        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">{revCount}</div>
         <div style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:8px">Five-star reviews</div>
       </div>
       <div style="padding:34px 26px;text-align:center;border-right:1px solid rgba(196,171,138,.18)">
-        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">{rating.toFixed(1)}</div>
+        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">{rating}</div>
         <div style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:8px">Average rating</div>
       </div>
       <div style="padding:34px 26px;text-align:center;border-right:1px solid rgba(196,171,138,.18)">
-        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">{platforms.length || 2}</div>
+        <div style="font-family:'Marcellus',serif;font-size:2rem;color:#c4ab8a;line-height:1">{platCount}</div>
         <div style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-top:8px">Verified platforms</div>
       </div>
       <div style="padding:34px 26px;text-align:center">
@@ -203,272 +405,181 @@ const enquiryDesc = isOwner
       </div>
     </div>
   </section>
-  )}
 
-  <!-- About -->
   <section id="about" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div data-split="1" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:60px;align-items:center">
-      {aboutImages.length > 0 ? (
       <div style="position:relative;width:100%;aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:#e9e0d2;border:1px solid rgba(110,84,56,.22)">
-        {aboutImages.map((img, i) => (
-          <img data-about-slide="1" src={img.src} alt={img.alt} style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;opacity:${i === 0 ? 1 : 0};transition:opacity .5s ease`} />
+        {about.map((a, i) => (
+          <img data-about-slide="1" src={a.src} alt={a.alt} style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;opacity:${i === 0 ? 1 : 0};transition:opacity .5s ease`} />
         ))}
-        {aboutImages.length > 1 && <>
-          <button data-aboutbtn="1" data-about-prev="1" aria-label="Previous photo" style="position:absolute;top:50%;left:14px;transform:translateY(-50%);background:rgba(250,246,238,.9);border:1px solid rgba(110,84,56,.3);width:42px;height:42px;border-radius:50%;font-size:1.3rem;color:#2c1a0e;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s">&#8249;</button>
-          <button data-aboutbtn="1" data-about-next="1" aria-label="Next photo" style="position:absolute;top:50%;right:14px;transform:translateY(-50%);background:rgba(250,246,238,.9);border:1px solid rgba(110,84,56,.3);width:42px;height:42px;border-radius:50%;font-size:1.3rem;color:#2c1a0e;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s">&#8250;</button>
-          <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2">
-            {aboutImages.map((_, i) => (
-              <button data-about-dot={i} aria-label={`Photo ${i+1}`} style={`width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:${i === 0 ? 'rgba(255,255,255,.9)' : 'transparent'};cursor:pointer;padding:0`}></button>
-            ))}
-          </div>
-        </>}
+        <button data-about-prev="1" aria-label="Previous photo" class="sp-about-btn" style="position:absolute;top:50%;left:14px;transform:translateY(-50%);background:rgba(250,246,238,.9);border:1px solid rgba(110,84,56,.3);width:42px;height:42px;border-radius:50%;font-size:1.3rem;color:#2c1a0e;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s">&#8249;</button>
+        <button data-about-next="1" aria-label="Next photo" class="sp-about-btn" style="position:absolute;top:50%;right:14px;transform:translateY(-50%);background:rgba(250,246,238,.9);border:1px solid rgba(110,84,56,.3);width:42px;height:42px;border-radius:50%;font-size:1.3rem;color:#2c1a0e;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s">&#8250;</button>
+        <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2">
+          {about.map((_, i) => (
+            <button data-about-dot={i} aria-label={`Photo ${i + 1}`} style={`width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:${i === 0 ? 'rgba(255,255,255,.9)' : 'transparent'};cursor:pointer;padding:0`}></button>
+          ))}
+        </div>
       </div>
-      ) : (
-      <div style="position:relative;width:100%;aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#e9e0d2 0%,#d4c4a8 100%);border:1px solid rgba(110,84,56,.22);display:flex;align-items:center;justify-content:center">
-        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="rgba(110,84,56,.3)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-      </div>
-      )}
       <div>
-        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px">
-          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>
-          {heading.aboutLabel}
-        </p>
-        <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0" set:html={heading.aboutTitle.replace(' — ', ' — <em style="color:#2f5d45;">')} />
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Who we are</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">A home away from home — <em style="color:#2f5d45;">for you and your pets.</em></h2>
         <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 26px"></div>
-        {bioParagraphs.map(para => (
-          <p style="color:#6b4e35;line-height:1.85;margin:0 0 16px;font-size:.98rem">{para}</p>
+        {bio.map((b) => (
+          <p style={`color:#6b4e35;line-height:1.85;margin:${b.m};font-size:.98rem`}>{b.t}</p>
         ))}
-        {bioParagraphs.length === 0 && (
-          <p style="color:#6e5438;font-style:italic;font-size:.95rem">Bio coming soon.</p>
-        )}
       </div>
     </div>
   </section>
 
-  <!-- Reviews -->
-  {reviews.length > 0 && (
   <section id="reviews" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div style="max-width:1100px;margin:0 auto">
-      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px">
-        <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>
-        {heading.reviewsLabel}
-      </p>
-      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">{reviewsHeading.replace('five-star', '<em style="color:#2f5d45;">five-star</em>')}</h2>
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>What pet owners say</p>
+      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">{revCount} <em style="color:#2f5d45;">five-star reviews.</em></h2>
       <div style="display:flex;align-items:center;gap:14px;margin:24px 0 36px">
         <span style="color:#2f5d45;font-size:1.05rem;letter-spacing:.24em">★★★★★</span>
         <span style="color:#6b4e35;font-size:.8rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase">5.0 across all platforms</span>
       </div>
       <div style="overflow:hidden;margin-bottom:26px">
-        <div id="revTrack" style="display:flex;gap:24px;transition:transform .45s ease">
-          {reviews.map(r => (
-          <div data-rev-card="1" style="min-width:330px;max-width:330px;flex-shrink:0;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-            <div style="color:#2f5d45;font-size:.85rem;letter-spacing:.3em">★★★★★</div>
-            <p style="color:#6b4e35;font-size:.92rem;line-height:1.8;margin:0;font-style:italic">"{r.text}"</p>
-            <div style="display:flex;align-items:center;gap:13px;margin-top:auto;padding-top:18px;border-top:1px solid rgba(44,26,14,.08)">
-              <span style="width:42px;height:42px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;flex-shrink:0;letter-spacing:.04em">{r.initials}</span>
-              <div style="min-width:0">
-                <div style="font-weight:600;color:#2c1a0e;font-size:.92rem">{r.name}</div>
-                <div style="color:#6b4e35;font-size:.78rem;letter-spacing:.04em">{r.platform}</div>
+        <div data-rev-track="1" style="display:flex;gap:24px;transition:transform .45s ease">
+          {reviews.map((r: any) => (
+            <div data-rev-card="1" class="sp-rev-card" style="min-width:330px;max-width:330px;flex-shrink:0;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:30px 28px;display:flex;flex-direction:column;gap:16px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <div style="color:#2f5d45;font-size:.85rem;letter-spacing:.3em">★★★★★</div>
+              <p style="color:#6b4e35;font-size:.92rem;line-height:1.8;margin:0;font-style:italic">"{r.text}"</p>
+              <div style="display:flex;align-items:center;gap:13px;margin-top:auto;padding-top:18px;border-top:1px solid rgba(44,26,14,.08)">
+                <span style="width:42px;height:42px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;flex-shrink:0;letter-spacing:.04em">{r.initials}</span>
+                <div style="min-width:0">
+                  <div style="font-weight:600;color:#2c1a0e;font-size:.92rem">{r.name}</div>
+                  <div style="color:#6b4e35;font-size:.78rem;letter-spacing:.04em">{r.platform}</div>
+                </div>
               </div>
             </div>
-          </div>
           ))}
         </div>
       </div>
       <div style="display:flex;align-items:center;gap:12px">
-        <button id="revPrev" data-revbtn="1" aria-label="Previous reviews" style="width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(110,84,56,.4);background:transparent;color:#5c3d20;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s, color .2s, border-color .2s">&larr;</button>
-        <button id="revNext" data-revbtn="1" aria-label="Next reviews" style="width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(110,84,56,.4);background:transparent;color:#5c3d20;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s, color .2s, border-color .2s">&rarr;</button>
-        <div id="revDots" style="display:flex;gap:7px;margin-left:10px"></div>
+        <button data-rev-prev="1" aria-label="Previous reviews" class="sp-rev-btn" style="width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(110,84,56,.4);background:transparent;color:#5c3d20;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s, color .2s, border-color .2s">&larr;</button>
+        <button data-rev-next="1" aria-label="Next reviews" class="sp-rev-btn" style="width:44px;height:44px;border-radius:50%;border:1.5px solid rgba(110,84,56,.4);background:transparent;color:#5c3d20;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s, color .2s, border-color .2s">&rarr;</button>
+        <div data-rev-dots="1" style="display:flex;gap:7px;margin-left:10px"></div>
       </div>
     </div>
   </section>
-  )}
 
-  <!-- Gallery -->
-  {gallery.length > 0 && (
   <section id="gallery" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div style="max-width:1100px;margin:0 auto">
-      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px">
-        <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>
-        {heading.galleryLabel}
-      </p>
-      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">{heading.galleryTitle}</h2>
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Pets we've loved</p>
+      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">Our sits</h2>
       <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 36px"></div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px">
-        {gallery.map(g => (
-        <button type="button" data-gallitem="1" data-lightbox={g.src} data-lightbox-alt={g.alt} style="position:relative;border:none;padding:0;border-radius:14px;overflow:hidden;aspect-ratio:1;background:#e9e0d2;cursor:pointer;display:block;width:100%">
-          <img src={g.src} alt={g.alt} style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease" />
-          <span data-gallovl="1" style="position:absolute;inset:0;background:linear-gradient(to top, rgba(44,26,14,.78) 0%, transparent 60%);opacity:0;transition:opacity .3s ease;display:flex;align-items:flex-end;padding:16px;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:#fff;text-align:left">{g.alt}</span>
-        </button>
+        {gallery.map((g) => (
+          <button type="button" data-lightbox={g.src} data-lightbox-alt={g.alt} style="position:relative;border:none;padding:0;border-radius:14px;overflow:hidden;aspect-ratio:1;background:#e9e0d2;cursor:pointer;display:block;width:100%">
+            <img src={g.src} alt={g.alt} style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease" />
+            <span class="sp-gal-cap" style="position:absolute;inset:0;background:linear-gradient(to top, rgba(44,26,14,.78) 0%, transparent 60%);opacity:0;transition:opacity .3s ease;display:flex;align-items:flex-end;padding:16px;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.04em;color:#fff;text-align:left">{g.alt}</span>
+          </button>
         ))}
       </div>
     </div>
   </section>
-  )}
 
-  <!-- Platforms (sitter only) -->
-  {!isOwner && platforms.length > 0 && (
   <section id="profiles" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div style="max-width:1100px;margin:0 auto">
-      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px">
-        <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>
-        {heading.platformsLabel}
-      </p>
-      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">{heading.platformsTitle}</h2>
+      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Find us online</p>
+      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">Verified profiles</h2>
       <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 36px"></div>
       <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
-        {platforms.map(p => (
-        <a href={p.url} target="_blank" rel="noopener noreferrer" data-platcard="1" style="display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px 32px;text-decoration:none;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
-          <span style="font-family:'Marcellus',serif;font-size:1.5rem;width:48px;height:48px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:6px">{p.name.charAt(0).toUpperCase()}</span>
-          <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">{p.name}</h3>
-          <p style="color:#6b4e35;line-height:1.75;font-size:.92rem;margin:0">{p.description}</p>
-          <span style="color:#2f5d45;font-weight:600;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-top:6px">View profile &rarr;</span>
-        </a>
+        {plats.map((pl) => (
+          <a href={pl.url} target="_blank" rel="noopener noreferrer" class="sp-plat" style="display:flex;flex-direction:column;gap:12px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px 32px;text-decoration:none;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease">
+            <span style="font-family:'Marcellus',serif;font-size:1.5rem;width:48px;height:48px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;margin-bottom:6px">{pl.initial}</span>
+            <h3 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">{pl.name}</h3>
+            <p style="color:#6b4e35;line-height:1.75;font-size:.92rem;margin:0">{pl.description}</p>
+            <span style="color:#2f5d45;font-weight:600;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;margin-top:6px">View profile &rarr;</span>
+          </a>
         ))}
       </div>
     </div>
   </section>
-  )}
 
-  <!-- Pets (owner only) -->
-  {isOwner && pets.length > 0 && (
-  <section id="pets" data-sec="1" style="padding:100px 48px;background:#faf6ee">
-    <div style="max-width:1100px;margin:0 auto">
-      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px">
-        <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>
-        {heading.galleryLabel}
-      </p>
-      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">{heading.galleryTitle}</h2>
-      <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 36px"></div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px">
-        {pets.map((pet: any) => (
-        <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(44,26,14,.04)">
-          {pet.photo_url && <img src={pet.photo_url} alt={pet.name} style="width:100%;height:200px;object-fit:cover;display:block" />}
-          <div style="padding:20px 22px">
-            <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;color:#2c1a0e;margin:0 0 6px">{pet.name}</h3>
-            <p style="font-size:.8rem;color:#6b4e35;font-weight:600;letter-spacing:.04em;margin:0 0 10px">{pet.type}{pet.breed ? ` · ${pet.breed}` : ''}{pet.age ? ` · ${pet.age}` : ''}</p>
-            {pet.temperament && <p style="font-size:.88rem;color:#5c3d20;line-height:1.6;margin:0 0 8px">{pet.temperament}</p>}
-            {pet.special_needs && <p style="font-size:.84rem;color:#6b4e35;line-height:1.6;margin:0;padding:10px 14px;background:rgba(110,84,56,.07);border-radius:8px">{pet.special_needs}</p>}
-          </div>
-        </div>
-        ))}
-      </div>
-    </div>
-  </section>
-  )}
-
-  <!-- Amenities (owner only) -->
-  {isOwner && amenities.length > 0 && (
-  <section id="amenities" data-sec="1" style="padding:80px 48px;background:#faf6ee">
-    <div style="max-width:1100px;margin:0 auto">
-      <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px">
-        <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>
-        Home Amenities
-      </p>
-      <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">What's included</h2>
-      <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 36px"></div>
-      <div style="display:flex;flex-wrap:wrap;gap:10px">
-        {amenities.map((a: string) => (
-          <span style="background:rgba(110,84,56,.08);border:1px solid rgba(110,84,56,.18);border-radius:50px;padding:10px 20px;font-size:.84rem;font-weight:600;color:#5c3d20">✓ {a}</span>
-        ))}
-      </div>
-    </div>
-  </section>
-  )}
-
-  <!-- Enquiry -->
   <section id="enquiry" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div data-split="1" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:60px;align-items:start">
       <div>
-        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px">
-          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>
-          {heading.enquiryLabel}
-        </p>
-        <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">{heading.enquiryTitle.replace('&', '<em style="color:#2f5d45;">&amp;</em>')}</h2>
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Get in touch</p>
+        <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">Book {nameA} <em style="color:#2f5d45;">{nameB}</em></h2>
         <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 26px"></div>
-        <p style="color:#6b4e35;line-height:1.85;font-size:.98rem;margin:0">{enquiryDesc}</p>
-        {whatsapp && (
-          <a href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${profile.name}! I found you on MYAH and I'm interested.`)}`} target="_blank" rel="noopener" data-wabtn="1" style="display:inline-flex;align-items:center;gap:10px;margin-top:26px;padding:14px 28px;background:#25D366;color:#fff;border-radius:50px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 6px 20px rgba(37,211,102,.25);transition:background .2s, transform .12s">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            Message on WhatsApp
-          </a>
-        )}
+        <p style="color:#6b4e35;line-height:1.85;font-size:.98rem;margin:0">Tell us about your home, your pets, and your dates and we'll get back to you within 24 hours.</p>
+        <a href={waHref} target="_blank" rel="noopener" class="sp-wa" style="display:inline-flex;align-items:center;gap:10px;margin-top:26px;padding:14px 28px;background:#25D366;color:#fff;border-radius:50px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 6px 20px rgba(37,211,102,.25);transition:background .2s, transform .12s">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          Message on WhatsApp
+        </a>
       </div>
-      <form id="enquiryForm" style="display:flex;flex-direction:column;gap:18px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+      <form data-enquiry="1" data-go="/messages" style="display:flex;flex-direction:column;gap:18px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div style="display:flex;flex-direction:column;gap:8px">
             <label for="fname" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">First name</label>
-            <input type="text" id="fname" name="first_name" placeholder="Jane" required data-field="1" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <input type="text" id="fname" name="first_name" placeholder="Jane" required="required" class="sp-field" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
           </div>
           <div style="display:flex;flex-direction:column;gap:8px">
             <label for="lname" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Last name</label>
-            <input type="text" id="lname" name="last_name" placeholder="Smith" required data-field="1" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <input type="text" id="lname" name="last_name" placeholder="Smith" required="required" class="sp-field" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <label for="femail" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Email</label>
-          <input type="email" id="femail" name="email" placeholder="jane@example.com" required data-field="1" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
+          <label for="email" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Email</label>
+          <input type="email" id="email" name="email" placeholder="jane@example.com" required="required" class="sp-field" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
           <div style="display:flex;flex-direction:column;gap:8px">
-            <label for="dfrom" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">From</label>
-            <input type="date" id="dfrom" name="date_from" required data-field="1" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <label for="date-from" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">From</label>
+            <input type="date" id="date-from" name="date_from" required="required" class="sp-field" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
           </div>
           <div style="display:flex;flex-direction:column;gap:8px">
-            <label for="dto" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">To</label>
-            <input type="date" id="dto" name="date_to" required data-field="1" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
+            <label for="date-to" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">To</label>
+            <input type="date" id="date-to" name="date_to" required="required" class="sp-field" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;transition:border-color .2s, box-shadow .2s" />
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <label for="fmessage" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">{isOwner ? 'Tell us about your experience' : (isSolo ? 'Tell me about your pets & home' : 'Tell us about your pets & home')}</label>
-          <textarea id="fmessage" name="message" rows="4" placeholder="Breed, age, any special needs…" data-field="1" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;resize:vertical;min-height:110px;line-height:1.7;transition:border-color .2s, box-shadow .2s"></textarea>
+          <label for="message" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Tell us about your pets &amp; home</label>
+          <textarea id="message" name="message" rows="4" placeholder="Breed, age, any special needs…" class="sp-field" style="padding:12px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none;resize:vertical;min-height:110px;line-height:1.7;transition:border-color .2s, box-shadow .2s"></textarea>
         </div>
-        <button type="submit" data-cta="1" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Send enquiry</button>
-        <p id="enquiryStatus" style="font-size:.86rem;text-align:center;min-height:1.2em;margin:0;color:#2f7d4f;font-weight:600"></p>
+        <button type="submit" class="sp-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Send enquiry</button>
+        <p data-enquiry-status="1" style="font-size:.86rem;text-align:center;min-height:1.2em;margin:0;color:#2f7d4f;font-weight:600"></p>
       </form>
     </div>
   </section>
 
-  <!-- Lightbox -->
-  <div id="lb" style="position:fixed;inset:0;z-index:9998;background:rgba(44,26,14,.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:48px;opacity:0;pointer-events:none;transition:opacity .25s ease">
-    <button type="button" id="lbClose" data-lbclose="1" aria-label="Close" style="position:absolute;top:28px;right:32px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(196,171,138,.45);background:rgba(250,246,238,.12);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s">
+  <div data-lb="1" style="position:fixed;inset:0;z-index:9998;background:rgba(44,26,14,.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:48px;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <button type="button" data-lb-close="1" aria-label="Close" class="sp-lb-close" style="position:absolute;top:28px;right:32px;width:44px;height:44px;border-radius:50%;border:1px solid rgba(196,171,138,.45);background:rgba(250,246,238,.12);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s">
       <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5l10 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
     </button>
     <figure style="margin:0;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:100%">
-      <img id="lbImg" alt="" style="max-width:min(880px,100%);max-height:72vh;object-fit:contain;border-radius:16px;display:block" />
-      <figcaption id="lbCap" style="font-size:.82rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#c4ab8a"></figcaption>
+      <img data-lb-img="1" alt="" style="max-width:min(880px,100%);max-height:72vh;object-fit:contain;border-radius:16px;display:block" />
+      <figcaption data-lb-cap="1" style="font-size:.82rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#c4ab8a"></figcaption>
     </figure>
   </div>
 
-  <!-- Footer -->
   <footer data-sec="1" style="background:#2c1a0e;color:rgba(255,255,255,.7);padding:0 48px 32px;border-top:3px solid #2f5d45">
     <div style="max-width:1100px;margin:0 auto">
       <div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:56px;padding:64px 0 44px">
         <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
           <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.7rem;letter-spacing:.28em">
             <img src="/images/logo-mark-white.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
-            <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(255,255,255,.28)">
-              <span style="color:#fff;line-height:1">MYAH</span>
-              <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);line-height:1">Make Yourself At Home</span>
-            </span>
+            <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(255,255,255,.28)"><span style="color:#fff;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);line-height:1">Make Yourself At Home</span></span>
           </a>
-          <p style="line-height:1.8;font-size:.95rem;margin:0;max-width:340px;color:rgba(255,255,255,.7)">{isOwner ? `${profile.name} — looking for a trusted pet sitter.` : `${profile.name} — experienced house and pet ${isSolo ? 'sitter' : 'sitters'}.`}</p>
+          <p style="line-height:1.8;font-size:.95rem;margin:0;max-width:340px;color:rgba(255,255,255,.7)">{blurb}</p>
         </div>
         <div>
           <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Quick links</h4>
           <ul style="list-style:none;padding:0;margin:0">
-            <li style="margin-bottom:12px"><a href="#about" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">{isOwner ? 'About the home' : (isSolo ? 'About me' : 'About us')}</a></li>
-            {reviews.length > 0 && <li style="margin-bottom:12px"><a href="#reviews" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Reviews</a></li>}
-            {gallery.length > 0 && <li style="margin-bottom:12px"><a href="#gallery" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Gallery</a></li>}
-            <li style="margin-bottom:12px"><a href="#enquiry" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">{isOwner ? 'Get in touch' : (isSolo ? 'Book me' : 'Book us')}</a></li>
+            <li style="margin-bottom:12px"><a href="#about" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">About us</a></li>
+            <li style="margin-bottom:12px"><a href="#reviews" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Reviews</a></li>
+            <li style="margin-bottom:12px"><a href="#gallery" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Gallery</a></li>
+            <li style="margin-bottom:12px"><a href="#enquiry" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Book us</a></li>
           </ul>
         </div>
         <div>
-          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">MYAH</h4>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Platforms</h4>
           <ul style="list-style:none;padding:0;margin:0">
-            <li style="margin-bottom:12px"><a href="/listings" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Browse sits</a></li>
-            <li style="margin-bottom:12px"><a href="/dashboard" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Sitter dashboard</a></li>
-            <li style="margin-bottom:12px"><a href="/owner/dashboard" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Owner dashboard</a></li>
+            {plats.map((pl) => (
+              <li style="margin-bottom:12px"><a href={pl.url} target="_blank" rel="noopener noreferrer" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">{pl.name}</a></li>
+            ))}
           </ul>
         </div>
       </div>
@@ -476,164 +587,156 @@ const enquiryDesc = isOwner
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">
           <span>&copy; 2026 MYAH</span>
           <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
-          <span>{profile.name}</span>
+          <span>{name}</span>
         </div>
-        <span style="font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with ♥ for pet lovers everywhere</span>
+        <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with <span style="font-style:normal">&#9825;</span> for pet lovers everywhere</span>
       </div>
     </div>
   </footer>
+</div>
 
-  <script define:vars={{ heroImages, aboutImages, reviews, isOwner, profileSlug: profile.slug }}>
-    // ── Hero slideshow ────────────────────────────────────────────
-    const heroSlides = Array.from(document.querySelectorAll('[data-hero-slide]'));
-    if (heroSlides.length > 1) {
-      let heroIdx = 0;
-      setInterval(() => {
-        heroSlides[heroIdx].style.opacity = '0';
-        heroIdx = (heroIdx + 1) % heroSlides.length;
-        heroSlides[heroIdx].style.opacity = '1';
-      }, 5000);
-    }
+<script is:inline define:vars={{ pageSlug }}>
+(() => {
+  let hideT, heroT, aboutT;
 
-    // ── About carousel ────────────────────────────────────────────
-    const aboutSlides = Array.from(document.querySelectorAll('[data-about-slide]'));
-    const aboutDots = Array.from(document.querySelectorAll('[data-about-dot]'));
-    let aboutIdx = 0;
-    let aboutTimer;
+  document.querySelectorAll('form[data-go]').forEach(f => f.addEventListener('submit', e => {
+    e.preventDefault(); e.stopImmediatePropagation();
+    // Deliver the enquiry before navigating away (the design navigates on submit).
+    const fd = new FormData(f);
+    fd.append('slug', pageSlug);
+    navigator.sendBeacon('/api/enquiry', fd);
+    const target = f.getAttribute('data-go');
+    const l = document.querySelector('[data-loader]');
+    if (l) { l.style.opacity = '1'; l.style.pointerEvents = 'all'; }
+    setTimeout(() => { window.location.href = target; }, l ? 700 : 150);
+  }, true));
+  const q = s => document.querySelector(s);
+  const qa = s => Array.from(document.querySelectorAll(s));
 
-    function goAbout(n) {
-      aboutSlides[aboutIdx].style.opacity = '0';
-      aboutDots[aboutIdx] && (aboutDots[aboutIdx].style.background = 'transparent');
-      aboutIdx = (n + aboutSlides.length) % aboutSlides.length;
-      aboutSlides[aboutIdx].style.opacity = '1';
-      aboutDots[aboutIdx] && (aboutDots[aboutIdx].style.background = 'rgba(255,255,255,.9)');
-    }
+  const loader = q('[data-loader]');
+  const show = () => {
+    if (!loader) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    clearTimeout(hideT);
+    hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  };
+  qa('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || a.target === '_blank') return;
+    a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+  });
 
-    if (aboutSlides.length > 1) {
-      document.querySelector('[data-about-prev]')?.addEventListener('click', () => { clearInterval(aboutTimer); goAbout(aboutIdx - 1); aboutTimer = setInterval(() => goAbout(aboutIdx + 1), 4500); });
-      document.querySelector('[data-about-next]')?.addEventListener('click', () => { clearInterval(aboutTimer); goAbout(aboutIdx + 1); aboutTimer = setInterval(() => goAbout(aboutIdx + 1), 4500); });
-      aboutDots.forEach((dot, i) => dot.addEventListener('click', () => { clearInterval(aboutTimer); goAbout(i); aboutTimer = setInterval(() => goAbout(aboutIdx + 1), 4500); }));
-      aboutTimer = setInterval(() => goAbout(aboutIdx + 1), 4500);
-    }
+  const form = q('[data-enquiry]');
+  const status = q('[data-enquiry-status]');
+  form && form.addEventListener('submit', e => {
+    e.preventDefault();
+    show();
+    if (status) status.textContent = "Enquiry sent! You'll hear back soon.";
+    form.reset();
+  });
 
-    // ── Reviews carousel ─────────────────────────────────────────
-    const track = document.getElementById('revTrack');
-    const cards = track ? Array.from(track.querySelectorAll('[data-rev-card]')) : [];
-    const dotsEl = document.getElementById('revDots');
-    const CARD_W = 330 + 24;
-    let revIdx = 0;
-    let perPage = Math.max(1, Math.floor((window.innerWidth - 96) / CARD_W));
+  // smooth scroll past the fixed header
+  qa('a[href^="#"]').forEach(a => a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    const off = (q('[data-topbar]') ? q('[data-topbar]').offsetHeight : 0) + 20;
+    window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - off, behavior: 'smooth' });
+  }));
 
-    function buildRevDots() {
-      if (!dotsEl) return;
-      const pages = Math.max(1, cards.length - perPage + 1);
+  // hero slideshow
+  const hero = qa('[data-hero-slide]');
+  let hi = 0;
+  if (hero.length > 1) {
+    heroT = setInterval(() => {
+      hero[hi].style.opacity = '0';
+      hi = (hi + 1) % hero.length;
+      hero[hi].style.opacity = '1';
+    }, 5000);
+  }
+
+  // about carousel
+  const slides = qa('[data-about-slide]');
+  const dots = qa('[data-about-dot]');
+  let ai = 0;
+  const goAbout = i => {
+    slides[ai].style.opacity = '0';
+    if (dots[ai]) dots[ai].style.background = 'transparent';
+    ai = (i + slides.length) % slides.length;
+    slides[ai].style.opacity = '1';
+    if (dots[ai]) dots[ai].style.background = 'rgba(255,255,255,.9)';
+  };
+  const resetAbout = () => {
+    clearInterval(aboutT);
+    aboutT = setInterval(() => goAbout(ai + 1), 4500);
+  };
+  q('[data-about-prev]') && q('[data-about-prev]').addEventListener('click', () => { goAbout(ai - 1); resetAbout(); });
+  q('[data-about-next]') && q('[data-about-next]').addEventListener('click', () => { goAbout(ai + 1); resetAbout(); });
+  dots.forEach(d => d.addEventListener('click', () => { goAbout(Number(d.getAttribute('data-about-dot'))); resetAbout(); }));
+  if (slides.length > 1) resetAbout();
+
+  // reviews carousel
+  const track = q('[data-rev-track]');
+  const dotsEl = q('[data-rev-dots]');
+  const setupRev = () => {
+    const cards = qa('[data-rev-card]');
+    if (!track || !cards.length || !dotsEl) return;
+    let ri = 0;
+    const visible = () => window.innerWidth >= 1100 ? 3 : window.innerWidth >= 760 ? 2 : 1;
+    const cardW = () => cards[0].offsetWidth + 24;
+    const maxIdx = () => Math.max(0, cards.length - visible());
+    const paint = () => {
+      track.style.transform = 'translateX(-' + (ri * cardW()) + 'px)';
+      Array.from(dotsEl.children).forEach((d, j) => {
+        d.style.background = j === ri ? '#2f5d45' : '#e9e0d2';
+      });
+    };
+    const go = i => { ri = Math.max(0, Math.min(i, maxIdx())); paint(); };
+    const build = () => {
       dotsEl.innerHTML = '';
-      for (let i = 0; i < pages; i++) {
-        const d = document.createElement('button');
-        d.style.cssText = `width:9px;height:9px;border-radius:50%;border:none;cursor:pointer;padding:0;background:${i === revIdx ? '#2f5d45' : 'rgba(110,84,56,.25)'}`;
-        d.addEventListener('click', () => goRev(i));
+      for (let i = 0; i <= maxIdx(); i++) {
+        const d = document.createElement('div');
+        Object.assign(d.style, { width: '8px', height: '8px', borderRadius: '50%', background: '#e9e0d2', cursor: 'pointer', transition: 'background .2s' });
+        d.addEventListener('click', () => go(i));
         dotsEl.appendChild(d);
       }
-    }
+      paint();
+    };
+    q('[data-rev-prev]').onclick = () => go(ri - 1);
+    q('[data-rev-next]').onclick = () => go(ri + 1);
+    const onResize = () => { build(); go(ri); };
+    window.addEventListener('resize', onResize);
+    build();
+  };
+  setTimeout(setupRev, 60);
 
-    function goRev(n) {
-      const max = Math.max(0, cards.length - perPage);
-      revIdx = Math.max(0, Math.min(n, max));
-      if (track) track.style.transform = `translateX(-${revIdx * CARD_W}px)`;
-      buildRevDots();
-    }
-
-    document.getElementById('revPrev')?.addEventListener('click', () => goRev(revIdx - 1));
-    document.getElementById('revNext')?.addEventListener('click', () => goRev(revIdx + 1));
-    buildRevDots();
-
-    // ── Gallery lightbox ─────────────────────────────────────────
-    const lb = document.getElementById('lb');
-    const lbImg = document.getElementById('lbImg');
-    const lbCap = document.getElementById('lbCap');
-    document.querySelectorAll('[data-lightbox]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        lbImg.src = btn.dataset.lightbox;
-        lbImg.alt = btn.dataset.lightboxAlt || '';
-        lbCap.textContent = btn.dataset.lightboxAlt || '';
-        lb.style.opacity = '1';
-        lb.style.pointerEvents = 'all';
-        document.body.style.overflow = 'hidden';
-      });
-    });
-    document.getElementById('lbClose')?.addEventListener('click', closeLb);
-    lb?.addEventListener('click', e => { if (e.target === lb) closeLb(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLb(); });
-    function closeLb() {
-      lb.style.opacity = '0'; lb.style.pointerEvents = 'none';
-      document.body.style.overflow = '';
-    }
-
-    // ── Enquiry form ─────────────────────────────────────────────
-    document.getElementById('enquiryForm')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const btn = e.target.querySelector('[type=submit]');
-      const status = document.getElementById('enquiryStatus');
-      const fd = new FormData(e.target);
-      btn.disabled = true;
-      btn.textContent = 'Sending…';
-      try {
-        const res = await fetch('/api/enquiry', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            slug: profileSlug,
-            first_name: fd.get('first_name'),
-            last_name: fd.get('last_name'),
-            email: fd.get('email'),
-            date_from: fd.get('date_from'),
-            date_to: fd.get('date_to'),
-            message: fd.get('message'),
-          })
-        });
-        if (res.ok) {
-          if (status) status.textContent = "Enquiry sent! You'll hear back soon.";
-          e.target.reset();
-        } else {
-          if (status) status.textContent = 'Something went wrong. Please try again.';
-          if (status) status.style.color = '#c0392b';
-        }
-      } catch {
-        if (status) { status.textContent = 'Something went wrong. Please try again.'; status.style.color = '#c0392b'; }
-      }
-      btn.disabled = false;
-      btn.textContent = 'Send enquiry';
-    });
-
-    // ── Loading overlay on navigation ────────────────────────────
-    const loader = document.getElementById('loader');
-    document.querySelectorAll('a[href]').forEach(a => {
-      const href = a.getAttribute('href') || '';
-      if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel') || a.target === '_blank') return;
-      a.addEventListener('click', e => {
-        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-        if (loader) { loader.style.opacity = '1'; loader.style.pointerEvents = 'all'; }
-      });
-    });
-  </script>
-
+  // gallery lightbox
+  const lb = q('[data-lb]');
+  const lbImg = q('[data-lb-img]');
+  const lbCap = q('[data-lb-cap]');
+  const openLb = (src, alt) => {
+    if (!lb) return;
+    lbImg.src = src;
+    lbImg.alt = alt || '';
+    lbCap.textContent = alt || '';
+    lb.style.opacity = '1';
+    lb.style.pointerEvents = 'all';
+  };
+  const closeLb = () => {
+    if (!lb) return;
+    lb.style.opacity = '0';
+    lb.style.pointerEvents = 'none';
+  };
+  document.addEventListener('click', e => {
+    const btn = e.target.closest && e.target.closest('[data-lightbox]');
+    if (btn) openLb(btn.getAttribute('data-lightbox'), btn.getAttribute('data-lightbox-alt'));
+  });
+  q('[data-lb-close]') && q('[data-lb-close]').addEventListener('click', closeLb);
+  lb && lb.addEventListener('click', e => { if (e.target === lb) closeLb(); });
+  const onKey = e => { if (e.key === 'Escape') closeLb(); };
+  document.addEventListener('keydown', onKey);
+})();
+</script>
 </body>
 </html>
-) : (
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Profile not found — MYAH</title>
-  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
-  <style>body{margin:0;font-family:'Montserrat',sans-serif;background:#faf6ee;color:#2c1a0e;display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center}</style>
-</head>
-<body>
-  <div>
-    <h1 style="font-family:'Marcellus',serif;font-size:2rem;margin:0 0 12px">Profile not found</h1>
-    <p style="color:#6b4e35;margin:0 0 24px">That sitter profile doesn't exist.</p>
-    <a href="/listings" style="color:#2f5d45;font-weight:600;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none">Browse all sits &rarr;</a>
-  </div>
-</body>
-</html>
-)}
