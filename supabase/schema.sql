@@ -163,3 +163,13 @@ CREATE INDEX IF NOT EXISTS notifications_profile_id_idx ON notifications (profil
 
 -- What also leaves the page (email/push): {applications, messages, sit, matches, product}
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS notify_prefs_json JSONB NOT NULL DEFAULT '{"applications": true, "messages": true, "sit": true, "matches": false, "product": false}';
+
+
+-- ── ID VERIFICATION ──────────────────────────────────────────────────────────
+-- /verification. The sitter starts a check (status -> pending); whoever reviews
+-- it sets verified_id = true, id_check_status = 'verified' and id_verified_at.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS verified_id     BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_check_status TEXT    NOT NULL DEFAULT 'none'
+  CHECK (id_check_status IN ('none', 'pending', 'verified'));
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_submitted_at TIMESTAMPTZ;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_verified_at  TIMESTAMPTZ;

@@ -1,95 +1,361 @@
 ---
-export const prerender = false;
+// Data: the signed-in
+// profile's ID check
+// (id_check_status,
+// id_submitted_at,
+// id_verified_at,
+// verified_id) and the
+// sitter's sit count.
+// The button posts to
+// /api/verification.
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../lib/auth';
+import {
+  supabase,
+} from '../lib/supabase';
 
-import { getSession } from '../lib/auth';
-import { supabase } from '../lib/supabase';
+const session =
+  await getSession(
+    Astro.request,
+  );
+if (!session) {
+  return Astro.redirect(
+    '/login',
+  );
+}
 
-const session = await getSession(Astro.request);
-if (!session) return Astro.redirect('/login');
-
-const { data: profileData } = await supabase
+const pr =
+  await supabase
   .from('profiles')
-  .select('id, name, avatar_url, profile_type, verified_id, verified_selfie, slug')
-  .eq('user_id', session.userId)
+  .select('*')
+  .eq(
+    'user_id',
+    session.userId,
+  )
   .single();
-const profile = profileData as any;
-const isOwner = profile?.profile_type === 'owner';
-const dashUrl = isOwner ? '/owner/dashboard' : '/dashboard';
-const profilePageUrl = profile?.slug ? `/${profile.slug}` : '/dashboard';
+const me: any = pr.data;
+if (!me) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+const isOwner =
+  me.profile_type ===
+  'owner';
+const dashUrl = isOwner
+  ? '/owner/dashboard'
+  : '/dashboard';
+const pageUrl = me.slug
+  ? '/' + me.slug
+  : dashUrl;
 
-const idStatus: 'verified' | 'pending' | 'none' = profile?.verified_id === true ? 'verified' : profile?.verified_id === 'pending' ? 'pending' : 'none';
-const selfieStatus: 'verified' | 'pending' | 'none' = profile?.verified_selfie === true ? 'verified' : profile?.verified_selfie === 'pending' ? 'pending' : 'none';
+// none | pending |
+// verified
+let idState = 'none';
+if (
+  me.verified_id === true
+) {
+  idState = 'verified';
+} else if (
+  me.id_check_status ===
+  'pending'
+) {
+  idState = 'pending';
+}
 
-const trustLevels = [
-  { name: 'Not started', pct: 0, note: 'No verification yet.', emblemLine: 'No badge on your profile.' },
-  { name: 'ID submitted', pct: 40, note: 'We\'re reviewing your documents.', emblemLine: 'Badge pending — shows once approved.' },
-  { name: 'ID verified', pct: 70, note: 'Photo ID confirmed.', emblemLine: 'ID verified badge live on your profile.' },
-  { name: 'Fully verified', pct: 100, note: 'Photo ID and selfie both confirmed.', emblemLine: 'Full verification badge — owners trust this most.' },
-];
-const trustIdx = idStatus === 'verified' && selfieStatus === 'verified' ? 3
-  : idStatus === 'verified' ? 2
-  : idStatus === 'pending' || selfieStatus === 'pending' ? 1
-  : 0;
-const trust = trustLevels[trustIdx];
+const fmt = (v: any) => {
+  if (!v) return '';
+  const d = new Date(v);
+  if (isNaN(+d)) return '';
+  return d
+    .toLocaleDateString(
+      'en-GB',
+      {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      },
+    );
+};
+const fmtShort = (
+  v: any,
+) => {
+  if (!v) return '';
+  const d = new Date(v);
+  if (isNaN(+d)) return '';
+  return d
+    .toLocaleDateString(
+      'en-GB',
+      {
+        day: 'numeric',
+        month: 'long',
+      },
+    );
+};
+const verAt =
+  fmt(me.id_verified_at);
+const subAt = fmtShort(
+  me.id_submitted_at,
+);
 
-const initials = (profile?.name || 'U').split(' ').map((w: string) => w[0]).slice(0, 2).join('').toUpperCase();
+// Card line: sits done
+// and where.
+let sitCount = 0;
+try {
+  const sc =
+    await supabase
+    .from('sits')
+    .select('id', {
+      count: 'exact',
+      head: true,
+    })
+    .eq(
+      'sitter_user_id',
+      session.userId,
+    );
+  sitCount =
+    sc.count ?? 0;
+} catch {}
+const cardBits: string[] =
+  [];
+if (sitCount) {
+  cardBits.push(
+    sitCount + ' sits',
+  );
+}
+if (me.location) {
+  cardBits.push(
+    me.location,
+  );
+}
+const cardLine =
+  cardBits.join(' · ');
+const cardPic =
+  me.profile_pic ||
+  '/images/couple-bw-1.jpg';
+const cardName =
+  me.name || '';
 
-const STEPS = [
-  {
-    key: 'id',
-    title: 'Photo ID',
-    icon: 'id',
-    body: 'A passport, driving licence or national ID card. We check the document is genuine and matches the name on your account.',
+// ── Design renderVals,
+// ported (state from
+// the database).
+const s = { id: idState };
+
+const stateStyles = {
+  verified: { pill: 'Verified', bg: '#2f5d45', colour: '#fff' },
+  pending: { pill: 'In review', bg: 'rgba(110,84,56,.16)', colour: '#2f5d45' },
+  none: { pill: 'Not started', bg: 'rgba(44,26,14,.08)', colour: '#6b4e35' }
+};
+
+const svg = (
+  paths: string[],
+) =>
+  '<svg width="22"' +
+  ' height="22"' +
+  ' viewBox="0 0 24 24"' +
+  ' fill="none"' +
+  ' stroke="currentColor"' +
+  ' stroke-width="1.6"' +
+  ' stroke-linecap=' +
+  '"round"' +
+  ' stroke-linejoin=' +
+  '"round">' +
+  paths.map(
+    (d) =>
+      '<path d="' +
+      d + '"></path>',
+  ).join('') +
+  '</svg>';
+
+const ICONS = {
+  id: svg(['M3 6.5h18v11H3z', 'M7.5 11.6a1.6 1.6 0 1 0 0-.1', 'M6 15c.5-1.2 1.6-1.8 2.8-1.8s2.3.6 2.8 1.8', 'M14.5 10.5h4', 'M14.5 13.5h3']),
+  selfie: svg(['M4 8.5h3l1.4-2h7.2L17 8.5h3V19H4z', 'M12 16.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z'])
+};
+
+const step = (cfg) => {
+  const st = stateStyles[cfg.state];
+  const done = cfg.state === 'verified';
+  return {
+    icon: cfg.icon,
+    iconStyle: 'width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;transition:background .3s ease, color .3s ease;' +
+      (done ? 'background:#2f5d45;color:#fff;' : cfg.state === 'pending' ? 'background:rgba(110,84,56,.18);color:#2f5d45;' : 'background:#faf6ee;color:#8a6a4f;border:1.5px dashed rgba(110,84,56,.5);'),
+    title: cfg.title,
+    pill: st.pill,
+    pillStyle: 'font-size:.64rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:5px 12px;border-radius:50px;background:' + st.bg + ';color:' + st.colour + ';',
+    body: cfg.body,
+    meta: cfg.meta || '',
+    metaStyle: 'font-size:.84rem;color:#8a6a4f;line-height:1.6;margin:0;' + (cfg.meta ? '' : 'display:none;'),
+    stages: cfg.stages || [],
+    actionLabel: cfg.actionLabel,
+    actionStyle: 'font-family:\'Montserrat\',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:13px 28px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease, transform .15s ease;' +
+      (done
+        ? 'background:none;color:#6b4e35;border:1.5px solid rgba(44,26,14,.15);'
+        : 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;box-shadow:0 6px 18px rgba(110,84,56,.26);'),
+    hint: cfg.hint || '',
+    hintStyle: 'font-size:.84rem;color:#8a6a4f;line-height:1.6;' + (cfg.hint ? '' : 'display:none;'),
+    action: cfg.action,
+    wrapStyle: 'background:#fff;border-radius:18px;padding:32px 34px;transition:border-color .3s ease, box-shadow .3s ease;' +
+      (done ? 'border:1.5px solid rgba(110,84,56,.45);box-shadow:0 6px 22px rgba(110,84,56,.1);' : 'border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);')
+  };
+};
+
+// "Verified <date> ·
+// renews every two
+// years" and
+// "Submitted <date> ·
+// with the checker now"
+const metaVer = verAt
+  ? 'Verified ' + verAt +
+    ' · renews every' +
+    ' two years'
+  : '';
+const metaSub = subAt
+  ? 'Submitted ' + subAt +
+    ' · with the' +
+    ' checker now'
+  : '';
+
+const steps = [
+  step({
+    state: s.id, icon: ICONS.id, title: 'Photo ID',
+    body: 'Passport or driving licence, checked against a selfie you take on the spot. Two minutes, and it usually comes back the same day.',
+    meta: s.id === 'verified'
+      ? metaVer
+      : s.id === 'pending'
+        ? metaSub
+        : '',
+    actionLabel: s.id === 'verified' ? 'Replace document' : s.id === 'pending' ? 'Check progress' : 'Verify my ID',
+    hint: s.id === 'verified' ? '' : 'Owners filter on this before they read a word of your profile.',
     stages: [
-      { num: '1', title: 'Upload', body: 'A clear photo of your document — front and back for a driving licence.' },
-      { num: '2', title: 'Review', body: 'Our team checks it, usually within one working day.' },
-      { num: '3', title: 'Verified', body: 'The badge goes live on your profile and in browse results.' },
-    ],
-    status: idStatus,
-    actionLabel: idStatus === 'verified' ? '✓ Verified' : idStatus === 'pending' ? 'In review' : 'Upload ID',
-  },
-  {
-    key: 'selfie',
-    title: 'Selfie check',
-    icon: 'selfie',
-    body: 'A short selfie video to confirm you are the person in the ID. Takes about 90 seconds — no app needed.',
-    stages: [
-      { num: '1', title: 'Record', body: 'Turn your head left and right to camera — we check it\'s a real person.' },
-      { num: '2', title: 'Match', body: 'We compare your face to the ID photo automatically.' },
-      { num: '3', title: 'Done', body: 'Second badge added — owners can see both are confirmed.' },
-    ],
-    status: selfieStatus,
-    actionLabel: selfieStatus === 'verified' ? '✓ Verified' : selfieStatus === 'pending' ? 'In review' : 'Record selfie',
-  },
+      { num: '1', title: 'Your document', body: 'Passport or driving licence, photographed with your phone.' },
+      { num: '2', title: 'A quick selfie', body: 'Matched against the photo on the document.' },
+      { num: '3', title: 'Checked', body: 'Usually back the same day. We email you either way.' }
+    ].map((g, i) => {
+      const reached = s.id === 'verified' ? 3 : s.id === 'pending' ? 2 : 0;
+      const done = i < reached;
+      return {
+        num: g.num, title: g.title, body: g.body,
+        state: done ? 'Done' : s.id === 'pending' && i === 2 ? 'In review' : 'To do',
+        stateStyle: 'font-size:.64rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:' + (done ? '#2f5d45' : '#8a6a4f') + ';',
+        numStyle: 'width:24px;height:24px;border-radius:50%;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;' +
+          (done ? 'background:#2f5d45;color:#fff;' : 'background:rgba(44,26,14,.07);color:#6b4e35;'),
+        wrapStyle: 'border-radius:12px;padding:16px 18px;transition:background .3s ease, border-color .3s ease;' +
+          (done ? 'background:rgba(110,84,56,.09);border:1px solid rgba(110,84,56,.35);' : 'background:#faf6ee;border:1px solid rgba(44,26,14,.08);')
+      };
+    }),
+    action: s.id === 'verified'
+      ? 'remove'
+      : s.id === 'pending'
+        ? 'check'
+        : 'start'
+  })
 ];
+
+const verified = s.id === 'verified';
+const level = verified ? 'Verified sitter' : 'Unverified';
+
+const badgeDefs = verified ? [{ label: 'ID verified' }] : [];
+
+const unlocks = [
+  { title: 'You appear in verified-only searches', body: 'Most owners tick that filter first. Without the badge you are not in the list at all.', on: verified },
+  { title: 'The badge sits on your browse card', body: 'A gold tick beside your photo, wherever your profile appears.', on: verified },
+  { title: 'Owners see it on your application', body: 'It shows next to your name in their applicant list, above the message you wrote.', on: verified }
+].map((u, i, arr) => ({
+  title: u.title, body: u.body,
+  mark: u.on ? '✓' : String(i + 1),
+  markStyle: 'width:26px;height:26px;border-radius:50%;font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;transition:background .3s ease, color .3s ease;' +
+    (u.on ? 'background:#2f5d45;color:#fff;' : 'background:rgba(44,26,14,.07);color:#6b4e35;'),
+  rowStyle: 'display:flex;gap:14px;align-items:flex-start;padding:16px 0;' + (i < arr.length - 1 ? 'border-bottom:1px solid rgba(44,26,14,.07);' : '')
+}));
+
+const privacy = [
+  'Your document is deleted as soon as the check clears — we keep the result, not the file.',
+  'Date of birth and document numbers are never shown to owners or other sitters.',
+  'The check is run by a third-party identity provider; we never see the raw images.',
+  'You can remove the check from your profile at any time, and the badge goes with it.'
+];
+
+const levelName = level;
+const levelNote = verified
+  ? 'You show up for owners who only accept verified sitters — which is most of them.'
+  : 'Owners filtering for verified sitters cannot see you yet.';
+const levelBarStyle = 'height:100%;width:' + (verified ? 100 : 8) + '%;border-radius:50px;background:linear-gradient(90deg,#2f5d45,#c4ab8a);transition:width .4s ease';
+const emblemStyle = 'width:30px;height:30px;border-radius:50%;font-size:.8rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .3s ease, color .3s ease;' +
+  (verified ? 'background:#2f5d45;color:#fff;' : 'background:rgba(255,255,255,.1);color:rgba(255,255,255,.3);');
+// "Checked <date>.
+// Renews in two years
+// — we will remind you."
+const emblemVer = verAt
+  ? 'Checked ' + verAt +
+    '. Renews in two' +
+    ' years — we will' +
+    ' remind you.'
+  : tx(`
+Renews in two years — we will remind you.
+`);
+const emblemLine = verified
+  ? emblemVer
+  : tx(`
+Four of the six sits posted this week accept verified sitters only.
+`);
+const cardTickStyle =
+  'position:absolute;right:-3px;bottom:-3px;width:21px;height:21px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;display:flex;align-items:center;justify-content:center;border:2px solid #faf6ee;' + (badgeDefs.length ? '' : 'display:none;')
+  ;
+const badges =
+  badgeDefs.map(b => ({
+  label: b.label,
+  style: 'font-size:.7rem;font-weight:700;letter-spacing:.05em;color:#2f5d45;background:rgba(110,84,56,.14);padding:5px 12px;border-radius:50px;'
+}));
+const noBadgeStyle =
+  'font-size:.84rem;color:#8a6a4f;line-height:1.6;margin:0;' + (badgeDefs.length ? 'display:none;' : '')
+  ;
+const nudge = verified
+  ? 'ID verified — owners filtering for verified sitters can now see you.'
+  : 'Verified sitters hear back on roughly twice as many applications as unverified ones.'
+  ;
+
+function tx(v: string) {
+  return v.trim();
+}
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Verification — MYAH</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-<style>
-  body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
-  * { box-sizing:border-box; }
-  a { color:#2f5d45; }
-  a:hover { color:#2c1a0e; }
-  @keyframes gs-ring { to { transform:rotate(360deg); } }
-  @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
-  @media (max-width:1000px) {
-    [data-topnav] { padding:14px 24px !important; }
-    [data-pad] { padding:34px 20px 80px !important; }
-    [data-two-col] { grid-template-columns:minmax(0,1fr) !important; }
-    [data-aside] { position:static !important; }
-    [data-card] { padding:26px 22px !important; }
-    [data-step] { grid-template-columns:minmax(0,1fr) !important; }
-    [data-stages] { grid-template-columns:minmax(0,1fr) !important; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Verification — MYAH</title>
+  <style is:global>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 1000px) {
+      [data-topnav] { padding: 14px 24px !important; }
+      [data-pad] { padding: 34px 20px 80px !important; }
+      [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+      [data-card] { padding: 26px 22px !important; }
+      [data-step] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-stages] { grid-template-columns: minmax(0,1fr) !important; }
+    }
+
+    .vf-back:hover { gap:13px !important; color:#2f5d45 !important; }
+    .vf-page:hover { color:#2c1a0e !important; }
+    .vf-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    [data-action][disabled] { opacity:.6; cursor:wait !important; }
+  </style>
 </head>
 <body>
 <div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
@@ -102,29 +368,22 @@ const STEPS = [
     </div>
   </div>
 
-  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
-    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
-      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
-        <span style="color:#2f5d45;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
-      </span>
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
     </a>
     <div style="display:flex;align-items:center;gap:22px">
-      <a href={dashUrl} style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s,color .2s"
-        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'" onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
-      <a href={profilePageUrl} style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
-        onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#2f5d45'">View my page</a>
+      <a href={dashUrl} class="vf-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Dashboard</a>
+      <a href={pageUrl} class="vf-page" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">View my page</a>
     </div>
   </nav>
 
-  <main data-pad="1" style="flex:1;padding:52px 48px 90px">
+  <main data-pad="1" data-screen-label="Verification" style="flex:1;padding:52px 48px 90px">
     <div style="max-width:1180px;margin:0 auto">
 
       <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
-        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
-          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH sitter
-        </p>
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH sitter</p>
         <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Getting <em style="color:#2f5d45;">verified</em></h1>
         <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">Owners are handing you their keys and their animals. Verify your ID once and the badge shows on your page and in browse &mdash; verified sitters hear back far more often.</p>
       </div>
@@ -133,84 +392,47 @@ const STEPS = [
 
         <div style="display:flex;flex-direction:column;gap:24px">
 
-          {STEPS.map(step => {
-            const isVerified = step.status === 'verified';
-            const isPending = step.status === 'pending';
-            const pillBg = isVerified ? '#2f5d45' : isPending ? 'rgba(110,84,56,.16)' : 'rgba(44,26,14,.08)';
-            const pillColor = isVerified ? '#fff' : isPending ? '#2f5d45' : '#6b4e35';
-            const pillLabel = isVerified ? 'Verified' : isPending ? 'In review' : 'Not started';
-            const iconPaths = {
-              id: ['M3 6.5h18v11H3z', 'M7.5 11.6a1.6 1.6 0 1 0 0-.1', 'M6 15c.5-1.2 1.6-1.8 2.8-1.8s2.3.6 2.8 1.8', 'M14.5 10.5h4', 'M14.5 13.5h3'],
-              selfie: ['M4 8.5h3l1.4-2h7.2L17 8.5h3V19H4z', 'M12 16.2a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4z'],
-            };
-            const btnStyle = isVerified
-              ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;cursor:default;'
-              : isPending
-                ? 'background:rgba(110,84,56,.16);color:#2f5d45;border:1.5px solid rgba(110,84,56,.35);cursor:default;'
-                : 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;cursor:pointer;';
-            return (
-              <section data-card="1" style={`background:#fff;border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease;${isVerified ? 'border:1.5px solid #2f5d45;' : 'border:1px solid rgba(110,84,56,.22);'}`}
-                onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-                onmouseout={`this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='${isVerified ? '#2f5d45' : 'rgba(110,84,56,.22)'}'`}>
-                <div data-step="1" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:start">
-                  <span style={`width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;${isVerified ? 'background:#2f5d45;color:#fff;' : 'background:rgba(110,84,56,.12);color:#2f5d45;'}`}>
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-                      {iconPaths[step.icon]?.map((d, i) => <path key={i} d={d} />)}
-                    </svg>
-                  </span>
-                  <div style="min-width:0">
-                    <div style="display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;margin-bottom:8px">
-                      <h2 style="font-family:'Marcellus',serif;font-size:1.28rem;color:#2c1a0e;margin:0;line-height:1.25">{step.title}</h2>
-                      <span style={`font-size:.68rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:${pillBg};color:${pillColor}`}>{pillLabel}</span>
-                    </div>
-                    <p style="font-size:.95rem;color:#6b4e35;line-height:1.75;margin:0 0 8px;max-width:520px">{step.body}</p>
+          {steps.map((st) => (
+            <section data-card="1" style={st.wrapStyle}>
+              <div data-step="1" style="display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:start">
+                <span style={st.iconStyle} set:html={st.icon}></span>
+                <div style="min-width:0">
+                  <div style="display:flex;align-items:baseline;gap:13px;flex-wrap:wrap;margin-bottom:8px">
+                    <h2 style="font-family:'Marcellus',serif;font-size:1.28rem;color:#2c1a0e;margin:0;line-height:1.25">{st.title}</h2>
+                    <span style={st.pillStyle}>{st.pill}</span>
+                  </div>
+                  <p style="font-size:.95rem;color:#6b4e35;line-height:1.75;margin:0 0 8px;max-width:520px">{st.body}</p>
+                  <p style={st.metaStyle}>{st.meta}</p>
 
-                    <div data-stages="1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px">
-                      {step.stages.map((g, gi) => {
-                        const done = (gi === 0 && (step.status !== 'none')) || (gi === 1 && (step.status === 'verified' || step.status === 'pending')) || (gi === 2 && step.status === 'verified');
-                        return (
-                          <div style={`border-radius:12px;padding:18px 18px 20px;border:1px solid rgba(44,26,14,.1);${done ? 'background:rgba(47,93,69,.06);border-color:rgba(47,93,69,.25);' : 'background:#faf6ee;'}`}>
-                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
-                              <span style={`width:22px;height:22px;border-radius:50%;font-size:.72rem;font-weight:600;display:flex;align-items:center;justify-content:center;${done ? 'background:#2f5d45;color:#fff;' : 'background:rgba(44,26,14,.1);color:#6b4e35;'}`}>{done ? '✓' : g.num}</span>
-                              <span style={`font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;${done ? 'color:#2f5d45;' : 'color:#6e5438;'}`}>{done ? 'Done' : 'Pending'}</span>
-                            </div>
-                            <p style="font-size:.88rem;font-weight:700;color:#2c1a0e;margin:0 0 4px">{g.title}</p>
-                            <p style="font-size:.82rem;color:#6b4e35;line-height:1.6;margin:0">{g.body}</p>
-                          </div>
-                        );
-                      })}
-                    </div>
+                  <div data-stages="1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:24px">
+                    {st.stages.map((g) => (
+                      <div style={g.wrapStyle}>
+                        <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px">
+                          <span style={g.numStyle}>{g.num}</span>
+                          <span style={g.stateStyle}>{g.state}</span>
+                        </div>
+                        <p style="font-size:.88rem;font-weight:700;color:#2c1a0e;margin:0 0 4px">{g.title}</p>
+                        <p style="font-size:.82rem;color:#6b4e35;line-height:1.6;margin:0">{g.body}</p>
+                      </div>
+                    ))}
+                  </div>
 
-                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px">
-                      <button type="button" disabled={isVerified || isPending}
-                        style={`font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:13px 26px;transition:background .25s ease,transform .15s ease;${btnStyle}`}
-                        onmouseover={isVerified || isPending ? '' : "this.style.background='#3e7a5b';this.style.transform='translateY(-2px)'"}
-                        onmouseout={isVerified || isPending ? '' : "this.style.background='#2f5d45';this.style.transform='translateY(0)'"}>
-                        {step.actionLabel}
-                      </button>
-                      {!isVerified && !isPending && (
-                        <span style="font-size:.84rem;color:#6e5438">Takes about 2 minutes</span>
-                      )}
-                    </div>
+                  <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:20px">
+                    <button type="button" data-action={st.action} style={st.actionStyle}>{st.actionLabel}</button>
+                    <span style={st.hintStyle}>{st.hint}</span>
                   </div>
                 </div>
-              </section>
-            );
-          })}
+              </div>
+            </section>
+          ))}
 
-          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+          <div data-card="1" class="vf-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
             <h2 style="font-family:'Marcellus',serif;font-size:1.22rem;color:#2c1a0e;margin:0 0 8px">What the badge changes</h2>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
             <div style="display:flex;flex-direction:column;gap:0">
-              {[
-                { mark: '✓', title: 'You appear higher in search', body: 'Verified sitters rank above unverified ones when an owner searches the same dates and location.' },
-                { mark: '✓', title: 'Owners message you first', body: 'The badge signals that someone has looked at who you actually are. Most owners filter for it.' },
-                { mark: '✓', title: 'Your applications stand out', body: 'On an applications page, verified sitters get a star. Unverified ones don\'t — even with more reviews.' },
-              ].map((u, i, arr) => (
-                <div style={`display:flex;gap:14px;align-items:flex-start;padding:18px 0;${i < arr.length - 1 ? 'border-bottom:1px solid rgba(44,26,14,.07);' : ''}`}>
-                  <span style="width:28px;height:28px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">{u.mark}</span>
+              {unlocks.map((u) => (
+                <div style={u.rowStyle}>
+                  <span style={u.markStyle}>{u.mark}</span>
                   <div style="flex:1;min-width:0">
                     <p style="font-size:.94rem;font-weight:700;color:#2c1a0e;margin:0 0 3px">{u.title}</p>
                     <p style="font-size:.87rem;color:#6b4e35;line-height:1.65;margin:0">{u.body}</p>
@@ -220,18 +442,11 @@ const STEPS = [
             </div>
           </div>
 
-          <div data-card="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+          <div data-card="1" class="vf-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
             <h2 style="font-family:'Marcellus',serif;font-size:1.22rem;color:#2c1a0e;margin:0 0 8px">What we do with your document</h2>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
             <div style="display:flex;flex-direction:column;gap:14px">
-              {[
-                'We check the document is genuine using an automated service, then delete the original within 24 hours.',
-                'Only the verified status and name are stored against your account — not the document itself.',
-                'We never share your documents or verification status with owners beyond the badge.',
-                'You can remove your verified status at any time from your account settings.',
-              ].map(p => (
+              {privacy.map((p) => (
                 <div style="display:flex;gap:13px;align-items:flex-start">
                   <span style="width:20px;height:20px;border-radius:50%;background:rgba(110,84,56,.16);color:#2f5d45;font-size:.66rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">✓</span>
                   <p style="font-size:.93rem;color:#6b4e35;line-height:1.7;margin:0">{p}</p>
@@ -245,56 +460,41 @@ const STEPS = [
 
           <div style="background:#2c1a0e;border-radius:18px;padding:28px 26px 30px">
             <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Your trust level</p>
-            <p style="font-family:'Marcellus',serif;font-size:2rem;color:#fff;margin:0 0 6px;line-height:1.1">{trust.name}</p>
-            <p style="font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.65;margin:0 0 20px">{trust.note}</p>
+            <p style="font-family:'Marcellus',serif;font-size:2rem;color:#fff;margin:0 0 6px;line-height:1.1">{levelName}</p>
+            <p style="font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.65;margin:0 0 20px">{levelNote}</p>
             <div style="height:7px;border-radius:50px;background:rgba(255,255,255,.14);overflow:hidden;margin-bottom:20px">
-              <div style={`height:100%;width:${trust.pct}%;background:#2f5d45;border-radius:50px;transition:width .6s ease`}></div>
+              <div style={levelBarStyle}></div>
             </div>
             <div style="display:flex;align-items:center;gap:14px;padding-top:18px;border-top:1px solid rgba(255,255,255,.12)">
-              <span style={`width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:600;flex-shrink:0;${trustIdx >= 2 ? 'background:#2f5d45;color:#fff;' : 'background:rgba(255,255,255,.12);color:rgba(255,255,255,.4);'}`}>✓</span>
-              <p style="font-size:.87rem;color:rgba(255,255,255,.72);line-height:1.6;margin:0">{trust.emblemLine}</p>
+              <span style={emblemStyle}>✓</span>
+              <p style="font-size:.87rem;color:rgba(255,255,255,.72);line-height:1.6;margin:0">{emblemLine}</p>
             </div>
           </div>
 
-          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:24px 26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+          <div class="vf-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:24px 26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
             <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">On your card</p>
             <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:14px;padding:18px 20px">
               <div style="display:flex;gap:13px;align-items:center;margin-bottom:14px">
                 <div style="position:relative;flex-shrink:0">
-                  {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
-                  ) : (
-                    <div style="width:48px;height:48px;border-radius:50%;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.1rem;color:#2f5d45">{initials}</div>
-                  )}
-                  {idStatus === 'verified' && (
-                    <span style="position:absolute;right:-2px;bottom:-2px;width:18px;height:18px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.6rem;font-weight:600;display:flex;align-items:center;justify-content:center;border:2px solid #fff">✓</span>
-                  )}
+                  <img src={cardPic} alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
+                  <span style={cardTickStyle}>✓</span>
                 </div>
                 <div style="min-width:0">
-                  <p style="font-family:'Marcellus',serif;font-size:1.04rem;color:#2c1a0e;margin:0 0 2px">{profile?.name || 'Your name'}</p>
-                  <p style="font-size:.78rem;color:#6b4e35;margin:0">Sitter</p>
+                  <p style="font-family:'Marcellus',serif;font-size:1.04rem;color:#2c1a0e;margin:0 0 2px">{cardName}</p>
+                  <p style="font-size:.78rem;color:#6b4e35;margin:0">{cardLine}</p>
                 </div>
               </div>
               <div style="display:flex;gap:7px;flex-wrap:wrap">
-                {idStatus === 'verified' && (
-                  <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:#2f5d45;color:#fff">ID verified</span>
-                )}
-                {selfieStatus === 'verified' && (
-                  <span style="font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:rgba(110,84,56,.14);color:#5c3d20">Selfie verified</span>
-                )}
-                {idStatus !== 'verified' && selfieStatus !== 'verified' && (
-                  <p style="font-size:.82rem;color:#6e5438;margin:0">No badges yet &mdash; owners see a plain card.</p>
-                )}
+                {badges.map((b) => (
+                  <span style={b.style}>{b.label}</span>
+                ))}
               </div>
+              <p style={noBadgeStyle}>No badges yet &mdash; owners see a plain card.</p>
             </div>
           </div>
 
           <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
-            <p style="font-size:.88rem;color:#6b4e35;line-height:1.7;margin:0">
-              {trustIdx === 0 ? 'Most sits in the UK go to verified sitters. ID takes two minutes and the badge is instant once approved.' : trustIdx < 3 ? 'Add the selfie check to get the full badge — owners trust this most.' : 'Full verification complete. Your badge is live and visible on your profile.'}
-            </p>
+            <p style="font-size:.88rem;color:#6b4e35;line-height:1.7;margin:0">{nudge}</p>
           </div>
         </aside>
       </div>
@@ -302,19 +502,44 @@ const STEPS = [
   </main>
 </div>
 
-<script>
-document.querySelectorAll('a[href]').forEach(a => {
-  const href = a.getAttribute('href') || '';
-  if (href.startsWith('#') || href.startsWith('http')) return;
+<script is:inline>
+(() => {
   const loader = document.querySelector('[data-loader]');
-  if (!loader) return;
-  a.addEventListener('click', e => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-    (loader as HTMLElement).style.opacity = '1';
-    (loader as HTMLElement).style.pointerEvents = 'all';
-    setTimeout(() => { (loader as HTMLElement).style.opacity = '0'; (loader as HTMLElement).style.pointerEvents = 'none'; }, 1600);
+  let hideT;
+  const show = () => {
+    if (!loader) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    clearTimeout(hideT);
+    hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  };
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+    a.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      show();
+    });
   });
-});
+
+  // Verify my ID -> start a check (pending). Check progress -> reload.
+  // Replace document -> remove the badge so a new check can start.
+  document.querySelectorAll('[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.getAttribute('data-action');
+      if (action === 'check') { show(); location.reload(); return; }
+      if (action === 'remove' && !confirm('Remove your ID badge?')) return;
+      btn.disabled = true;
+      fetch('/api/verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+      })
+        .then(r => { if (!r.ok) throw new Error(); show(); location.reload(); })
+        .catch(() => { btn.disabled = false; });
+    });
+  });
+})();
 </script>
 </body>
 </html>

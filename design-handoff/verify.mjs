@@ -41,7 +41,7 @@ const PAGES = {
   'Confirmed sit':         ['src/pages'],
   'Notifications':         ['src/pages/notifications.astro'],
   'Saved sits':            ['src/pages/saved.astro'],
-  'Verification':          ['src/pages'],
+  'Verification':          ['src/pages/verification.astro'],
   'Find a sitter':         ['src/pages'],
 };
 
