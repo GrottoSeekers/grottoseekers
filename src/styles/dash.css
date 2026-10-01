@@ -1,0 +1,11 @@
+/* Message toasts shared by the sitter and owner dashboards.
+   Hover rules stay in each page so verify.mjs can see their values. */
+@keyframes toast-in { from { transform:translateX(120%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+@keyframes toast-out { from { transform:translateX(0); opacity:1; } to { transform:translateX(120%); opacity:0; } }
+.msg-toast { background:#fff; border-radius:14px; padding:14px 18px; box-shadow:0 8px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08); display:flex; gap:12px; align-items:center; pointer-events:auto; cursor:pointer; text-decoration:none; color:inherit; transform:translateX(120%); animation:toast-in .4s cubic-bezier(.34,1.56,.64,1) forwards; max-width:380px; border-left:4px solid #2f5d45; }
+.msg-toast.toast-out { animation:toast-out .3s ease forwards; }
+.msg-toast-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0; }
+.msg-toast-avatar-ph { width:42px; height:42px; border-radius:50%; flex-shrink:0; background:rgba(47,93,69,.12); color:#2f5d45; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; font-family:"Marcellus",serif; }
+.msg-toast-body { flex:1; min-width:0; }
+.msg-toast-name { font-weight:700; font-size:.88rem; color:#2c1a0e; }
+.msg-toast-preview { font-size:.82rem; color:#6b4e35; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }

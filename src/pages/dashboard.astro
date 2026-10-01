@@ -7,6 +7,16 @@ import {
 import {
   supabase,
 } from '../lib/supabase';
+import {
+  arr,
+  tx,
+  clip,
+  dateRange,
+  durationLabel,
+  strength,
+} from '../lib/dashboard';
+import
+  '../styles/dash.css';
 
 const session =
   await getSession(
@@ -75,12 +85,6 @@ const lr =
 const listings: any[] =
   lr.data ?? [];
 
-const arr = (
-  v: any,
-): any[] => (
-  Array.isArray(v)
-    ? v : []
-);
 const heroImages =
   arr(
     profile.hero_images_json,
@@ -102,38 +106,8 @@ const theme =
   profile.theme_json ??
   {};
 
-const fmtDate = (
-  d: string,
-) => new Date(
-  d + 'T00:00:00',
-).toLocaleDateString(
-  'en-GB',
-  {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  },
-);
-const daysBetween = (
-  from: string,
-  to: string,
-) => {
-  const a = new Date(
-    to + 'T00:00:00',
-  ).getTime();
-  const b = new Date(
-    from + 'T00:00:00',
-  ).getTime();
-  return Math.ceil(
-    (a - b) / 86400000,
-  );
-};
-
 // Design copy — used
 // when a field is empty.
-const tx = (
-  s: string,
-) => s.trim();
 const taglineDef = tx(`
 Experienced house & pet sitters available worldwide.
 `);
@@ -192,18 +166,13 @@ const pvAbout: string =
   aboutImages[0]?.src ||
   '/images/' +
   'couple-dinner-1.jpg';
-const clip = (
-  s: string,
-) => (
-  s && s.length > 60
-    ? s.slice(0, 60) +
-      '…'
-    : s || ''
-);
 const pvReviews = reviews
   .slice(0, 3)
   .map((r: any) => ({
-    text: clip(r.text),
+    text: clip(
+      r.text,
+      60,
+    ),
     name: r.name || '',
   }));
 const pvGallery = gallery
@@ -252,22 +221,13 @@ Colours customised
       .length > 0,
   },
 ];
-const doneCount = items
-  .filter((i) => i.done)
-  .length;
-const pct = Math.round(
-  (doneCount /
-    items.length) *
-    100,
-);
+const st =
+  strength(items);
 const strengthLabel =
-  doneCount +
-  ' of ' +
-  items.length +
-  ' complete';
+  st.label;
 const strengthBar =
   'height:100%;width:' +
-  pct +
+  st.pct +
   '%;border-radius:' +
   '50px;background:' +
   'linear-gradient(' +
@@ -318,10 +278,6 @@ const sits = listings
     const lh = arr(
       lp.hero_images_json,
     );
-    const n = daysBetween(
-      l.date_from,
-      l.date_to,
-    );
     const petList = pets
       .slice(0, 3)
       .map((p: any) =>
@@ -348,19 +304,15 @@ const sits = listings
           ' · ' +
           lp.location
         : lp.name,
-      dates:
-        fmtDate(
+      dates: dateRange(
+        l.date_from,
+        l.date_to,
+      ),
+      duration:
+        durationLabel(
           l.date_from,
-        ) +
-        ' — ' +
-        fmtDate(
           l.date_to,
         ),
-      duration:
-        n +
-        (n === 1
-          ? ' day'
-          : ' days'),
       img:
         lh[0]?.src ||
         lp.profile_pic ||
@@ -435,8 +387,6 @@ const tabs = [
     input::placeholder { color: rgba(44,26,14,.35); }
     @keyframes gs-ring { to { transform: rotate(360deg); } }
     @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-    @keyframes toast-in { from { transform:translateX(120%); opacity:0; } to { transform:translateX(0); opacity:1; } }
-    @keyframes toast-out { from { transform:translateX(0); opacity:1; } to { transform:translateX(120%); opacity:0; } }
     @media (max-width: 900px) {
       [data-topnav] { padding: 12px 24px !important; }
       [data-dash-pad] { padding: 28px 24px 60px !important; }
@@ -452,13 +402,6 @@ const tabs = [
     .db-text-link:hover { color:#2c1a0e !important; }
     .db-sit:hover { transform:translateY(-6px) !important; box-shadow:0 20px 50px rgba(44,26,14,.12) !important; border-color:rgba(110,84,56,.45) !important; }
 
-    .msg-toast { background:#fff; border-radius:14px; padding:14px 18px; box-shadow:0 8px 32px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08); display:flex; gap:12px; align-items:center; pointer-events:auto; cursor:pointer; text-decoration:none; color:inherit; transform:translateX(120%); animation:toast-in .4s cubic-bezier(.34,1.56,.64,1) forwards; max-width:380px; border-left:4px solid #2f5d45; }
-    .msg-toast.toast-out { animation:toast-out .3s ease forwards; }
-    .msg-toast-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; flex-shrink:0; }
-    .msg-toast-avatar-ph { width:42px; height:42px; border-radius:50%; flex-shrink:0; background:rgba(47,93,69,.12); color:#2f5d45; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem; font-family:"Marcellus",serif; }
-    .msg-toast-body { flex:1; min-width:0; }
-    .msg-toast-name { font-weight:700; font-size:.88rem; color:#2c1a0e; }
-    .msg-toast-preview { font-size:.82rem; color:#6b4e35; margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   </style>
 </head>
 <body>
@@ -690,110 +633,9 @@ const tabs = [
   </main>
 </div>
 
-<script is:inline>
-(() => {
-  let hideT, copyT;
-
-  // tabs
-  const tabBtns = Array.from(document.querySelectorAll('[data-tab]'));
-  const panels = Array.from(document.querySelectorAll('[data-panel]'));
-  const setTab = id => {
-    tabBtns.forEach(b => {
-      const on = b.getAttribute('data-tab') === id;
-      b.style.color = on ? '#2f5d45' : '#8a6a4f';
-      const line = b.querySelector('[data-tab-line]');
-      if (line) line.style.background = on ? '#2f5d45' : 'transparent';
-    });
-    panels.forEach(p => {
-      const key = p.getAttribute('data-panel');
-      p.style.display = key === id ? (key === 'dashboard' ? 'flex' : (key === 'sits' ? 'block' : 'block')) : 'none';
-    });
-  };
-  tabBtns.forEach(b => b.addEventListener('click', () => { setTab(b.getAttribute('data-tab')); window.scrollTo({ top: 0, behavior: 'smooth' }); }));
-
-  // copy share link
-  const copyBtn = document.querySelector('[data-copy]');
-  copyBtn && copyBtn.addEventListener('click', () => {
-    const input = document.querySelector('[data-share]');
-    if (input) {
-      input.select();
-      if (navigator.clipboard) navigator.clipboard.writeText(input.value);
-    }
-    copyBtn.textContent = 'Copied!';
-    clearTimeout(copyT);
-    copyT = setTimeout(() => { copyBtn.textContent = 'Copy'; }, 2000);
-  });
-
-  // loader
-  const loader = document.querySelector('[data-loader]');
-  const show = () => {
-    if (!loader) return;
-    loader.style.opacity = '1';
-    loader.style.pointerEvents = 'all';
-    clearTimeout(hideT);
-    hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
-  };
-  document.querySelectorAll('a[href]').forEach(a => {
-    const href = a.getAttribute('href') || '';
-    if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
-    a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
-  });
-
-  // unread message badge + toasts (kept from the previous dashboard)
-  const seen = new Set();
-  let first = true;
-  const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
-  const ping = () => {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.frequency.setValueAtTime(660, ctx.currentTime);
-      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
-    } catch {}
-  };
-  const toast = m => {
-    const box = document.querySelector('[data-msg-toasts]');
-    if (!box) return;
-    const s = m.sender || {};
-    const av = s.profile_pic
-      ? '<img src="' + esc(s.profile_pic) + '" class="msg-toast-avatar" />'
-      : '<div class="msg-toast-avatar-ph">' + esc((s.name || '?').charAt(0).toUpperCase()) + '</div>';
-    const t = document.createElement('a');
-    t.href = '/messages/' + m.conversation_id;
-    t.className = 'msg-toast';
-    t.innerHTML = av + '<div class="msg-toast-body"><div class="msg-toast-name">' + esc(s.name || 'Someone') + '</div><div class="msg-toast-preview">' + esc((m.body || '').slice(0, 80)) + '</div></div>';
-    box.appendChild(t);
-    setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 5000);
-  };
-  const badge = n => {
-    const el = document.querySelector('[data-msg-badge]');
-    if (!el) return;
-    if (n > 0) { el.textContent = n > 99 ? '99+' : String(n); el.style.display = 'inline-flex'; }
-    else el.style.display = 'none';
-  };
-  const check = async () => {
-    try {
-      const res = await fetch('/api/messages/unread');
-      const data = await res.json();
-      badge(data.count || 0);
-      if (data.messages) {
-        if (!first) {
-          const fresh = data.messages.filter(m => !seen.has(m.id));
-          if (fresh.length) { ping(); fresh.slice(0, 3).forEach(toast); }
-        }
-        data.messages.forEach(m => seen.add(m.id));
-      }
-      first = false;
-    } catch {}
-  };
-  check();
-  setInterval(check, 8000);
-})();
+<script>
+  import { initDashboard } from '../scripts/dashboard';
+  initDashboard();
 </script>
 </body>
 </html>

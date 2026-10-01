@@ -1,0 +1,130 @@
+// Client behaviour shared by the sitter and owner dashboards:
+// tab switching, copy share link, navigation loader, unread-message badge + toasts.
+// Hooks: [data-tab], [data-tab-line], [data-panel], [data-share], [data-copy],
+// [data-loader], [data-msg-badge], [data-msg-toasts].
+
+const ON = '#2f5d45';
+const OFF = '#8a6a4f';
+
+function initTabs() {
+  const tabBtns = Array.from(document.querySelectorAll<HTMLElement>('[data-tab]'));
+  const panels = Array.from(document.querySelectorAll<HTMLElement>('[data-panel]'));
+  const setTab = (id: string) => {
+    tabBtns.forEach((b) => {
+      const on = b.dataset.tab === id;
+      b.style.color = on ? ON : OFF;
+      const line = b.querySelector<HTMLElement>('[data-tab-line]');
+      if (line) line.style.background = on ? ON : 'transparent';
+    });
+    panels.forEach((p) => {
+      const key = p.dataset.panel;
+      p.style.display = key === id ? (key === 'dashboard' ? 'flex' : 'block') : 'none';
+    });
+  };
+  tabBtns.forEach((b) =>
+    b.addEventListener('click', () => {
+      setTab(b.dataset.tab!);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }),
+  );
+}
+
+function initCopy() {
+  const btn = document.querySelector<HTMLElement>('[data-copy]');
+  let t: ReturnType<typeof setTimeout>;
+  btn?.addEventListener('click', () => {
+    const input = document.querySelector<HTMLInputElement>('[data-share]');
+    if (input) {
+      input.select();
+      navigator.clipboard?.writeText(input.value);
+    }
+    btn.textContent = 'Copied!';
+    clearTimeout(t);
+    t = setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+  });
+}
+
+function initLoader() {
+  const loader = document.querySelector<HTMLElement>('[data-loader]');
+  let hideT: ReturnType<typeof setTimeout>;
+  const show = () => {
+    if (!loader) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    clearTimeout(hideT);
+    hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  };
+  document.querySelectorAll('a[href]').forEach((a) => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
+    a.addEventListener('click', (e) => {
+      const m = e as MouseEvent;
+      if (m.metaKey || m.ctrlKey || m.shiftKey) return;
+      show();
+    });
+  });
+}
+
+function initUnread() {
+  const seen = new Set<string>();
+  let first = true;
+  const esc = (s: string) => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
+  const ping = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.frequency.setValueAtTime(660, ctx.currentTime);
+      osc.frequency.setValueAtTime(880, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+      osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.4);
+    } catch {}
+  };
+  const toast = (m: any) => {
+    const box = document.querySelector('[data-msg-toasts]');
+    if (!box) return;
+    const s = m.sender || {};
+    const av = s.profile_pic
+      ? '<img src="' + esc(s.profile_pic) + '" class="msg-toast-avatar" />'
+      : '<div class="msg-toast-avatar-ph">' + esc((s.name || '?').charAt(0).toUpperCase()) + '</div>';
+    const t = document.createElement('a');
+    t.href = '/messages/' + m.conversation_id;
+    t.className = 'msg-toast';
+    t.innerHTML = av + '<div class="msg-toast-body"><div class="msg-toast-name">' + esc(s.name || 'Someone') +
+      '</div><div class="msg-toast-preview">' + esc((m.body || '').slice(0, 80)) + '</div></div>';
+    box.appendChild(t);
+    setTimeout(() => { t.classList.add('toast-out'); setTimeout(() => t.remove(), 300); }, 5000);
+  };
+  const badge = (n: number) => {
+    const el = document.querySelector<HTMLElement>('[data-msg-badge]');
+    if (!el) return;
+    if (n > 0) { el.textContent = n > 99 ? '99+' : String(n); el.style.display = 'inline-flex'; }
+    else el.style.display = 'none';
+  };
+  const check = async () => {
+    try {
+      const res = await fetch('/api/messages/unread');
+      const data = await res.json();
+      badge(data.count || 0);
+      if (data.messages) {
+        if (!first) {
+          const fresh = data.messages.filter((m: any) => !seen.has(m.id));
+          if (fresh.length) { ping(); fresh.slice(0, 3).forEach(toast); }
+        }
+        data.messages.forEach((m: any) => seen.add(m.id));
+      }
+      first = false;
+    } catch {}
+  };
+  check();
+  setInterval(check, 8000);
+}
+
+export function initDashboard() {
+  initTabs();
+  initCopy();
+  initLoader();
+  initUnread();
+}
