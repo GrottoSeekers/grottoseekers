@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getSession } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
+import { notify } from '../../../lib/notify';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -98,6 +99,17 @@ export const POST: APIRoute = async ({ request }) => {
       .from('conversations')
       .update({ last_message_at: new Date().toISOString() })
       .eq('id', convId);
+
+    const recipientId = conv.sitter_profile_id === senderProfile.id ? conv.owner_profile_id : conv.sitter_profile_id;
+    const { data: sender } = await supabase.from('profiles').select('name').eq('id', senderProfile.id).single();
+    const text = body.trim();
+    await notify(recipientId, {
+      kind: 'message',
+      title: (sender?.name || 'Someone') + ' sent you a message',
+      body: '“' + (text.length > 140 ? text.slice(0, 140) + '…' : text) + '”',
+      link: '/messages/' + convId,
+      cta: 'Open message',
+    });
 
     return new Response(JSON.stringify({ conversation_id: convId, message }), { status: 200 });
   } catch (e) {

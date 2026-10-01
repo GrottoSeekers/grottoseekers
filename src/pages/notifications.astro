@@ -1,62 +1,328 @@
 ---
-export const prerender = false;
+// Data: the
+// `notifications` table
+// for the signed-in
+// profile (written by
+// src/lib/notify.ts), the
+// next confirmed sit from
+// `sits`, and the
+// profile's notify prefs.
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../lib/auth';
+import {
+  supabase,
+} from '../lib/supabase';
 
-import { getSession } from '../lib/auth';
-import { supabase } from '../lib/supabase';
+const session =
+  await getSession(
+    Astro.request,
+  );
+if (!session) {
+  return Astro.redirect(
+    '/login',
+  );
+}
 
-const session = await getSession(Astro.request);
-if (!session) return Astro.redirect('/login');
-
-const { data: profileData } = await supabase
+const pr =
+  await supabase
   .from('profiles')
-  .select('id, name, profile_type, profile_pic')
-  .eq('user_id', session.userId)
+  .select('*')
+  .eq(
+    'user_id',
+    session.userId,
+  )
   .single();
-const profile = profileData as any;
-const isOwner = profile?.profile_type === 'owner';
-const dashUrl = isOwner ? '/owner/dashboard' : '/dashboard';
-const profileUrl = isOwner ? '/owner/edit' : '/profile/edit';
+const me: any = pr.data;
+if (!me) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+const isOwner =
+  me.profile_type ===
+  'owner';
+const dashUrl = isOwner
+  ? '/owner/dashboard'
+  : '/dashboard';
 
-let notifications: any[] = [];
+let rows: any[] = [];
 try {
-  const { data } = await supabase
+  const nr =
+    await supabase
     .from('notifications')
-    .select('*')
-    .eq('user_id', session.userId)
-    .order('created_at', { ascending: false })
-    .limit(50);
-  notifications = data ?? [];
-} catch { /* table may not exist yet */ }
+    .select(
+      'id, kind, title,' +
+      ' body, link, cta,' +
+      ' read, created_at',
+    )
+    .eq(
+      'profile_id',
+      me.id,
+    )
+    .order(
+      'created_at',
+      { ascending: false },
+    )
+    .limit(100);
+  rows = nr.data ?? [];
+} catch {}
 
-const unreadCount = notifications.filter(n => !n.read).length;
+// Today / This week /
+// Earlier, and "when".
+const now = new Date();
+const dayStart = new Date(
+  now.getFullYear(),
+  now.getMonth(),
+  now.getDate(),
+).getTime();
+const weekAgo =
+  dayStart -
+  6 * 86400000;
+const when = (
+  d: Date,
+) => {
+  const ms =
+    now.getTime() -
+    d.getTime();
+  if (
+    d.getTime() >=
+    dayStart
+  ) {
+    const h =
+      Math.floor(
+        ms / 3600000,
+      );
+    if (h < 1) {
+      return 'Just now';
+    }
+    return (
+      h +
+      (h === 1
+        ? ' hour ago'
+        : ' hours ago')
+    );
+  }
+  if (
+    d.getTime() >= weekAgo
+  ) {
+    return d
+      .toLocaleDateString(
+        'en-GB',
+        {
+          weekday: 'long',
+        },
+      );
+  }
+  return d
+    .toLocaleDateString(
+      'en-GB',
+      {
+        day: 'numeric',
+        month: 'long',
+      },
+    );
+};
+const kinds = [
+  'urgent',
+  'message',
+  'sit',
+  'review',
+  'match',
+  'account',
+];
+const items = rows.map(
+  (r) => {
+    const d = new Date(
+      r.created_at,
+    );
+    return {
+      id: r.id,
+      kind: kinds.includes(
+        r.kind,
+      )
+        ? r.kind
+        : 'account',
+      group:
+        d.getTime() >=
+        dayStart
+          ? 'Today'
+          : d.getTime() >=
+              weekAgo
+            ? 'This week'
+            : 'Earlier',
+      title: r.title || '',
+      body: r.body || '',
+      when: when(d),
+      cta:
+        r.cta || 'Open',
+      href:
+        r.link || dashUrl,
+      read: !!r.read,
+    };
+  },
+);
+
+// Next confirmed sit for
+// this sitter, if any.
+let next: any = null;
+if (!isOwner) {
+  try {
+    const sr =
+      await supabase
+      .from('sits')
+      .select(
+        'id, listings!inner(' +
+        'title, date_from,' +
+        ' date_to,' +
+        ' profiles!inner(' +
+        'name, location))',
+      )
+      .eq(
+        'sitter_user_id',
+        session.userId,
+      );
+    const today = now
+      .toISOString()
+      .slice(0, 10);
+    next =
+      (sr.data ?? [])
+      .filter(
+        (s: any) =>
+          s.listings
+            ?.date_from >=
+          today,
+      )
+      .sort(
+        (a: any, b: any) =>
+          a.listings
+            .date_from <
+          b.listings
+            .date_from
+            ? -1
+            : 1,
+      )[0] || null;
+  } catch {}
+}
+
+// Design copy — used if
+// the sit has no title or
+// owner details.
+const sitTitleDef = `
+Cosy cottage with two spaniels
+`.trim();
+const sitLineDef = `
+Thomas James · Woolley, near Bath. 4 – 18 Oct 2026, 20 days away.
+`.trim();
+const fmt = (
+  s: string,
+  year: boolean,
+) => new Date(
+  s + 'T00:00:00',
+).toLocaleDateString(
+  'en-GB',
+  year
+    ? {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      }
+    : {
+        day: 'numeric',
+        month: 'short',
+      },
+);
+let sitTitle =
+  sitTitleDef;
+let sitLine = sitLineDef;
+let sitHref = '/dashboard';
+if (next) {
+  const l = next.listings;
+  const o =
+    l.profiles || {};
+  const days = Math.ceil(
+    (new Date(
+      l.date_from +
+        'T00:00:00',
+    ).getTime() -
+      dayStart) /
+      86400000,
+  );
+  sitTitle =
+    l.title ||
+    sitTitleDef;
+  sitLine =
+    (o.name || 'Owner') +
+    (o.location
+      ? ' · ' + o.location
+      : '') +
+    '. ' +
+    fmt(
+      l.date_from,
+      false,
+    ) +
+    ' – ' +
+    fmt(l.date_to, true) +
+    ', ' +
+    days +
+    (days === 1
+      ? ' day away.'
+      : ' days away.');
+  sitHref =
+    '/sits/' + next.id;
+}
+
+const np =
+  me.notify_prefs_json ||
+  {};
+const prefs = {
+  applications:
+    np.applications !==
+    false,
+  messages:
+    np.messages !== false,
+  sit: np.sit !== false,
+  matches: !!np.matches,
+  product: !!np.product,
+};
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Notifications — MYAH</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-<style>
-  body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; min-height:100vh; }
-  * { box-sizing:border-box; }
-  a { color:#2f5d45; }
-  a:hover { color:#2c1a0e; }
-  @keyframes gs-ring { to { transform:rotate(360deg); } }
-  @keyframes gs-pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
-  @media (max-width:1000px) {
-    [data-topnav] { padding:14px 24px !important; }
-    [data-pad] { padding:34px 20px 80px !important; }
-    [data-two-col] { grid-template-columns:minmax(0,1fr) !important; }
-    [data-aside] { position:static !important; }
-    [data-row] { grid-template-columns:minmax(0,1fr) !important; }
-    [data-row] [data-actions] { padding:0 22px 20px !important; justify-content:flex-start !important; }
-    [data-safety] { grid-template-columns:minmax(0,1fr) !important; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Notifications — MYAH</title>
+  <style is:global>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 1000px) {
+      [data-topnav] { padding: 14px 24px !important; }
+      [data-pad] { padding: 34px 20px 80px !important; }
+      [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+      [data-row] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-row] [data-actions] { padding: 0 22px 20px !important; justify-content: flex-start !important; }
+      [data-safety] { grid-template-columns: minmax(0,1fr) !important; }
+    }
+
+    .nt-back:hover { gap:13px !important; color:#2f5d45 !important; }
+    .nt-msgs:hover { color:#2c1a0e !important; }
+    .nt-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .nt-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px) !important; box-shadow:0 12px 28px rgba(110,84,56,.36) !important; }
+  </style>
 </head>
 <body>
 <div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
@@ -70,18 +336,13 @@ const unreadCount = notifications.filter(n => !n.read).length;
   </div>
 
   <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
-    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
-      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
-        <span style="color:#2f5d45;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
-      </span>
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
     </a>
     <div style="display:flex;align-items:center;gap:22px">
-      <a href={dashUrl} style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s,color .2s"
-        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'" onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
-      <a href="/messages" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
-        onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#2f5d45'">Messages</a>
+      <a href={dashUrl} class="nt-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Dashboard</a>
+      <a href="/messages" class="nt-msgs" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">Messages</a>
     </div>
   </nav>
 
@@ -89,104 +350,55 @@ const unreadCount = notifications.filter(n => !n.read).length;
     <div style="max-width:1180px;margin:0 auto">
 
       <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
-        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px">
-          <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your account
-        </p>
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your account</p>
         <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">What&rsquo;s <em style="color:#2f5d45;">happened</em></h1>
-        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">
-          {unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}.` : 'You\'re all caught up.'}
-        </p>
+        <p data-intro="1" style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0"></p>
       </div>
 
       <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start">
 
         <div>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px">
-            <div style="display:flex;gap:9px;flex-wrap:wrap" id="tabBar">
-              {[
-                { key: 'all', label: 'All', count: notifications.length },
-                { key: 'unread', label: 'Unread', count: unreadCount },
-              ].map(t => (
-                <button type="button" data-tab={t.key} onclick={`setTab('${t.key}')`}
-                  style={`display:inline-flex;align-items:center;gap:9px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease,color .25s ease,border-color .25s ease;${t.key === 'all' ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);'}`}>
-                  {t.label}
-                  <span style={`font-size:.7rem;padding:2px 8px;border-radius:50px;${t.key === 'all' ? 'background:rgba(255,255,255,.25);color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;'}`}>{t.count}</span>
-                </button>
-              ))}
-            </div>
-            <button type="button" onclick="markAllRead()" style="font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:none;border:none;cursor:pointer;padding:4px 0;transition:color .2s"
-              onmouseover="this.style.color='#2c1a0e'" onmouseout="this.style.color='#2f5d45'">Mark all read</button>
+            <div data-tabs="1" style="display:flex;gap:9px;flex-wrap:wrap"></div>
+            <button type="button" data-read-all="1">Mark all read</button>
           </div>
 
-          <div id="notifList" style="display:flex;flex-direction:column;gap:11px">
-            {notifications.length === 0 ? (
-              <div style="background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px">
-                <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">All caught up</p>
-                <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0;max-width:420px">Nothing unread. Anything new lands here and, if you want it to, in your inbox.</p>
-              </div>
-            ) : (
-              notifications.map((n: any) => (
-                <article data-notif={n.id} data-read={n.read ? '1' : '0'}
-                  style={`display:grid;grid-template-columns:minmax(0,1fr) auto;background:#fff;border-radius:18px;overflow:hidden;transition:border-color .3s ease,box-shadow .3s ease;${!n.read ? 'border:1.5px solid rgba(110,84,56,.35);box-shadow:0 2px 8px rgba(44,26,14,.06);' : 'border:1px solid rgba(110,84,56,.18);opacity:.75;'}`}>
-                  <div style="display:flex;gap:16px;align-items:flex-start;padding:20px 22px;min-width:0">
-                    <span style={`width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem;${!n.read ? 'background:#2f5d45;color:#fff;' : 'background:rgba(110,84,56,.12);color:#6b4e35;'}`}>✦</span>
-                    <div style="flex:1;min-width:0">
-                      <p style={`font-size:.95rem;font-weight:700;color:#2c1a0e;margin:0 0 5px;${!n.read ? '' : 'font-weight:600;'}`}>{n.title || n.message}</p>
-                      <p style="font-size:.92rem;color:#6b4e35;line-height:1.7;margin:0 0 4px">{n.body || ''}</p>
-                      <p style="font-size:.79rem;color:#6e5438;margin:0">{new Date(n.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                    </div>
-                  </div>
-                  <div data-actions="1" style="display:flex;align-items:center;gap:10px;padding:20px 22px;justify-content:flex-end;flex-wrap:wrap">
-                    {n.link && (
-                      <a href={n.link} style="font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border-radius:50px;padding:10px 18px;text-decoration:none;white-space:nowrap;transition:background .25s ease"
-                        onmouseover="this.style.background='#3e7a5b'" onmouseout="this.style.background='#2f5d45'">View</a>
-                    )}
-                    {!n.read && (
-                      <button type="button" onclick={`markRead('${n.id}')`} style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6b4e35;background:none;border:1px solid rgba(44,26,14,.15);border-radius:50px;padding:9px 14px;cursor:pointer;white-space:nowrap;transition:border-color .2s"
-                        onmouseover="this.style.borderColor='rgba(110,84,56,.4)'" onmouseout="this.style.borderColor='rgba(44,26,14,.15)'">Mark read</button>
-                    )}
-                  </div>
-                </article>
-              ))
-            )}
+          <div data-groups="1" style="display:flex;flex-direction:column;gap:22px"></div>
+
+          <div data-empty="1" style="display:none">
+            <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">All caught up</p>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0;max-width:420px">Nothing unread. Anything new lands here and, if you want it to, in your inbox.</p>
           </div>
 
-          {notifications.length === 0 && (
-            <div style="display:flex;flex-direction:column;gap:11px;margin-top:22px">
-              <div style="background:#fff;border:1px solid rgba(110,84,56,.18);border-radius:18px;overflow:hidden;opacity:.4">
-                <div style="display:flex;gap:16px;align-items:flex-start;padding:20px 22px">
-                  <span style="width:36px;height:36px;border-radius:50%;background:rgba(110,84,56,.12);display:block;flex-shrink:0"></span>
-                  <div style="flex:1">
-                    <div style="height:14px;width:70%;background:rgba(110,84,56,.12);border-radius:6px;margin-bottom:10px"></div>
-                    <div style="height:11px;width:90%;background:rgba(110,84,56,.08);border-radius:6px;margin-bottom:6px"></div>
-                    <div style="height:11px;width:50%;background:rgba(110,84,56,.06);border-radius:6px"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <section style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;margin-top:28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+          <section data-card="1" class="nt-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;margin-top:28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
             <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 8px">If something goes wrong</h2>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
             <p style="font-size:.93rem;color:#6b4e35;line-height:1.75;margin:0 0 26px;max-width:520px">Sits mostly go fine. When they don&rsquo;t, here is exactly what to do &mdash; no hunting through a help centre at eleven at night.</p>
+
             <div data-safety="1" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-              {[
-                { title: 'Pet is unwell', body: 'Contact the vet whose number is on the sit page. Let the owner know right away.', link: 'Get vet details', href: '#' },
-                { title: 'You need to leave early', body: 'Message the owner first. We can help find emergency cover if needed.', link: 'Message the owner', href: '/messages' },
-                { title: 'Something broken or damaged', body: 'Document it with photos. Tell the owner before they get home.', link: 'Read our policy', href: '#' },
-                { title: 'You feel unsafe', body: 'Leave immediately. Call 999 if needed. Message us after you are safe.', link: 'Contact MYAH', href: '#' },
-              ].map(s => (
-                <a href={s.href} style="background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:20px 22px;text-decoration:none;display:block;transition:border-color .25s ease,background .25s ease"
-                  onmouseover="this.style.borderColor='rgba(110,84,56,.45)';this.style.background='#f0e8dc'" onmouseout="this.style.borderColor='rgba(110,84,56,.2)';this.style.background='#faf6ee'">
-                  <p style="font-family:'Marcellus',serif;font-size:1.02rem;color:#2c1a0e;margin:0 0 6px">{s.title}</p>
-                  <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0 0 12px">{s.body}</p>
-                  <span style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45">{s.link} &rarr;</span>
-                </a>
-              ))}
+              <a href="/messages" style="display:block;text-decoration:none;background:#faf6ee;border-radius:14px;padding:22px 24px;transition:border-color .25s ease, transform .2s ease;border:1px solid rgba(185,28,28,.22);">
+                <p style="font-family:'Marcellus',serif;font-size:1.08rem;color:#2c1a0e;margin:0 0 8px;line-height:1.3">The owner has cancelled on you</p>
+                <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0 0 12px">Tell us and we will surface sits matching your dates straight away, and flag the cancellation on their side.</p>
+                <span style="font-size:.74rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#b91c1c;">Report a cancellation
+                  &rarr;</span>
+              </a>
+              <a href="/messages" style="display:block;text-decoration:none;background:#faf6ee;border-radius:14px;padding:22px 24px;transition:border-color .25s ease, transform .2s ease;border:1px solid rgba(185,28,28,.22);">
+                <p style="font-family:'Marcellus',serif;font-size:1.08rem;color:#2c1a0e;margin:0 0 8px;line-height:1.3">Something happened to a pet</p>
+                <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0 0 12px">Vet first, always. Then log it here so both sides have a written record of what happened and when.</p>
+                <span style="font-size:.74rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#b91c1c;">Log an incident &rarr;</span>
+              </a>
+              <a href="/messages" style="display:block;text-decoration:none;background:#faf6ee;border-radius:14px;padding:22px 24px;transition:border-color .25s ease, transform .2s ease;border:1px solid rgba(110,84,56,.25);">
+                <p style="font-family:'Marcellus',serif;font-size:1.08rem;color:#2c1a0e;margin:0 0 8px;line-height:1.3">Someone made you uncomfortable</p>
+                <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0 0 12px">Block them, and tell us why. We read every report and the person is never told who raised it.</p>
+                <span style="font-size:.74rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#2f5d45;">Report a person &rarr;</span>
+              </a>
+              <a href={sitHref} style="display:block;text-decoration:none;background:#faf6ee;border-radius:14px;padding:22px 24px;transition:border-color .25s ease, transform .2s ease;border:1px solid rgba(110,84,56,.25);">
+                <p style="font-family:'Marcellus',serif;font-size:1.08rem;color:#2c1a0e;margin:0 0 8px;line-height:1.3">Pulling out of a sit</p>
+                <p style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0 0 12px">Life happens. More than two weeks out and it does not touch your record — later than that and the owner is told.</p>
+                <span style="font-size:.74rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#2f5d45;">Read the policy &rarr;</span>
+              </a>
             </div>
+
             <div style="display:flex;align-items:flex-start;gap:14px;background:#fdeeee;border:1px solid #f7cfcf;border-radius:14px;padding:18px 20px;margin-top:20px">
               <span style="width:26px;height:26px;border-radius:50%;background:#b91c1c;color:#fff;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0">!</span>
               <p style="font-size:.92rem;color:#5c3d20;line-height:1.7;margin:0">If an animal is hurt or someone is in danger, call a vet or the emergency services first. Tell us afterwards &mdash; we are not an emergency service and we would rather you got help fast.</p>
@@ -195,35 +407,23 @@ const unreadCount = notifications.filter(n => !n.read).length;
         </div>
 
         <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
-          <div style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease,border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+          <div class="nt-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
             <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 8px">What reaches you</p>
             <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 20px">Everything shows on this page. Choose what also leaves it.</p>
-            <div style="display:flex;flex-direction:column;gap:14px" id="prefList">
-              {[
-                { key: 'applications', label: 'Applications', note: 'When someone applies to your sit' },
-                { key: 'messages', label: 'Messages', note: 'New conversations and replies' },
-                { key: 'sit', label: 'Sit reminders', note: 'Countdowns and checklist nudges' },
-                { key: 'matches', label: 'Sit matches', note: 'New sits matching your saved searches' },
-                { key: 'product', label: 'MYAH news', note: 'New features and tips' },
-              ].map((p, i) => (
-                <div style="display:flex;align-items:center;gap:14px">
-                  <div style="flex:1;min-width:0">
-                    <p style="font-size:.92rem;font-weight:600;color:#2c1a0e;margin:0 0 2px">{p.label}</p>
-                    <p style="font-size:.79rem;color:#6b4e35;margin:0">{p.note}</p>
-                  </div>
-                  <button type="button" data-pref={p.key} onclick={`togglePref('${p.key}', this)`}
-                    style={`position:relative;width:44px;height:26px;border-radius:50px;border:none;cursor:pointer;transition:background .25s ease;padding:0;${i < 3 ? 'background:#2f5d45;' : 'background:rgba(44,26,14,.2);'}`}>
-                    <span style={`position:absolute;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .25s ease;${i < 3 ? 'left:21px;' : 'left:3px;'}`}></span>
-                  </button>
-                </div>
-              ))}
-            </div>
+            <div data-prefs="1" style="display:flex;flex-direction:column;gap:14px"></div>
           </div>
 
+          {next && (
+            <div style="background:#2c1a0e;border-radius:18px;padding:26px">
+              <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">Your sit starts soon</p>
+              <p style="font-family:'Marcellus',serif;font-size:1.35rem;color:#fff;margin:0 0 8px;line-height:1.25">{sitTitle}</p>
+              <p style="font-size:.88rem;color:rgba(255,255,255,.7);line-height:1.65;margin:0 0 20px">{sitLine}</p>
+              <a href={sitHref} class="nt-btn" style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2c1a0e;background:#2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;transition:background .25s ease, transform .15s ease">Open the sit</a>
+            </div>
+          )}
+
           <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
-            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0">Notifications stay on this page for 90 days. Email alerts are sent to the address on your account.</p>
+            <p data-quiet="1" style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0"></p>
           </div>
         </aside>
       </div>
@@ -231,69 +431,167 @@ const unreadCount = notifications.filter(n => !n.read).length;
   </main>
 </div>
 
-<script define:vars={{ notifIds: notifications.map((n: any) => n.id) }}>
-let currentTab = 'all';
+<script is:inline define:vars={{ items, prefs }}>
+(() => {
+  // Ported from the design's script. Read/unread, mark all read and
+  // preferences are saved via /api/notifications.
+  const ITEMS = items;
+  const s = { tab: 'all', read: {}, prefs: Object.assign({}, prefs) };
+  ITEMS.forEach(i => { s.read[i.id] = i.read; });
+  const q = sel => document.querySelector(sel);
+  const esc = v => { const d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; };
+  const post = body => fetch('/api/notifications', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(r => { if (!r.ok) throw new Error(); });
 
-function setTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('[data-tab]').forEach(btn => {
-    const active = btn.dataset.tab === tab;
-    btn.style.background = active ? '#2f5d45' : '#fff';
-    btn.style.color = active ? '#fff' : '#5c3d20';
-    btn.style.borderColor = active ? '#2f5d45' : 'rgba(110,84,56,.32)';
-    const count = btn.querySelector('span');
-    if (count) {
-      count.style.background = active ? 'rgba(255,255,255,.25)' : 'rgba(110,84,56,.14)';
-      count.style.color = active ? '#fff' : '#2f5d45';
-    }
-  });
-  document.querySelectorAll('[data-notif]').forEach(el => {
-    const isUnread = el.dataset.read === '0';
-    if (tab === 'unread') {
-      el.style.display = isUnread ? '' : 'none';
-    } else {
-      el.style.display = '';
-    }
-  });
-}
+  const svg = paths => '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + paths.map(d => '<path d="' + d + '"></path>').join('') + '</svg>';
+  const ICONS = {
+    urgent: svg(['M20 6.5 9.5 17 4 11.5']),
+    message: svg(['M3.5 6h17v12h-17z', 'm4 6.8 8 5.6 8-5.6']),
+    sit: svg(['M4 10.5 12 4l8 6.5V20a.5.5 0 0 1-.5.5h-15A.5.5 0 0 1 4 20z', 'M10 20.5v-6h4v6']),
+    review: svg(['M4 5.5h16v10H9l-5 4z', 'M8.5 10.5h7']),
+    match: svg(['M18 9a6 6 0 1 0-12 0c0 5-2 6.5-2 6.5h16S18 14 18 9z', 'M10.4 19a1.9 1.9 0 0 0 3.2 0']),
+    account: svg(['M12 3.5 5 6v6c0 4.2 3 7.3 7 8.5 4-1.2 7-4.3 7-8.5V6z', 'm9.3 12.2 1.9 1.9 3.5-3.6'])
+  };
+  const tagFor = {
+    urgent: { label: 'Application', bg: '#2f5d45', colour: '#fff' },
+    message: { label: 'Message', bg: 'rgba(110,84,56,.16)', colour: '#2f5d45' },
+    sit: { label: 'Your sit', bg: '#2c1a0e', colour: '#fff' },
+    review: { label: 'Review', bg: 'rgba(110,84,56,.16)', colour: '#2f5d45' },
+    match: { label: 'Alert', bg: 'rgba(44,26,14,.08)', colour: '#6b4e35' },
+    account: { label: 'Account', bg: 'rgba(44,26,14,.08)', colour: '#6b4e35' }
+  };
+  const PREFS = [
+    { key: 'applications', label: 'Sit decisions', note: 'An owner shortlists or confirms you' },
+    { key: 'messages', label: 'Messages', note: 'A reply in a conversation' },
+    { key: 'sit', label: 'Sit reminders', note: 'A week before, then the day before' },
+    { key: 'matches', label: 'Saved search alerts', note: 'New sits matching your searches' },
+    { key: 'product', label: 'News from us', note: 'Occasional, never more than monthly' }
+  ];
 
-function markRead(id) {
-  const el = document.querySelector(`[data-notif="${id}"]`);
-  if (!el) return;
-  el.dataset.read = '1';
-  el.style.border = '1px solid rgba(110,84,56,.18)';
-  el.style.boxShadow = 'none';
-  el.style.opacity = '.75';
-  const btn = el.querySelector('button');
-  if (btn) btn.remove();
-  fetch('/api/notifications/read', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }).catch(() => {});
-}
+  const render = () => {
+    const unread = ITEMS.filter(i => !s.read[i.id]);
+    const tabDefs = [
+      { key: 'all', label: 'Everything', count: ITEMS.length },
+      { key: 'unread', label: 'Unread', count: unread.length },
+      { key: 'sits', label: 'My sits', count: ITEMS.filter(i => i.kind === 'sit' || i.kind === 'urgent').length },
+      { key: 'messages', label: 'Messages', count: ITEMS.filter(i => i.kind === 'message').length }
+    ];
+    let list = ITEMS;
+    if (s.tab === 'unread') list = ITEMS.filter(i => !s.read[i.id]);
+    if (s.tab === 'sits') list = ITEMS.filter(i => i.kind === 'sit' || i.kind === 'urgent');
+    if (s.tab === 'messages') list = ITEMS.filter(i => i.kind === 'message');
 
-function markAllRead() {
-  document.querySelectorAll('[data-notif]').forEach(el => {
-    markRead(el.dataset.notif);
-  });
-}
+    q('[data-intro]').textContent = unread.length
+      ? unread.length + (unread.length === 1 ? ' thing needs' : ' things need') + ' your attention. The rest is here for the record.'
+      : 'Nothing unread. Everything that has happened on your account is kept here.';
 
-function togglePref(key, btn) {
-  const isOn = btn.style.background === 'rgb(47, 93, 69)' || btn.style.background === '#2f5d45';
-  btn.style.background = isOn ? 'rgba(44,26,14,.2)' : '#2f5d45';
-  const knob = btn.querySelector('span');
-  if (knob) knob.style.left = isOn ? '3px' : '21px';
-}
+    q('[data-tabs]').innerHTML = tabDefs.map(t => {
+      const style = 'display:inline-flex;align-items:center;gap:9px;font-family:\'Montserrat\',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;' +
+        (s.tab === t.key ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);');
+      const countStyle = 'font-size:.7rem;padding:2px 8px;border-radius:50px;' + (s.tab === t.key ? 'background:rgba(255,255,255,.25);color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;');
+      return '<button type="button" data-tab="' + t.key + '" style="' + style + '">' + t.label + ' <span style="' + countStyle + '">' + t.count + '</span></button>';
+    }).join('');
 
-document.querySelectorAll('a[href]').forEach(a => {
-  const href = a.getAttribute('href') || '';
-  if (href.startsWith('#') || href.startsWith('http')) return;
-  const loader = document.querySelector('[data-loader]');
-  if (!loader) return;
-  a.addEventListener('click', e => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    q('[data-read-all]').style.cssText = 'font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:10px 22px;cursor:pointer;transition:background .2s ease, border-color .2s ease, color .2s ease;' +
+      (unread.length ? 'background:#fff;color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);' : 'background:none;color:#8a6a4f;border:1.5px solid rgba(44,26,14,.12);');
+
+    const groups = ['Today', 'This week', 'Earlier'].map(label => ({
+      label, items: list.filter(i => i.group === label)
+    })).filter(g => g.items.length);
+
+    q('[data-groups]').innerHTML = groups.map(g =>
+      '<div><p style="font-size:.7rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#8a6a4f;margin:0 0 12px">' + g.label + '</p>' +
+      '<div style="display:flex;flex-direction:column;gap:11px">' + g.items.map(i => {
+        const isRead = s.read[i.id];
+        const tag = tagFor[i.kind];
+        const iconStyle = 'width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;transition:background .25s ease, color .25s ease;' +
+          (isRead ? 'background:#faf6ee;color:#8a6a4f;border:1px solid rgba(44,26,14,.08);' : 'background:#2f5d45;color:#fff;');
+        const titleStyle = 'font-size:1rem;margin:0;line-height:1.4;font-weight:' + (isRead ? '400' : '700') + ';color:' + (isRead ? '#6b4e35' : '#2c1a0e') + ';';
+        const tagStyle = 'font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:50px;background:' + tag.bg + ';color:' + tag.colour + ';';
+        const ctaStyle = 'font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border-radius:50px;padding:11px 22px;white-space:nowrap;transition:background .25s ease, border-color .25s ease, color .25s ease, transform .15s ease;' +
+          (isRead ? 'color:#6b4e35;border:1.5px solid rgba(44,26,14,.15);' : 'color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;box-shadow:0 6px 18px rgba(110,84,56,.24);');
+        const readStyle = 'font-family:\'Montserrat\',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a6a4f;background:none;border:none;cursor:pointer;padding:6px 4px;transition:color .2s';
+        const wrapStyle = 'display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0;border-radius:18px;transition:border-color .25s ease, background .25s ease;' +
+          (isRead ? 'background:#faf6ee;border:1px solid rgba(44,26,14,.08);' : 'background:#fff;border:1px solid rgba(110,84,56,.3);box-shadow:0 1px 2px rgba(44,26,14,.04);');
+        return '<article data-row="1" style="' + wrapStyle + '">' +
+          '<div style="display:flex;gap:16px;align-items:flex-start;padding:20px 22px;min-width:0">' +
+            '<span style="' + iconStyle + '">' + ICONS[i.kind] + '</span>' +
+            '<div style="flex:1;min-width:0">' +
+              '<div style="display:flex;align-items:baseline;gap:11px;flex-wrap:wrap;margin-bottom:5px">' +
+                '<p style="' + titleStyle + '">' + esc(i.title) + '</p>' +
+                '<span style="' + tagStyle + '">' + tag.label + '</span>' +
+              '</div>' +
+              (i.body ? '<p style="font-size:.92rem;color:#6b4e35;line-height:1.7;margin:0 0 4px">' + esc(i.body) + '</p>' : '') +
+              '<p style="font-size:.79rem;color:#8a6a4f;margin:0">' + esc(i.when) + '</p>' +
+            '</div>' +
+          '</div>' +
+          '<div data-actions="1" style="display:flex;align-items:center;gap:10px;padding:20px 22px;justify-content:flex-end;flex-wrap:wrap">' +
+            '<a href="' + esc(i.href) + '" data-open="' + esc(i.id) + '" style="' + ctaStyle + '">' + esc(i.cta) + '</a>' +
+            '<button type="button" data-read="' + esc(i.id) + '" style="' + readStyle + '">' + (isRead ? 'Unread' : 'Read') + '</button>' +
+          '</div>' +
+        '</article>';
+      }).join('') + '</div></div>'
+    ).join('');
+
+    q('[data-empty]').style.cssText = 'flex-direction:column;align-items:flex-start;background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px;' + (groups.length ? 'display:none;' : 'display:flex;');
+
+    q('[data-prefs]').innerHTML = PREFS.map(p => {
+      const on = s.prefs[p.key];
+      const switchStyle = 'position:relative;width:44px;height:25px;border-radius:50px;border:none;cursor:pointer;flex-shrink:0;padding:0;transition:background .25s ease;background:' + (on ? '#2f5d45' : 'rgba(44,26,14,.16)') + ';';
+      const knobStyle = 'position:absolute;top:3px;left:' + (on ? '22px' : '3px') + ';width:19px;height:19px;border-radius:50%;background:#fff;display:block;transition:left .22s ease;box-shadow:0 1px 3px rgba(44,26,14,.25)';
+      return '<div style="display:flex;align-items:center;gap:14px">' +
+        '<div style="flex:1;min-width:0"><p style="font-size:.92rem;font-weight:600;color:#2c1a0e;margin:0 0 2px">' + p.label + '</p><p style="font-size:.79rem;color:#6b4e35;margin:0">' + p.note + '</p></div>' +
+        '<button type="button" data-pref="' + p.key + '" style="' + switchStyle + '"><span style="' + knobStyle + '"></span></button></div>';
+    }).join('');
+
+    q('[data-quiet]').textContent = Object.values(s.prefs).filter(Boolean).length <= 2
+      ? 'Quiet setup. Worth keeping sit decisions on at least — owners move quickly once they choose.'
+      : 'We never email during a sit unless it is about that sit.';
+  };
+
+  const loader = q('[data-loader]');
+  let hideT;
+  const show = () => {
+    if (!loader) return;
     loader.style.opacity = '1';
     loader.style.pointerEvents = 'all';
-    setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    clearTimeout(hideT);
+    hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  };
+
+  document.addEventListener('click', e => {
+    const el = e.target.closest && e.target.closest('[data-tab],[data-read],[data-read-all],[data-pref],a[href]');
+    if (!el) return;
+    if (el.hasAttribute('data-tab')) { s.tab = el.getAttribute('data-tab'); render(); return; }
+    if (el.hasAttribute('data-read')) {
+      const id = el.getAttribute('data-read');
+      const prev = s.read[id];
+      s.read[id] = !prev; render();
+      post({ action: 'read', id, read: !prev }).catch(() => { s.read[id] = prev; render(); });
+      return;
+    }
+    if (el.hasAttribute('data-read-all')) {
+      const before = Object.assign({}, s.read);
+      ITEMS.forEach(i => { s.read[i.id] = true; }); render();
+      post({ action: 'read-all' }).catch(() => { s.read = before; render(); });
+      return;
+    }
+    if (el.hasAttribute('data-pref')) {
+      const key = el.getAttribute('data-pref');
+      s.prefs[key] = !s.prefs[key]; render();
+      post({ action: 'prefs', prefs: s.prefs }).catch(() => { s.prefs[key] = !s.prefs[key]; render(); });
+      return;
+    }
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    // Opening an item marks it read.
+    const openId = el.getAttribute('data-open');
+    if (openId && !s.read[openId]) post({ action: 'read', id: openId, read: true }).catch(() => {});
+    const href = el.getAttribute('href') || '';
+    if (!href.startsWith('#') && !href.startsWith('http')) show();
   });
-});
+
+  render();
+})();
 </script>
 </body>
 </html>

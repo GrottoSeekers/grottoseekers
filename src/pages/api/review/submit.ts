@@ -2,6 +2,7 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 import { supabase } from '../../../lib/supabase';
+import { notify } from '../../../lib/notify';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -16,7 +17,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, reviews_json, review_requests_json')
+      .select('id, slug, reviews_json, review_requests_json')
       .not('review_requests_json', 'is', null);
 
     if (!profiles) {
@@ -60,6 +61,14 @@ export const POST: APIRoute = async ({ request }) => {
     if (error) {
       return new Response(null, { status: 302, headers: { Location: `/review/${token}?error=server` } });
     }
+
+    await notify(matchedProfile.id, {
+      kind: 'review',
+      title: name + ' left you a review',
+      body: '“' + (text.length > 140 ? text.slice(0, 140) + '…' : text) + '”',
+      link: '/' + (matchedProfile.slug || ''),
+      cta: 'See it on your page',
+    });
 
     return new Response(null, { status: 302, headers: { Location: `/review/${token}?success=true` } });
   } catch {

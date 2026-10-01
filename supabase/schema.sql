@@ -141,3 +141,25 @@ CREATE INDEX IF NOT EXISTS saved_sits_profile_id_idx ON saved_sits (profile_id);
 --   alert_prefs_json:    {email, push, weekly}
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS saved_searches_json JSONB NOT NULL DEFAULT '[]';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS alert_prefs_json    JSONB NOT NULL DEFAULT '{"email": true, "push": true, "weekly": false}';
+
+
+-- ── NOTIFICATIONS ────────────────────────────────────────────────────────────
+-- Everything that happens on an account. Shown on /notifications; written by
+-- src/lib/notify.ts (new message, shortlisted by an owner, new review).
+CREATE TABLE IF NOT EXISTS notifications (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id  UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  kind        TEXT        NOT NULL DEFAULT 'account'
+                          CHECK (kind IN ('urgent', 'message', 'sit', 'review', 'match', 'account')),
+  title       TEXT        NOT NULL,
+  body        TEXT,
+  link        TEXT,                                -- where the button goes
+  cta         TEXT,                                -- button label
+  read        BOOLEAN     NOT NULL DEFAULT false,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS notifications_profile_id_idx ON notifications (profile_id, created_at DESC);
+
+-- What also leaves the page (email/push): {applications, messages, sit, matches, product}
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS notify_prefs_json JSONB NOT NULL DEFAULT '{"applications": true, "messages": true, "sit": true, "matches": false, "product": false}';

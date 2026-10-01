@@ -39,7 +39,7 @@ const PAGES = {
   'Applications':          ['src/pages/applications.astro'],
   'Availability':          ['src/pages'],
   'Confirmed sit':         ['src/pages'],
-  'Notifications':         ['src/pages'],
+  'Notifications':         ['src/pages/notifications.astro'],
   'Saved sits':            ['src/pages/saved.astro'],
   'Verification':          ['src/pages'],
   'Find a sitter':         ['src/pages'],
