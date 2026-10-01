@@ -123,7 +123,10 @@ const cardBits: string[] =
   [];
 if (sitCount) {
   cardBits.push(
-    sitCount + ' sits',
+    sitCount +
+      (sitCount === 1
+        ? ' sit'
+        : ' sits'),
   );
 }
 if (me.location) {

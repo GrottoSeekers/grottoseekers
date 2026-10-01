@@ -37,3 +37,22 @@ export function strength(items: { label: string; done: boolean }[]) {
     label: done + ' of ' + items.length + ' complete',
   };
 }
+
+// Free date ranges from profiles.availability_json, which the Availability page
+// stores as a day map { "YYYY-MM-DD": "free" | "maybe" }. An older [{from, to}]
+// list is passed through. Consecutive "free" days become one range.
+export function freeRanges(v: unknown): { from: string; to: string }[] {
+  if (Array.isArray(v)) return v.filter((r) => r && r.from && r.to);
+  if (!v || typeof v !== 'object') return [];
+  const keys = Object.keys(v as Record<string, string>)
+    .filter((k) => (v as Record<string, string>)[k] === 'free')
+    .sort();
+  const dayNum = (k: string) => Math.round(new Date(k + 'T00:00:00Z').getTime() / 86400000);
+  const out: { from: string; to: string }[] = [];
+  keys.forEach((k) => {
+    const last = out[out.length - 1];
+    if (last && dayNum(k) - dayNum(last.to) === 1) last.to = k;
+    else out.push({ from: k, to: k });
+  });
+  return out;
+}

@@ -14,6 +14,9 @@ import {
 import {
   supabase,
 } from '../lib/supabase';
+import {
+  freeRanges,
+} from '../lib/dashboard';
 
 const session =
   await getSession(
@@ -101,9 +104,9 @@ const arr = (
   Array.isArray(v)
     ? v : []
 );
-// [{from, to}] — set on
-// the Availability page.
-const free = arr(
+// Free ranges from the
+// Availability page.
+const free = freeRanges(
   me.availability_json,
 );
 const hasFree =

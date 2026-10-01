@@ -37,7 +37,7 @@ const PAGES = {
   'Messages':              ['src/pages/messages/index.astro', 'src/pages/messages/[id].astro'],
   'Leave a review':        ['src/pages/review/[token].astro'],
   'Applications':          ['src/pages/applications.astro'],
-  'Availability':          ['src/pages'],
+  'Availability':          ['src/pages/availability.astro'],
   'Confirmed sit':         ['src/pages'],
   'Notifications':         ['src/pages/notifications.astro'],
   'Saved sits':            ['src/pages/saved.astro'],

@@ -173,3 +173,11 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_check_status TEXT    NOT NULL D
   CHECK (id_check_status IN ('none', 'pending', 'verified'));
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_submitted_at TIMESTAMPTZ;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_verified_at  TIMESTAMPTZ;
+
+
+-- ── AVAILABILITY ─────────────────────────────────────────────────────────────
+-- /availability. Day map of when the sitter is free, and the sits they'll take.
+--   availability_json:       { "YYYY-MM-DD": "free" | "maybe" }
+--   availability_prefs_json: { lengths: [...], pets: [...], notice }
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS availability_json       JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS availability_prefs_json JSONB NOT NULL DEFAULT '{"lengths": [], "pets": [], "notice": "Any time"}';

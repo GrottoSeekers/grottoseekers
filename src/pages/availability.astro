@@ -1,0 +1,597 @@
+---
+// Data: the profile's
+// availability_json
+// (day map, "free" or
+// "maybe"), its
+// availability_prefs_json,
+// booked days from
+// confirmed `sits`, and
+// open `listings` dates.
+// Saves via the
+// profile API.
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../lib/auth';
+import {
+  supabase,
+} from '../lib/supabase';
+
+const session =
+  await getSession(
+    Astro.request,
+  );
+if (!session) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+
+const pr =
+  await supabase
+  .from('profiles')
+  .select('*')
+  .eq(
+    'user_id',
+    session.userId,
+  )
+  .single();
+const me: any = pr.data;
+if (!me) {
+  return Astro.redirect(
+    '/profile/create',
+  );
+}
+const isOwner =
+  me.profile_type ===
+  'owner';
+const dashUrl = isOwner
+  ? '/owner/dashboard'
+  : '/dashboard';
+const pageUrl = me.slug
+  ? '/' + me.slug
+  : dashUrl;
+
+// Saved day map.
+const days: Record<
+  string,
+  string
+> = {};
+const rawDays =
+  me.availability_json;
+if (
+  rawDays &&
+  typeof rawDays ===
+    'object' &&
+  !Array.isArray(rawDays)
+) {
+  for (const k of
+    Object.keys(rawDays)) {
+    const v = rawDays[k];
+    if (
+      v === 'free' ||
+      v === 'maybe'
+    ) {
+      days[k] = v;
+    }
+  }
+}
+
+// Saved preferences.
+const rp: any =
+  me.availability_prefs_json
+  || {};
+const prefs = {
+  lengths:
+    Array.isArray(
+      rp.lengths,
+    )
+      ? rp.lengths
+      : [],
+  pets:
+    Array.isArray(rp.pets)
+      ? rp.pets
+      : [],
+  notice:
+    typeof rp.notice ===
+      'string'
+      ? rp.notice
+      : 'Any time',
+};
+
+// Booked days from
+// confirmed sits.
+const booked: Record<
+  string,
+  number
+> = {};
+let sitCount = 0;
+const dayKey = (
+  d: Date,
+) =>
+  d.toISOString()
+  .slice(0, 10);
+try {
+  const sr =
+    await supabase
+    .from('sits')
+    .select(
+      'id, listings!inner(' +
+      'date_from,' +
+      ' date_to)',
+    )
+    .eq(
+      'sitter_user_id',
+      session.userId,
+    );
+  const rows =
+    sr.data ?? [];
+  sitCount = rows.length;
+  for (const s of
+    rows as any[]) {
+    const l = s.listings;
+    if (
+      !l?.date_from ||
+      !l?.date_to
+    ) {
+      continue;
+    }
+    const d = new Date(
+      l.date_from +
+        'T00:00:00Z',
+    );
+    const end = new Date(
+      l.date_to +
+        'T00:00:00Z',
+    );
+    let guard = 0;
+    while (
+      d <= end &&
+      guard++ < 400
+    ) {
+      booked[dayKey(d)] =
+        1;
+      d.setUTCDate(
+        d.getUTCDate() + 1,
+      );
+    }
+  }
+} catch {}
+
+// Open sits, for the
+// "fit your dates" link.
+let openSits: {
+  from: string;
+  to: string;
+}[] = [];
+try {
+  const lr =
+    await supabase
+    .from('listings')
+    .select(
+      'date_from, date_to',
+    )
+    .eq(
+      'status',
+      'active',
+    )
+    .limit(500);
+  openSits = (
+    lr.data ?? []
+  )
+    .filter(
+      (l: any) =>
+        l.date_from &&
+        l.date_to,
+    )
+    .map((l: any) => ({
+      from: l.date_from,
+      to: l.date_to,
+    }));
+} catch {}
+
+// "What owners see".
+const cardPic =
+  me.profile_pic ||
+  '/images/couple-bw-1.jpg';
+const cardName =
+  me.name || '';
+const cardBits: string[] =
+  [];
+if (sitCount) {
+  cardBits.push(
+    sitCount +
+      (sitCount === 1
+        ? ' sit'
+        : ' sits'),
+  );
+}
+if (me.location) {
+  cardBits.push(
+    me.location,
+  );
+}
+const cardLine =
+  cardBits.join(' · ');
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Availability — MYAH</title>
+  <style is:global>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 1000px) {
+      [data-topnav] { padding: 14px 24px !important; }
+      [data-pad] { padding: 34px 20px 130px !important; }
+      [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+      [data-card] { padding: 26px 22px !important; }
+      [data-months] { grid-template-columns: minmax(0,1fr) !important; }
+    }
+
+    .av-back:hover { gap:13px !important; color:#2f5d45 !important; }
+    .av-page:hover { color:#2c1a0e !important; }
+    .av-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .av-match:hover { gap:12px !important; color:#2c1a0e !important; }
+    [data-months] button { user-select:none; -webkit-user-select:none; }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href={dashUrl} class="av-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Dashboard</a>
+      <a href={pageUrl} class="av-page" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">View my page</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Availability" style="flex:1;padding:52px 48px 130px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH sitter</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">When you&rsquo;re <em style="color:#2f5d45;">free</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">This is your availability, and owners can see it. Mark the days you could sit and your profile shows them at a glance &mdash; you&rsquo;ll turn up in their date searches, and they won&rsquo;t need to ask.</p>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <div data-card="1" class="av-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:24px">
+              <div data-brushes style="display:flex;gap:9px;flex-wrap:wrap"></div>
+              <div style="display:flex;gap:9px;align-items:center">
+                <button type="button" data-prev aria-label="Previous months">&larr;</button>
+                <span data-range style="font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;min-width:120px;text-align:center"></span>
+                <button type="button" data-next aria-label="Next months">&rarr;</button>
+              </div>
+            </div>
+
+            <div data-months="1" style="display:grid;grid-template-columns:1fr 1fr;gap:30px"></div>
+
+            <div data-legend style="display:flex;gap:20px;flex-wrap:wrap;margin-top:26px;padding-top:22px;border-top:1px solid rgba(44,26,14,.08)"></div>
+          </div>
+
+          <div data-card="1" class="av-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.25rem;color:#2c1a0e;margin:0 0 8px">The sits you&rsquo;ll take</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 24px;max-width:480px">These narrow what owners can ask you for, and what we put in your alerts.</p>
+
+            <div style="margin-bottom:26px">
+              <span style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Length of sit</span>
+              <div data-lengths style="display:flex;gap:10px;flex-wrap:wrap"></div>
+            </div>
+
+            <div style="margin-bottom:26px">
+              <span style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Pets you&rsquo;re happy with</span>
+              <div data-pets style="display:flex;gap:10px;flex-wrap:wrap"></div>
+            </div>
+
+            <div>
+              <label for="notice" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:12px">Notice you need</label>
+              <div data-notices id="notice" style="display:flex;gap:10px;flex-wrap:wrap"></div>
+            </div>
+          </div>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+          <div class="av-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px 26px 28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 18px">Your next free stretches</p>
+            <div data-stretches style="display:flex;flex-direction:column;gap:12px"></div>
+            <p data-stretch-empty style="font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0;">Nothing marked yet &mdash; drag across the calendar to block out when you&rsquo;re free.</p>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">What owners see</p>
+            <div style="background:#fff;border:1px solid rgba(110,84,56,.25);border-radius:14px;padding:18px 20px">
+              <div style="display:flex;gap:13px;align-items:center;margin-bottom:14px">
+                <img src={cardPic} alt="" style="width:46px;height:46px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35);flex-shrink:0" />
+                <div style="min-width:0">
+                  <p style="font-family:'Marcellus',serif;font-size:1.02rem;color:#2c1a0e;margin:0 0 2px">{cardName}</p>
+                  <p style="font-size:.78rem;color:#6b4e35;margin:0">{cardLine}</p>
+                </div>
+              </div>
+              <span data-card-pill></span>
+            </div>
+            <p data-match-line style="font-size:.84rem;color:#6b4e35;line-height:1.65;margin:14px 0 0"></p>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(44,26,14,.1);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 12px">Sits matching these dates</p>
+            <a href="/listings" class="av-match" style="display:inline-flex;align-items:center;gap:8px;font-size:.76rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.4);padding-bottom:2px;transition:gap .2s, color .2s"><span data-match-count></span> &rarr;</a>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <div data-save-bar>
+    <div style="max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <p data-save-text style="font-size:.88rem;color:#6b4e35;margin:0;line-height:1.5"></p>
+      <button type="button" data-save></button>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ days, prefs, booked, openSits }}>
+(() => {
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const WEEKDAYS = ['M','T','W','T','F','S','S'];
+  const BOOKED = booked;
+
+  const key = (y, m, d) => y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+  const fmt = k => {
+    const [y, m, d] = k.split('-').map(Number);
+    return d + ' ' + MONTH_NAMES[m - 1].slice(0, 3);
+  };
+  const esc = v => { const d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; };
+  const q = sel => document.querySelector(sel);
+
+  const now = new Date();
+  const state = {
+    offset: 0,
+    brush: 'free',
+    days: Object.assign({}, days),
+    saved: true,
+    saving: false
+  };
+  const P = { lengths: prefs.lengths.slice(), pets: prefs.pets.slice(), notice: prefs.notice };
+
+  const paint = k => {
+    if (BOOKED[k]) return;
+    const prev = state.days[k];
+    if (state.brush === 'clear') delete state.days[k]; else state.days[k] = state.brush;
+    if (prev !== state.days[k]) { state.saved = false; render(); }
+  };
+
+  const buildMonth = (year, monthIdx) => {
+    const first = new Date(year, monthIdx, 1);
+    const startDow = (first.getDay() + 6) % 7;
+    const total = new Date(year, monthIdx + 1, 0).getDate();
+    const cells = [];
+    for (let i = 0; i < startDow; i++) cells.push({ blank: true });
+    for (let d = 1; d <= total; d++) cells.push({ day: d, k: key(year, monthIdx, d) });
+    return { label: MONTH_NAMES[monthIdx] + ' ' + year, cells };
+  };
+
+  const stretches = () => {
+    const keys = Object.keys(state.days).filter(k => state.days[k] === 'free').sort();
+    const out = [];
+    let run = [];
+    const dayNum = k => Math.round(new Date(k + 'T00:00:00').getTime() / 86400000);
+    keys.forEach(k => {
+      if (run.length && dayNum(k) - dayNum(run[run.length - 1]) !== 1) { out.push(run); run = []; }
+      run.push(k);
+    });
+    if (run.length) out.push(run);
+    return out.sort((a, b) => b.length - a.length);
+  };
+
+  // Open sits that sit wholly inside a free stretch.
+  const fitCount = () => {
+    const runs = stretches().map(r => ({ from: r[0], to: r[r.length - 1] }));
+    return openSits.filter(l => runs.some(r => l.from >= r.from && l.to <= r.to)).length;
+  };
+
+  const chip = on => 'font-family:\'Montserrat\',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.04em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;' +
+    (on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#faf6ee;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);');
+
+  const brushDefs = [
+    { key: 'free', label: 'Free', colour: '#2f5d45' },
+    { key: 'maybe', label: 'Maybe', colour: 'rgba(110,84,56,.3)' },
+    { key: 'clear', label: 'Clear', colour: '#faf6ee' }
+  ];
+  const navBtnStyle = 'width:36px;height:36px;border-radius:50%;background:#fff;border:1.5px solid rgba(110,84,56,.35);color:#2f5d45;font-size:.9rem;cursor:pointer;transition:background .2s ease, border-color .2s ease';
+  q('[data-prev]').setAttribute('style', navBtnStyle);
+  q('[data-next]').setAttribute('style', navBtnStyle);
+
+  const legend = [
+    { label: 'Free', colour: '#2f5d45' },
+    { label: 'Maybe', colour: 'rgba(110,84,56,.22)' },
+    { label: 'Not available', colour: '#faf6ee' },
+    { label: 'Booked sit', colour: '#2c1a0e' }
+  ];
+  q('[data-legend]').innerHTML = legend.map(l =>
+    '<span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:#6b4e35">' +
+      '<span style="width:14px;height:14px;border-radius:5px;display:block;flex-shrink:0;background:' + l.colour + ';border:1px solid rgba(44,26,14,.12);"></span>' + esc(l.label) +
+    '</span>').join('');
+
+  const render = () => {
+    const s = state;
+
+    q('[data-brushes]').innerHTML = brushDefs.map(b =>
+      '<button type="button" data-brush="' + b.key + '" style="' + 'display:inline-flex;align-items:center;gap:9px;font-family:\'Montserrat\',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.06em;padding:10px 18px;border-radius:50px;cursor:pointer;transition:background .2s ease, border-color .2s ease, color .2s ease;' +
+        (s.brush === b.key ? 'background:rgba(110,84,56,.14);color:#2f5d45;border:1.5px solid rgba(110,84,56,.5);' : 'background:#fff;color:#6b4e35;border:1.5px solid rgba(44,26,14,.1);') + '">' +
+        '<span style="width:12px;height:12px;border-radius:4px;display:block;flex-shrink:0;background:' + b.colour + ';border:1px solid rgba(44,26,14,.15);"></span>' + esc(b.label) +
+      '</button>').join('');
+
+    const base = new Date(now.getFullYear(), now.getMonth() + s.offset, 1);
+    const m1 = buildMonth(base.getFullYear(), base.getMonth());
+    const second = new Date(base.getFullYear(), base.getMonth() + 1, 1);
+    const m2 = buildMonth(second.getFullYear(), second.getMonth());
+    q('[data-range]').textContent = m1.label.split(' ')[0].slice(0, 3) + ' — ' + m2.label.split(' ')[0].slice(0, 3) + ' ' + m2.label.split(' ')[1];
+
+    const cellFor = c => {
+      if (c.blank) return '<button type="button" tabindex="-1" aria-hidden="true" style="visibility:hidden;height:34px"></button>';
+      const isBooked = BOOKED[c.k];
+      const v = isBooked ? 'booked' : s.days[c.k];
+      const style = 'height:34px;border-radius:8px;font-family:\'Montserrat\',sans-serif;font-size:.8rem;font-weight:600;cursor:' + (isBooked ? 'not-allowed' : 'pointer') + ';transition:background .15s ease, color .15s ease, border-color .15s ease;' +
+        (isBooked
+          ? 'background:#2c1a0e;color:#fff;border:1.5px solid #2c1a0e;'
+          : v === 'free'
+            ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;'
+            : v === 'maybe'
+              ? 'background:rgba(110,84,56,.22);color:#5c3d20;border:1.5px solid rgba(110,84,56,.4);'
+              : 'background:#faf6ee;color:#6b4e35;border:1.5px solid rgba(44,26,14,.08);');
+      return '<button type="button" data-day="' + c.k + '" style="' + style + '">' + c.day + '</button>';
+    };
+    q('[data-months]').innerHTML = [m1, m2].map(m =>
+      '<div>' +
+        '<p style="font-family:\'Marcellus\',serif;font-size:1.12rem;color:#2c1a0e;margin:0 0 14px">' + esc(m.label) + '</p>' +
+        '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px">' +
+          WEEKDAYS.map(w => '<span style="text-align:center;font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a6a4f">' + w + '</span>').join('') +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px">' + m.cells.map(cellFor).join('') + '</div>' +
+      '</div>').join('');
+
+    const chips = (list, field, multi) => list.map(v =>
+      '<button type="button" data-pref="' + field + '" data-value="' + esc(v) + '" data-multi="' + (multi ? 1 : 0) + '" style="' + chip(multi ? P[field].includes(v) : P[field] === v) + '">' + esc(v) + '</button>').join('');
+    q('[data-lengths]').innerHTML = chips(['A few days', '1–2 weeks', '2–4 weeks', 'A month or more'], 'lengths', true);
+    q('[data-pets]').innerHTML = chips(['Dogs', 'Cats', 'Birds', 'Rabbits', 'Horses', 'Livestock'], 'pets', true);
+    q('[data-notices]').innerHTML = chips(['Any time', '1 week', '2 weeks', 'A month'], 'notice', false);
+
+    const stretchList = stretches().slice(0, 3);
+    const longest = stretchList[0] ? stretchList[0].length : 0;
+    const freeCount = Object.values(s.days).filter(v => v === 'free').length;
+
+    q('[data-stretches]').innerHTML = stretchList.map(run => {
+      const pillStyle = 'font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:50px;white-space:nowrap;flex-shrink:0;' +
+        (run.length >= 14 ? 'background:#2f5d45;color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;');
+      return '<div style="display:flex;align-items:center;justify-content:space-between;gap:14px;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:12px;padding:14px 16px">' +
+        '<div style="min-width:0">' +
+          '<p style="font-size:.92rem;font-weight:600;color:#2c1a0e;margin:0 0 3px">' + fmt(run[0]) + ' — ' + fmt(run[run.length - 1]) + '</p>' +
+          '<p style="font-size:.8rem;color:#6b4e35;margin:0">' + run.length + (run.length === 1 ? ' day' : ' days') + '</p>' +
+        '</div>' +
+        '<span style="' + pillStyle + '">' + (run.length >= 14 ? 'Long sit' : run.length >= 7 ? 'A week+' : 'Short') + '</span>' +
+      '</div>';
+    }).join('');
+    q('[data-stretch-empty]').setAttribute('style', 'font-size:.88rem;color:#6b4e35;line-height:1.65;margin:0;' + (stretchList.length ? 'display:none;' : ''));
+
+    const pill = q('[data-card-pill]');
+    pill.textContent = freeCount ? 'Available ' + (longest >= 14 ? 'for long sits' : 'for short sits') + ' · ' + freeCount + ' days marked' : 'No dates set';
+    pill.setAttribute('style', 'display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.05em;padding:6px 14px;border-radius:50px;' +
+      (freeCount ? 'background:rgba(110,84,56,.14);color:#2f5d45;' : 'background:rgba(44,26,14,.07);color:#6b4e35;'));
+    q('[data-match-line]').textContent = freeCount
+      ? 'Owners searching those dates see this badge on your card, and you appear in their filtered results.'
+      : 'Without dates your card shows nothing here, and date filters skip you entirely.';
+    const fits = fitCount();
+    q('[data-match-count]').textContent = freeCount ? fits + ' open sit' + (fits === 1 ? '' : 's') + ' fit your dates' : 'Browse all open sits';
+
+    q('[data-save-bar]').setAttribute('style', 'position:fixed;left:0;right:0;bottom:0;z-index:40;padding:16px 48px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid rgba(110,84,56,.28);box-shadow:0 -6px 24px rgba(44,26,14,.06);transition:transform .3s ease, opacity .3s ease;' +
+      (s.saved ? 'transform:translateY(100%);opacity:0;pointer-events:none;' : 'transform:translateY(0);opacity:1;'));
+    q('[data-save-text]').textContent = freeCount + ' days marked free — not saved yet.';
+    const saveBtn = q('[data-save]');
+    saveBtn.textContent = s.saving ? 'Saving…' : s.saved ? 'Saved' : 'Save availability';
+    saveBtn.disabled = s.saving;
+    saveBtn.setAttribute('style', 'font-family:\'Montserrat\',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease');
+  };
+
+  // Paint by clicking or dragging across days.
+  const months = q('[data-months]');
+  months.addEventListener('mousedown', e => {
+    const b = e.target.closest('[data-day]');
+    if (!b || e.button !== 0) return;
+    e.preventDefault();
+    paint(b.getAttribute('data-day'));
+  });
+  months.addEventListener('mouseover', e => {
+    const b = e.target.closest('[data-day]');
+    if (b && e.buttons === 1) paint(b.getAttribute('data-day'));
+  });
+  months.addEventListener('click', e => {
+    // Keyboard activation (mouse clicks are handled on mousedown).
+    const b = e.target.closest('[data-day]');
+    if (b && e.detail === 0) paint(b.getAttribute('data-day'));
+  });
+
+  q('[data-prev]').addEventListener('click', () => { state.offset -= 1; render(); });
+  q('[data-next]').addEventListener('click', () => { state.offset += 1; render(); });
+
+  document.addEventListener('click', e => {
+    const br = e.target.closest('[data-brush]');
+    if (br) { state.brush = br.getAttribute('data-brush'); render(); return; }
+    const pf = e.target.closest('[data-pref]');
+    if (pf) {
+      const field = pf.getAttribute('data-pref');
+      const value = pf.getAttribute('data-value');
+      if (pf.getAttribute('data-multi') === '1') {
+        P[field] = P[field].includes(value) ? P[field].filter(x => x !== value) : P[field].concat(value);
+      } else P[field] = value;
+      state.saved = false; render();
+    }
+  });
+
+  q('[data-save]').addEventListener('click', () => {
+    if (state.saving) return;
+    state.saving = true; render();
+    fetch('/api/profile/availability', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ days: state.days, prefs: P })
+    })
+      .then(r => { if (!r.ok) throw new Error(); state.saved = true; })
+      .catch(() => {})
+      .finally(() => { state.saving = false; render(); });
+  });
+
+  window.addEventListener('beforeunload', e => { if (!state.saved) { e.preventDefault(); e.returnValue = ''; } });
+
+  const loader = q('[data-loader]');
+  let hideT;
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+    a.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      if (!state.saved) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(hideT);
+      hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
