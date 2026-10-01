@@ -122,3 +122,22 @@ CREATE TABLE IF NOT EXISTS applications (
 );
 
 CREATE INDEX IF NOT EXISTS applications_listing_id_idx ON applications (listing_id);
+
+
+-- ── SAVED SITS ───────────────────────────────────────────────────────────────
+-- Listings a sitter has hearted. Shown on /saved.
+CREATE TABLE IF NOT EXISTS saved_sits (
+  id          UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  profile_id  UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE, -- the sitter
+  listing_id  UUID        NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (profile_id, listing_id)
+);
+
+CREATE INDEX IF NOT EXISTS saved_sits_profile_id_idx ON saved_sits (profile_id);
+
+-- Saved searches and how the sitter wants to hear about matches (/saved).
+--   saved_searches_json: [{id, name, terms, on}]
+--   alert_prefs_json:    {email, push, weekly}
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS saved_searches_json JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS alert_prefs_json    JSONB NOT NULL DEFAULT '{"email": true, "push": true, "weekly": false}';

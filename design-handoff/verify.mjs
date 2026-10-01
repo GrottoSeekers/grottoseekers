@@ -40,7 +40,7 @@ const PAGES = {
   'Availability':          ['src/pages'],
   'Confirmed sit':         ['src/pages'],
   'Notifications':         ['src/pages'],
-  'Saved sits':            ['src/pages'],
+  'Saved sits':            ['src/pages/saved.astro'],
   'Verification':          ['src/pages'],
   'Find a sitter':         ['src/pages'],
 };
@@ -74,7 +74,7 @@ function designValues(html) {
   add(/border-radius:\s*[\d.]+(px|%)/gi);
   add(/padding:\s*[\d.]+px[^;"]*/gi);
   add(/gap:\s*[\d.]+px/gi);
-  add(/box-shadow:\s*[^;"]+/gi);
+  add(/box-shadow:\s*[^;"']+/gi);
   add(/translatey\(-?[\d.]+px\)/gi);
   return [...v].map(norm);
 }

@@ -1,0 +1,525 @@
+---
+// Data: `saved_sits` for
+// the signed-in sitter,
+// joined to the listing
+// and its owner; applied
+// status from
+// `applications`; free
+// dates from the profile.
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../lib/auth';
+import {
+  supabase,
+} from '../lib/supabase';
+
+const session =
+  await getSession(
+    Astro.request,
+  );
+if (!session) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+
+const pr =
+  await supabase
+  .from('profiles')
+  .select('*')
+  .eq(
+    'user_id',
+    session.userId,
+  )
+  .single();
+const me: any = pr.data;
+if (!me) {
+  return Astro.redirect(
+    '/profile/create',
+  );
+}
+if (
+  me.profile_type ===
+  'owner'
+) {
+  return Astro.redirect(
+    '/owner/dashboard',
+  );
+}
+
+let saved: any[] = [];
+try {
+  const sr =
+    await supabase
+    .from('saved_sits')
+    .select(
+      'created_at,' +
+      ' listings(id,' +
+      ' title, status,' +
+      ' date_from,' +
+      ' date_to,' +
+      ' profiles(name,' +
+      ' location,' +
+      ' profile_pic,' +
+      ' hero_images_json))',
+    )
+    .eq(
+      'profile_id',
+      me.id,
+    )
+    .order(
+      'created_at',
+      { ascending: false },
+    );
+  saved = sr.data ?? [];
+} catch {}
+
+let appliedIds: string[] =
+  [];
+try {
+  const ar =
+    await supabase
+    .from('applications')
+    .select('listing_id')
+    .eq(
+      'profile_id',
+      me.id,
+    );
+  appliedIds = (
+    ar.data ?? []
+  ).map(
+    (r: any) =>
+      r.listing_id,
+  );
+} catch {}
+
+const arr = (
+  v: unknown,
+): any[] => (
+  Array.isArray(v)
+    ? v : []
+);
+// [{from, to}] — set on
+// the Availability page.
+const free = arr(
+  me.availability_json,
+);
+const hasFree =
+  free.length > 0;
+const today = new Date()
+  .toISOString()
+  .slice(0, 10);
+const soon = new Date(
+  Date.now() +
+    7 * 86400000,
+)
+  .toISOString()
+  .slice(0, 10);
+
+const fmt = (
+  s: string,
+) => new Date(
+  s + 'T00:00:00',
+).toLocaleDateString(
+  'en-GB',
+  {
+    day: 'numeric',
+    month: 'short',
+  },
+);
+const ago = (
+  iso: string,
+) => {
+  const n =
+    Math.floor(
+      (Date.now() -
+        new Date(
+          iso,
+        ).getTime()) /
+        86400000,
+    );
+  if (n <= 0) {
+    return 'today';
+  }
+  if (n === 1) {
+    return 'yesterday';
+  }
+  if (n < 7) {
+    return n + ' days ago';
+  }
+  if (n < 14) {
+    return '1 week ago';
+  }
+  return (
+    Math.floor(n / 7) +
+    ' weeks ago'
+  );
+};
+
+const sits = saved
+  .filter(
+    (r) =>
+      r.listings &&
+      r.listings.date_to >=
+        today,
+  )
+  .map((r) => {
+    const l = r.listings;
+    const o =
+      l.profiles || {};
+    const hero = arr(
+      o.hero_images_json,
+    );
+    const fits = free.some(
+      (f: any) =>
+        l.date_from >=
+          f.from &&
+        l.date_to <= f.to,
+    );
+    const status =
+      appliedIds.includes(
+        l.id,
+      )
+        ? 'applied'
+        : l.status !==
+            'active'
+          ? 'filled'
+          : l.date_from <=
+              soon
+            ? 'closing'
+            : 'open';
+    return {
+      id: l.id,
+      title: l.title,
+      owner:
+        o.name || 'Owner',
+      location:
+        o.location || '',
+      pic:
+        hero[0]?.src ||
+        o.profile_pic ||
+        '/images/' +
+          'logo-tile.png',
+      dates:
+        fmt(l.date_from) +
+        ' — ' +
+        fmt(l.date_to) +
+        ' ' +
+        l.date_to.slice(
+          0,
+          4,
+        ),
+      saved: ago(
+        r.created_at,
+      ),
+      status,
+      fits,
+    };
+  });
+
+const searches = arr(
+  me.saved_searches_json,
+).map((q: any) => ({
+  id: String(q.id),
+  name: q.name || '',
+  terms: q.terms || '',
+  on: !!q.on,
+}));
+const prefs =
+  me.alert_prefs_json ||
+  {};
+const channels = {
+  email:
+    prefs.email !== false,
+  push:
+    prefs.push !== false,
+  weekly: !!prefs.weekly,
+};
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Saved sits — MYAH</title>
+  <style is:global>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 1000px) {
+      [data-topnav] { padding: 14px 24px !important; }
+      [data-pad] { padding: 34px 20px 80px !important; }
+      [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+      [data-cards] { grid-template-columns: minmax(0,1fr) !important; }
+    }
+
+    .sv-back:hover { gap:13px !important; color:#2f5d45 !important; }
+    .sv-dash:hover { color:#2c1a0e !important; }
+    .sv-more:hover { gap:12px !important; color:#2c1a0e !important; }
+    .sv-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px) !important; box-shadow:0 12px 28px rgba(110,84,56,.36) !important; color:#fff !important; }
+    .sv-remove:hover { border-color:#b91c1c !important; color:#b91c1c !important; }
+    .sv-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .sv-ghost:hover { background:rgba(110,84,56,.1) !important; border-color:#2f5d45 !important; }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="/listings" class="sv-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Browse sits</a>
+      <a href="/dashboard" class="sv-dash" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">Dashboard</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH sitter</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Sits you <em style="color:#2f5d45;">liked</em></h1>
+        <p data-intro="1" style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0"></p>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px">
+            <div data-filters="1" style="display:flex;gap:9px;flex-wrap:wrap"></div>
+            <a href="/listings" class="sv-more" style="font-size:.76rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:#2f5d45;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:gap .2s, color .2s">Find more &rarr;</a>
+          </div>
+
+          <div data-cards="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px"></div>
+
+          <div data-empty="1" style="display:none">
+            <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">Nothing here</p>
+            <p data-empty-text="1" style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 22px;max-width:420px"></p>
+            <a href="/listings" class="sv-btn" style="display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;text-decoration:none;transition:background .25s ease, border-color .25s ease, transform .15s ease">Browse open sits</a>
+          </div>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+
+          <div class="sv-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px 26px 28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 8px">Saved searches</p>
+            <p style="font-size:.87rem;color:#6b4e35;line-height:1.7;margin:0 0 20px">We&rsquo;ll email you when a new sit matches. Off by default &mdash; flip the ones you want.</p>
+
+            <div data-searches="1" style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px"></div>
+
+            <button type="button" data-add-search="1" class="sv-ghost" style="width:100%;font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px dashed rgba(110,84,56,.5);border-radius:50px;padding:13px 20px;cursor:pointer;transition:background .25s ease, border-color .25s ease">Save this search</button>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">How you&rsquo;re told</p>
+            <div data-channels="1" style="display:flex;flex-direction:column;gap:12px"></div>
+            <p data-channel-note="1" style="font-size:.82rem;color:#6b4e35;line-height:1.65;margin:16px 0 0"></p>
+          </div>
+
+          <div style="background:#fff;border:1px solid rgba(44,26,14,.1);border-radius:18px;padding:22px 24px">
+            <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0">Saved sits disappear once the dates pass. <span data-expiring="1"></span></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script is:inline define:vars={{ sits, searches, channels, hasFree }}>
+(() => {
+  // Ported from the design's script. Remove, alert switches and channels
+  // are saved via /api/saved.
+  const SITS = sits;
+  const s = { filter: 'all', removed: {}, searches: searches, channels: channels };
+  const q = sel => document.querySelector(sel);
+  const esc = v => { const d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; };
+  const post = body => fetch('/api/saved', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(r => { if (!r.ok) throw new Error(); });
+
+  const statusMap = {
+    applied: { label: 'You applied', bg: '#2f5d45' },
+    open: { label: 'Open', bg: 'rgba(44,26,14,.62)' },
+    filled: { label: 'Filled', bg: '#2c1a0e' },
+    closing: { label: 'Closing soon', bg: '#b91c1c' }
+  };
+
+  const render = () => {
+    const live = SITS.filter(x => !s.removed[x.id]);
+    const counts = {
+      all: live.length,
+      fits: live.filter(x => x.fits).length,
+      applied: live.filter(x => x.status === 'applied').length
+    };
+    let list = live;
+    if (s.filter === 'fits') list = live.filter(x => x.fits);
+    if (s.filter === 'applied') list = live.filter(x => x.status === 'applied');
+    const alerts = s.searches.filter(x => x.on).length;
+
+    q('[data-intro]').textContent = counts.all === 0
+      ? 'Nothing saved. Hit the heart on any listing and it waits here for you.'
+      : counts.all + ' saved · ' + counts.fits + ' fit the dates you marked free · ' + alerts + ' alert' + (alerts === 1 ? '' : 's') + ' running.';
+
+    q('[data-filters]').innerHTML = [
+      { key: 'all', label: 'All saved', count: counts.all },
+      { key: 'fits', label: 'Fits my dates', count: counts.fits },
+      { key: 'applied', label: 'Applied', count: counts.applied }
+    ].map(f => {
+      const style = 'display:inline-flex;align-items:center;gap:9px;font-family:\'Montserrat\',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;' +
+        (s.filter === f.key ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);');
+      const countStyle = 'font-size:.7rem;padding:2px 8px;border-radius:50px;' + (s.filter === f.key ? 'background:rgba(255,255,255,.25);color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;');
+      return '<button type="button" data-filter="' + f.key + '" style="' + style + '">' + f.label + ' <span style="' + countStyle + '">' + f.count + '</span></button>';
+    }).join('');
+
+    q('[data-cards]').innerHTML = list.map(x => {
+      const st = statusMap[x.status];
+      const dim = x.status === 'filled';
+      const fit = x.fits ? '✓ Inside your free dates'
+        : x.status === 'filled' ? 'Taken — someone else got it'
+        : hasFree ? 'Outside the dates you marked free' : 'No free dates marked yet';
+      const fitStyle = 'display:flex;align-items:center;gap:9px;font-size:.86rem;font-weight:' + (x.fits ? '700' : '400') + ';color:' + (x.fits ? '#2f5d45' : '#8a6a4f') + ';';
+      const statusStyle = 'position:absolute;left:14px;top:14px;font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;padding:5px 12px;border-radius:50px;backdrop-filter:blur(6px);background:' + st.bg + ';';
+      const veilStyle = 'position:absolute;inset:0;background:rgba(250,246,238,.55);' + (dim ? '' : 'display:none;');
+      const heartStyle = 'position:absolute;right:14px;top:14px;width:34px;height:34px;border-radius:50%;background:#2f5d45;color:#fff;border:2px solid #fff;font-size:.9rem;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 4px 12px rgba(44,26,14,.2);transition:transform .15s ease, background .2s ease';
+      const wrapStyle = 'display:flex;flex-direction:column;background:#fff;border-radius:18px;overflow:hidden;transition:box-shadow .3s ease, border-color .3s ease, transform .2s ease;' +
+        (dim ? 'border:1px solid rgba(44,26,14,.1);opacity:.72;' : 'border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);');
+      return '<article style="' + wrapStyle + '">' +
+        '<div style="position:relative">' +
+          '<img src="' + esc(x.pic) + '" alt="" style="width:100%;height:168px;object-fit:cover;display:block;background:#e9e0d2" />' +
+          '<div style="' + veilStyle + '"></div>' +
+          '<span style="' + statusStyle + '">' + st.label + '</span>' +
+          '<button type="button" data-unsave="' + esc(x.id) + '" title="Saved" style="' + heartStyle + '">♥</button>' +
+        '</div>' +
+        '<div style="padding:22px 24px 24px;display:flex;flex-direction:column;gap:14px;flex:1">' +
+          '<div>' +
+            '<h2 style="font-family:\'Marcellus\',serif;font-size:1.18rem;color:#2c1a0e;margin:0 0 6px;line-height:1.3">' + esc(x.title) + '</h2>' +
+            '<p style="font-size:.82rem;color:#2f5d45;font-weight:600;margin:0">' + esc(x.owner) + (x.location ? ' · ' + esc(x.location) : '') + '</p>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:8px;font-size:.86rem;color:#6b4e35">' +
+            '<span style="display:flex;align-items:center;gap:9px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>' + esc(x.dates) + '</span>' +
+            '<span style="' + fitStyle + '">' + fit + '</span>' +
+          '</div>' +
+          '<p style="font-size:.8rem;color:#8a6a4f;margin:0">Saved ' + esc(x.saved) + '</p>' +
+          '<div style="display:flex;gap:10px;margin-top:auto">' +
+            '<a href="/listings/' + esc(x.id) + '" class="sv-btn" style="flex:1;text-align:center;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 12px;text-decoration:none;transition:background .25s ease, border-color .25s ease, transform .15s ease">View sit</a>' +
+            '<button type="button" data-unsave="' + esc(x.id) + '" class="sv-remove" style="font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;background:none;border:1.5px solid rgba(44,26,14,.15);border-radius:50px;padding:11px 18px;cursor:pointer;transition:border-color .2s, color .2s">Remove</button>' +
+          '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+
+    q('[data-empty]').style.cssText = 'flex-direction:column;align-items:flex-start;background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px;' + (list.length === 0 ? 'display:flex;' : 'display:none;');
+    q('[data-empty-text]').textContent = s.filter === 'all'
+      ? 'Hit the heart on any listing while you browse and it waits here for you.'
+      : s.filter === 'fits'
+        ? 'None of your saved sits fall inside the dates you marked free. Widen your availability or save a few more.'
+        : 'You haven’t applied to any of these yet.';
+
+    q('[data-searches]').innerHTML = s.searches.map(x => {
+      const hits = x.on ? 'Alerts on' : 'Alerts off';
+      const hitStyle = 'font-size:.79rem;font-weight:700;margin:6px 0 0;color:' + (x.on ? '#2f5d45' : '#8a6a4f') + ';';
+      const wrapStyle = 'display:flex;align-items:flex-start;gap:14px;border-radius:12px;padding:15px 16px;transition:border-color .25s ease, background .25s ease;' +
+        (x.on ? 'background:rgba(110,84,56,.09);border:1px solid rgba(110,84,56,.4);' : 'background:#faf6ee;border:1px solid rgba(44,26,14,.08);');
+      const switchStyle = 'position:relative;width:44px;height:25px;border-radius:50px;border:none;cursor:pointer;flex-shrink:0;padding:0;transition:background .25s ease;background:' + (x.on ? '#2f5d45' : 'rgba(44,26,14,.16)') + ';';
+      const knobStyle = 'position:absolute;top:3px;left:' + (x.on ? '22px' : '3px') + ';width:19px;height:19px;border-radius:50%;background:#fff;display:block;transition:left .22s ease;box-shadow:0 1px 3px rgba(44,26,14,.25)';
+      return '<div style="' + wrapStyle + '">' +
+        '<div style="flex:1;min-width:0">' +
+          '<p style="font-size:.94rem;font-weight:600;color:#2c1a0e;margin:0 0 4px">' + esc(x.name) + '</p>' +
+          '<p style="font-size:.81rem;color:#6b4e35;line-height:1.55;margin:0">' + esc(x.terms) + '</p>' +
+          '<p style="' + hitStyle + '">' + hits + '</p>' +
+        '</div>' +
+        '<button type="button" data-search="' + esc(x.id) + '" title="Email alerts" style="' + switchStyle + '"><span style="' + knobStyle + '"></span></button>' +
+      '</div>';
+    }).join('');
+
+    q('[data-channels]').innerHTML = [
+      { key: 'email', label: 'Email me as sits appear' },
+      { key: 'push', label: 'Notify me in the app' },
+      { key: 'weekly', label: 'One weekly digest instead' }
+    ].map(c => {
+      const on = s.channels[c.key];
+      const boxStyle = 'width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0;transition:background .2s ease, color .2s ease, border-color .2s ease;' +
+        (on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:transparent;border:1.5px solid rgba(44,26,14,.18);');
+      const labelStyle = 'font-size:.92rem;line-height:1.5;color:' + (on ? '#2c1a0e' : '#6b4e35') + ';';
+      return '<button type="button" data-channel="' + c.key + '" style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:\'Montserrat\',sans-serif;background:none;border:none;padding:2px 0;cursor:pointer">' +
+        '<span style="' + boxStyle + '">✓</span><span style="' + labelStyle + '">' + c.label + '</span></button>';
+    }).join('');
+    q('[data-channel-note]').textContent = s.channels.weekly
+      ? 'A single Monday email covering everything that matched — quieter, but you see sits later than everyone else.'
+      : 'Good sits go in a day or two, so the instant alerts are the ones that actually land you a sit.';
+
+    const closing = live.filter(x => x.status === 'closing');
+    q('[data-expiring]').textContent = closing.length === 1
+      ? 'One of yours is closing soon — ' + closing[0].title + '.'
+      : closing.length > 1
+        ? closing.length + ' of yours are closing soon.'
+        : 'Nothing of yours is close to expiring.';
+  };
+
+  const loader = q('[data-loader]');
+  let hideT;
+  const show = () => {
+    if (!loader) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    clearTimeout(hideT);
+    hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  };
+
+  document.addEventListener('click', e => {
+    const el = e.target.closest && e.target.closest('[data-filter],[data-unsave],[data-search],[data-channel],[data-add-search],a[href]');
+    if (!el) return;
+    if (el.hasAttribute('data-filter')) { s.filter = el.getAttribute('data-filter'); render(); return; }
+    if (el.hasAttribute('data-unsave')) {
+      const id = el.getAttribute('data-unsave');
+      s.removed[id] = true; render();
+      post({ action: 'unsave', listing_id: id }).catch(() => { delete s.removed[id]; render(); });
+      return;
+    }
+    if (el.hasAttribute('data-search')) {
+      const id = el.getAttribute('data-search');
+      const item = s.searches.find(x => x.id === id);
+      item.on = !item.on; render();
+      post({ action: 'search', id, on: item.on }).catch(() => { item.on = !item.on; render(); });
+      return;
+    }
+    if (el.hasAttribute('data-channel')) {
+      const key = el.getAttribute('data-channel');
+      s.channels = Object.assign({}, s.channels, { [key]: !s.channels[key] }); render();
+      post({ action: 'channels', channels: s.channels }).catch(() => { s.channels = Object.assign({}, s.channels, { [key]: !s.channels[key] }); render(); });
+      return;
+    }
+    if (el.hasAttribute('data-add-search')) { show(); location.href = '/listings'; return; }
+    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+    const href = el.getAttribute('href') || '';
+    if (!href.startsWith('#') && !href.startsWith('http')) show();
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
