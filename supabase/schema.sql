@@ -181,3 +181,28 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_verified_at  TIMESTAMPTZ;
 --   availability_prefs_json: { lengths: [...], pets: [...], notice }
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS availability_json       JSONB NOT NULL DEFAULT '{}';
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS availability_prefs_json JSONB NOT NULL DEFAULT '{"lengths": [], "pets": [], "notice": "Any time"}';
+
+
+-- ── CONFIRMED SITS ───────────────────────────────────────────────────────────
+-- A sitter booked onto a listing. /sits/[id] is the handover pack; booked days
+-- show on /availability, and the next one on /notifications and /verification.
+CREATE TABLE IF NOT EXISTS sits (
+  id                 UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id         UUID        NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  sitter_user_id     UUID        NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  sitter_profile_id  UUID        REFERENCES profiles(id) ON DELETE SET NULL,
+  conversation_id    UUID,                          -- the owner/sitter thread
+  checklist_json     JSONB       NOT NULL DEFAULT '{}',  -- {"0": true, ...} "Before the handover"
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (listing_id, sitter_user_id)
+);
+
+CREATE INDEX IF NOT EXISTS sits_sitter_user_id_idx ON sits (sitter_user_id);
+
+-- Handover details on the listing (set on Edit listing; read by /sits/[id]).
+--   handover_json: { address, address_note, owner_away, owner_away_note,
+--                    house_notes: [{label, value}], emergency: [{label, value, note}] }
+-- Pets' daily routines live on profiles.pets_json as routine: [{when, what}].
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS arrival       TEXT;
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS keys          TEXT;
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS handover_json JSONB NOT NULL DEFAULT '{}';

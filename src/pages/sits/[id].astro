@@ -1,160 +1,478 @@
 ---
-export const prerender = false;
+// Data: the `sits` row
+// (listing, sitter,
+// conversation and
+// checklist), its
+// listing (dates,
+// arrival, keys,
+// handover_json) and
+// the owner's profile
+// (location, pets).
+// Checklist ticks save
+// to /api/sits/checklist.
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../../lib/auth';
+import {
+  supabase,
+} from
+  '../../lib/supabase';
+import {
+  arr,
+} from
+  '../../lib/dashboard';
 
-import { getSession } from '../../lib/auth';
-import { supabase } from '../../lib/supabase';
+const session =
+  await getSession(
+    Astro.request,
+  );
+if (!session) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+const { id } =
+  Astro.params;
 
-const session = await getSession(Astro.request);
-if (!session) return Astro.redirect('/login');
-
-const { id } = Astro.params;
-
-const { data: profile } = await supabase
-  .from('profiles')
-  .select('id, profile_type, user_id')
-  .eq('user_id', session.userId)
-  .single();
-
-if (!profile) return Astro.redirect('/profile/create');
-
-// Load confirmed sit — graceful fallback if table doesn't exist yet
 let sit: any = null;
-let listing: any = null;
-let ownerProfile: any = null;
-let sitterProfile: any = null;
-
 try {
-  const { data: sitRow } = await supabase
+  const r =
+    await supabase
     .from('sits')
-    .select('*, listings!inner(*, profiles!inner(*))')
+    .select(
+      '*, listings!inner(' +
+      '*, profiles!inner(*))',
+    )
     .eq('id', id)
     .single();
+  sit = r.data;
+} catch {}
 
-  if (sitRow) {
-    sit = sitRow;
-    listing = sitRow.listings;
-    ownerProfile = sitRow.listings?.profiles;
-  }
-} catch (_) {}
-
-// Only show this sit to the sitter or owner involved
-if (sit) {
-  const isOwner = ownerProfile?.user_id === session.userId;
-  const isSitter = sit.sitter_user_id === session.userId;
-  if (!isOwner && !isSitter) return Astro.redirect('/dashboard');
+const listing: any =
+  sit?.listings || null;
+const owner: any =
+  listing?.profiles ||
+  null;
+const isOwner =
+  owner?.user_id ===
+  session.userId;
+const isSitter =
+  sit?.sitter_user_id ===
+  session.userId;
+const dashUrl = isOwner
+  ? '/owner/dashboard'
+  : '/dashboard';
+if (
+  !sit ||
+  !listing ||
+  (!isOwner && !isSitter)
+) {
+  return Astro.redirect(
+    dashUrl,
+  );
 }
 
-// Load sitter profile for the people panel
+let sitter: any = null;
 try {
-  if (sit?.sitter_profile_id) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('id, display_name, full_name, avatar_url, sits_count, location')
-      .eq('id', sit.sitter_profile_id)
-      .single();
-    sitterProfile = data;
-  }
-} catch (_) {}
+  const q = supabase
+    .from('profiles')
+    .select('*');
+  const r =
+    sit.sitter_profile_id
+      ? await q
+        .eq(
+          'id',
+          sit
+            .sitter_profile_id,
+        )
+        .single()
+      : await q
+        .eq(
+          'user_id',
+          sit.sitter_user_id,
+        )
+        .single();
+  sitter = r.data;
+} catch {}
 
-// Derive display values (use sit data or sensible placeholders)
-const sitTitle = listing?.title ?? 'Your confirmed sit';
-const sitLocation = ownerProfile?.location ?? listing?.location ?? '';
-const startDateRaw = sit?.start_date ?? '';
-const endDateRaw = sit?.end_date ?? '';
-
-function fmtDate(d: string, opts?: Intl.DateTimeFormatOptions) {
-  if (!d) return '';
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', opts ?? { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-}
-
-function nightsBetween(a: string, b: string) {
-  if (!a || !b) return 0;
-  return Math.round((new Date(b + 'T00:00:00').getTime() - new Date(a + 'T00:00:00').getTime()) / 86400000);
-}
-
-function daysToGo(d: string) {
-  if (!d) return 0;
-  const diff = new Date(d + 'T00:00:00').getTime() - Date.now();
-  return Math.max(0, Math.ceil(diff / 86400000));
-}
-
-const nights = nightsBetween(startDateRaw, endDateRaw);
-const daysUntil = daysToGo(startDateRaw);
-const dateRange = startDateRaw ? `${fmtDate(startDateRaw)} – ${fmtDate(endDateRaw)} · ${nights} ${nights === 1 ? 'night' : 'nights'}` : '';
-
-const ownerName = (ownerProfile?.display_name ?? ownerProfile?.full_name ?? 'Owner') as string;
-const ownerAvatar = (ownerProfile?.avatar_url ?? '') as string;
-const ownerLocation = (ownerProfile?.location ?? '') as string;
-
-const sitterName = (sitterProfile?.display_name ?? sitterProfile?.full_name ?? 'Sitter') as string;
-const sitterAvatar = (sitterProfile?.avatar_url ?? '') as string;
-const sitterSits = (sitterProfile?.sits_count ?? 0) as number;
-
-// Pets from owner profile
-const pets: any[] = (() => {
-  try {
-    const p = ownerProfile?.pets_json;
-    return Array.isArray(p) ? p : [];
-  } catch (_) { return []; }
-})();
-
-// House notes from listing/owner profile
-const houseNotesRaw: any[] = (() => {
-  try {
-    const n = listing?.house_notes_json ?? ownerProfile?.house_notes_json;
-    return Array.isArray(n) ? n : [];
-  } catch (_) { return []; }
-})();
-
-// Emergency contacts from listing/owner profile
-const emergencyRaw: any[] = (() => {
-  try {
-    const e = listing?.emergency_json ?? ownerProfile?.emergency_json;
-    return Array.isArray(e) ? e : [];
-  } catch (_) { return []; }
-})();
-
-// Checklist state stored in sit row
-let checklistDone: Record<string, boolean> = {};
+let sitterSits = 0;
 try {
-  const cd = sit?.checklist_done_json;
-  if (cd && typeof cd === 'object') checklistDone = cd as Record<string, boolean>;
-} catch (_) {}
+  const c =
+    await supabase
+    .from('sits')
+    .select('id', {
+      count: 'exact',
+      head: true,
+    })
+    .eq(
+      'sitter_user_id',
+      sit.sitter_user_id,
+    );
+  sitterSits =
+    c.count ?? 0;
+} catch {}
 
+// ── Formatting
+const D = (s: string) =>
+  new Date(
+    s + 'T00:00:00Z',
+  );
+const fmtLong = (
+  s: string,
+) =>
+  s
+    ? D(s)
+      .toLocaleDateString(
+        'en-GB',
+        {
+          weekday: 'short',
+          day: 'numeric',
+          month: 'short',
+          timeZone: 'UTC',
+        },
+      )
+      .replace(',', '')
+    : '';
+const yr = (s: string) =>
+  s ? s.slice(0, 4) : '';
+const from: string =
+  listing.date_from || '';
+const to: string =
+  listing.date_to || '';
+const nights =
+  from && to
+    ? Math.round(
+      (+D(to) - +D(from)) /
+        86400000,
+    )
+    : 0;
+const todayKey =
+  new Date()
+  .toISOString()
+  .slice(0, 10);
+const started =
+  !!from &&
+  todayKey >= from;
+const countTo = started
+  ? to
+  : from;
+const daysLeft = countTo
+  ? Math.max(
+    0,
+    Math.round(
+      (+D(countTo) -
+        +D(todayKey)) /
+        86400000,
+    ),
+  )
+  : 0;
+const countLabel = started
+  ? 'days left'
+  : 'days to go';
+
+// ── Names
+const ownerName: string =
+  owner.name || 'Owner';
+const ownerFirst =
+  ownerName.split(' ')[0];
+const sitterName: string =
+  sitter?.name ||
+  'Your sitter';
+const ownerLoc: string =
+  owner.location || '';
+const hand: any =
+  listing.handover_json ||
+  {};
+
+// ── Hero. Format, as
+// in the design:
+/*
+Sun 4 Oct – Sun 18 Oct 2026 · 14 days · Thomas James & Callum and Niamh
+*/
+const heroTitle: string =
+  listing.title || '';
+const heroWhere =
+  ownerLoc;
+const heroSep =
+  heroWhere ? ', ' : '';
+const dayWord =
+  nights === 1
+    ? ' day'
+    : ' days';
+const heroLine = [
+  fmtLong(from) +
+    ' – ' +
+    fmtLong(to) +
+    ' ' +
+    yr(to),
+  nights + dayWord,
+  ownerName +
+    ' & ' +
+    sitterName,
+].join(' · ');
+
+// ── 01 The basics
+const named = (
+  s: string,
+) =>
+  s
+    .trim()
+    .replace(
+      'Thomas',
+      ownerFirst,
+    );
+const basicsNote = named(`
+Dates, arrival and keys from the listing · address from Thomas’s profile
+`);
+const pets = arr(
+  owner.pets_json,
+);
+const petNames = pets
+  .map((p: any) => p.name)
+  .filter(Boolean);
+const petKinds = [
+  ...new Set(
+    pets
+      .map(
+        (p: any) =>
+          p.breed || p.type,
+      )
+      .filter(Boolean),
+  ),
+];
+const nightWord =
+  nights === 1
+    ? ' night'
+    : ' nights';
+const factRows = [
+  {
+    label: 'Dates',
+    value: from
+      ? fmtLong(from) +
+        ' — ' +
+        fmtLong(to) +
+        ' ' + yr(to)
+      : '',
+    note: nights
+      ? nights + nightWord
+      : '',
+  },
+  {
+    label: 'Arrival',
+    value:
+      listing.arrival ||
+      '',
+    note: '',
+  },
+  {
+    label: 'Address',
+    value:
+      hand.address ||
+      ownerLoc,
+    note:
+      hand.address_note ||
+      '',
+  },
+  {
+    label: 'Keys',
+    value:
+      listing.keys || '',
+    note: listing.keys
+      ? 'Set on the listing'
+      : '',
+  },
+  {
+    label: 'Pets',
+    value: petNames.length
+      ? petNames.join(
+        ' & ',
+      ) +
+        (petKinds.length
+          ? ' — ' +
+            petKinds.join(
+              ', ',
+            )
+          : '')
+      : '',
+    note: '',
+  },
+  {
+    label:
+      'Owner away in',
+    value:
+      hand.owner_away ||
+      '',
+    note:
+      hand.owner_away_note
+      || '',
+  },
+];
+const facts = factRows
+  .filter((f) => f.value)
+  .map(f => ({ ...f, noteStyle: 'font-size:.86rem;color:#6b4e35;line-height:1.6;margin:5px 0 0;' + (f.note ? '' : 'display:none;') }));
+
+// ── 02 Care routine
+const careNote = named(`
+Pets and their routines from Thomas’s profile
+`);
+const petCards = pets.map(
+  (p: any) => {
+    const meta = [
+      p.breed || p.type,
+      p.age,
+      p.temperament,
+    ]
+      .filter(Boolean)
+      .join(' · ');
+    const lines = arr(
+      p.routine,
+    ).filter(
+      (l: any) =>
+        l && l.what,
+    );
+    const warn =
+      p.special_needs ||
+      '';
+    return {
+      name: p.name || '',
+      photo:
+        p.photo_url ||
+        '/images/solomon-1.jpg',
+      meta,
+      lines,
+      warn,
+      warnStyle:
+        'font-size:.88rem;color:#b91c1c;font-weight:600;line-height:1.65;margin:14px 0 0;' +
+        (warn
+          ? ''
+          : 'display:none;'),
+    };
+  },
+);
+
+// ── 03 The house
+const houseNote = named(`
+House notes from Thomas’s handover details
+`);
+const houseNotes = arr(
+  hand.house_notes,
+).filter(
+  (n: any) =>
+    n && n.label &&
+    n.value,
+);
+
+// ── 04 Emergencies
+const helpNote = named(`
+Vet, neighbour and contact numbers from Thomas’s handover details
+`);
+const ownerReach = [
+  owner.whatsapp_number,
+  owner.contact_email,
+]
+  .filter(Boolean)
+  .join(' · ');
+const emergency = [
+  ...arr(
+    hand.emergency,
+  ).filter(
+    (e: any) =>
+      e && e.label &&
+      e.value,
+  ),
+  {
+    label: 'Owner',
+    value: ownerName,
+    note: ownerReach,
+  },
+];
+
+// ── Aside
 const CHECKS = [
   'Handover call booked',
   'Arrival time agreed',
   'Keys arranged',
   'Vet details confirmed',
   'Wifi password shared',
-  'Emergency contact swapped',
+  'Emergency contact swapped'
 ];
-const checksDone = CHECKS.filter((_, i) => checklistDone[String(i)]).length;
+const doneRaw: any =
+  sit.checklist_json ||
+  {};
+const done: Record<
+  string,
+  boolean
+> = {};
+CHECKS.forEach((_, i) => {
+  if (doneRaw[i]) {
+    done[i] = true;
+  }
+});
 
-// Facts for section 01
-type Fact = { label: string; value: string; note: string };
-const facts: Fact[] = [
-  { label: 'Dates', value: startDateRaw ? `${fmtDate(startDateRaw, { weekday:'short', day:'numeric', month:'short', year:'numeric' })} — ${fmtDate(endDateRaw, { weekday:'short', day:'numeric', month:'short', year:'numeric' })}` : 'Dates TBC', note: nights ? `${nights} nights` : '' },
-  { label: 'Arrival', value: sit?.arrival_details ?? 'To be confirmed', note: sit?.arrival_note ?? '' },
-  { label: 'Address', value: ownerProfile?.full_address ?? sitLocation, note: ownerProfile?.address_note ?? '' },
-  { label: 'Keys', value: listing?.keys_details ?? 'Agreed with owner', note: listing?.keys_note ?? '' },
-  { label: 'Pets', value: pets.map((p: any) => p.name ?? '').filter(Boolean).join(' & ') || 'See care routine below', note: '' },
-  { label: 'Owner away in', value: sit?.owner_destination ?? 'To be confirmed', note: sit?.owner_contact_note ?? '' },
-].filter(f => f.value);
+const sitWord =
+  sitter?.account_type ===
+  'joint'
+    ? 'Sitters'
+    : 'Sitter';
+const people = [
+  {
+    name: ownerName,
+    role: ownerLoc
+      ? 'Owner · ' +
+        ownerLoc
+      : 'Owner',
+    photo:
+      owner.profile_pic ||
+      '/images/' +
+        'couple-dinner-1.jpg',
+  },
+  {
+    name: sitterName,
+    role: sitterSits
+      ? sitWord +
+        ' · ' +
+        sitterSits +
+        (sitterSits === 1
+          ? ' sit'
+          : ' sits')
+      : sitWord,
+    photo:
+      sitter?.profile_pic ||
+      '/images/couple-bw-1.jpg',
+  },
+];
 
-// Conversation ID for message link
-const conversationId = sit?.conversation_id ?? '';
+const msgUrl =
+  sit.conversation_id
+    ? '/messages?c=' +
+      sit.conversation_id
+    : '/messages';
+// Owner reviews the
+// sitter on their page;
+// sitter asks for one
+// from the dashboard.
+const reviewUrl =
+  isOwner && sitter?.slug
+    ? '/' + sitter.slug
+    : '/dashboard';
+const sitId = sit.id;
 ---
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{sitTitle} — MYAH</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-  <style>
+  <title>Confirmed sit — MYAH</title>
+  <style is:global>
     body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
     * { box-sizing: border-box; }
     a { color: #2f5d45; }
@@ -174,6 +492,14 @@ const conversationId = sit?.conversation_id ?? '';
       [data-topnav], [data-noprint] { display: none !important; }
       body { background: #fff; }
     }
+
+    .cs-back:hover { gap:13px !important; color:#2f5d45 !important; }
+    .cs-msgs:hover { color:#2c1a0e !important; }
+    .cs-review:hover { color:#2f5d45 !important; }
+    .cs-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .cs-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px) !important; box-shadow:0 12px 28px rgba(110,84,56,.36) !important; }
+    .cs-print:hover { background:rgba(110,84,56,.1) !important; border-color:#2f5d45 !important; }
+    .cs-cancel:hover { color:#2c1a0e !important; }
   </style>
 </head>
 <body>
@@ -187,52 +513,33 @@ const conversationId = sit?.conversation_id ?? '';
     </div>
   </div>
 
-  <nav data-topnav="1" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
     <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
       <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
-      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
-        <span style="color:#2f5d45;line-height:1">MYAH</span>
-        <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
-      </span>
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
     </a>
     <div style="display:flex;align-items:center;gap:22px">
-      <a href="/dashboard"
-        style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s"
-        onmouseover="this.style.gap='13px';this.style.color='#2f5d45'"
-        onmouseout="this.style.gap='9px';this.style.color='#6b4e35'">&larr; Dashboard</a>
-      <a href={conversationId ? `/messages/${conversationId}` : '/messages'}
-        style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s"
-        onmouseover="this.style.color='#2c1a0e'"
-        onmouseout="this.style.color='#2f5d45'">Messages</a>
-      {sit && (
-        <a href={`/review/${sit.id}`}
-          style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s"
-          onmouseover="this.style.color='#2f5d45'"
-          onmouseout="this.style.color='#5c3d20'">Leave a review</a>
-      )}
+      <a href={dashUrl} class="cs-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Dashboard</a>
+      <a href={msgUrl} class="cs-msgs" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">Messages</a>
+      <a href={reviewUrl} class="cs-review" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Leave a review</a>
     </div>
   </nav>
 
-  <main data-pad="1" style="flex:1;padding:52px 48px 90px">
+  <main data-pad="1" data-screen-label="Confirmed sit" style="flex:1;padding:52px 48px 90px">
     <div style="max-width:1120px;margin:0 auto">
 
-      <!-- Hero banner -->
       <div style="background:#2c1a0e;border-radius:20px;padding:38px 40px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:28px;flex-wrap:wrap">
         <div style="min-width:0">
-          <p style="font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px">
-            <span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Confirmed sit
-          </p>
-          <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#fff;line-height:1.15;margin:0 0 12px">
-            {sitTitle}{sitLocation && sitLocation !== sitTitle ? `, <em style="color:#2f5d45;">${sitLocation}</em>` : ''}
-          </h1>
-          <p style="font-size:1rem;color:rgba(255,255,255,.75);line-height:1.7;margin:0">
-            {dateRange}
-            {ownerName && sitterName ? ` · ${ownerName} & ${sitterName}` : ''}
-          </p>
+          <p style="font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Confirmed sit</p>
+          <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#fff;line-height:1.15;margin:0 0 12px">{heroTitle}{heroSep}
+            {heroWhere && (
+              <em style="color:#2f5d45;">{heroWhere}</em>
+            )}</h1>
+          <p style="font-size:1rem;color:rgba(255,255,255,.75);line-height:1.7;margin:0">{heroLine}</p>
         </div>
         <div style="text-align:right;flex-shrink:0">
-          <p style="font-family:'Marcellus',serif;font-size:3.4rem;color:#6e5438;margin:0;line-height:1">{daysUntil}</p>
-          <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:6px 0 0">days to go</p>
+          <p style="font-family:'Marcellus',serif;font-size:3.4rem;color:#6e5438;margin:0;line-height:1">{daysLeft}</p>
+          <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:6px 0 0">{countLabel}</p>
         </div>
       </div>
 
@@ -240,185 +547,101 @@ const conversationId = sit?.conversation_id ?? '';
 
         <div style="display:flex;flex-direction:column;gap:24px">
 
-          <!-- Section 01: The basics -->
-          <section data-card="1"
-            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
-            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px">
-              <span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">01</span>
-              <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The basics</h2>
-            </div>
+          <section data-card="1" class="cs-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">01</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The basics</h2></div>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
-            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Dates, arrival and keys from the listing &middot; address from the owner&rsquo;s profile</p>
-            {facts.length > 0 ? (
-              <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:22px 30px">
-                {facts.map(f => (
-                  <div>
-                    <p style="font-size:.72rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#2f5d45;margin:0 0 7px">{f.label}</p>
-                    <p style="font-size:.98rem;color:#2c1a0e;line-height:1.6;margin:0">{f.value}</p>
-                    {f.note && <p style="font-size:.86rem;color:#6b4e35;line-height:1.6;margin:5px 0 0">{f.note}</p>}
+            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">{basicsNote}</p>
+            <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:22px 30px">
+              {facts.map((f) => (
+                <div>
+                  <p style="font-size:.72rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#2f5d45;margin:0 0 7px">{f.label}</p>
+                  <p style="font-size:.98rem;color:#2c1a0e;line-height:1.6;margin:0">{f.value}</p>
+                  <p style={f.noteStyle}>{f.note}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {petCards.length > 0 && (
+            <section data-card="1" class="cs-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">02</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Care routine</h2></div>
+              <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
+              <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">{careNote}</p>
+              <div style="display:flex;flex-direction:column;gap:18px">
+                {petCards.map((p) => (
+                  <div data-pet="1" style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:20px;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:22px 24px">
+                    <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+                      <img src={p.photo} alt="" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
+                      <p style="font-family:'Marcellus',serif;font-size:1.05rem;color:#2c1a0e;margin:0;text-align:center">{p.name}</p>
+                    </div>
+                    <div style="min-width:0">
+                      <p style="font-size:.8rem;color:#2f5d45;font-weight:600;margin:0 0 14px">{p.meta}</p>
+                      <div style="display:flex;flex-direction:column;gap:10px">
+                        {p.lines.map((l: any) => (
+                          <div style="display:flex;gap:14px;align-items:baseline">
+                            <span style="font-size:.76rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8a6a4f;width:82px;flex-shrink:0">{l.when}</span>
+                            <span style="font-size:.93rem;color:#6b4e35;line-height:1.65">{l.what}</span>
+                          </div>
+                        ))}
+                      </div>
+                      <p style={p.warnStyle}>{p.warn}</p>
+                    </div>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Details will appear here once the sit is set up by the owner.</p>
-            )}
-          </section>
+            </section>
+          )}
 
-          <!-- Section 02: Care routine -->
-          <section data-card="1"
-            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
-            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px">
-              <span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">02</span>
-              <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Care routine</h2>
-            </div>
-            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
-            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Pets and their routines from the owner&rsquo;s profile</p>
-            {pets.length > 0 ? (
-              <div style="display:flex;flex-direction:column;gap:18px">
-                {pets.map((p: any) => {
-                  const lines: any[] = Array.isArray(p.routine) ? p.routine : [];
-                  const petPhoto = p.photo_url ?? p.photo ?? '';
-                  const petName = p.name ?? 'Pet';
-                  const petMeta = [p.breed, p.age ? `${p.age} ${p.age === 1 ? 'year' : 'years'}` : '', p.personality].filter(Boolean).join(' · ');
-                  const petWarn = p.warning ?? p.warn ?? '';
-                  return (
-                    <div data-pet="1" style="display:grid;grid-template-columns:96px minmax(0,1fr);gap:20px;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:22px 24px">
-                      <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
-                        {petPhoto ? (
-                          <img src={petPhoto} alt="" style="width:76px;height:76px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35)" />
-                        ) : (
-                          <div style="width:76px;height:76px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.5rem;border:2px solid rgba(110,84,56,.35)">
-                            {petName.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <p style="font-family:'Marcellus',serif;font-size:1.05rem;color:#2c1a0e;margin:0;text-align:center">{petName}</p>
-                      </div>
-                      <div style="min-width:0">
-                        {petMeta && <p style="font-size:.8rem;color:#2f5d45;font-weight:600;margin:0 0 14px">{petMeta}</p>}
-                        {lines.length > 0 && (
-                          <div style="display:flex;flex-direction:column;gap:10px">
-                            {lines.map((l: any) => (
-                              <div style="display:flex;gap:14px;align-items:baseline">
-                                <span style="font-size:.76rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6e5438;width:82px;flex-shrink:0">{l.when ?? l.time}</span>
-                                <span style="font-size:.93rem;color:#6b4e35;line-height:1.65">{l.what ?? l.note}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {!lines.length && p.notes && <p style="font-size:.93rem;color:#6b4e35;line-height:1.65;margin:0">{p.notes}</p>}
-                        {petWarn && <p style="font-size:.88rem;color:#b91c1c;font-weight:600;line-height:1.65;margin:14px 0 0">{petWarn}</p>}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Pet care details will be added by the owner before the sit.</p>
-            )}
-          </section>
-
-          <!-- Section 03: The house -->
-          <section data-card="1"
-            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
-            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px">
-              <span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">03</span>
-              <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The house</h2>
-            </div>
-            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
-            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">House notes from the handover details</p>
-            {houseNotesRaw.length > 0 ? (
+          {houseNotes.length > 0 && (
+            <section data-card="1" class="cs-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">03</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">The house</h2></div>
+              <div style="width:40px;height:2px;background:#6e5438;margin:0 0 26px"></div>
+              <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">{houseNote}</p>
               <div style="display:flex;flex-direction:column;gap:14px">
-                {houseNotesRaw.map((n: any) => (
+                {houseNotes.map((n) => (
                   <div style="display:flex;gap:14px;align-items:baseline;padding-bottom:14px;border-bottom:1px solid rgba(44,26,14,.07)">
                     <span style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;width:110px;flex-shrink:0">{n.label}</span>
                     <span style="font-size:.95rem;color:#6b4e35;line-height:1.7">{n.value}</span>
                   </div>
                 ))}
               </div>
-            ) : (
-              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">House notes will appear here once added by the owner.</p>
-            )}
-          </section>
+            </section>
+          )}
 
-          <!-- Section 04: If something goes wrong -->
           <section data-card="1" style="background:#fff;border:1px solid rgba(185,28,28,.22);border-radius:18px;padding:34px 36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
-            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px">
-              <span style="font-family:'Marcellus',serif;font-size:.92rem;color:#b91c1c;letter-spacing:.08em">04</span>
-              <h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">If something goes wrong</h2>
-            </div>
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#b91c1c;letter-spacing:.08em">04</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">If something goes wrong</h2></div>
             <div style="width:40px;height:2px;background:#b91c1c;margin:0 0 26px"></div>
-            <p style="font-size:.82rem;color:#6e5438;line-height:1.6;margin:-18px 0 24px">Vet, neighbour and contact numbers from the handover details</p>
-            {emergencyRaw.length > 0 ? (
-              <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:20px 30px">
-                {emergencyRaw.map((e: any) => (
-                  <div>
-                    <p style="font-size:.72rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#b91c1c;margin:0 0 7px">{e.label}</p>
-                    <p style="font-size:.98rem;color:#2c1a0e;line-height:1.6;margin:0 0 3px">{e.value}</p>
-                    {e.note && <p style="font-size:.86rem;color:#6b4e35;line-height:1.6;margin:0">{e.note}</p>}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p style="font-size:.93rem;color:#6e5438;line-height:1.65;margin:0">Emergency contacts will be added by the owner before the sit begins.</p>
-            )}
+            <p style="font-size:.82rem;color:#8a6a4f;line-height:1.6;margin:-18px 0 24px">{helpNote}</p>
+            <div data-facts="1" style="display:grid;grid-template-columns:1fr 1fr;gap:20px 30px">
+              {emergency.map((e) => (
+                <div>
+                  <p style="font-size:.72rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#b91c1c;margin:0 0 7px">{e.label}</p>
+                  <p style="font-size:.98rem;color:#2c1a0e;line-height:1.6;margin:0 0 3px">{e.value}</p>
+                  <p style="font-size:.86rem;color:#6b4e35;line-height:1.6;margin:0">{e.note}</p>
+                </div>
+              ))}
+            </div>
           </section>
-
         </div>
 
-        <!-- Aside -->
         <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
-
-          <!-- Checklist -->
-          <div
-            style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px 26px 28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease"
-            onmouseover="this.style.boxShadow='0 10px 34px rgba(44,26,14,.08)';this.style.borderColor='rgba(110,84,56,.4)'"
-            onmouseout="this.style.boxShadow='0 1px 2px rgba(44,26,14,.04)';this.style.borderColor='rgba(110,84,56,.22)'">
+          <div class="cs-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px 26px 28px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
             <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:6px">
               <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">Before the handover</p>
-              <span id="checkCount" style="font-size:.78rem;color:#6b4e35">{checksDone} of {CHECKS.length} done</span>
+              <span data-check-count style="font-size:.78rem;color:#6b4e35"></span>
             </div>
             <div style="height:6px;border-radius:50px;background:rgba(44,26,14,.08);overflow:hidden;margin:12px 0 20px">
-              <div id="checkBar" style={`height:100%;width:${Math.round((checksDone/CHECKS.length)*100)}%;border-radius:50px;background:linear-gradient(90deg,#2f5d45,#c4ab8a);transition:width .4s ease`}></div>
+              <div data-check-bar></div>
             </div>
-            <div style="display:flex;flex-direction:column;gap:11px">
-              {CHECKS.map((label, i) => {
-                const on = !!checklistDone[String(i)];
-                return (
-                  <button
-                    type="button"
-                    data-check={i}
-                    onclick={`toggleCheck(${i})`}
-                    style="display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:'Montserrat',sans-serif;background:none;border:none;padding:2px 0;cursor:pointer">
-                    <span data-box={i} style={`width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0;transition:background .2s ease, color .2s ease, border-color .2s ease;${on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:transparent;border:1.5px solid rgba(44,26,14,.18);'}`}>&#10003;</span>
-                    <span data-lbl={i} style={`font-size:.93rem;line-height:1.5;transition:color .2s ease;${on ? 'color:#6e5438;text-decoration:line-through;' : 'color:#2c1a0e;'}`}>{label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <div data-checklist style="display:flex;flex-direction:column;gap:11px"></div>
           </div>
 
-          <!-- People panel -->
           <div data-noprint="1" style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
             <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Both of you</p>
             <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:20px">
-              {[
-                { name: ownerName, role: `Owner${ownerLocation ? ` · ${ownerLocation}` : ''}`, photo: ownerAvatar },
-                { name: sitterName, role: `Sitter${sitterSits ? ` · ${sitterSits} sits` : ''}`, photo: sitterAvatar },
-              ].filter(p => p.name).map(p => (
+              {people.map((p) => (
                 <div style="display:flex;gap:13px;align-items:center">
-                  {p.photo ? (
-                    <img src={p.photo} alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
-                  ) : (
-                    <div style="width:44px;height:44px;border-radius:50%;background:#2f5d45;color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1rem;flex-shrink:0;border:2px solid rgba(110,84,56,.35)">
-                      {p.name.charAt(0).toUpperCase()}
-                    </div>
-                  )}
+                  <img src={p.photo} alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
                   <div style="min-width:0">
                     <p style="font-size:.95rem;font-weight:600;color:#2c1a0e;margin:0 0 2px">{p.name}</p>
                     <p style="font-size:.8rem;color:#6b4e35;margin:0">{p.role}</p>
@@ -426,78 +649,76 @@ const conversationId = sit?.conversation_id ?? '';
                 </div>
               ))}
             </div>
-            <a href={conversationId ? `/messages/${conversationId}` : '/messages'}
-              style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease"
-              onmouseover="this.style.background='#3e7a5b';this.style.borderColor='#3e7a5b';this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 28px rgba(110,84,56,.36)'"
-              onmouseout="this.style.background='#2f5d45';this.style.borderColor='#2f5d45';this.style.transform='translateY(0)';this.style.boxShadow='0 6px 20px rgba(110,84,56,.28)'">Message</a>
-            <button
-              type="button"
-              onclick="window.print()"
-              style="width:100%;margin-top:10px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:14px 20px;cursor:pointer;transition:background .25s ease, border-color .25s ease"
-              onmouseover="this.style.background='rgba(110,84,56,.1)';this.style.borderColor='#2f5d45'"
-              onmouseout="this.style.background='#fff';this.style.borderColor='rgba(110,84,56,.45)'">Print this pack</button>
+            <a href={msgUrl} class="cs-btn" style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease">Message</a>
+            <button type="button" data-print class="cs-print" style="width:100%;margin-top:10px;font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:14px 20px;cursor:pointer;transition:background .25s ease, border-color .25s ease">Print this pack</button>
           </div>
 
-          <!-- Plans changed -->
           <div data-noprint="1" style="background:#fff;border:1px solid rgba(44,26,14,.1);border-radius:18px;padding:22px 24px">
             <p style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0 0 14px">Plans changed?</p>
-            <a href={conversationId ? `/messages/${conversationId}` : '/messages'}
-              style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#b91c1c;text-decoration:none;border-bottom:1px solid rgba(185,28,28,.35);padding-bottom:2px;transition:color .2s"
-              onmouseover="this.style.color='#2c1a0e'"
-              onmouseout="this.style.color='#b91c1c'">Cancel this sit</a>
+            <a href={msgUrl} class="cs-cancel" style="font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#b91c1c;text-decoration:none;border-bottom:1px solid rgba(185,28,28,.35);padding-bottom:2px;transition:color .2s">Cancel this sit</a>
           </div>
-
         </aside>
       </div>
     </div>
   </main>
 </div>
 
-<script define:vars={{ sitId: id, initialChecks: checklistDone, totalChecks: CHECKS.length }}>
-let done = { ...initialChecks };
+<script is:inline define:vars={{ CHECKS, done, sitId }}>
+(() => {
+  const state = { done: Object.assign({}, done) };
+  const esc = v => { const d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; };
 
-function toggleCheck(i) {
-  done[String(i)] = !done[String(i)];
-  const on = done[String(i)];
+  const render = () => {
+    const count = CHECKS.filter((_, i) => state.done[i]).length;
+    document.querySelector('[data-check-count]').textContent = count + ' of ' + CHECKS.length + ' done';
+    document.querySelector('[data-check-bar]').setAttribute('style', 'height:100%;width:' + Math.round((count / CHECKS.length) * 100) + '%;border-radius:50px;background:linear-gradient(90deg,#2f5d45,#c4ab8a);transition:width .4s ease');
+    document.querySelector('[data-checklist]').innerHTML = CHECKS.map((label, i) => {
+      const on = !!state.done[i];
+      const style = 'display:flex;align-items:center;gap:12px;width:100%;text-align:left;font-family:\'Montserrat\',sans-serif;background:none;border:none;padding:2px 0;cursor:pointer';
+      const boxStyle = 'width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:.68rem;flex-shrink:0;transition:background .2s ease, color .2s ease, border-color .2s ease;' +
+        (on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:transparent;border:1.5px solid rgba(44,26,14,.18);');
+      const labelStyle = 'font-size:.93rem;line-height:1.5;transition:color .2s ease;' + (on ? 'color:#8a6a4f;text-decoration:line-through;' : 'color:#2c1a0e;');
+      return '<button type="button" data-check="' + i + '" aria-pressed="' + on + '" style="' + style + '">' +
+        '<span style="' + boxStyle + '">✓</span>' +
+        '<span style="' + labelStyle + '">' + esc(label) + '</span>' +
+      '</button>';
+    }).join('');
+  };
 
-  const box = document.querySelector('[data-box="' + i + '"]');
-  const lbl = document.querySelector('[data-lbl="' + i + '"]');
-  if (box) {
-    box.style.background = on ? '#2f5d45' : '#fff';
-    box.style.color = on ? '#fff' : 'transparent';
-    box.style.borderColor = on ? '#2f5d45' : 'rgba(44,26,14,.18)';
-  }
-  if (lbl) {
-    lbl.style.color = on ? '#6e5438' : '#2c1a0e';
-    lbl.style.textDecoration = on ? 'line-through' : '';
-  }
-
-  const count = Object.values(done).filter(Boolean).length;
-  const bar = document.getElementById('checkBar');
-  const cc = document.getElementById('checkCount');
-  if (bar) bar.style.width = Math.round((count / totalChecks) * 100) + '%';
-  if (cc) cc.textContent = count + ' of ' + totalChecks + ' done';
-
-  // Persist
-  fetch('/api/sits/checklist', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ sitId, index: i, value: on }),
-  }).catch(() => {});
-}
-
-// Loader on nav
-const loader = document.querySelector('[data-loader]');
-document.querySelectorAll('a[href]').forEach(a => {
-  const href = a.getAttribute('href') || '';
-  if (href.startsWith('#') || href.startsWith('http') || !loader) return;
-  a.addEventListener('click', e => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey) return;
-    loader.style.opacity = '1';
-    loader.style.pointerEvents = 'all';
-    setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  document.querySelector('[data-checklist]').addEventListener('click', e => {
+    const b = e.target.closest('[data-check]');
+    if (!b) return;
+    const i = b.getAttribute('data-check');
+    const before = Object.assign({}, state.done);
+    if (state.done[i]) delete state.done[i]; else state.done[i] = true;
+    render();
+    fetch('/api/sits/checklist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sit_id: sitId, done: state.done })
+    })
+      .then(r => { if (!r.ok) throw new Error(); })
+      .catch(() => { state.done = before; render(); });
   });
-});
+
+  document.querySelector('[data-print]').addEventListener('click', () => window.print());
+
+  const loader = document.querySelector('[data-loader]');
+  let hideT;
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+    a.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(hideT);
+      hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    });
+  });
+
+  render();
+})();
 </script>
 </body>
 </html>

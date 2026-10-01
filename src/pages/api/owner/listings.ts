@@ -59,6 +59,8 @@ export const POST: APIRoute = async ({ request }) => {
       const date_from   = (form.get('date_from') as string | null)?.trim() ?? '';
       const date_to     = (form.get('date_to') as string | null)?.trim() ?? '';
       const status      = (form.get('status') as string | null)?.trim() ?? 'active';
+      const arrival     = (form.get('arrival') as string | null)?.trim() || null;
+      const keys        = (form.get('keys') as string | null)?.trim() || null;
 
       if (!listingId || !title || !date_from || !date_to) {
         return new Response(null, { status: 302, headers: { Location: `/owner/listings/${listingId}/edit?error=missing` } });
@@ -70,7 +72,7 @@ export const POST: APIRoute = async ({ request }) => {
 
       const { error } = await supabase
         .from('listings')
-        .update({ title, description, date_from, date_to, status })
+        .update({ title, description, date_from, date_to, status, arrival, keys })
         .eq('id', listingId)
         .eq('profile_id', profile.id);
 
