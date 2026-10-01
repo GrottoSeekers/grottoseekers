@@ -28,7 +28,7 @@ export const GET: APIRoute = async ({ request }) => {
         id, listing_id, last_message_at, created_at,
         sitter:profiles!conversations_sitter_profile_id_fkey(id, name, profile_pic, slug),
         owner:profiles!conversations_owner_profile_id_fkey(id, name, profile_pic, slug),
-        listings(title)
+        listings(id, title)
       `)
       .eq(col, profile.id)
       .order('last_message_at', { ascending: false });
