@@ -105,6 +105,34 @@ CREATE TRIGGER listings_updated_at
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 
+-- ── MESSAGING ────────────────────────────────────────────────────────────────
+-- Owner ↔ sitter threads (/messages). These were created directly in Supabase
+-- when messaging shipped; recorded here so a fresh database matches the code.
+-- IF NOT EXISTS makes this a no-op where they already exist.
+CREATE TABLE IF NOT EXISTS conversations (
+  id                 UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  sitter_profile_id  UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  owner_profile_id   UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  listing_id         UUID        REFERENCES listings(id) ON DELETE SET NULL,
+  last_message_at    TIMESTAMPTZ,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS conversations_sitter_idx ON conversations (sitter_profile_id);
+CREATE INDEX IF NOT EXISTS conversations_owner_idx  ON conversations (owner_profile_id);
+
+CREATE TABLE IF NOT EXISTS messages (
+  id                 UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  conversation_id    UUID        NOT NULL REFERENCES conversations(id) ON DELETE CASCADE,
+  sender_profile_id  UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,  -- messages_sender_profile_id_fkey
+  body               TEXT        NOT NULL,
+  read_at            TIMESTAMPTZ,
+  created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS messages_conversation_idx ON messages (conversation_id, created_at);
+
+
 -- ── APPLICATIONS ─────────────────────────────────────────────────────────────
 -- A sitter applying for an owner's listing. Read by /applications (and counted
 -- on the Edit listing page); the owner shortlists or declines each one.

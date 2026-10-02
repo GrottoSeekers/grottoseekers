@@ -1,446 +1,654 @@
 ---
-import LoadingOverlay from '../../components/LoadingOverlay.astro';
-export const prerender = false;
+// Data: the active
+// listing and its
+// owner's profile (pets,
+// amenities, photos,
+// looking_for). Guests
+// enquire by email via
+// /api/enquiry; signed-in
+// users open a chat via
+// /api/messages/start.
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../../lib/auth';
+import {
+  supabase,
+} from
+  '../../lib/supabase';
+import {
+  arr,
+} from
+  '../../lib/dashboard';
 
-import { getSession } from '../../lib/auth';
-import { supabase } from '../../lib/supabase';
-
-const session = await getSession(Astro.request);
-let viewerProfile: any = null;
+const session =
+  await getSession(
+    Astro.request,
+  );
+let viewer: any = null;
 if (session) {
-  const { data } = await supabase
+  const vr =
+    await supabase
     .from('profiles')
-    .select('id, profile_type')
-    .eq('user_id', session.userId)
+    .select(
+      'id, profile_type',
+    )
+    .eq(
+      'user_id',
+      session.userId,
+    )
     .single();
-  viewerProfile = data;
+  viewer = vr.data;
 }
 
-const { id } = Astro.params;
-
-const { data: listing } = await supabase
+const { id } =
+  Astro.params;
+const lr =
+  await supabase
   .from('listings')
-  .select('*, profiles!inner(*)')
+  .select(
+    '*, profiles!inner(*)',
+  )
   .eq('id', id)
   .single();
-
-if (!listing || listing.status !== 'active') {
-  return Astro.redirect('/listings');
+const listing: any =
+  lr.data;
+if (
+  !listing ||
+  listing.status !==
+    'active'
+) {
+  return Astro.redirect(
+    '/listings',
+  );
 }
 
-const profile = listing.profiles as any;
-const pets: any[] = Array.isArray(profile?.pets_json) ? profile.pets_json : [];
-const amenities: string[] = Array.isArray(profile?.amenities_json) ? profile.amenities_json : [];
-const heroImages: any[] = Array.isArray(profile?.hero_images_json) ? profile.hero_images_json : [];
-const gallery: any[] = Array.isArray(profile?.gallery_json) ? profile.gallery_json : [];
-const allPhotos = [...heroImages, ...gallery];
+const owner: any =
+  listing.profiles;
+const pets = arr(
+  owner?.pets_json,
+);
+const amenities: string[] =
+  arr(
+    owner?.amenities_json,
+  );
+const heroImages = arr(
+  owner?.hero_images_json,
+).filter(
+  (i: any) => i?.src,
+);
+const gallery = arr(
+  owner?.gallery_json,
+).filter(
+  (i: any) => i?.src,
+);
+const allPhotos = [
+  ...heroImages,
+  ...gallery,
+];
+const heroSrc =
+  heroImages[0]?.src ||
+  '/images/' +
+  'slideshow-living-' +
+  'room.jpeg';
 
-function formatDate(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
-}
-function formatDateShort(d: string) {
-  return new Date(d + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-}
+const fmt = (
+  d: string,
+  long: boolean,
+) =>
+  new Date(
+    d + 'T00:00:00Z',
+  ).toLocaleDateString(
+    'en-GB',
+    long
+      ? {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }
+      : {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+      },
+  ).replace(',', '');
+const days = Math.max(
+  1,
+  Math.round(
+    (+new Date(
+      listing.date_to,
+    ) -
+      +new Date(
+        listing.date_from,
+      )) /
+      86400000,
+  ),
+);
+const dayLabel =
+  days +
+  (days === 1
+    ? ' day'
+    : ' days');
+const dateRange =
+  fmt(
+    listing.date_from,
+    false,
+  ) +
+  ' — ' +
+  fmt(
+    listing.date_to,
+    false,
+  );
+const fromLong = fmt(
+  listing.date_from,
+  true,
+);
+const toLong = fmt(
+  listing.date_to,
+  true,
+);
 
-function daysBetween(from: string, to: string) {
-  const ms = new Date(to + 'T00:00:00').getTime() - new Date(from + 'T00:00:00').getTime();
-  return Math.ceil(ms / 86400000);
-}
+// Sample copy, as in
+// the design:
+/*
+Cosy cottage with two spaniels
+We're away for two weeks in October and looking for a couple or solo sitter to look after the cottage and our two spaniels, Solomon and Chester.
+The house is a three-bedroom stone cottage on the edge of the village, with a walled garden the dogs can come and go from. The pub is a five-minute walk and Bath is twenty minutes by bus, so there's no need for a car.
+Sitters who are happy to be home most evenings, comfortable with two energetic dogs, and able to keep us updated with the odd photo. Previous sitting references appreciated but not essential.
+*/
+const paras = (
+  v: string,
+) =>
+  String(v || '')
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+const aboutParas = paras(
+  listing.description,
+);
+const wantParas = paras(
+  owner?.looking_for,
+);
 
-const duration = daysBetween(listing.date_from, listing.date_to);
-const canMessage = !!(viewerProfile && viewerProfile.id !== profile.id);
-const isLoggedIn = !!session;
-const dashUrl = viewerProfile?.profile_type === 'owner' ? '/owner/dashboard' : '/dashboard';
+const ownerName: string =
+  owner?.name || 'the owner';
+const ownerFirst =
+  ownerName.split(' ')[0];
+const ownerLoc: string =
+  owner?.location || '';
+const ownerHref =
+  owner?.slug
+    ? '/' + owner.slug
+    : '#enquiry';
+const initial = (
+  s: string,
+) =>
+  (s || '?')
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+const sendLine = `
+Send a message to Thomas James about this sit.
+`
+  .trim()
+  .replace(
+    'Thomas James',
+    ownerName,
+  );
+const msgLabel =
+  'Message ' + ownerFirst;
+
+const petCards = pets.map(
+  (p: any) => ({
+    name: p?.name || '',
+    photo:
+      p?.photo_url || '',
+    meta: [
+      p?.type,
+      p?.breed,
+      p?.age,
+    ]
+      .filter(Boolean)
+      .join(' · '),
+    temperament:
+      p?.temperament || '',
+    needs:
+      p?.special_needs ||
+      '',
+  }),
+);
+
+// At a glance. As in
+// the design:
+/*
+Two spaniels — Solomon & Chester
+Three-bed cottage, walled garden
+*/
+const petNames = pets
+  .map((p: any) => p?.name)
+  .filter(Boolean);
+const glancePets =
+  petNames.length > 2
+    ? petNames
+      .slice(0, 2)
+      .join(' & ') +
+      ' +' +
+      (petNames.length -
+        2) +
+      ' more'
+    : petNames.join(' & ');
+const glanceHome =
+  amenities
+    .slice(0, 3)
+    .join(', ') +
+  (amenities.length > 3
+    ? ' +' +
+      (amenities.length -
+        3) +
+      ' more'
+    : '');
+
+const isLoggedIn =
+  !!session;
+const canMessage = !!(
+  viewer &&
+  viewer.id !== owner.id
+);
+const dashUrl =
+  viewer?.profile_type ===
+  'owner'
+    ? '/owner/dashboard'
+    : '/dashboard';
+const waNumber = String(
+  owner?.whatsapp_number ||
+    '',
+).replace(/[^0-9]/g, '');
+const waHref =
+  'https://wa.me/' +
+  waNumber;
+const ownerId = owner.id;
+const listingId =
+  listing.id;
+const ownerSlug =
+  owner.slug || '';
+const dateFrom =
+  listing.date_from;
+const dateTo =
+  listing.date_to;
 ---
 
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="icon" type="image/png" href="/images/favicon.png" />
-    <link rel="apple-touch-icon" href="/images/app-tile.png" />
-    <meta property="og:image" content="/images/logo-tile.png" />
-    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
-    <title>{listing.title} — MYAH</title>
-    <style>
-      body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; }
-      * { box-sizing: border-box; }
-      a { color: #2f5d45; }
-      a:hover { color: #2c1a0e; }
-      input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
-      @keyframes gs-ring { to { transform: rotate(360deg); } }
-      @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-      [data-nav-link]:hover { color: #2f5d45 !important; }
-      [data-primary-btn]:hover { background: #3e7a5b !important; border-color: #3e7a5b !important; transform: translateY(-2px) !important; box-shadow: 0 12px 28px rgba(110,84,56,.36) !important; }
-      [data-card]:hover { box-shadow: 0 10px 34px rgba(44,26,14,.08) !important; border-color: rgba(110,84,56,.4) !important; }
-      [data-back]:hover { gap: 13px !important; color: #2c1a0e !important; }
-      input:focus, textarea:focus { border-color: #2f5d45 !important; box-shadow: 0 0 0 3px rgba(110,84,56,.15) !important; }
-      @media (max-width: 1000px) {
-        [data-header-nav] { display: none !important; }
-        [data-topbar] { padding: 16px 24px !important; }
-        [data-page-pad] { padding: 28px 24px 80px !important; }
-        [data-detail-grid] { grid-template-columns: minmax(0,1fr) !important; }
-        [data-aside] { position: static !important; }
-      }
-    </style>
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>{listing.title} — MYAH</title>
+  <style is:global>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 1000px) {
+      [data-header-nav] { display: none !important; }
+      [data-topbar] { padding: 16px 24px !important; }
+      [data-page-pad] { padding: 28px 24px 80px !important; }
+      [data-detail-grid] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+    }
+    @media (max-width: 700px) {
+      [data-eq-grid] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-foot-grid] { grid-template-columns: minmax(0,1fr) !important; gap: 36px !important; }
+    }
 
-    <div aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease" id="pageLoader">
-      <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
-        <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
-        <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
-        <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
-      </div>
+    [data-enquiry] input:focus, [data-enquiry] textarea:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; }
+    .sd-nav:hover { color:#2f5d45 !important; }
+    .sd-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px) !important; box-shadow:0 12px 28px rgba(110,84,56,.36) !important; }
+    .sd-btn:active { transform:translateY(0) scale(.98) !important; }
+    .sd-back:hover { gap:13px !important; color:#2c1a0e !important; }
+    .sd-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .sd-photo:hover { transform:scale(1.03) !important; }
+    .sd-wa:hover { background:#1da851 !important; transform:translateY(-2px) !important; }
+    .sd-wa:active { transform:translateY(0) scale(.98) !important; }
+    .sd-foot:hover { color:#c4ab8a !important; }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
     </div>
+  </div>
 
-    <header data-topbar="1" style="position:sticky;top:0;z-index:210;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;background:rgba(250,246,238,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(110,84,56,.2)">
-      <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;flex-shrink:0;letter-spacing:.28em">
-        <img src="/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
-        <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
-          <span style="color:#2f5d45;line-height:1">MYAH</span>
-          <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;line-height:1">Make Yourself At Home</span>
-        </span>
-      </a>
-      <nav data-header-nav="1" style="display:flex;align-items:center;gap:32px;flex-wrap:nowrap">
-        <a href="/" data-nav-link style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Home</a>
-        <a href="/listings" data-nav-link style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;border-bottom:2px solid #2f5d45;padding-bottom:3px">Browse sits</a>
-        {isLoggedIn ? (
-          <a href={dashUrl} data-nav-link style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Dashboard</a>
-        ) : (
-          <a href="/login" data-nav-link style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Log in</a>
-        )}
-        {!isLoggedIn && (
-          <a href="/signup" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s">Get started</a>
-        )}
-      </nav>
-    </header>
+  <header data-topbar="1" data-screen-label="Header" style="position:sticky;top:0;z-index:210;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;background:rgba(250,246,238,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;flex-shrink:0;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <nav data-header-nav="1" style="display:flex;align-items:center;gap:32px;flex-wrap:nowrap">
+      <a href="/" class="sd-nav" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Home</a>
+      <a href="/listings" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;border-bottom:2px solid #2f5d45;padding-bottom:3px">Browse sits</a>
+      {isLoggedIn ? (
+        <a href={dashUrl} class="sd-nav" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Dashboard</a>
+      ) : (
+        <a href="/login" class="sd-nav" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Log in</a>
+      )}
+      {!isLoggedIn && (
+        <a href="/signup" class="sd-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s">Get started</a>
+      )}
+    </nav>
+  </header>
 
-    <main data-page-pad="1" style="flex:1;padding:40px 48px 100px">
-      <div style="max-width:1100px;margin:0 auto">
-        <a data-back href="/listings" style="display:inline-flex;align-items:center;gap:9px;margin-bottom:28px;font-size:.78rem;color:#2f5d45;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:gap .2s, color .2s">&larr; Back to all sits</a>
+  <main data-screen-label="Sit detail" data-page-pad="1" style="flex:1;padding:40px 48px 100px">
+    <div style="max-width:1100px;margin:0 auto">
+      <a href="/listings" class="sd-back" style="display:inline-flex;align-items:center;gap:9px;margin-bottom:28px;font-size:.78rem;color:#2f5d45;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:gap .2s, color .2s">&larr; Back to all sits</a>
 
-        <div data-detail-grid="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start">
+      <div data-detail-grid="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start">
 
-          <!-- LEFT COLUMN -->
-          <div style="display:flex;flex-direction:column;gap:24px">
+        <div style="display:flex;flex-direction:column;gap:24px">
 
-            <!-- Hero image -->
-            <div style="position:relative;border-radius:20px;overflow:hidden;border:1px solid rgba(110,84,56,.22)">
-              {heroImages.length > 0 ? (
-                <img src={heroImages[0].src} alt={listing.title} style="width:100%;height:340px;object-fit:cover;display:block;background:#e9e0d2" />
-              ) : (
-                <div style="width:100%;height:340px;background:linear-gradient(135deg,#e9e0d2 0%,#d4c4a8 100%);display:block"></div>
-              )}
-              <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(44,26,14,.78) 0%, rgba(44,26,14,.1) 55%, transparent 100%)"></div>
-              <div style="position:absolute;left:0;right:0;bottom:0;padding:34px 34px 30px">
-                <p style="font-size:.74rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#c4ab8a;margin:0 0 12px;display:flex;align-items:center;gap:10px"><span style="width:22px;height:1px;background:#c4ab8a;display:block"></span>Available sit</p>
-                <h1 style="font-family:'Marcellus',serif;font-size:2.4rem;color:#fff;line-height:1.15;margin:0 0 18px">{listing.title}</h1>
-                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-                  {profile?.location && (
-                    <span style="display:flex;align-items:center;gap:8px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.4);backdrop-filter:blur(6px);color:#fff;padding:8px 16px;border-radius:50px;font-size:.78rem;font-weight:700;letter-spacing:.06em">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4ab8a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                      {profile.location}
-                    </span>
-                  )}
-                  <span style="display:flex;align-items:center;gap:8px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.4);backdrop-filter:blur(6px);color:#fff;padding:8px 16px;border-radius:50px;font-size:.78rem;font-weight:700;letter-spacing:.06em">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4ab8a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
-                    {formatDateShort(listing.date_from)} — {formatDateShort(listing.date_to)}
-                  </span>
-                  <span style="background:#2f5d45;color:#fff;padding:11px 22px;border-radius:50px;font-size:.74rem;font-weight:700;letter-spacing:.06em">{duration} day{duration !== 1 ? 's' : ''}</span>
-                </div>
+          <div style="position:relative;border-radius:20px;overflow:hidden;border:1px solid rgba(110,84,56,.22)">
+            <img src={heroSrc} alt={listing.title} style="width:100%;height:340px;object-fit:cover;display:block;background:#e9e0d2" />
+            <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(44,26,14,.78) 0%, rgba(44,26,14,.1) 55%, transparent 100%)"></div>
+            <div style="position:absolute;left:0;right:0;bottom:0;padding:34px 34px 30px">
+              <p style="font-size:.74rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:#c4ab8a;margin:0 0 12px;display:flex;align-items:center;gap:10px"><span style="width:22px;height:1px;background:#c4ab8a;display:block"></span>Available sit</p>
+              <h1 style="font-family:'Marcellus',serif;font-size:2.4rem;color:#fff;line-height:1.15;margin:0 0 18px;text-wrap:pretty">{listing.title}</h1>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                {ownerLoc && (
+                  <span style="display:flex;align-items:center;gap:8px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.4);backdrop-filter:blur(6px);color:#fff;padding:8px 16px;border-radius:50px;font-size:.78rem;font-weight:700;letter-spacing:.06em"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4ab8a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>{ownerLoc}</span>
+                )}
+                <span style="display:flex;align-items:center;gap:8px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.4);backdrop-filter:blur(6px);color:#fff;padding:8px 16px;border-radius:50px;font-size:.78rem;font-weight:700;letter-spacing:.06em"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#c4ab8a" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>{dateRange}</span>
+                <span style="background:#2f5d45;color:#fff;padding:11px 22px;border-radius:50px;font-size:.74rem;font-weight:700;letter-spacing:.06em">{dayLabel}</span>
               </div>
             </div>
+          </div>
 
-            <!-- About this sit -->
-            {listing.description && (
-              <section data-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-                <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">About this sit</h2>
-                <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
-                {listing.description.split('\n\n').map((p: string) => (
-                  <p style="font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0 0 14px">{p}</p>
-                ))}
-              </section>
-            )}
+          {aboutParas.length > 0 && (
+            <section class="sd-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">About this sit</h2>
+              <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
+              {aboutParas.map((p, i) => (
+                <p style={i < aboutParas.length - 1 ? 'font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0 0 14px' : 'font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0'}>{p}</p>
+              ))}
+            </section>
+          )}
 
-            <!-- Meet the pets -->
-            {pets.length > 0 && (
-              <section data-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-                <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Meet the pets</h2>
-                <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px">
-                  {pets.map((pet: any) => (
-                    <div style="display:flex;gap:16px;align-items:flex-start;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:20px">
-                      {pet.photo_url ? (
-                        <img src={pet.photo_url} alt={pet.name} style="width:84px;height:84px;border-radius:12px;object-fit:cover;flex-shrink:0" />
-                      ) : (
-                        <div style="width:84px;height:84px;border-radius:12px;flex-shrink:0;background:rgba(47,93,69,.1);display:flex;align-items:center;justify-content:center;font-size:2rem">🐾</div>
-                      )}
-                      <div style="min-width:0">
-                        <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;color:#2c1a0e;margin:0 0 5px">{pet.name}</h3>
-                        <p style="font-size:.8rem;color:#2f5d45;font-weight:700;letter-spacing:.04em;margin:0 0 8px">{pet.type}{pet.breed ? ` · ${pet.breed}` : ''}{pet.age ? ` · ${pet.age}` : ''}</p>
-                        {pet.temperament && <p style="font-size:.87rem;color:#6b4e35;line-height:1.6;margin:0">{pet.temperament}</p>}
-                        {pet.special_needs && <p style="font-size:.83rem;color:#b91c1c;line-height:1.55;margin:8px 0 0;display:flex;gap:7px"><span>⚠</span>{pet.special_needs}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <!-- Amenities -->
-            {amenities.length > 0 && (
-              <section data-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-                <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Home amenities</h2>
-                <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
-                <div style="display:flex;flex-wrap:wrap;gap:10px">
-                  {amenities.map((a: string) => (
-                    <span style="background:rgba(110,84,56,.08);color:#5c3d20;border:1px solid rgba(110,84,56,.28);padding:9px 18px;border-radius:50px;font-size:.85rem">{a}</span>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <!-- What they're looking for -->
-            {profile?.ideal_sitter && (
-              <section data-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-                <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">What they're looking for</h2>
-                <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
-                {profile.ideal_sitter.split('\n\n').map((p: string) => (
-                  <p style="font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0 0 14px">{p}</p>
-                ))}
-              </section>
-            )}
-
-            <!-- Photos -->
-            {allPhotos.length > 0 && (
-              <section data-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
-                <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Photos</h2>
-                <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px">
-                  {allPhotos.map((img: any) => (
-                    <img src={img.src} alt={img.alt ?? ''} style="width:100%;height:180px;object-fit:cover;border-radius:12px;display:block;background:#e9e0d2;transition:transform .5s ease" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            <!-- Enquiry form -->
-            <section id="enquiry" style="background:#fff;border:2px solid rgba(110,84,56,.35);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
-              <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Interested? Get in touch</h2>
-              <div style="width:40px;height:2px;background:#6e5438;margin:0 0 18px"></div>
-              <p style="font-size:.95rem;color:#6b4e35;margin:0 0 26px;line-height:1.7">Send a message to {profile.name} about this sit.</p>
-
-              {canMessage ? (
-                <div id="inAppCta" style="display:flex;flex-direction:column;align-items:flex-start;gap:12px">
-                  <button type="button" id="msgOwnerBtn" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;transition:background .2s, border-color .2s, transform .12s">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    Message {profile.name}
-                  </button>
-                  <p style="font-size:.8rem;color:#6b4e35;margin:0">Chat directly on MYAH</p>
-                </div>
-              ) : (
-                <form id="enquiryForm" style="display:flex;flex-direction:column;gap:18px">
-                  <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
-                    <div style="display:flex;flex-direction:column;gap:8px">
-                      <label for="eq_name" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Your name <span style="color:#2f5d45">*</span></label>
-                      <input type="text" id="eq_name" name="name" required placeholder="Jane Smith" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:8px">
-                      <label for="eq_email" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Your email <span style="color:#2f5d45">*</span></label>
-                      <input type="email" id="eq_email" name="email" required placeholder="you@example.com" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:8px;grid-column:1 / -1">
-                      <label for="eq_message" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Message <span style="color:#2f5d45">*</span></label>
-                      <textarea id="eq_message" name="message" rows="5" required placeholder="Tell them about your experience, availability, and why you'd be a great fit for this sit." style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .2s, box-shadow .2s"></textarea>
+          {petCards.length > 0 && (
+            <section class="sd-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Meet the pets</h2>
+              <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px">
+                {petCards.map((pet) => (
+                  <div style="display:flex;gap:16px;align-items:flex-start;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:20px">
+                    {pet.photo ? (
+                      <img src={pet.photo} alt={pet.name} style="width:84px;height:84px;border-radius:12px;object-fit:cover;flex-shrink:0" />
+                    ) : (
+                      <span style="width:84px;height:84px;border-radius:12px;flex-shrink:0;background:rgba(110,84,56,.14);color:#2f5d45;font-family:'Marcellus',serif;font-size:2rem;display:flex;align-items:center;justify-content:center">{initial(pet.name)}</span>
+                    )}
+                    <div style="min-width:0">
+                      <h3 style="font-family:'Marcellus',serif;font-size:1.15rem;color:#2c1a0e;margin:0 0 5px">{pet.name}</h3>
+                      <p style="font-size:.8rem;color:#2f5d45;font-weight:700;letter-spacing:.04em;margin:0 0 8px">{pet.meta}</p>
+                      {pet.temperament && <p style="font-size:.87rem;color:#6b4e35;line-height:1.6;margin:0">{pet.temperament}</p>}
+                      {pet.needs && <p style="font-size:.83rem;color:#b91c1c;line-height:1.55;margin:8px 0 0;display:flex;gap:7px"><span>⚠</span>{pet.needs}</p>}
                     </div>
                   </div>
-                  <button type="submit" id="sendBtn" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:8px;align-self:flex-start;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;transition:background .2s, border-color .2s, transform .12s">Send message</button>
-                  <p id="formStatus" style="font-size:.88rem;min-height:1.4em;margin:0;color:#2f7d4f"></p>
-                </form>
-              )}
-
-              {profile?.whatsapp_number && (
-                <div style="display:flex;align-items:center;gap:16px;margin-top:22px;padding-top:22px;border-top:1px solid rgba(44,26,14,.08);flex-wrap:wrap">
-                  <span style="font-size:.85rem;color:#6b4e35">or</span>
-                  <a href={`https://wa.me/${(profile.whatsapp_number as string).replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#25D366;color:#fff;text-decoration:none;padding:13px 26px;border-radius:50px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 6px 20px rgba(37,211,102,.25);transition:background .2s, transform .12s">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                    Message on WhatsApp
-                  </a>
-                </div>
-              )}
+                ))}
+              </div>
             </section>
-          </div>
+          )}
 
-          <!-- ASIDE (sticky) -->
-          <aside data-aside="1" style="position:sticky;top:104px;display:flex;flex-direction:column;gap:20px">
-            <!-- Owner card -->
-            <div data-card style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:28px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:22px;transition:box-shadow .3s ease, border-color .3s ease">
-              <div style="display:flex;gap:15px;align-items:center">
-                {profile.profile_pic ? (
-                  <img src={profile.profile_pic} alt={profile.name} style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
-                ) : (
-                  <div style="width:58px;height:58px;border-radius:50%;flex-shrink:0;border:2px solid rgba(110,84,56,.35);background:rgba(47,93,69,.1);display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif;font-size:1.4rem;color:#2f5d45">{(profile.name ?? 'O').charAt(0)}</div>
-                )}
-                <div style="min-width:0">
-                  <a href={`/${profile.slug}`} style="font-size:1.02rem;color:#2f5d45;font-weight:600;text-decoration:none;display:block;line-height:1.3">{profile.name}</a>
-                  {profile.location && (
-                    <p style="font-size:.85rem;color:#6b4e35;margin:3px 0 0;display:flex;align-items:center;gap:7px">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                      {profile.location}
-                    </p>
-                  )}
-                </div>
+          {amenities.length > 0 && (
+            <section class="sd-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Home amenities</h2>
+              <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+              <div style="display:flex;flex-wrap:wrap;gap:10px">
+                {amenities.map((a) => (
+                  <span style="background:rgba(110,84,56,.08);color:#5c3d20;border:1px solid rgba(110,84,56,.28);padding:9px 18px;border-radius:50px;font-size:.85rem">{a}</span>
+                ))}
               </div>
-              <div style="display:flex;flex-direction:column;gap:12px;padding-top:22px;border-top:1px solid rgba(44,26,14,.08)">
-                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px">
-                  <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;flex-shrink:0">From</span>
-                  <span style="font-size:.93rem;font-weight:600;color:#2c1a0e;text-align:right">{formatDate(listing.date_from)}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px">
-                  <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;flex-shrink:0">To</span>
-                  <span style="font-size:.93rem;font-weight:600;color:#2c1a0e;text-align:right">{formatDate(listing.date_to)}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding-top:12px;border-top:1px solid rgba(44,26,14,.08)">
-                  <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Length</span>
-                  <span style="background:rgba(110,84,56,.12);color:#2f5d45;font-weight:600;padding:7px 16px;border-radius:50px;font-size:.8rem;letter-spacing:.04em">{duration} days</span>
-                </div>
-              </div>
-              <a href="#enquiry" data-primary-btn style="display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                Message {profile.name?.split(' ')[0] ?? profile.name}
-              </a>
-              <p style="font-size:.8rem;color:#6b4e35;text-align:center;margin:-8px 0 0">Chat directly on MYAH</p>
-            </div>
+            </section>
+          )}
 
-            <!-- At a glance -->
-            <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
-              <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">At a glance</p>
-              <div style="display:flex;flex-direction:column;gap:11px;font-size:.88rem;color:#6b4e35">
-                {pets.length > 0 && (
-                  <span style="display:flex;align-items:center;gap:10px">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="8" cy="9" r="2.2"></circle><circle cx="16" cy="9" r="2.2"></circle><circle cx="12" cy="15.5" r="3"></circle></svg>
-                    {pets.length === 1 ? pets[0].name : `${pets.map((p: any) => p.name).slice(0, 2).join(' & ')}${pets.length > 2 ? ` +${pets.length - 2} more` : ''}`}
-                  </span>
-                )}
-                {amenities.length > 0 && (
-                  <span style="display:flex;align-items:center;gap:10px">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                    {amenities.slice(0, 3).join(', ')}{amenities.length > 3 ? ` +${amenities.length - 3} more` : ''}
-                  </span>
-                )}
-                <span style="display:flex;align-items:center;gap:10px">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>
-                  {duration} day{duration !== 1 ? 's' : ''}
-                </span>
+          {wantParas.length > 0 && (
+            <section class="sd-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">What they're looking for</h2>
+              <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
+              {wantParas.map((p, i) => (
+                <p style={i < wantParas.length - 1 ? 'font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0 0 14px' : 'font-size:.97rem;color:#2c1a0e;line-height:1.85;margin:0'}>{p}</p>
+              ))}
+            </section>
+          )}
+
+          {allPhotos.length > 0 && (
+            <section class="sd-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+              <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Photos</h2>
+              <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px">
+                {allPhotos.map((p) => (
+                  <img src={p.src} alt={p.alt || ''} class="sd-photo" style="width:100%;height:180px;object-fit:cover;border-radius:12px;display:block;background:#e9e0d2;transition:transform .5s ease" />
+                ))}
               </div>
-            </div>
-          </aside>
+            </section>
+          )}
+
+          <section id="enquiry" style="background:#fff;border:2px solid rgba(110,84,56,.35);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+            <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Interested? Get in touch</h2>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 18px"></div>
+            <p style="font-size:.95rem;color:#6b4e35;margin:0 0 26px;line-height:1.7">{sendLine}</p>
+            {canMessage ? (
+              <div style="display:flex;flex-direction:column;align-items:flex-start;gap:12px">
+                <button type="button" data-chat class="sd-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;align-self:flex-start;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">{msgLabel}</button>
+                <p style="font-size:.8rem;color:#6b4e35;margin:0">Chat directly on MYAH</p>
+              </div>
+            ) : (
+              <form data-enquiry="1" style="display:flex;flex-direction:column;gap:18px">
+                <div data-eq-grid="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <label for="eq_name" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Your name <span style="color:#2f5d45">*</span></label>
+                    <input type="text" id="eq_name" name="name" required="required" placeholder="Jane Smith" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <label for="eq_email" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Your email <span style="color:#2f5d45">*</span></label>
+                    <input type="email" id="eq_email" name="email" required="required" placeholder="you@example.com" style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:8px;grid-column:1 / -1">
+                    <label for="eq_message" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Message <span style="color:#2f5d45">*</span></label>
+                    <textarea id="eq_message" name="message" rows="5" required="required" placeholder="Tell them about your experience, availability, and why you'd be a great fit for this sit." style="border:1.5px solid rgba(44,26,14,.2);border-radius:10px;padding:12px 15px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .2s, box-shadow .2s"></textarea>
+                  </div>
+                </div>
+                <button type="submit" class="sd-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;align-self:flex-start;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:16px 36px;cursor:pointer;font-family:'Montserrat',sans-serif;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Send message</button>
+                <p data-status="1" style="font-size:.88rem;min-height:1.4em;margin:0;color:#2f7d4f"></p>
+              </form>
+            )}
+            {waNumber && (
+              <div style="display:flex;align-items:center;gap:16px;margin-top:22px;padding-top:22px;border-top:1px solid rgba(44,26,14,.08);flex-wrap:wrap">
+                <span style="font-size:.85rem;color:#6b4e35">or</span>
+                <a href={waHref} target="_blank" rel="noopener noreferrer" class="sd-wa" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;background:#25D366;color:#fff;text-decoration:none;padding:13px 26px;border-radius:50px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;box-shadow:0 6px 20px rgba(37,211,102,.25);transition:background .2s, transform .12s">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                  Message on WhatsApp
+                </a>
+              </div>
+            )}
+          </section>
         </div>
-      </div>
-    </main>
 
-    <!-- FOOTER -->
-    <footer style="background:#2c1a0e;color:rgba(255,255,255,.7);padding:0 48px 32px;border-top:3px solid #2f5d45">
-      <div style="max-width:1100px;margin:0 auto">
-        <div style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:56px;padding:64px 0 44px">
-          <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
-            <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.7rem;letter-spacing:.28em">
-              <img src="/images/logo-mark-white.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
-              <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(255,255,255,.28)">
-                <span style="color:#fff;line-height:1">MYAH</span>
-                <span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);line-height:1">Make Yourself At Home</span>
-              </span>
+        <aside data-aside="1" style="position:sticky;top:104px;display:flex;flex-direction:column;gap:20px">
+          <div class="sd-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:28px;box-shadow:0 1px 2px rgba(44,26,14,.04);display:flex;flex-direction:column;gap:22px;transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;gap:15px;align-items:center">
+              {owner.profile_pic ? (
+                <img src={owner.profile_pic} alt={ownerName} style="width:58px;height:58px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35)" />
+              ) : (
+                <span style="width:58px;height:58px;border-radius:50%;flex-shrink:0;border:2px solid rgba(110,84,56,.35);background:rgba(110,84,56,.14);color:#2f5d45;font-family:'Marcellus',serif;font-size:1.4rem;display:flex;align-items:center;justify-content:center">{initial(ownerName)}</span>
+              )}
+              <div style="min-width:0">
+                <a href={ownerHref} style="font-size:1.02rem;color:#2f5d45;font-weight:600;text-decoration:none;display:block;line-height:1.3">{ownerName}</a>
+                {ownerLoc && (
+                  <p style="font-size:.85rem;color:#6b4e35;margin:3px 0 0;display:flex;align-items:center;gap:7px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>{ownerLoc}</p>
+                )}
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;padding-top:22px;border-top:1px solid rgba(44,26,14,.08)">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px">
+                <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;flex-shrink:0">From</span>
+                <span style="font-size:.93rem;font-weight:600;color:#2c1a0e;text-align:right">{fromLong}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px">
+                <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;flex-shrink:0">To</span>
+                <span style="font-size:.93rem;font-weight:600;color:#2c1a0e;text-align:right">{toLong}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:14px;padding-top:12px;border-top:1px solid rgba(44,26,14,.08)">
+                <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Length</span>
+                <span style="background:rgba(110,84,56,.12);color:#2f5d45;font-weight:600;padding:7px 16px;border-radius:50px;font-size:.8rem;letter-spacing:.04em">{dayLabel}</span>
+              </div>
+            </div>
+            <a href="#enquiry" class="sd-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              {msgLabel}
             </a>
-            <div style="display:flex;flex-direction:column;gap:12px;max-width:340px">
-              <p style="font-family:'Lato',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#c4ab8a;margin:0">Make Yourself At Home</p>
-              <p style="line-height:1.8;font-size:.95rem;margin:0;color:rgba(255,255,255,.7)">Premium pet &amp; home care for peace of mind while you travel.</p>
+            <p style="font-size:.8rem;color:#6b4e35;text-align:center;margin:-8px 0 0">Chat directly on MYAH</p>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">At a glance</p>
+            <div style="display:flex;flex-direction:column;gap:11px;font-size:.88rem;color:#6b4e35">
+              {glancePets && (
+                <span style="display:flex;align-items:center;gap:10px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="8" cy="9" r="2.2"></circle><circle cx="16" cy="9" r="2.2"></circle><circle cx="12" cy="15.5" r="3"></circle></svg>{glancePets}</span>
+              )}
+              {glanceHome && (
+                <span style="display:flex;align-items:center;gap:10px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>{glanceHome}</span>
+              )}
+              <span style="display:flex;align-items:center;gap:10px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3.5 2"></path></svg>{dayLabel}</span>
             </div>
-            <a href="/signup" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;margin-top:6px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28)">Sign up for free</a>
           </div>
-          <div>
-            <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Platform</h4>
-            <ul style="list-style:none;padding:0;margin:0">
-              <li style="margin-bottom:12px"><a href="/signup" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem">Get started</a></li>
-              <li style="margin-bottom:12px"><a href="/login" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem">Log in</a></li>
-              <li style="margin-bottom:12px"><a href="/listings" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem">Browse sits</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Example profile</h4>
-            <ul style="list-style:none;padding:0;margin:0">
-              <li style="margin-bottom:12px"><a href="/callum-niamh" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem">Callum &amp; Niamh</a></li>
-            </ul>
-          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer data-screen-label="Footer" style="background:#2c1a0e;color:rgba(255,255,255,.7);padding:0 48px 32px;border-top:3px solid #2f5d45">
+    <div style="max-width:1100px;margin:0 auto">
+      <div data-foot-grid="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr);gap:56px;padding:64px 0 44px">
+        <div style="display:flex;flex-direction:column;gap:18px;align-items:flex-start">
+          <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.7rem;letter-spacing:.28em">
+            <img src="/images/logo-mark-white.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
+            <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(255,255,255,.28)"><span style="color:#fff;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.75);line-height:1">Make Yourself At Home</span></span>
+          </a>
+          <div style="display:flex;flex-direction:column;gap:12px;max-width:340px"><p style="font-family:'Lato',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:#c4ab8a;margin:0">Make Yourself At Home</p><p style="line-height:1.8;font-size:.95rem;margin:0;color:rgba(255,255,255,.7)">Premium pet &amp; home care for peace of mind while you travel.</p></div>
+          <a href="/signup" class="sd-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;margin-top:6px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">Sign up for free</a>
         </div>
-        <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">
-            <span>&copy; 2026 MYAH</span>
-            <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
-            <a href="#" style="color:rgba(255,255,255,.45);text-decoration:none">Privacy</a>
-            <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
-            <a href="#" style="color:rgba(255,255,255,.45);text-decoration:none">Terms</a>
-          </div>
-          <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with love for house &amp; pet sitters everywhere</span>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Platform</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="/signup" class="sd-foot" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Get started</a></li>
+            <li style="margin-bottom:12px"><a href="/login" class="sd-foot" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Log in</a></li>
+            <li style="margin-bottom:12px"><a href="/listings" class="sd-foot" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Browse sits</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Example profile</h4>
+          <ul style="list-style:none;padding:0;margin:0">
+            <li style="margin-bottom:12px"><a href="/callum" class="sd-foot" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Callum &amp; Niamh</a></li>
+          </ul>
         </div>
       </div>
-    </footer>
+      <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">
+          <span>&copy; 2026 MYAH</span>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <a href="#privacy" class="sd-foot" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s">Privacy</a>
+          <span style="width:4px;height:4px;border-radius:50%;background:rgba(196,171,138,.5);display:block"></span>
+          <a href="#terms" class="sd-foot" style="color:rgba(255,255,255,.45);text-decoration:none;transition:color .2s">Terms</a>
+        </div>
+        <span style="display:flex;align-items:center;gap:9px;font-size:.82rem;color:rgba(255,255,255,.55);font-style:italic">Made with <span style="font-style:normal">&#9825;</span> for house &amp; pet sitters everywhere</span>
+      </div>
+    </div>
+  </footer>
+</div>
 
-    <script define:vars={{ profileId: profile.id, listingId: listing.id, canMessage }}>
-      if (canMessage) {
-        document.getElementById('msgOwnerBtn')?.addEventListener('click', async () => {
-          const btn = document.getElementById('msgOwnerBtn');
-          if (!btn) return;
-          btn.disabled = true;
-          btn.textContent = 'Opening chat…';
-          try {
-            const res = await fetch('/api/messages/start', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ recipient_profile_id: profileId, listing_id: listingId }),
-            });
-            const data = await res.json();
-            if (data.conversation_id) {
-              window.location.href = `/messages/${data.conversation_id}`;
-            } else {
-              btn.textContent = 'Something went wrong';
-              btn.disabled = false;
-            }
-          } catch {
-            btn.textContent = 'Something went wrong';
-            btn.disabled = false;
-          }
-        });
-      }
+<script is:inline define:vars={{ ownerId, listingId, ownerSlug, dateFrom, dateTo }}>
+(() => {
+  const loader = document.querySelector('[data-loader]');
+  let hideT;
+  const show = (stay) => {
+    if (!loader) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    clearTimeout(hideT);
+    if (!stay) hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  };
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http')) return;
+    a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey) return; show(); });
+  });
 
-      document.getElementById('enquiryForm')?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const form = e.target as HTMLFormElement;
-        const status = document.getElementById('formStatus');
-        const btn = document.getElementById('sendBtn') as HTMLButtonElement;
-        if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
-        if (status) { status.textContent = ''; status.style.color = '#2f7d4f'; }
-
-        try {
-          const body = new FormData(form);
-          const res = await fetch('/api/enquiry', { method: 'POST', body });
-          if (res.ok) {
-            if (status) status.textContent = "Message sent! They'll be in touch soon.";
-            form.reset();
-          } else {
-            throw new Error();
-          }
-        } catch {
-          if (status) { status.textContent = 'Could not send — please try again.'; status.style.color = '#b91c1c'; }
-        } finally {
-          if (btn) { btn.disabled = false; btn.textContent = 'Send message'; }
-        }
+  // Signed in: open (or reuse) the conversation about this listing.
+  const chat = document.querySelector('[data-chat]');
+  chat && chat.addEventListener('click', async () => {
+    const label = chat.textContent;
+    chat.disabled = true;
+    chat.textContent = 'Opening chat…';
+    try {
+      const res = await fetch('/api/messages/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recipient_profile_id: ownerId, listing_id: listingId })
       });
-    </script>
+      const data = await res.json();
+      if (!data.conversation_id) throw new Error();
+      show(true);
+      window.location.href = '/messages/' + data.conversation_id;
+    } catch {
+      chat.textContent = 'Something went wrong';
+      setTimeout(() => { chat.textContent = label; chat.disabled = false; }, 2000);
+    }
+  });
 
-    <LoadingOverlay />
-  </body>
+  // Guests: email the owner through /api/enquiry.
+  const form = document.querySelector('[data-enquiry]');
+  form && form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const status = form.querySelector('[data-status]');
+    const btn = form.querySelector('button[type=submit]');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    status.textContent = ''; status.style.color = '#2f7d4f';
+    const fd = new FormData(form);
+    const body = new FormData();
+    body.append('slug', ownerSlug);
+    body.append('first_name', String(fd.get('name') || '').trim());
+    body.append('email', String(fd.get('email') || '').trim());
+    body.append('date_from', dateFrom);
+    body.append('date_to', dateTo);
+    body.append('message', String(fd.get('message') || '').trim());
+    try {
+      const res = await fetch('/api/enquiry', { method: 'POST', body });
+      if (!res.ok) throw new Error();
+      status.textContent = "Message sent! They'll be in touch soon.";
+      form.reset();
+    } catch {
+      status.textContent = 'Could not send — please try again.';
+      status.style.color = '#b91c1c';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Send message';
+    }
+  });
+})();
+</script>
+</body>
 </html>
