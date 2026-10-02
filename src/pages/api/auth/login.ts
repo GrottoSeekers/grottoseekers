@@ -11,9 +11,12 @@ export const POST: APIRoute = async ({ request }) => {
     const form = await request.formData();
     const email = (form.get('email') as string ?? '').trim().toLowerCase();
     const password = (form.get('password') as string) ?? '';
+    // Signing in from the admin page returns there (only /admin paths allowed).
+    const nextRaw = String(form.get('next') ?? '');
+    const next = /^\/admin(\/[a-z0-9/-]*)?$/.test(nextRaw) ? nextRaw : '';
 
     if (!email || !password) {
-      return new Response(null, { status: 302, headers: { Location: '/login?error=missing' } });
+      return new Response(null, { status: 302, headers: { Location: next ? next + '?error=missing' : '/login?error=missing' } });
     }
 
     const { data: user } = await supabase
@@ -25,7 +28,7 @@ export const POST: APIRoute = async ({ request }) => {
     const validPassword = user ? await bcrypt.compare(password, user.password) : false;
 
     if (!user || !validPassword) {
-      return new Response(null, { status: 302, headers: { Location: '/login?error=invalid' } });
+      return new Response(null, { status: 302, headers: { Location: next ? next + '?error=invalid' : '/login?error=invalid' } });
     }
 
     // Straight to their own side: their dashboard, or their create-profile page.
@@ -35,7 +38,7 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: landingFor(acct),
+        Location: next || landingFor(acct),
         'Set-Cookie': sessionCookie(token),
       },
     });

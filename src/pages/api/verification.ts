@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { safeUpdate } from '../../lib/db';
 import { notify } from '../../lib/notify';
 import { FOUNDERS_SLUG } from '../../data/founders';
+import { emailNewIdCheck } from '../../lib/email';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -81,7 +82,10 @@ export const POST: APIRoute = async ({ request }) => {
       return json({ error: 'setup_needed', detail: 'The ID check columns are missing — run supabase/id-verification.sql.' }, 500);
     }
 
-    // Tell the founders there is a check to review.
+    // Email the founders straight away so they can review it.
+    await emailNewIdCheck(profile, acct.side);
+
+    // And drop it in their MYAH notifications.
     try {
       const { data: f } = await supabase.from('profiles').select('id').eq('slug', FOUNDERS_SLUG).limit(1);
       const fid = (f as any)?.[0]?.id;
@@ -90,7 +94,7 @@ export const POST: APIRoute = async ({ request }) => {
           kind: 'urgent',
           title: (profile.name || 'A member') + ' sent their ID for review',
           body: (acct.side === 'owner' ? 'Home owner' : 'Sitter') + ' · check the photo ID against the selfie.',
-          link: '/admin/verifications',
+          link: '/admin',
           cta: 'Review ID checks',
         });
       }

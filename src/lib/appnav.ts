@@ -31,7 +31,7 @@ export function buildNav(side: NavSide, active = '', admin = false) {
       { key: 'availability', label: 'Availability', href: '/availability' },
       { key: 'verification', label: 'Verification', href: '/verification' },
       { key: 'notifications', label: 'Notifications', href: '/notifications' },
-    ]).concat(admin ? [{ key: 'idchecks', label: 'ID checks', href: '/admin/verifications' }] : []).map((l) => ({
+    ]).concat(admin ? [{ key: 'idchecks', label: 'ID checks', href: '/admin' }] : []).map((l) => ({
     ...l,
     on: l.key === active,
   }));

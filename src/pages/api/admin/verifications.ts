@@ -9,7 +9,7 @@ import { notify } from '../../../lib/notify';
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
-// Founders approve or reject an ID check from /admin/verifications.
+// Founders approve or reject an ID check from /admin.
 //   { profile_id, decision: 'approve' | 'reject', reason? }
 // Either way the uploaded photos are deleted straight after the decision.
 export const POST: APIRoute = async ({ request }) => {
