@@ -416,31 +416,31 @@ const listings =
   document.querySelectorAll('.len-chip').forEach(btn => {
     btn.addEventListener('click', () => {
       state.len = btn.dataset.len;
-      document.querySelectorAll('.len-chip').forEach(b => { (b as HTMLElement).style.cssText = chipStyle(b.dataset.len === state.len); });
+      document.querySelectorAll('.len-chip').forEach(b => { (b).style.cssText = chipStyle(b.dataset.len === state.len); });
       render();
     });
   });
 
-  document.getElementById('q')?.addEventListener('input', e => { state.q = (e.target as HTMLInputElement).value; render(); });
-  document.getElementById('place')?.addEventListener('change', e => { state.place = (e.target as HTMLSelectElement).value; render(); });
-  document.getElementById('pet')?.addEventListener('change', e => { state.pet = (e.target as HTMLSelectElement).value; render(); });
-  document.getElementById('sort')?.addEventListener('change', e => { state.sort = (e.target as HTMLSelectElement).value; render(); });
+  document.getElementById('q')?.addEventListener('input', e => { state.q = (e.target).value; render(); });
+  document.getElementById('place')?.addEventListener('change', e => { state.place = (e.target).value; render(); });
+  document.getElementById('pet')?.addEventListener('change', e => { state.pet = (e.target).value; render(); });
+  document.getElementById('sort')?.addEventListener('change', e => { state.sort = (e.target).value; render(); });
   document.getElementById('clearBtn')?.addEventListener('click', () => {
     state = { q: '', place: 'all', pet: 'all', len: 'any', sort: 'soonest' };
-    (document.getElementById('q') as HTMLInputElement).value = '';
-    (document.getElementById('place') as HTMLSelectElement).value = 'all';
-    (document.getElementById('pet') as HTMLSelectElement).value = 'all';
-    (document.getElementById('sort') as HTMLSelectElement).value = 'soonest';
-    document.querySelectorAll('.len-chip').forEach(b => { (b as HTMLElement).style.cssText = chipStyle(b.dataset.len === 'any'); });
+    (document.getElementById('q')).value = '';
+    (document.getElementById('place')).value = 'all';
+    (document.getElementById('pet')).value = 'all';
+    (document.getElementById('sort')).value = 'soonest';
+    document.querySelectorAll('.len-chip').forEach(b => { (b).style.cssText = chipStyle(b.dataset.len === 'any'); });
     render();
   });
 
-  const loader = document.querySelector('[data-loader]') as HTMLElement | null;
+  const loader = document.querySelector('[data-loader]');
   document.querySelectorAll('a[href]').forEach(a => {
     const href = a.getAttribute('href') || '';
     if (href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto') || href.startsWith('tel')) return;
-    a.addEventListener('click', (e: Event) => {
-      if ((e as MouseEvent).metaKey || (e as MouseEvent).ctrlKey || (e as MouseEvent).shiftKey) return;
+    a.addEventListener('click', (e) => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
       if (loader) { loader.style.opacity = '1'; loader.style.pointerEvents = 'all'; }
     });
   });

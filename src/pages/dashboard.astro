@@ -612,7 +612,7 @@ const tabs = [
             {pvReviews.length > 0 && (
               <div style="padding:22px 26px">
                 <p style="font-size:.58rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">What pet owners say</p>
-                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+                <div data-prev-revs="1" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
                   {pvReviews.map((r) => (
                     <div style="background:#fff;border:1px solid rgba(110,84,56,.18);border-radius:10px;padding:13px">
                       <span style="color:#2f5d45;font-size:.55rem;display:block;margin-bottom:6px;letter-spacing:.2em">★★★★★</span>

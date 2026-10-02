@@ -34,6 +34,9 @@ img, video { max-width: 100%; }
   [data-topnav] [data-acct-links] {
     flex-basis: 100% !important;
     justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+    overflow: visible !important;
+    row-gap: 8px !important;
     padding: 4px 0 2px !important;
     gap: 18px !important;
   }
@@ -72,6 +75,10 @@ img, video { max-width: 100%; }
   }
   h2[style*="font-size:2.5rem"], h2[style*="font-size:2.4rem"] { font-size: 1.8rem !important; }
   h2[style*="font-size:1.7rem"], h2[style*="font-size:1.6rem"] { font-size: 1.4rem !important; }
+  h1[style*="font-size:2.9rem"], h1[style*="font-size:3rem"], h1[style*="font-size:2.8rem"],
+  h2[style*="font-size:3rem"], h2[style*="font-size:2.9rem"], h2[style*="font-size:2.8rem"] {
+    font-size: 2.15rem !important; line-height: 1.15 !important;
+  }
   p[style*="font-size:3.4rem"] { font-size: 2.6rem !important; }
 
   /* ── Rows that are side by side on desktop stack on phones ─────────────── */
@@ -79,14 +86,34 @@ img, video { max-width: 100%; }
   [style*="grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,1fr)"],
   [style*="grid-template-columns:repeat(2,minmax(0,1fr))"]:not([data-keep-cols]),
   [style*="grid-template-columns:.7fr 1.6fr"],
-  [style*="grid-template-columns:1fr 1.4fr"] {
+  [style*="grid-template-columns:1fr 1.4fr"],
+  [style*="grid-template-columns:minmax(0,1fr) minmax(0,.85fr)"],
+  [style*="grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr)"],
+  [data-prev-revs] {
     grid-template-columns: minmax(0, 1fr) !important;
   }
+  [style*="grid-template-columns:minmax(0,1fr) minmax(0,.85fr)"] { gap: 18px !important; }
+
+  /* Browse filters: search on its own row, then two per row */
+  [style*="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+  [style*="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)"] > :first-child { grid-column: 1 / -1; }
   footer [style*="grid-template-columns"] { gap: 32px !important; padding: 44px 0 30px !important; }
   footer { padding-left: 20px !important; padding-right: 20px !important; }
 
   /* ── Big buttons: a touch smaller so labels fit ────────────────────────── */
   [style*="padding:16px 36px"] { padding: 14px 26px !important; }
+
+  /* Profile editors: photo tiles fill the row, three across */
+  .ep-thumb, .ep-add, .eo-thumb, .eo-add {
+    width: calc((100% - 24px) / 3) !important;
+    height: auto !important;
+    aspect-ratio: 4 / 3;
+  }
+
+  [data-amenities] { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 8px !important; }
 
   /* Fixed save bars */
   [data-save-bar], [data-savebar] { padding: 12px 16px !important; }
