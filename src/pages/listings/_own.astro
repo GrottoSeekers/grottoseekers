@@ -23,12 +23,12 @@ const solid = btn + 'color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;bo
 const ghost = btn + 'color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.4);';
 ---
 {variant === 'banner' && (
-  <div data-own-banner="1" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:-8px 0 24px;padding:14px 20px;border-radius:14px;background:#2c1a0e;color:#fff;font-size:.88rem">
-    <span><strong style="font-weight:600">This is your sit.</strong> It's shown here exactly as sitters see it.</span>
+  <div data-own-banner="1" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:-8px 0 24px;padding:16px 22px;border-radius:14px;background:#fff;border:1px solid rgba(110,84,56,.28);border-left:4px solid #2f5d45;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.9rem">
+    <span style="color:#6b4e35"><strong style="font-weight:600;color:#2c1a0e">This is your sit.</strong> It's shown here exactly as sitters see it.</span>
     <span style="display:flex;gap:16px;flex-wrap:wrap">
-      <a href={appsHref} style="color:#fff;font-weight:600">Applications{live.length ? ' (' + live.length + ')' : ''}</a>
-      <a href={editHref} style="color:#fff;font-weight:600">Edit</a>
-      <a href="/owner/listings/new" style="color:#fff;font-weight:600">Post another</a>
+      <a href={appsHref} style="color:#2f5d45;font-weight:600;font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid rgba(47,93,69,.4);padding-bottom:2px">Applications{live.length ? ' (' + live.length + ')' : ''}</a>
+      <a href={editHref} style="color:#2f5d45;font-weight:600;font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid rgba(47,93,69,.4);padding-bottom:2px">Edit</a>
+      <a href="/owner/listings/new" style="color:#2f5d45;font-weight:600;font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid rgba(47,93,69,.4);padding-bottom:2px">Post another</a>
     </span>
   </div>
 )}
@@ -58,7 +58,7 @@ const ghost = btn + 'color:#2f5d45;background:#fff;border:1.5px solid rgba(110,8
               <span style="display:block;font-weight:600;color:#2c1a0e;font-size:.92rem">{a.name}</span>
               <span style="display:block;font-size:.78rem;color:#8a6a4f">Applied {a.when}</span>
             </span>
-            <span style={'font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:50px;' + (a.status === 'new' ? 'background:#2f5d45;color:#fff' : 'background:#e9e0d2;color:#5c3d20')}>{STATUS[a.status] || a.status}</span>
+            <span style={'font-size:.68rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:50px;' + (a.status === 'new' ? 'background:#2f5d45;color:#fff' : 'background:#e9e0d2;color:#5c3d20')}>{STATUS[a.status] || a.status}</span>
           </li>
         ))}
         {live.length > 4 && <li style="font-size:.84rem;color:#6b4e35;padding-left:4px">+ {live.length - 4} more</li>}

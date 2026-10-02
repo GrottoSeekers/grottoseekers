@@ -451,17 +451,18 @@ const listingId =
     const shortlisted = APPLICANTS.filter(a => statusOf(a.id) === 'shortlisted');
     const confirmed = APPLICANTS.find(a => statusOf(a.id) === 'confirmed');
 
-    q('[data-intro]').textContent = counts.new + ' still to look at, ' + counts.shortlist + ' shortlisted. Every one of them can do at least part of your dates — the fit note on each says how much.';
+    // Just the heading and the filter bubbles: no summary sentence.
+    q('[data-intro]').style.display = 'none';
 
     q('[data-tabs]').innerHTML = tabDefs.map(t => {
-      const style = 'display:inline-flex;align-items:center;gap:9px;font-family:\'Montserrat\',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.08em;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;' +
+      const style = 'display:inline-flex;align-items:center;gap:9px;font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:11px 20px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;' +
         (tab === t.key ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);');
-      const countStyle = 'font-size:.7rem;padding:2px 8px;border-radius:50px;' + (tab === t.key ? 'background:rgba(255,255,255,.25);color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;');
+      const countStyle = 'font-size:.7rem;letter-spacing:.06em;padding:2px 8px;border-radius:50px;' + (tab === t.key ? 'background:rgba(255,255,255,.25);color:#fff;' : 'background:rgba(110,84,56,.14);color:#2f5d45;');
       return '<button type="button" data-tab="' + t.key + '" style="' + style + '">' + t.label + ' <span style="' + countStyle + '">' + t.count + '</span></button>';
     }).join('');
 
     q('[data-sorts]').innerHTML = sortDefs.map(s => {
-      const style = 'font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.06em;padding:9px 16px;border-radius:50px;cursor:pointer;transition:background .2s ease, color .2s ease, border-color .2s ease;' +
+      const style = 'font-family:\'Montserrat\',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:9px 16px;border-radius:50px;cursor:pointer;transition:background .2s ease, color .2s ease, border-color .2s ease;' +
         (sort === s.key ? 'background:rgba(110,84,56,.14);color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);' : 'background:#fff;color:#6b4e35;border:1.5px solid rgba(44,26,14,.1);');
       return '<button type="button" data-sort="' + s.key + '" style="' + style + '">' + s.label + '</button>';
     }).join('');

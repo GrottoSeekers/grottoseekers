@@ -6,6 +6,17 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 html, body { overflow-x: clip; }
+
+/* ── Brand typography (every page) ────────────────────────────────────────
+   Montserrat: 400 / 500 / 600 only. Lato: 700 is allowed for labels.
+   Marcellus has a single weight: never let the browser fake a bold.     */
+[style*="font-weight:700"]:not([style*="Lato"]),
+[style*="font-weight: 700"]:not([style*="Lato"]),
+[style*="font-weight:800"], [style*="font-weight:bold"] { font-weight: 600 !important; }
+strong, b { font-weight: 600; }
+h1, h2, h3, h4, [style*="Marcellus"] { font-weight: 400; }
+[style*="Marcellus"] { font-weight: 400 !important; }
+
 img, video { max-width: 100%; }
 
 @media (max-width: 640px) {

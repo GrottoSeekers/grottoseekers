@@ -965,16 +965,16 @@ const enquiryTitlePh =
     if (!main) return;
     var box = document.createElement('div');
     box.setAttribute('data-welcome', '1');
-    box.setAttribute('style', 'max-width:1100px;margin:0 auto 28px;background:#2c1a0e;color:#fff;border-radius:18px;padding:24px 26px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between');
+    box.setAttribute('style', 'max-width:1100px;margin:0 auto 28px;background:#fff;color:#2c1a0e;border:1px solid rgba(110,84,56,.28);border-left:4px solid #2f5d45;border-radius:18px;padding:24px 26px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between');
     box.innerHTML =
       '<div style="flex:1 1 320px;min-width:0">' +
-        '<p style="margin:0 0 6px;font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#c4ab8a">Your profile is live</p>' +
-        '<h2 style="margin:0 0 8px;font-family:Marcellus,serif;font-size:1.5rem;font-weight:400;line-height:1.25">Next: make your page stand out</h2>' +
-        '<p style="margin:0;font-size:.92rem;line-height:1.65;color:rgba(255,255,255,.8)">Add photos of you and the pets you have looked after, and any reviews you already have. Save at the bottom, then browse sits and apply from your dashboard.</p>' +
+        '<p style="margin:0 0 6px;font-family:Lato,sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f">Your profile is live</p>' +
+        '<h2 style="margin:0 0 8px;font-family:Marcellus,serif;font-size:1.5rem;font-weight:400;line-height:1.25;color:#2c1a0e">Next: make your page stand out</h2>' +
+        '<p style="margin:0;font-size:.92rem;line-height:1.65;color:#6b4e35">Add photos of you and the pets you have looked after, and any reviews you already have. Save at the bottom, then browse sits and apply from your dashboard.</p>' +
       '</div>' +
       '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
         '<a href="#photos" style="display:inline-flex;align-items:center;justify-content:center;padding:13px 22px;border-radius:50px;background:#2f5d45;color:#fff;text-decoration:none;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Add photos</a>' +
-        '<a href="/dashboard" style="display:inline-flex;align-items:center;justify-content:center;padding:13px 22px;border-radius:50px;border:1.5px solid rgba(255,255,255,.4);color:#fff;text-decoration:none;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Go to my dashboard</a>' +
+        '<a href="/dashboard" style="display:inline-flex;align-items:center;justify-content:center;padding:13px 22px;border-radius:50px;border:1.5px solid rgba(110,84,56,.4);background:#fff;color:#2f5d45;text-decoration:none;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Go to my dashboard</a>' +
       '</div>';
     main.insertBefore(box, main.firstChild);
   })();
