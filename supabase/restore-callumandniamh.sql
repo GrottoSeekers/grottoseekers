@@ -1,5 +1,6 @@
 -- Restore Callum & Niamh's reviews, photo captions and review total.
 -- Safe to run more than once. Only touches the callumandniamh profile.
+-- Works whether the review/gallery columns are stored as JSON or as text.
 
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS review_total INT;
 
@@ -103,7 +104,7 @@ UPDATE profiles p SET
     ),
     extra AS (
       SELECT r, 1000 + n AS n
-      FROM jsonb_array_elements(COALESCE(p.reviews_json, '[]'::jsonb)) WITH ORDINALITY t(r, n)
+      FROM jsonb_array_elements(CASE WHEN jsonb_typeof(to_jsonb(p.reviews_json)) = 'array' THEN to_jsonb(p.reviews_json) WHEN jsonb_typeof(to_jsonb(p.reviews_json)) = 'string' AND left(trim(p.reviews_json::text), 1) = '[' THEN p.reviews_json::text::jsonb ELSE '[]'::jsonb END) WITH ORDINALITY t(r, n)
       WHERE lower(trim(r->>'name')) NOT IN (SELECT lower(trim(r->>'name')) FROM orig)
     )
     SELECT jsonb_agg(r ORDER BY n) FROM (SELECT * FROM orig UNION ALL SELECT * FROM extra) a
@@ -276,7 +277,7 @@ UPDATE profiles p SET
     ),
     extra AS (
       SELECT g, 1000 + n AS n
-      FROM jsonb_array_elements(COALESCE(p.gallery_json, '[]'::jsonb)) WITH ORDINALITY t(g, n)
+      FROM jsonb_array_elements(CASE WHEN jsonb_typeof(to_jsonb(p.gallery_json)) = 'array' THEN to_jsonb(p.gallery_json) WHEN jsonb_typeof(to_jsonb(p.gallery_json)) = 'string' AND left(trim(p.gallery_json::text), 1) = '[' THEN p.gallery_json::text::jsonb ELSE '[]'::jsonb END) WITH ORDINALITY t(g, n)
       WHERE regexp_replace(regexp_replace(g->>'src', '^https?://(www\.)?grottositters\.com', ''), '^public/', '/')
             NOT IN (SELECT g->>'src' FROM orig)
     )
