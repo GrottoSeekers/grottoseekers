@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /owner/
+Disallow: /messages
+Disallow: /notifications
+
+Sitemap: https://myahsits.com/sitemap.xml
