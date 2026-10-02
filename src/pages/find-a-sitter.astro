@@ -1,0 +1,677 @@
+---
+// Data: the owner's
+// listing (?listing= or
+// their next active one),
+// sitter `profiles`
+// (photo, base, joint,
+// verified_id, reviews,
+// bio, availability),
+// sit counts from `sits`
+// and this listing's
+// `invites`. Invites
+// post to /api/invites.
+export const prerender =
+  false;
+import {
+  getSession,
+} from '../lib/auth';
+import {
+  supabase,
+} from '../lib/supabase';
+import {
+  arr,
+  clip,
+} from '../lib/dashboard';
+
+const session =
+  await getSession(
+    Astro.request,
+  );
+if (!session) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+
+const pr =
+  await supabase
+  .from('profiles')
+  .select('*')
+  .eq(
+    'user_id',
+    session.userId,
+  )
+  .single();
+const me: any = pr.data;
+if (!me) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+if (
+  me.profile_type !==
+  'owner'
+) {
+  return Astro.redirect(
+    '/dashboard',
+  );
+}
+
+// The listing invites
+// go out for.
+const todayKey =
+  new Date()
+  .toISOString()
+  .slice(0, 10);
+const wanted =
+  Astro.url.searchParams
+  .get('listing');
+let listing: any = null;
+try {
+  const lr =
+    await supabase
+    .from('listings')
+    .select(
+      'id, title,' +
+      ' date_from,' +
+      ' date_to, status',
+    )
+    .eq(
+      'profile_id',
+      me.id,
+    )
+    .order('date_from', {
+      ascending: true,
+    });
+  const mine =
+    lr.data ?? [];
+  listing =
+    (wanted &&
+      mine.find(
+        (l: any) =>
+          l.id === wanted,
+      )) ||
+    mine.find(
+      (l: any) =>
+        l.status ===
+          'active' &&
+        l.date_to >=
+          todayKey,
+    ) ||
+    null;
+} catch {}
+if (!listing) {
+  return Astro.redirect(
+    '/owner/listings/new',
+  );
+}
+
+// Listing card. As in
+// the design:
+/*
+Cosy cottage with two spaniels
+4 – 18 Oct 2026 · Woolley, near Bath
+*/
+const MON = [
+  'Jan', 'Feb', 'Mar',
+  'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep',
+  'Oct', 'Nov', 'Dec',
+];
+const parts = (
+  s: string,
+) => {
+  const [y, m, d] = s
+    .split('-')
+    .map(Number);
+  return { y, m, d };
+};
+const a =
+  parts(listing.date_from);
+const b =
+  parts(listing.date_to);
+const sameMonth =
+  a.y === b.y &&
+  a.m === b.m;
+// "4 – 18 Oct"
+const shortRange =
+  (sameMonth
+    ? a.d
+    : a.d + ' ' +
+      MON[a.m - 1]) +
+  ' – ' +
+  b.d + ' ' +
+  MON[b.m - 1];
+const dateLabel =
+  shortRange + ' ' + b.y;
+const ownerLoc: string =
+  me.location || '';
+const listLine = ownerLoc
+  ? dateLabel + ' · ' +
+    ownerLoc
+  : dateLabel;
+const hero = arr(
+  me.hero_images_json,
+);
+const listPic =
+  hero[0]?.src ||
+  me.profile_pic ||
+  '/images/solomon-1.jpg';
+const listTitle: string =
+  listing.title || '';
+
+// Listing days, for
+// "Free for my dates".
+const listDays: string[] =
+  [];
+{
+  const d = new Date(
+    listing.date_from +
+      'T00:00:00Z',
+  );
+  const end = new Date(
+    listing.date_to +
+      'T00:00:00Z',
+  );
+  let guard = 0;
+  while (
+    d <= end &&
+    guard++ < 400
+  ) {
+    listDays.push(
+      d.toISOString()
+      .slice(0, 10),
+    );
+    d.setUTCDate(
+      d.getUTCDate() + 1,
+    );
+  }
+}
+
+// Same area: a word of
+// the sitter's base
+// appears in the
+// owner's location.
+const words = (
+  s: string,
+) =>
+  s
+    .toLowerCase()
+    .split(/[^a-z]+/)
+    .filter(
+      (w) => w.length > 2,
+    );
+const ownerWords = words(
+  ownerLoc,
+);
+const STOP = [
+  'near', 'the', 'and',
+  'upon', 'under',
+];
+
+let rows: any[] = [];
+try {
+  const sr =
+    await supabase
+    .from('profiles')
+    .select('*')
+    .eq(
+      'profile_type',
+      'sitter',
+    )
+    .limit(200);
+  rows = sr.data ?? [];
+} catch {}
+
+// Sit counts.
+const sitsBy: Record<
+  string,
+  number
+> = {};
+try {
+  const ids = rows
+    .map((r) => r.user_id)
+    .filter(Boolean);
+  if (ids.length) {
+    const cr =
+      await supabase
+      .from('sits')
+      .select(
+        'sitter_user_id',
+      )
+      .in(
+        'sitter_user_id',
+        ids,
+      );
+    for (const s of
+      cr.data ?? []) {
+      const k =
+        s.sitter_user_id;
+      sitsBy[k] =
+        (sitsBy[k] || 0) +
+        1;
+    }
+  }
+} catch {}
+
+const sitters = rows.map(
+  (r) => {
+    const reviews = arr(
+      r.reviews_json,
+    );
+    const rated = reviews
+      .map((x: any) =>
+        Number(x?.rating),
+      )
+      .filter(
+        (n: number) =>
+          n >= 1 && n <= 5,
+      );
+    const rating =
+      rated.length
+        ? Math.round(
+          rated.reduce(
+            (s: number,
+              n: number) =>
+              s + n,
+            0,
+          ) / rated.length,
+        )
+        : 0;
+    const av =
+      r.availability_json;
+    const dayMap =
+      av &&
+      typeof av ===
+        'object' &&
+      !Array.isArray(av)
+        ? av
+        : {};
+    const free =
+      listDays.length >
+        0 &&
+      listDays.every(
+        (k) =>
+          dayMap[k] ===
+          'free',
+      );
+    const base: string =
+      r.location || '';
+    const near = words(
+      base,
+    ).some(
+      (w) =>
+        !STOP.includes(w) &&
+        ownerWords
+          .includes(w),
+    );
+    const prefs: any =
+      r
+        .availability_prefs_json
+      || {};
+    return {
+      id: r.id,
+      slug: r.slug || '',
+      name: r.name || '',
+      photo:
+        r.profile_pic ||
+        '',
+      base,
+      sits:
+        sitsBy[
+          r.user_id
+        ] || 0,
+      rating,
+      reviews:
+        reviews.length,
+      verified:
+        r.verified_id ===
+        true,
+      joint:
+        r.account_type ===
+        'joint',
+      blurb: clip(
+        r.tagline ||
+          r.bio ||
+          '',
+        180,
+      ),
+      tags: arr(
+        prefs.pets,
+      ).slice(0, 3),
+      free,
+      near,
+    };
+  },
+);
+
+let invitedIds: string[] =
+  [];
+try {
+  const ir =
+    await supabase
+    .from('invites')
+    .select(
+      'sitter_profile_id',
+    )
+    .eq(
+      'listing_id',
+      listing.id,
+    );
+  invitedIds = (
+    ir.data ?? []
+  ).map(
+    (i: any) =>
+      i.sitter_profile_id,
+  );
+} catch {}
+
+const listingId =
+  listing.id;
+const appsUrl =
+  '/applications' +
+  '?listing=' +
+  listing.id;
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Find a sitter — MYAH</title>
+  <style is:global>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    input::placeholder { color: rgba(44,26,14,.35); }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 1000px) {
+      [data-topnav] { padding: 14px 24px !important; }
+      [data-pad] { padding: 34px 20px 80px !important; }
+      [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+      [data-cards] { grid-template-columns: minmax(0,1fr) !important; }
+    }
+
+    .fs-back:hover { gap:13px !important; color:#2f5d45 !important; }
+    .fs-apps:hover { color:#2c1a0e !important; }
+    .fs-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .fs-search:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; }
+    .fs-profile:hover { border-color:#2f5d45 !important; color:#2f5d45 !important; }
+    .fs-clear:hover { background:rgba(110,84,56,.1) !important; border-color:#2f5d45 !important; }
+    .fs-undo:hover { color:#b91c1c !important; }
+    .fs-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px) !important; box-shadow:0 12px 28px rgba(110,84,56,.36) !important; }
+  </style>
+</head>
+<body>
+<div style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="/owner/dashboard" class="fs-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Dashboard</a>
+      <a href={appsUrl} class="fs-apps" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">Applications</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Find a sitter" style="flex:1;padding:52px 48px 90px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH owner</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Find a <em style="color:#2f5d45;">sitter</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:620px;margin:0">Rather than waiting for applications, go and look. Everyone here has marked themselves free for your dates &mdash; invite the ones you like and they&rsquo;ll get a message with your sit attached.</p>
+      </div>
+
+      <div class="fs-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:22px 24px;margin-bottom:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-bottom:18px">
+          <input data-search="1" class="fs-search" type="text" placeholder="Search by name, place or experience" aria-label="Search sitters" style="flex:1;min-width:220px;border:1.5px solid rgba(44,26,14,.18);border-radius:50px;padding:13px 20px;font-size:.95rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+          <div style="display:flex;align-items:center;gap:10px;background:#faf6ee;border:1.5px solid rgba(110,84,56,.3);border-radius:50px;padding:11px 20px">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+            <span style="font-size:.86rem;font-weight:600;color:#5c3d20">{dateLabel}</span>
+          </div>
+        </div>
+        <div data-filters style="display:flex;gap:9px;flex-wrap:wrap"></div>
+      </div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+            <p data-result style="font-size:.88rem;color:#6b4e35;margin:0"></p>
+            <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+              <span style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35">Sort</span>
+              <span data-sorts style="display:contents"></span>
+            </div>
+          </div>
+
+          <div data-cards="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px"></div>
+
+          <div data-empty>
+            <p style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0 0 10px">No one matches all that</p>
+            <p style="font-size:.95rem;color:#6b4e35;line-height:1.7;margin:0 0 22px;max-width:420px">Loosen a filter &mdash; distance is usually the one worth dropping first.</p>
+            <button type="button" data-clear class="fs-clear" style="font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:12px 28px;cursor:pointer;transition:background .25s ease, border-color .25s ease">Clear filters</button>
+          </div>
+        </div>
+
+        <aside data-aside="1" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:20px">
+          <div class="fs-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:26px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Inviting them to</p>
+            <div style="display:flex;gap:14px;align-items:flex-start;background:#faf6ee;border:1px solid rgba(110,84,56,.22);border-radius:14px;padding:16px 18px">
+              <img src={listPic} alt="" style="width:46px;height:46px;border-radius:10px;object-fit:cover;flex-shrink:0" />
+              <div style="min-width:0">
+                <p style="font-family:'Marcellus',serif;font-size:1.02rem;color:#2c1a0e;margin:0 0 4px;line-height:1.3">{listTitle}</p>
+                <p style="font-size:.8rem;color:#6b4e35;margin:0">{listLine}</p>
+              </div>
+            </div>
+            <p style="font-size:.85rem;color:#6b4e35;line-height:1.7;margin:16px 0 0">An invite sends them the listing and opens a conversation. They can still say no.</p>
+          </div>
+
+          <div data-invited-panel>
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 16px">Invited</p>
+            <div data-invited style="display:flex;flex-direction:column;gap:11px;margin-bottom:18px"></div>
+            <a href="/messages" class="fs-btn" style="display:flex;align-items:center;justify-content:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:11px 22px;text-decoration:none;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease">Go to messages</a>
+          </div>
+
+          <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px">
+            <p data-tip style="font-size:.86rem;color:#6b4e35;line-height:1.7;margin:0"></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script is:inline define:vars={{ sitters, invitedIds, listingId, shortRange }}>
+(() => {
+  const SITTERS = sitters;
+  // "ID verified" starts off: badges come from manual checks, so most sitters
+  // would be hidden by default.
+  const s = { filters: { verified: false, free: true, nearby: false, joint: false, experienced: false }, sort: 'best', invited: {}, q: '' };
+  invitedIds.forEach(id => { s.invited[id] = true; });
+  const pending = {};
+
+  const q = sel => document.querySelector(sel);
+  const esc = v => { const d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; };
+  const initialsOf = name => name.split(/[^A-Za-z]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('');
+
+  const chip = on => 'font-family:\'Montserrat\',sans-serif;font-size:.78rem;font-weight:700;letter-spacing:.05em;padding:10px 18px;border-radius:50px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease;' +
+    (on ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#faf6ee;color:#5c3d20;border:1.5px solid rgba(110,84,56,.32);');
+
+  const FILTERS = [
+    { key: 'free', label: 'Free for my dates' },
+    { key: 'verified', label: 'ID verified' },
+    { key: 'nearby', label: 'Same area' },
+    { key: 'joint', label: 'Couples' },
+    { key: 'experienced', label: '20+ sits' }
+  ];
+  const SORTS = [
+    { key: 'best', label: 'Best match' },
+    { key: 'reviews', label: 'Most reviewed' },
+    { key: 'near', label: 'Nearest' }
+  ];
+
+  const render = () => {
+    const f = s.filters;
+
+    let list = SITTERS.filter(x => {
+      if (f.verified && !x.verified) return false;
+      if (f.free && !x.free) return false;
+      if (f.nearby && !x.near) return false;
+      if (f.joint && !x.joint) return false;
+      if (f.experienced && x.sits < 20) return false;
+      if (s.q) {
+        const hay = (x.name + ' ' + x.base + ' ' + x.blurb + ' ' + x.tags.join(' ')).toLowerCase();
+        if (!hay.includes(s.q.toLowerCase())) return false;
+      }
+      return true;
+    });
+
+    if (s.sort === 'near') list = [...list].sort((a, b) => (b.near - a.near) || (b.sits - a.sits));
+    else if (s.sort === 'reviews') list = [...list].sort((a, b) => b.reviews - a.reviews);
+    else list = [...list].sort((a, b) => (b.verified - a.verified) || (b.free - a.free) || (b.sits - a.sits) || (b.reviews - a.reviews));
+
+    const invitedList = SITTERS.filter(x => s.invited[x.id]);
+
+    q('[data-filters]').innerHTML = FILTERS.map(x =>
+      '<button type="button" data-filter="' + x.key + '" aria-pressed="' + !!f[x.key] + '" style="' + chip(f[x.key]) + '">' + esc(x.label) + '</button>').join('');
+
+    q('[data-sorts]').innerHTML = SORTS.map(x =>
+      '<button type="button" data-sort="' + x.key + '" style="' + 'font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:700;letter-spacing:.06em;padding:9px 16px;border-radius:50px;cursor:pointer;transition:background .2s ease, color .2s ease, border-color .2s ease;' +
+        (s.sort === x.key ? 'background:rgba(110,84,56,.14);color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);' : 'background:#fff;color:#6b4e35;border:1.5px solid rgba(44,26,14,.1);') + '">' + esc(x.label) + '</button>').join('');
+
+    q('[data-result]').textContent = list.length + (list.length === 1 ? ' sitter' : ' sitters') + ' match — ' + (invitedList.length ? invitedList.length + ' invited so far.' : 'none invited yet.');
+
+    q('[data-cards]').innerHTML = list.map(x => {
+      const inv = !!s.invited[x.id];
+      const photoStyle = 'width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35);' + (x.photo ? 'display:block;' : 'display:none;');
+      const initialsStyle = 'width:64px;height:64px;border-radius:50%;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);color:#2f5d45;font-family:\'Marcellus\',serif;font-size:1.3rem;align-items:center;justify-content:center;' + (x.photo ? 'display:none;' : 'display:flex;');
+      const tickStyle = 'position:absolute;right:-2px;bottom:-2px;width:22px;height:22px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.62rem;display:flex;align-items:center;justify-content:center;border:2px solid #fff;' + (x.verified ? '' : 'display:none;');
+      const meta = (x.joint ? 'Joint sitters' : 'Solo sitter') + ' · ' + x.sits + (x.sits === 1 ? ' sit' : ' sits') + (x.base ? ' · ' + x.base : '');
+      const stars = x.rating ? '★★★★★'.slice(0, x.rating) + '☆☆☆☆☆'.slice(0, 5 - x.rating) : '';
+      const reviews = x.reviews + (x.reviews === 1 ? ' review' : ' reviews');
+      const fit = x.free ? '✓ Free ' + shortRange + (x.base ? ' · ' + x.base : '') : 'Not free for your dates' + (x.base ? ' · ' + x.base : '');
+      const fitStyle = 'font-size:.85rem;font-weight:' + (x.free ? '700' : '400') + ';color:' + (x.free ? '#2f5d45' : '#8a6a4f') + ';background:' + (x.free ? 'rgba(110,84,56,.1)' : 'rgba(44,26,14,.04)') + ';border-radius:10px;padding:10px 14px;';
+      const wrapStyle = 'display:flex;flex-direction:column;background:#fff;border-radius:18px;overflow:hidden;transition:border-color .3s ease, box-shadow .3s ease;' +
+        (inv ? 'border:1.5px solid #2f5d45;box-shadow:0 10px 30px rgba(110,84,56,.16);' : 'border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);');
+      const inviteStyle = 'flex:1;font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:11px 12px;cursor:pointer;transition:background .25s ease, color .25s ease, border-color .25s ease, transform .15s ease;' +
+        (inv ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;' : 'background:#fff;color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);');
+      return '<article style="' + wrapStyle + '">' +
+        '<div style="padding:24px 24px 0;display:flex;gap:16px;align-items:flex-start">' +
+          '<div style="position:relative;flex-shrink:0">' +
+            '<img src="' + esc(x.photo || '/images/logo-mark.png') + '" alt="" style="' + photoStyle + '" />' +
+            '<span style="' + initialsStyle + '">' + esc(initialsOf(x.name)) + '</span>' +
+            '<span style="' + tickStyle + '">✓</span>' +
+          '</div>' +
+          '<div style="flex:1;min-width:0">' +
+            '<h2 style="font-family:\'Marcellus\',serif;font-size:1.16rem;color:#2c1a0e;margin:0 0 5px;line-height:1.3">' + esc(x.name) + '</h2>' +
+            '<p style="font-size:.81rem;color:#2f5d45;font-weight:700;margin:0 0 7px">' + esc(meta) + '</p>' +
+            '<p style="font-size:.84rem;color:#6b4e35;margin:0">' + (stars ? stars + ' &nbsp;' : '') + reviews + '</p>' +
+          '</div>' +
+        '</div>' +
+        '<div style="padding:18px 24px 24px;display:flex;flex-direction:column;gap:14px;flex:1">' +
+          '<p style="font-size:.92rem;color:#6b4e35;line-height:1.7;margin:0">' + esc(x.blurb) + '</p>' +
+          '<div style="display:flex;gap:7px;flex-wrap:wrap">' +
+            x.tags.map(t => '<span style="font-size:.74rem;font-weight:600;color:#6b4e35;background:#faf6ee;border:1px solid rgba(110,84,56,.28);padding:5px 13px;border-radius:50px">' + esc(t) + '</span>').join('') +
+          '</div>' +
+          '<div style="' + fitStyle + '">' + esc(fit) + '</div>' +
+          '<div style="display:flex;gap:10px;margin-top:auto">' +
+            '<button type="button" data-invite="' + esc(x.id) + '"' + (pending[x.id] ? ' disabled' : '') + ' style="' + inviteStyle + '">' + (inv ? '✓ Invited' : 'Invite to sit') + '</button>' +
+            (x.slug ? '<a href="/' + esc(x.slug) + '" class="fs-profile" style="font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;text-decoration:none;border:1.5px solid rgba(44,26,14,.15);border-radius:50px;padding:11px 18px;transition:border-color .2s, color .2s">Profile</a>' : '') +
+          '</div>' +
+        '</div>' +
+      '</article>';
+    }).join('');
+
+    q('[data-empty]').setAttribute('style', 'flex-direction:column;align-items:flex-start;background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px;' + (list.length === 0 ? 'display:flex;' : 'display:none;'));
+
+    q('[data-invited-panel]').setAttribute('style', 'background:#fff;border:1.5px solid #2f5d45;border-radius:18px;padding:26px;box-shadow:0 10px 30px rgba(110,84,56,.14);' + (invitedList.length ? '' : 'display:none;'));
+    q('[data-invited]').innerHTML = invitedList.map(x => {
+      const photoStyle = 'width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(110,84,56,.35);' + (x.photo ? 'display:block;' : 'display:none;');
+      const initialsStyle = 'width:38px;height:38px;border-radius:50%;flex-shrink:0;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);color:#2f5d45;font-family:\'Marcellus\',serif;font-size:.86rem;align-items:center;justify-content:center;' + (x.photo ? 'display:none;' : 'display:flex;');
+      return '<div style="display:flex;align-items:center;gap:12px">' +
+        '<img src="' + esc(x.photo || '/images/logo-mark.png') + '" alt="" style="' + photoStyle + '" />' +
+        '<span style="' + initialsStyle + '">' + esc(initialsOf(x.name)) + '</span>' +
+        '<div style="flex:1;min-width:0">' +
+          '<p style="font-size:.9rem;font-weight:600;color:#2c1a0e;margin:0">' + esc(x.name) + '</p>' +
+          '<p style="font-size:.78rem;color:#6b4e35;margin:0">Invited just now</p>' +
+        '</div>' +
+        '<button type="button" data-undo="' + esc(x.id) + '" class="fs-undo" style="font-family:\'Montserrat\',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6b4e35;background:none;border:none;cursor:pointer;padding:4px;transition:color .2s">Undo</button>' +
+      '</div>';
+    }).join('');
+
+    q('[data-tip]').textContent = invitedList.length >= 3
+      ? 'Three invites is plenty — more and you will be turning good sitters down.'
+      : 'Sitters who get a personal invite reply about three times as often as ones who find your listing themselves.';
+  };
+
+  const setInvite = (id, on) => {
+    if (pending[id]) return;
+    const before = !!s.invited[id];
+    if (before === on) return;
+    s.invited[id] = on; pending[id] = true; render();
+    fetch('/api/invites', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: on ? 'invite' : 'undo', listing_id: listingId, sitter_profile_id: id })
+    })
+      .then(r => { if (!r.ok) throw new Error(); })
+      .catch(() => { s.invited[id] = before; })
+      .finally(() => { delete pending[id]; render(); });
+  };
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest && e.target.closest('[data-filter],[data-sort],[data-invite],[data-undo],[data-clear]');
+    if (!t) return;
+    if (t.hasAttribute('data-filter')) { const k = t.getAttribute('data-filter'); s.filters[k] = !s.filters[k]; render(); return; }
+    if (t.hasAttribute('data-sort')) { s.sort = t.getAttribute('data-sort'); render(); return; }
+    if (t.hasAttribute('data-invite')) { const id = t.getAttribute('data-invite'); setInvite(id, !s.invited[id]); return; }
+    if (t.hasAttribute('data-undo')) { setInvite(t.getAttribute('data-undo'), false); return; }
+    if (t.hasAttribute('data-clear')) {
+      s.filters = { verified: false, free: false, nearby: false, joint: false, experienced: false };
+      s.q = ''; q('[data-search]').value = ''; render();
+    }
+  });
+
+  const search = q('[data-search]');
+  search && search.addEventListener('input', () => { s.q = search.value; render(); });
+
+  const loader = q('[data-loader]');
+  let hideT;
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http') || !loader) return;
+    a.addEventListener('click', e => {
+      if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+      loader.style.opacity = '1';
+      loader.style.pointerEvents = 'all';
+      clearTimeout(hideT);
+      hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+    });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

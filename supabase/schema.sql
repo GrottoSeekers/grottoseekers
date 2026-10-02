@@ -206,3 +206,21 @@ CREATE INDEX IF NOT EXISTS sits_sitter_user_id_idx ON sits (sitter_user_id);
 ALTER TABLE listings ADD COLUMN IF NOT EXISTS arrival       TEXT;
 ALTER TABLE listings ADD COLUMN IF NOT EXISTS keys          TEXT;
 ALTER TABLE listings ADD COLUMN IF NOT EXISTS handover_json JSONB NOT NULL DEFAULT '{}';
+
+
+-- ── INVITES ──────────────────────────────────────────────────────────────────
+-- An owner inviting a sitter to a listing from /find-a-sitter. The invite also
+-- opens the owner/sitter conversation for that listing (opened_conversation
+-- records whether it created it, so Undo can tidy an empty one away).
+CREATE TABLE IF NOT EXISTS invites (
+  id                   UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
+  listing_id           UUID        NOT NULL REFERENCES listings(id) ON DELETE CASCADE,
+  owner_profile_id     UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  sitter_profile_id    UUID        NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+  conversation_id      UUID,
+  opened_conversation  BOOLEAN     NOT NULL DEFAULT false,
+  created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (listing_id, sitter_profile_id)
+);
+
+CREATE INDEX IF NOT EXISTS invites_listing_id_idx ON invites (listing_id);

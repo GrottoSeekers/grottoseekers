@@ -42,7 +42,7 @@ const PAGES = {
   'Notifications':         ['src/pages/notifications.astro'],
   'Saved sits':            ['src/pages/saved.astro'],
   'Verification':          ['src/pages/verification.astro'],
-  'Find a sitter':         ['src/pages'],
+  'Find a sitter':         ['src/pages/find-a-sitter.astro'],
 };
 
 // Palettes from before the rebrand. #8a6a4f is NOT here — it is the design's
