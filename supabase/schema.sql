@@ -359,6 +359,30 @@ CREATE INDEX IF NOT EXISTS notifications_profile_id_idx ON notifications (profil
 CREATE INDEX IF NOT EXISTS sits_sitter_user_id_idx ON sits (sitter_user_id);
 CREATE INDEX IF NOT EXISTS invites_listing_id_idx ON invites (listing_id);
 
+-- ── LET THE WEBSITE USE THE NEWER TABLES ─────────────────────────────────────
+--
+-- Supabase switches on row-level security for every new table, and a table
+-- with security on but no rules refuses every write ("new row violates
+-- row-level security policy"). MYAH signs people in itself and talks to the
+-- database only from its server, with the project key in Vercel — the key
+-- never reaches visitors' browsers. So each table gets one rule: the website
+-- may read and write it. Security stays switched on.
+-- Safe to run more than once.
+
+DO $$
+DECLARE t text;
+BEGIN
+  FOREACH t IN ARRAY ARRAY['applications','notifications','sits','invites','saved_sits','conversations','messages']
+  LOOP
+    IF to_regclass('public.' || t) IS NOT NULL THEN
+      EXECUTE format('ALTER TABLE public.%I ENABLE ROW LEVEL SECURITY', t);
+      EXECUTE format('DROP POLICY IF EXISTS myah_website_access ON public.%I', t);
+      EXECUTE format('CREATE POLICY myah_website_access ON public.%I FOR ALL TO public USING (true) WITH CHECK (true)', t);
+    END IF;
+  END LOOP;
+END $$;
+
+
 -- Tell the API layer to pick up new tables and columns straight away
 -- (otherwise it can keep saying "Could not find the table … in the schema cache").
 NOTIFY pgrst, 'reload schema';
