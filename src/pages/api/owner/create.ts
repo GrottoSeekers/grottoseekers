@@ -15,10 +15,10 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     const location = (form.get('location') as string | null)?.trim() || null;
     const bio      = (form.get('bio') as string | null)?.trim() || null;
 
-    if (!name || !slug) return redirect('/owner/create?error=missing');
+    if (!name || !slug) return redirect('/owner/profile/create?error=missing');
 
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug))
-      return redirect('/owner/create?error=slug_invalid');
+      return redirect('/owner/profile/create?error=slug_invalid');
 
     const { data: taken } = await supabase
       .from('profiles')
@@ -26,14 +26,14 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       .eq('slug', slug)
       .maybeSingle();
 
-    if (taken) return redirect('/owner/create?error=slug_taken');
+    if (taken) return redirect('/owner/profile/create?error=slug_taken');
 
     let profilePicUrl: string | null = null;
 
     const file = form.get('profile_pic');
     if (file instanceof File && file.size > 0) {
       if (file.size > 5 * 1024 * 1024) {
-        return redirect('/owner/create?error=file_too_large');
+        return redirect('/owner/profile/create?error=file_too_large');
       }
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
       const path = `${session.userId}/${slug}-profile.${ext}`;
@@ -65,10 +65,10 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       amenities_json:    [],
     });
 
-    if (error) return redirect('/owner/create?error=server');
+    if (error) return redirect('/owner/profile/create?error=server');
 
     return redirect('/owner/dashboard');
   } catch {
-    return redirect('/owner/create?error=server');
+    return redirect('/owner/profile/create?error=server');
   }
 };

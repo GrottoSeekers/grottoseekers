@@ -19,7 +19,7 @@ export const POST: APIRoute = async ({ request }) => {
       .single();
 
     if (!profile) {
-      return new Response(null, { status: 302, headers: { Location: '/owner/create' } });
+      return new Response(null, { status: 302, headers: { Location: '/owner/profile/create' } });
     }
 
     const pets: any[] = Array.isArray(profile.pets_json) ? [...profile.pets_json] : [];

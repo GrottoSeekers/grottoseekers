@@ -39,7 +39,7 @@ if (!profile) {
   return Astro.redirect(
     session.role ===
       'owner'
-      ? '/owner/create'
+      ? '/owner/profile/create'
       : '/profile/create',
   );
 }

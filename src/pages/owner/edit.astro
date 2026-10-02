@@ -12,7 +12,7 @@ const { data: profile } = await supabase
   .eq('user_id', session.userId)
   .single();
 
-if (!profile) return Astro.redirect('/owner/create');
+if (!profile) return Astro.redirect('/owner/profile/create');
 
 const heroImages: any[] = Array.isArray(profile.hero_images_json) ? profile.hero_images_json : [];
 const aboutImages: any[] = Array.isArray(profile.about_images_json) ? profile.about_images_json : [];
