@@ -59,8 +59,6 @@ CREATE TABLE IF NOT EXISTS profiles (
   updated_at        TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS profiles_slug_idx    ON profiles (slug);
-CREATE INDEX IF NOT EXISTS profiles_user_id_idx ON profiles (user_id);
 
 -- Auto-bump updated_at on every row change
 CREATE OR REPLACE FUNCTION set_updated_at()
@@ -95,9 +93,6 @@ CREATE TABLE IF NOT EXISTS listings (
   updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS listings_profile_id_idx ON listings (profile_id);
-CREATE INDEX IF NOT EXISTS listings_status_idx     ON listings (status);
-CREATE INDEX IF NOT EXISTS listings_dates_idx      ON listings (date_from, date_to);
 
 DROP TRIGGER IF EXISTS listings_updated_at ON listings;
 CREATE TRIGGER listings_updated_at
@@ -154,8 +149,6 @@ CREATE TABLE IF NOT EXISTS conversations (
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS conversations_sitter_idx ON conversations (sitter_profile_id);
-CREATE INDEX IF NOT EXISTS conversations_owner_idx  ON conversations (owner_profile_id);
 
 CREATE TABLE IF NOT EXISTS messages (
   id                 UUID        PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -166,7 +159,6 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS messages_conversation_idx ON messages (conversation_id, created_at);
 
 
 -- ── APPLICATIONS ─────────────────────────────────────────────────────────────
@@ -185,7 +177,6 @@ CREATE TABLE IF NOT EXISTS applications (
   UNIQUE (listing_id, profile_id)
 );
 
-CREATE INDEX IF NOT EXISTS applications_listing_id_idx ON applications (listing_id);
 
 
 -- ── SAVED SITS ───────────────────────────────────────────────────────────────
@@ -198,7 +189,6 @@ CREATE TABLE IF NOT EXISTS saved_sits (
   UNIQUE (profile_id, listing_id)
 );
 
-CREATE INDEX IF NOT EXISTS saved_sits_profile_id_idx ON saved_sits (profile_id);
 
 -- Saved searches and how the sitter wants to hear about matches (/saved).
 --   saved_searches_json: [{id, name, terms, on}]
@@ -223,7 +213,6 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS notifications_profile_id_idx ON notifications (profile_id, created_at DESC);
 
 -- What also leaves the page (email/push): {applications, messages, sit, matches, product}
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS notify_prefs_json JSONB NOT NULL DEFAULT '{"applications": true, "messages": true, "sit": true, "matches": false, "product": false}';
@@ -261,7 +250,6 @@ CREATE TABLE IF NOT EXISTS sits (
   UNIQUE (listing_id, sitter_user_id)
 );
 
-CREATE INDEX IF NOT EXISTS sits_sitter_user_id_idx ON sits (sitter_user_id);
 
 -- Handover details on the listing (set on Edit listing; read by /sits/[id]).
 --   handover_json: { address, address_note, owner_away, owner_away_note,
@@ -287,7 +275,6 @@ CREATE TABLE IF NOT EXISTS invites (
   UNIQUE (listing_id, sitter_profile_id)
 );
 
-CREATE INDEX IF NOT EXISTS invites_listing_id_idx ON invites (listing_id);
 
 
 -- ── OWNER HANDOVER ───────────────────────────────────────────────────────────
@@ -310,3 +297,64 @@ ALTER TABLE applications ADD CONSTRAINT applications_status_check
 -- Reviews a sitter has across every platform (more than are written out on
 -- their page). The profile shows the larger of this and the reviews listed.
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS review_total INT;
+
+-- ── BRING OLDER MESSAGING / SIT TABLES UP TO DATE ───────────────────────────
+-- Tables that already existed on an older database keep their rows and gain
+-- any columns added since. (Columns that must be filled in are added without
+-- NOT NULL so existing rows are untouched.)
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS sitter_profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS owner_profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS listing_id UUID REFERENCES listings(id) ON DELETE SET NULL;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS last_message_at TIMESTAMPTZ;
+ALTER TABLE conversations ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS conversation_id UUID REFERENCES conversations(id) ON DELETE CASCADE;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS sender_profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS body TEXT;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS read_at TIMESTAMPTZ;
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS listing_id UUID REFERENCES listings(id) ON DELETE CASCADE;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS message TEXT;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS date_fit TEXT;
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS tags_json JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'new';
+ALTER TABLE applications ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE saved_sits ADD COLUMN IF NOT EXISTS profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE saved_sits ADD COLUMN IF NOT EXISTS listing_id UUID REFERENCES listings(id) ON DELETE CASCADE;
+ALTER TABLE saved_sits ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'account';
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS body TEXT;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS link TEXT;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS cta TEXT;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS read BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE sits ADD COLUMN IF NOT EXISTS listing_id UUID REFERENCES listings(id) ON DELETE CASCADE;
+ALTER TABLE sits ADD COLUMN IF NOT EXISTS sitter_user_id UUID REFERENCES users(id) ON DELETE CASCADE;
+ALTER TABLE sits ADD COLUMN IF NOT EXISTS sitter_profile_id UUID REFERENCES profiles(id) ON DELETE SET NULL;
+ALTER TABLE sits ADD COLUMN IF NOT EXISTS conversation_id UUID;
+ALTER TABLE sits ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS listing_id UUID REFERENCES listings(id) ON DELETE CASCADE;
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS owner_profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS sitter_profile_id UUID REFERENCES profiles(id) ON DELETE CASCADE;
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS conversation_id UUID;
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS opened_conversation BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE invites ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+
+-- ── INDEXES ──────────────────────────────────────────────────────────────────
+-- Last, so every column they use already exists — including on an older
+-- database where the columns were only just added by the ALTERs above.
+CREATE INDEX IF NOT EXISTS profiles_slug_idx    ON profiles (slug);
+CREATE INDEX IF NOT EXISTS profiles_user_id_idx ON profiles (user_id);
+CREATE INDEX IF NOT EXISTS listings_profile_id_idx ON listings (profile_id);
+CREATE INDEX IF NOT EXISTS listings_status_idx     ON listings (status);
+CREATE INDEX IF NOT EXISTS listings_dates_idx      ON listings (date_from, date_to);
+CREATE INDEX IF NOT EXISTS conversations_sitter_idx ON conversations (sitter_profile_id);
+CREATE INDEX IF NOT EXISTS conversations_owner_idx  ON conversations (owner_profile_id);
+CREATE INDEX IF NOT EXISTS messages_conversation_idx ON messages (conversation_id, created_at);
+CREATE INDEX IF NOT EXISTS applications_listing_id_idx ON applications (listing_id);
+CREATE INDEX IF NOT EXISTS saved_sits_profile_id_idx ON saved_sits (profile_id);
+CREATE INDEX IF NOT EXISTS notifications_profile_id_idx ON notifications (profile_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS sits_sitter_user_id_idx ON sits (sitter_user_id);
+CREATE INDEX IF NOT EXISTS invites_listing_id_idx ON invites (listing_id);
