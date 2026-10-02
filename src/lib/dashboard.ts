@@ -56,3 +56,87 @@ export function freeRanges(v: unknown): { from: string; to: string }[] {
   });
   return out;
 }
+
+// ── Confirmed sits for the dashboards ───────────────────────────────────────
+// One card per `sits` row: the sit pack link, dates, who's on the other side
+// and a short "when" line. Upcoming/current first (soonest first), then past.
+export type SitCard = {
+  id: string;
+  href: string;
+  title: string;
+  dates: string;
+  duration: string;
+  who: string;
+  pic: string;
+  img: string;
+  when: string;
+  past: boolean;
+  from: string;
+};
+
+const todayKey = () => new Date().toISOString().slice(0, 10);
+
+function whenLabel(from: string, to: string) {
+  const today = todayKey();
+  if (to < today) return 'Finished';
+  if (from <= today) return 'Happening now';
+  const n = daysBetween(today, from);
+  return n === 1 ? 'Starts tomorrow' : 'Starts in ' + n + ' days';
+}
+
+function toSitCard(id: string, l: any, who: any, fallbackImg: string): SitCard {
+  const hero = arr(l?.profiles?.hero_images_json)[0]?.src || fallbackImg || '';
+  return {
+    id,
+    href: '/sits/' + id,
+    title: l?.title || 'Your sit',
+    dates: l?.date_from && l?.date_to ? dateRange(l.date_from, l.date_to) : '',
+    duration: l?.date_from && l?.date_to ? durationLabel(l.date_from, l.date_to) : '',
+    who: who?.name || '',
+    pic: who?.profile_pic || '',
+    img: hero,
+    when: l?.date_from && l?.date_to ? whenLabel(l.date_from, l.date_to) : '',
+    past: !!(l?.date_to && l.date_to < todayKey()),
+    from: l?.date_from || '',
+  };
+}
+
+function order(cards: SitCard[]) {
+  const live = cards.filter((c) => !c.past).sort((a, b) => (a.from < b.from ? -1 : 1));
+  const past = cards.filter((c) => c.past).sort((a, b) => (a.from > b.from ? -1 : 1)).slice(0, 6);
+  return [...live, ...past];
+}
+
+// Sits the signed-in sitter is confirmed for; "who" is the owner.
+export async function sitterSits(supabase: any, userId: string): Promise<SitCard[]> {
+  try {
+    const { data } = await supabase
+      .from('sits')
+      .select('id, listings!inner(id, title, date_from, date_to, profiles!inner(name, profile_pic, hero_images_json))')
+      .eq('sitter_user_id', userId);
+    return order((data ?? []).map((s: any) => toSitCard(s.id, s.listings, s.listings?.profiles, '')));
+  } catch {
+    return [];
+  }
+}
+
+// Sits confirmed on the owner's listings; "who" is the sitter.
+export async function ownerSits(supabase: any, ownerProfile: any): Promise<SitCard[]> {
+  try {
+    const { data } = await supabase
+      .from('sits')
+      .select('id, sitter_profile_id, listings!inner(id, title, date_from, date_to, profile_id)')
+      .eq('listings.profile_id', ownerProfile.id);
+    const rows: any[] = data ?? [];
+    const ids = [...new Set(rows.map((r) => r.sitter_profile_id).filter(Boolean))];
+    let people: Record<string, any> = {};
+    if (ids.length) {
+      const { data: ps } = await supabase.from('profiles').select('id, name, profile_pic').in('id', ids);
+      people = Object.fromEntries((ps ?? []).map((p: any) => [p.id, p]));
+    }
+    const img = arr(ownerProfile.hero_images_json)[0]?.src || '';
+    return order(rows.map((r) => toSitCard(r.id, r.listings, people[r.sitter_profile_id], img)));
+  } catch {
+    return [];
+  }
+}
