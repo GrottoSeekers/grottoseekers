@@ -77,29 +77,10 @@ if (
 // their own: "View my
 // page" opens their
 // latest listing.
-let pageUrl =
-  '/owner/dashboard';
-try {
-  const lr =
-    await supabase
-    .from('listings')
-    .select('id')
-    .eq(
-      'profile_id',
-      me.id,
-    )
-    .order(
-      'created_at',
-      { ascending: false },
-    )
-    .limit(1);
-  const l =
-    (lr.data ?? [])[0];
-  if (l) {
-    pageUrl =
-      '/listings/' + l.id;
-  }
-} catch {}
+// Their public page —
+// what sitters see.
+const pageUrl =
+  '/' + me.slug;
 
 // "See how it reaches
 // the sitter": their

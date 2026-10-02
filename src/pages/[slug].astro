@@ -34,6 +34,34 @@ if (!p) {
   );
 }
 
+// Owners have their own
+// public page: home, pets
+// and open sits. The side
+// is what they picked at
+// sign-up (users.role).
+let side = '';
+try {
+  const ur =
+    await supabase
+    .from('users')
+    .select('role')
+    .eq('id', p.user_id)
+    .limit(1);
+  side =
+    ur.data?.[0]?.role ||
+    '';
+} catch {}
+side =
+  side ||
+  p.profile_type ||
+  'sitter';
+if (side === 'owner') {
+  return Astro.rewrite(
+    '/owner-page/' +
+    p.slug,
+  );
+}
+
 // Design copy — used
 // when a profile field
 // is empty.
@@ -244,14 +272,24 @@ const nameB =
   ampAt < 0
     ? ''
     : name.slice(ampAt + 1);
+// Callum & Niamh's own
+// words and photos fill
+// gaps on their page only;
+// other sitters show just
+// what they have added.
+const F = isFounders;
 const badge =
   p.badge_text ||
-  badgeDef;
+  (F ? badgeDef : '');
 const tagline =
   p.tagline ||
-  taglineDef;
+  (F ? taglineDef : '');
 const bioSrc: string =
-  p.bio || bioDef;
+  p.bio ||
+  (F ? bioDef : '') ||
+  tagline ||
+  name + ' has not' +
+  ' added a bio yet.';
 const bioParas =
   bioSrc
   .split('\n\n')
@@ -265,9 +303,27 @@ const bio = bioParas
       ? '0'
       : '0 0 16px',
   }));
+const ownPic: Pic[] =
+  p.profile_pic
+    ? [{
+      src: p.profile_pic,
+      pos: 'center 30%',
+      alt: name,
+    }]
+    : [];
+const plainHero: Pic[] = [{
+  src: at(
+    'slideshow-' +
+    'living-room.jpeg',
+  ),
+  pos: 'center',
+}];
 const hero = list(
   p.hero_images_json,
-  heroDef,
+  F ? heroDef
+    : ownPic.length
+      ? ownPic
+      : plainHero,
 ).map((h: Pic) => ({
   src: local(h.src),
   pos:
@@ -276,7 +332,7 @@ const hero = list(
 }));
 const about = list(
   p.about_images_json,
-  aboutDef,
+  F ? aboutDef : ownPic,
 ).map((a: Pic) => ({
   src: local(a.src),
   alt: a.alt || '',
@@ -287,22 +343,20 @@ const reviews = isFounders
     foundersReviews,
     (r) => keyOf(r && r.name),
   )
-  : list(
+  : arrOf(
     p.reviews_json,
-    revDef,
   );
 const gallery = (isFounders
   ? foundersGallery
-  : list(
+  : arrOf(
     p.gallery_json,
-    galDef,
   )).map((g: Pic) => ({
   src: local(g.src),
   alt: g.alt || '',
 }));
 const platforms = list(
   p.platforms_json,
-  platDef,
+  F ? platDef : [],
 );
 const ownRevs = isFounders
   ? reviews.length
@@ -323,8 +377,14 @@ const totalRevs = Math.max(
 );
 const revCount =
   totalRevs
-    ? totalRevs + '+'
-    : '40+';
+    ? totalRevs +
+      (F ? '+' : '')
+    : '0';
+const hasRevs =
+  reviews.length > 0;
+// The stats band has
+// founder-only figures.
+const showStats = F;
 const plats = platforms
   .map((x: any) => ({
     ...x,
@@ -341,7 +401,8 @@ const platCount =
 const rating = '5.0';
 const location =
   p.location ||
-  'UK & Australia';
+  (F ? 'UK & Australia'
+    : '');
 const waNum = String(
   p.whatsapp_number ||
   '',
@@ -449,8 +510,12 @@ const title =
     </a>
     <nav data-header-nav="1" style="display:flex;align-items:center;gap:30px;flex-wrap:nowrap">
       <a href="#about" class="sp-nav-link" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">About</a>
+{hasRevs && (
       <a href="#reviews" class="sp-nav-link" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Reviews</a>
+)}
+{gallery.length > 0 && (
       <a href="#gallery" class="sp-nav-link" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Gallery</a>
+)}
       <a href="/listings" class="sp-nav-link" style="font-size:.8rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Profiles</a>
       <a href="#enquiry" class="sp-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(44,26,14,.18);transition:background .2s, border-color .2s, transform .12s">Book us today</a>
     </nav>
@@ -464,17 +529,25 @@ const title =
     </div>
     <div style="position:absolute;inset:0;z-index:1;background:linear-gradient(180deg, rgba(44,26,14,.52) 0%, rgba(44,26,14,.66) 100%)"></div>
     <div style="position:relative;z-index:2;max-width:720px">
+{badge && (
       <p style="display:inline-flex;align-items:center;gap:10px;background:rgba(250,246,238,.14);border:1px solid rgba(196,171,138,.45);backdrop-filter:blur(6px);color:#fff;padding:9px 20px;border-radius:50px;font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 26px">{badge}</p>
+)}
       <h1 data-hero-title="1" style="font-family:'Montserrat',sans-serif;font-weight:500;letter-spacing:.28em;font-size:4.6rem;color:#fff;line-height:1;margin:0 0 18px">MYAH<br /><em style="color:#c4ab8a;">Sitters</em></h1>
       <p style="font-size:1.1rem;color:#fff;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin:0 0 18px">{name}</p>
+{tagline && (
       <p style="font-size:1.08rem;color:rgba(255,255,255,.85);line-height:1.75;max-width:540px;margin:0 auto 36px">{tagline}</p>
+)}
       <a href="#enquiry" class="sp-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;box-shadow:0 8px 26px rgba(44,26,14,.3);transition:background .2s, border-color .2s, transform .12s">Book us today</a>
       <div style="display:flex;align-items:center;justify-content:center;gap:20px;flex-wrap:wrap;margin:34px 0 0;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.72)">
+{hasRevs && (
         <span style="display:flex;align-items:center;gap:8px"><span style="color:#c4ab8a;letter-spacing:.2em">★★★★★</span>{rating} rating</span>
         <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
         <span>{revCount} reviews</span>
+)}
+{location && (
         <span style="width:5px;height:5px;border-radius:50%;background:rgba(196,171,138,.6)"></span>
         <span>{location}</span>
+)}
       </div>
     </div>
     <a href="#about" aria-label="Scroll to about" class="sp-scroll" style="position:absolute;bottom:30px;left:50%;transform:translateX(-50%);z-index:2;width:42px;height:42px;border-radius:50%;border:1px solid rgba(196,171,138,.5);background:rgba(250,246,238,.12);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;transition:background .2s, transform .2s">
@@ -482,6 +555,7 @@ const title =
     </a>
   </section>
 
+{showStats && (
   <section style="background:#2c1a0e;padding:0 48px" data-sec="1">
     <div data-stats="1" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border-left:1px solid rgba(196,171,138,.18);border-right:1px solid rgba(196,171,138,.18)">
       <div style="padding:34px 26px;text-align:center;border-right:1px solid rgba(196,171,138,.18)">
@@ -502,21 +576,26 @@ const title =
       </div>
     </div>
   </section>
+)}
 
   <section id="about" data-sec="1" style="padding:100px 48px;background:#faf6ee">
-    <div data-split="1" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:60px;align-items:center">
+    <div data-split="1" style={`max-width:1100px;margin:0 auto;display:grid;grid-template-columns:${about.length ? 'minmax(0,1fr) minmax(0,1fr)' : 'minmax(0,1fr)'};gap:60px;align-items:center`}>
+{about.length > 0 && (
       <div style="position:relative;width:100%;aspect-ratio:4/5;border-radius:18px;overflow:hidden;background:#e9e0d2;border:1px solid rgba(110,84,56,.22)">
         {about.map((a, i) => (
           <img data-about-slide="1" src={a.src} alt={a.alt} style={`position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;opacity:${i === 0 ? 1 : 0};transition:opacity .5s ease`} />
         ))}
+{about.length > 1 && (
         <button data-about-prev="1" aria-label="Previous photo" class="sp-about-btn" style="position:absolute;top:50%;left:14px;transform:translateY(-50%);background:rgba(250,246,238,.9);border:1px solid rgba(110,84,56,.3);width:42px;height:42px;border-radius:50%;font-size:1.3rem;color:#2c1a0e;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s">&#8249;</button>
         <button data-about-next="1" aria-label="Next photo" class="sp-about-btn" style="position:absolute;top:50%;right:14px;transform:translateY(-50%);background:rgba(250,246,238,.9);border:1px solid rgba(110,84,56,.3);width:42px;height:42px;border-radius:50%;font-size:1.3rem;color:#2c1a0e;cursor:pointer;z-index:2;display:flex;align-items:center;justify-content:center;transition:background .2s">&#8250;</button>
+)}
         <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:2">
           {about.map((_, i) => (
             <button data-about-dot={i} aria-label={`Photo ${i + 1}`} style={`width:10px;height:10px;border-radius:50%;border:2px solid rgba(255,255,255,.85);background:${i === 0 ? 'rgba(255,255,255,.9)' : 'transparent'};cursor:pointer;padding:0`}></button>
           ))}
         </div>
       </div>
+)}
       <div>
         <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Who we are</p>
         <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">A home away from home — <em style="color:#2f5d45;">for you and your pets.</em></h2>
@@ -528,6 +607,7 @@ const title =
     </div>
   </section>
 
+{hasRevs && (
   <section id="reviews" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div style="max-width:1100px;margin:0 auto">
       <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>What pet owners say</p>
@@ -560,7 +640,9 @@ const title =
       </div>
     </div>
   </section>
+)}
 
+{gallery.length > 0 && (
   <section id="gallery" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div style="max-width:1100px;margin:0 auto">
       <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Pets we've loved</p>
@@ -576,7 +658,9 @@ const title =
       </div>
     </div>
   </section>
+)}
 
+{plats.length > 0 && (
   <section id="profiles" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div style="max-width:1100px;margin:0 auto">
       <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 18px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Find us online</p>
@@ -594,6 +678,7 @@ const title =
       </div>
     </div>
   </section>
+)}
 
   <section id="enquiry" data-sec="1" style="padding:100px 48px;background:#faf6ee">
     <div data-split="1" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:60px;align-items:start">
@@ -602,10 +687,12 @@ const title =
         <h2 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.2;margin:0">Book {nameA} <em style="color:#2f5d45;">{nameB}</em></h2>
         <div style="width:48px;height:2px;background:#6e5438;margin:24px 0 26px"></div>
         <p style="color:#6b4e35;line-height:1.85;font-size:.98rem;margin:0">Tell us about your home, your pets, and your dates and we'll get back to you within 24 hours.</p>
+{waNum && (
         <a href={waHref} target="_blank" rel="noopener" class="sp-wa" style="display:inline-flex;align-items:center;gap:10px;margin-top:26px;padding:14px 28px;background:#25D366;color:#fff;border-radius:50px;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;box-shadow:0 6px 20px rgba(37,211,102,.25);transition:background .2s, transform .12s">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
           Message on WhatsApp
         </a>
+)}
       </div>
       <form data-enquiry="1" data-go="/messages" style="display:flex;flex-direction:column;gap:18px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
@@ -666,11 +753,16 @@ const title =
           <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Quick links</h4>
           <ul style="list-style:none;padding:0;margin:0">
             <li style="margin-bottom:12px"><a href="#about" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">About us</a></li>
+{hasRevs && (
             <li style="margin-bottom:12px"><a href="#reviews" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Reviews</a></li>
+)}
+{gallery.length > 0 && (
             <li style="margin-bottom:12px"><a href="#gallery" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Gallery</a></li>
+)}
             <li style="margin-bottom:12px"><a href="#enquiry" class="sp-foot-link" style="color:rgba(255,255,255,.62);text-decoration:none;font-size:.92rem;transition:color .2s">Book us</a></li>
           </ul>
         </div>
+{plats.length > 0 && (
         <div>
           <h4 style="color:#fff;font-size:.76rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;margin:0 0 20px;padding-bottom:14px;border-bottom:1px solid rgba(196,171,138,.28)">Platforms</h4>
           <ul style="list-style:none;padding:0;margin:0">
@@ -679,6 +771,7 @@ const title =
             ))}
           </ul>
         </div>
+)}
       </div>
       <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap">
         <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.45)">

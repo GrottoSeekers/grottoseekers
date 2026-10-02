@@ -31,7 +31,7 @@ export const POST: APIRoute = async ({ request }) => {
       .single();
 
     if (!profile?.contact_email) {
-      return new Response(JSON.stringify({ error: 'This sitter has not set up email yet' }), {
+      return new Response(JSON.stringify({ error: "They haven't set up email enquiries yet — message them on MYAH instead." }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
