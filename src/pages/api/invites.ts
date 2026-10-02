@@ -23,6 +23,7 @@ export const POST: APIRoute = async ({ request }) => {
     const acct = await accountFor(session.userId, session.email, session.role);
     const owner: any = acct.profile;
     if (!owner || acct.side !== 'owner') return json({ error: 'Owners only' }, 403);
+    if (!acct.verified) return json({ error: 'id_required', detail: 'Verify your ID first — go to Verification.' }, 403);
 
     const { action, listing_id, sitter_profile_id } = await request.json();
     if (!listing_id || !sitter_profile_id || !['invite', 'undo'].includes(action)) {

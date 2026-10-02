@@ -12,6 +12,8 @@
 // post to /api/invites.
 export const prerender =
   false;
+import IdGate from
+  './_idgate.astro';
 import AppNav from
   './_nav.astro';
 import {
@@ -451,6 +453,7 @@ const appsUrl =
 
   <main data-pad="1" data-screen-label="Find a sitter" style="flex:1;padding:52px 48px 90px">
     <div style="max-width:1180px;margin:0 auto">
+      <IdGate profile={acct!.profile} what="invite sitters" />
 
       <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
         <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH owner</p>

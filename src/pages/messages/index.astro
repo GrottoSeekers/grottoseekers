@@ -1,6 +1,8 @@
 ---
 export const prerender =
   false;
+import IdGate from
+  '../_idgate.astro';
 import AppNav from
   '../_nav.astro';
 import {
@@ -195,12 +197,16 @@ const myProfileId =
 
           <div data-scroll="1" style="flex:1;overflow-y:auto;padding:20px 22px;display:flex;flex-direction:column;gap:3px"></div>
 
+          {acct!.verified ? (
           <form data-compose="1" style="display:flex;gap:10px;align-items:center;padding:14px 18px;background:#fff;border-top:1px solid rgba(110,84,56,.2);flex-shrink:0">
             <input data-input="1" type="text" placeholder="Type a message…" autocomplete="off" class="mx-input" style="flex:1;border:1.5px solid rgba(110,84,56,.3);border-radius:50px;padding:13px 20px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
             <button type="submit" aria-label="Send message" class="mx-send" style="width:48px;height:48px;border-radius:50%;border:1.5px solid #2f5d45;background:#2f5d45;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 6px 18px rgba(110,84,56,.3);transition:background .2s, border-color .2s, transform .12s">
               <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
           </form>
+          ) : (
+            <div style="padding:12px;background:#fff;border-top:1px solid rgba(110,84,56,.2)"><IdGate profile={acct!.profile} what="send messages" compact /></div>
+          )}
         </div>
       </div>
     </div>

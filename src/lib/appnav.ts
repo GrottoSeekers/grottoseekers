@@ -14,7 +14,7 @@ const ICONS: Record<string, string> = {
   profile: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
 };
 
-export function buildNav(side: NavSide, active = '') {
+export function buildNav(side: NavSide, active = '', admin = false) {
   const owner = side === 'owner';
   const home = owner ? '/owner/dashboard' : '/dashboard';
   const links = (owner
@@ -22,6 +22,7 @@ export function buildNav(side: NavSide, active = '') {
       { key: 'post', label: 'Post a sit', href: '/owner/listings/new' },
       { key: 'find', label: 'Find a sitter', href: '/find-a-sitter' },
       { key: 'applications', label: 'Applications', href: '/applications' },
+      { key: 'verification', label: 'Verification', href: '/verification' },
       { key: 'notifications', label: 'Notifications', href: '/notifications' },
     ]
     : [
@@ -30,7 +31,7 @@ export function buildNav(side: NavSide, active = '') {
       { key: 'availability', label: 'Availability', href: '/availability' },
       { key: 'verification', label: 'Verification', href: '/verification' },
       { key: 'notifications', label: 'Notifications', href: '/notifications' },
-    ]).map((l) => ({
+    ]).concat(admin ? [{ key: 'idchecks', label: 'ID checks', href: '/admin/verifications' }] : []).map((l) => ({
     ...l,
     on: l.key === active,
   }));

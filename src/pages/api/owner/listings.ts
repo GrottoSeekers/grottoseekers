@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getSession } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
+import { getAccount } from '../../../lib/account';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -23,6 +24,9 @@ export const POST: APIRoute = async ({ request }) => {
     }
 
     if (action === 'create') {
+      // Posting a sit opens once the owner's ID is approved.
+      const acct = await getAccount(request);
+      if (!acct?.verified) return new Response(null, { status: 302, headers: { Location: '/owner/listings/new?error=id_required' } });
       const title       = (form.get('title') as string | null)?.trim() ?? '';
       const description = (form.get('description') as string | null)?.trim() || null;
       const date_from   = (form.get('date_from') as string | null)?.trim() ?? '';

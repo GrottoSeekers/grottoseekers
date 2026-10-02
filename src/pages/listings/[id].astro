@@ -10,6 +10,8 @@
 // /api/messages/start.
 export const prerender =
   false;
+import IdGate from
+  '../_idgate.astro';
 import AppNav from
   '../_nav.astro';
 import {
@@ -332,8 +334,15 @@ const glanceHome =
 
 const isLoggedIn =
   !!session;
+// ID approved: needed to
+// apply and to message.
+const idOk =
+  viewer?.verified_id ===
+  true;
 const canMessage = !!(
   viewer &&
+  viewer.verified_id ===
+    true &&
   !viewerIsOwner &&
   viewer.id !== owner.id
 );
@@ -597,7 +606,10 @@ const dateTo =
             <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Interested? Get in touch</h2>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 18px"></div>
             <p style="font-size:.95rem;color:#6b4e35;margin:0 0 26px;line-height:1.7">{sendLine}</p>
-            {canApply && (
+            {canApply && !idOk && (
+              <div style="margin:0 0 26px"><IdGate profile={viewer} what="apply and message owners" compact /></div>
+            )}
+            {canApply && idOk && (
               <div style="margin:0 0 26px;padding:0 0 26px;border-bottom:1px solid rgba(44,26,14,.08)">
                 <form data-apply="1" style={applied ? 'display:none' : 'display:flex;flex-direction:column;gap:14px'}>
                   <label for="ap_msg" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Your note to the owner</label>

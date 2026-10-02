@@ -10,6 +10,13 @@
 // /api/verification.
 export const prerender =
   false;
+import IdUpload from
+  './_idupload.astro';
+import {
+  OWNER_HINT,
+  ownerUnlocks,
+} from
+  '../lib/idcopy';
 import AppNav from
   './_nav.astro';
 import {
@@ -42,7 +49,7 @@ const acct =
 const away =
   wrongPlace(
     acct,
-    'sitter',
+    'any',
   );
 if (away) {
   return Astro.redirect(
@@ -93,6 +100,14 @@ if (
 ) {
   idState = 'pending';
 }
+// Rejected: back to the
+// start, with the reason.
+const rejectReason =
+  me.id_check_status ===
+  'rejected'
+    ? me.id_reject_reason
+      || 'Unclear photos.'
+    : '';
 
 const fmt = (v: any) => {
   if (!v) return '';
@@ -285,8 +300,12 @@ const steps = [
   })
 ];
 
+if (isOwner && steps[0].hint) {
+  steps[0].hint =
+    OWNER_HINT;
+}
 const verified = s.id === 'verified';
-const level = verified ? 'Verified sitter' : 'Unverified';
+const level = verified ? (isOwner ? 'Verified owner' : 'Verified sitter') : 'Unverified';
 
 const badgeDefs = verified ? [{ label: 'ID verified' }] : [];
 
@@ -351,6 +370,18 @@ const nudge = verified
 function tx(v: string) {
   return v.trim();
 }
+// Owners: same layout,
+// owner wording.
+const shownUnlocks =
+  isOwner
+    ? ownerUnlocks(
+      verified,
+    ).map((u, i) => ({
+      ...unlocks[i],
+      title: u.title,
+      body: u.body,
+    }))
+    : unlocks;
 ---
 
 <!doctype html>
@@ -400,7 +431,7 @@ function tx(v: string) {
     </div>
   </div>
 
-  <AppNav side={'sitter'} active="verification" />
+  <AppNav side={acct!.side} active="verification" />
 
   <main data-pad="1" data-screen-label="Verification" style="flex:1;padding:52px 48px 90px">
     <div style="max-width:1180px;margin:0 auto">
@@ -449,11 +480,15 @@ function tx(v: string) {
             </section>
           ))}
 
+          {idState === 'none' && (
+            <IdUpload reason={rejectReason} />
+          )}
+
           <div data-card="1" class="vf-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px 34px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
             <h2 style="font-family:'Marcellus',serif;font-size:1.22rem;color:#2c1a0e;margin:0 0 8px">What the badge changes</h2>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 22px"></div>
             <div style="display:flex;flex-direction:column;gap:0">
-              {unlocks.map((u) => (
+              {shownUnlocks.map((u) => (
                 <div style={u.rowStyle}>
                   <span style={u.markStyle}>{u.mark}</span>
                   <div style="flex:1;min-width:0">
@@ -551,6 +586,8 @@ function tx(v: string) {
     btn.addEventListener('click', () => {
       const action = btn.getAttribute('data-action');
       if (action === 'check') { show(); location.reload(); return; }
+      // Start = the upload form below the steps.
+      if (action === 'start') { const up = document.querySelector('[data-id-upload]'); if (up) up.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
       if (action === 'remove' && !confirm('Remove your ID badge?')) return;
       btn.disabled = true;
       fetch('/api/verification', {

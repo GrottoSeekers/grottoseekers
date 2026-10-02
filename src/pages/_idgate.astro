@@ -1,0 +1,27 @@
+---
+// "Verify your ID to …" notice, shown wherever an action is locked until the
+// member's ID is approved. Wording follows where their check is.
+interface Props { profile: any; what: string; compact?: boolean }
+const { profile, what, compact = false } = Astro.props;
+const st = profile?.verified_id === true ? 'verified' : (profile?.id_check_status || 'none');
+const title = st === 'pending'
+  ? 'Your ID is being checked'
+  : st === 'rejected'
+    ? 'We couldn’t verify your ID'
+    : 'Verify your ID to ' + what;
+const body = st === 'pending'
+  ? 'It usually comes back the same day. You can ' + what + ' as soon as it’s approved.'
+  : st === 'rejected'
+    ? (profile?.id_reject_reason ? profile.id_reject_reason + ' ' : '') + 'Send new photos to ' + what + '.'
+    : 'Everyone on MYAH is ID checked to keep homes and pets safe. It takes two minutes: a photo of your passport or driving licence and a selfie.';
+const cta = st === 'pending' ? 'See status' : st === 'rejected' ? 'Send new photos' : 'Verify my ID';
+---
+{st !== 'verified' && (
+  <div data-id-gate="1" style={`display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:#fff;border:1px solid rgba(110,84,56,.28);border-left:4px solid ${st === 'rejected' ? '#a4442e' : '#2f5d45'};border-radius:14px;padding:${compact ? '14px 16px' : '18px 22px'};margin:0 0 ${compact ? '0' : '24px'};font-family:'Montserrat',sans-serif`}>
+    <div style="flex:1 1 240px;min-width:0">
+      <p style="margin:0 0 4px;font-weight:600;color:#2c1a0e;font-size:.95rem">{title}</p>
+      <p style="margin:0;color:#6b4e35;font-size:.86rem;line-height:1.6">{body}</p>
+    </div>
+    <a href="/verification" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;white-space:nowrap;border-radius:50px;padding:12px 22px;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45">{cta}</a>
+  </div>
+)}

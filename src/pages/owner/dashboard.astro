@@ -1,6 +1,8 @@
 ---
 export const prerender =
   false;
+import IdGate from
+  '../_idgate.astro';
 import YourSits from
   './_yoursits.astro';
 import {
@@ -604,6 +606,7 @@ const tabs = [
 
   <main data-dash-pad="1" style="flex:1;padding:44px 48px 70px">
     <div style="max-width:1100px;margin:0 auto">
+      <IdGate profile={acct!.profile} what="post sits and message sitters" />
 
       <div data-panel="dashboard" style="display:flex;flex-direction:column;gap:24px">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px">

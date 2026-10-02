@@ -21,6 +21,10 @@ export interface Account {
   email: string;
   side: Side;
   profile: any | null;
+  /** Their photo ID has been approved (required to apply, post, message, confirm). */
+  verified: boolean;
+  /** Can review ID checks (the founders' account, or ADMIN_EMAILS). */
+  isAdmin: boolean;
   /** Their dashboard. */
   home: string;
   /** Where they create their profile. */
@@ -74,11 +78,15 @@ export async function accountFor(
     } catch {}
   }
 
+  const adminEmails = String(import.meta.env.ADMIN_EMAILS || '')
+    .split(',').map((e) => e.trim().toLowerCase()).filter(Boolean);
   return {
     userId: session.userId,
     email: session.email,
     side,
     profile,
+    verified: profile?.verified_id === true,
+    isAdmin: profile?.slug === 'callumandniamh' || adminEmails.includes(String(session.email || '').toLowerCase()),
     home: homeFor(side),
     createUrl: createFor(side),
     editUrl: editFor(side),
@@ -151,4 +159,10 @@ export async function sitterProfiles(select = '*', limit = 500): Promise<any[]> 
   } catch {
     return [];
   }
+}
+
+/** A short reason an action is blocked until the member's ID is approved. */
+export function idRequired(acct: Account | null): string | null {
+  if (!acct || !acct.profile) return 'no_profile';
+  return acct.verified ? null : 'id_required';
 }

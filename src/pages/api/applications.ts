@@ -27,6 +27,8 @@ export const POST: APIRoute = async ({ request }) => {
     const sitter: any = acct.profile;
     if (!sitter) return json({ error: 'no_profile' }, 400);
     if (acct.side !== 'sitter') return json({ error: 'sitters_only' }, 403);
+    // Everyone is ID checked before they can apply.
+    if (!acct.verified) return json({ error: 'id_required', detail: 'Verify your ID first — go to Verification.' }, 403);
 
     const { data: listing } = await supabase
       .from('listings')

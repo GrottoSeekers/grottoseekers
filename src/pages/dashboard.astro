@@ -1,6 +1,8 @@
 ---
 export const prerender =
   false;
+import IdGate from
+  './_idgate.astro';
 import {
   getAccount,
   wrongPlace,
@@ -143,15 +145,24 @@ const shareUrl =
   'https://' + pageUrl;
 const publicHref =
   '/' + slug;
+// The founders' words
+// and photos fill gaps on
+// their own account only.
+const F =
+  profile.slug ===
+  'callumandniamh';
 const tagline =
   profile.tagline ||
-  taglineDef;
+  (F ? taglineDef : '');
 const badge =
   profile.badge_text ||
-  badgeDef;
+  (F ? badgeDef : '');
 const pic: string =
   profile.profile_pic ||
-  '/images/couple-bw-1.jpg';
+  (F
+    ? '/images/couple-bw-1.jpg'
+    : '/images/' +
+      'avatar-cream.png');
 const bio: string =
   profile.bio || '';
 const aboutText =
@@ -160,12 +171,18 @@ const aboutText =
       ? bio.slice(0, 120) +
         '…'
       : bio
-    : aboutDef;
+    : F
+      ? aboutDef
+      : 'Add a bio so' +
+        ' owners can get' +
+        ' to know you.';
 const pvHero =
   heroImages[0] || {
-    src:
-      '/images/' +
-      'couple-villa-1.jpg',
+    src: F
+      ? '/images/' +
+        'couple-villa-1.jpg'
+      : '/images/slideshow-' +
+        'living-room.jpeg',
     pos: 'center 30%',
   };
 const pvHeroStyle =
@@ -178,8 +195,10 @@ const pvHeroStyle =
     'center 30%');
 const pvAbout: string =
   aboutImages[0]?.src ||
-  '/images/' +
-  'couple-dinner-1.jpg';
+  (F
+    ? '/images/' +
+      'couple-dinner-1.jpg'
+    : pic);
 const pvReviews = reviews
   .slice(0, 3)
   .map((r: any) => ({
@@ -503,6 +522,7 @@ const tabs = [
 
   <main data-dash-pad="1" style="flex:1;padding:44px 48px 70px">
     <div style="max-width:1100px;margin:0 auto">
+      <IdGate profile={acct!.profile} what="apply for sits and message owners" />
 
       <div data-panel="dashboard" style="display:flex;flex-direction:column;gap:24px">
         <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px">

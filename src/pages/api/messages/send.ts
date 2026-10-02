@@ -19,6 +19,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     // Sitter or owner comes from the account (sign-up role).
     const acct = await accountFor(session.userId, session.email, session.role);
+    // Messaging opens once the member's ID is approved.
+    if (acct.profile && !acct.verified) return new Response(JSON.stringify({ error: 'id_required', detail: 'Verify your ID to send messages.' }), { status: 403 });
     const senderProfile: any = acct.profile ? { ...acct.profile, profile_type: acct.side } : null;
 
     if (!senderProfile) {

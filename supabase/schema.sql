@@ -226,6 +226,14 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_check_status TEXT    NOT NULL D
   CHECK (id_check_status IN ('none', 'pending', 'verified'));
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_submitted_at TIMESTAMPTZ;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_verified_at  TIMESTAMPTZ;
+-- Uploaded ID photos (private 'id-documents' storage; deleted after review)
+-- and the reason if a check is rejected. See supabase/id-verification.sql.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_doc_path      TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_selfie_path   TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS id_reject_reason TEXT;
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_id_check_status_check;
+ALTER TABLE profiles ADD CONSTRAINT profiles_id_check_status_check
+  CHECK (id_check_status IN ('none', 'pending', 'verified', 'rejected'));
 
 
 -- ── AVAILABILITY ─────────────────────────────────────────────────────────────

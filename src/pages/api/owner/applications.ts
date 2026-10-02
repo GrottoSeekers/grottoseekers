@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getSession } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
+import { getAccount } from '../../../lib/account';
 import { notify } from '../../../lib/notify';
 
 const STATUSES = ['new', 'shortlisted', 'declined'];
@@ -17,7 +18,12 @@ export const POST: APIRoute = async ({ request }) => {
     if (!session) return json({ error: 'Unauthorized' }, 401);
 
     const { id, status, action } = await request.json();
-    if (action === 'confirm') return confirm(session.userId, id);
+    if (action === 'confirm') {
+      // Confirming a sitter opens once the owner's ID is approved.
+      const acct = await getAccount(request);
+      if (!acct?.verified) return json({ error: 'id_required', detail: 'Verify your ID to confirm a sitter.' }, 403);
+      return confirm(session.userId, id);
+    }
     if (!id || !STATUSES.includes(status)) return json({ error: 'Invalid request' }, 400);
 
     const { data: owner } = await supabase

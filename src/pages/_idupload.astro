@@ -1,0 +1,78 @@
+---
+// Photo ID + selfie upload on /verification (shown until a check is sent, and
+// again after one is rejected). Photos are shrunk in the browser, sent to the
+// PRIVATE id-documents storage, and deleted once the founders decide.
+interface Props { reason?: string }
+const { reason = '' } = Astro.props;
+---
+<section id="id-upload" data-id-upload="1" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-left:4px solid #2f5d45;border-radius:18px;padding:30px 32px;font-family:'Montserrat',sans-serif">
+  {reason && (
+    <p data-id-rejected="1" style="margin:0 0 18px;padding:12px 16px;border-radius:12px;background:rgba(164,68,46,.08);color:#a4442e;font-size:.9rem;line-height:1.6"><strong style="font-weight:600">We couldn't verify your last photos.</strong> {reason} Please send new ones.</p>
+  )}
+  <h2 style="font-family:'Marcellus',serif;font-weight:400;font-size:1.35rem;color:#2c1a0e;margin:0 0 8px">Send your photo ID</h2>
+  <p style="color:#6b4e35;font-size:.92rem;line-height:1.7;margin:0 0 22px">Everyone on MYAH is ID checked. Add a clear photo of your passport or driving licence, and a selfie so we can match your face to it. Only the MYAH founders see them, and they are deleted as soon as your check is done.</p>
+  <form data-id-form="1" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <label data-id-slot="document" style="display:flex;flex-direction:column;gap:10px;cursor:pointer">
+      <span style="font-family:'Lato',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#5c3d20">1 · Passport or driving licence</span>
+      <span data-preview style="aspect-ratio:4/3;border-radius:12px;border:1.5px dashed rgba(110,84,56,.45);background:#faf6ee;display:flex;align-items:center;justify-content:center;text-align:center;color:#8a6a4f;font-size:.85rem;overflow:hidden;padding:12px">Tap to take or choose a photo</span>
+      <input type="file" name="document" accept="image/*" style="display:none" />
+    </label>
+    <label data-id-slot="selfie" style="display:flex;flex-direction:column;gap:10px;cursor:pointer">
+      <span style="font-family:'Lato',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#5c3d20">2 · A selfie</span>
+      <span data-preview style="aspect-ratio:4/3;border-radius:12px;border:1.5px dashed rgba(110,84,56,.45);background:#faf6ee;display:flex;align-items:center;justify-content:center;text-align:center;color:#8a6a4f;font-size:.85rem;overflow:hidden;padding:12px">Tap to take a selfie</span>
+      <input type="file" name="selfie" accept="image/*" capture="user" style="display:none" />
+    </label>
+    <div style="grid-column:1 / -1;display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:4px">
+      <button type="submit" data-id-submit="1" style="font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:13px 28px;cursor:pointer;background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;box-shadow:0 6px 18px rgba(110,84,56,.26)">Send for checking</button>
+      <span data-id-status="1" style="font-size:.86rem;color:#6b4e35"></span>
+    </div>
+  </form>
+</section>
+<style>
+  @media (max-width: 640px) {
+    [data-id-upload] { padding: 22px 18px !important; }
+    [data-id-form] { grid-template-columns: minmax(0, 1fr) !important; }
+  }
+</style>
+<script is:inline>
+(function () {
+  var form = document.querySelector('[data-id-form]');
+  if (!form) return;
+  var files = {};
+  var shrink = function (file) {
+    return new Promise(function (resolve) {
+      var img = new Image();
+      img.onload = function () {
+        var max = 1800, w = img.width, h = img.height, k = Math.min(1, max / Math.max(w, h));
+        var c = document.createElement('canvas'); c.width = Math.round(w * k); c.height = Math.round(h * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(function (b) { resolve(b ? new File([b], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }) : file); }, 'image/jpeg', 0.85);
+      };
+      img.onerror = function () { resolve(file); };
+      img.src = URL.createObjectURL(file);
+    });
+  };
+  form.querySelectorAll('[data-id-slot]').forEach(function (slot) {
+    var input = slot.querySelector('input'); var prev = slot.querySelector('[data-preview]');
+    input.addEventListener('change', function () {
+      var f = input.files && input.files[0]; if (!f) return;
+      shrink(f).then(function (small) {
+        files[slot.getAttribute('data-id-slot')] = small;
+        prev.style.padding = '0'; prev.style.borderStyle = 'solid'; prev.style.borderColor = '#2f5d45';
+        prev.innerHTML = '<img src="' + URL.createObjectURL(small) + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />';
+      });
+    });
+  });
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var status = form.querySelector('[data-id-status]'); var btn = form.querySelector('[data-id-submit]');
+    if (!files.document || !files.selfie) { status.style.color = '#a4442e'; status.textContent = 'Add both photos first.'; return; }
+    var fd = new FormData(); fd.append('action', 'submit'); fd.append('document', files.document); fd.append('selfie', files.selfie);
+    btn.disabled = true; btn.textContent = 'Sending…'; status.style.color = '#6b4e35'; status.textContent = '';
+    fetch('/api/verification', { method: 'POST', body: fd })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (d) { if (!r.ok) throw new Error(d.detail || d.error || 'Could not send'); }); })
+      .then(function () { location.reload(); })
+      .catch(function (err) { btn.disabled = false; btn.textContent = 'Send for checking'; status.style.color = '#a4442e'; status.textContent = 'Could not send — ' + err.message; });
+  });
+})();
+</script>

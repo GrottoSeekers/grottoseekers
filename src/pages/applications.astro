@@ -6,6 +6,8 @@
 // sitter's profile.
 export const prerender =
   false;
+import IdGate from
+  './_idgate.astro';
 import AppNav from
   './_nav.astro';
 import {
@@ -373,6 +375,7 @@ const listingId =
 
   <main data-pad="1" style="flex:1;padding:52px 48px 90px">
     <div style="max-width:1120px;margin:0 auto">
+      <IdGate profile={acct!.profile} what="confirm a sitter" />
 
       <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
         <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>{eyebrow}</p>
@@ -578,7 +581,9 @@ const listingId =
       });
       state.tab = 'shortlist';
     } catch (err) {
-      window.alert(err.message === 'already_confirmed'
+      window.alert(err.message === 'id_required'
+        ? 'Verify your ID before confirming a sitter — go to Verification in the menu.'
+        : err.message === 'already_confirmed'
         ? 'Someone is already confirmed for this sit.'
         : 'Could not confirm — please try again.');
     } finally {
