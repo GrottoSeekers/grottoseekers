@@ -15,7 +15,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const validCategories = ['hero', 'about', 'gallery'];
     if (!validCategories.includes(category)) {
-      return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=server' } });
+      return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=server' } });
     }
 
     const columnMap: Record<string, string> = {
@@ -41,12 +41,12 @@ export const POST: APIRoute = async ({ request }) => {
     if (action === 'upload') {
       const files = form.getAll('files').filter((f): f is File => f instanceof File && f.size > 0);
       if (files.length === 0) {
-        return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=missing#${anchor}` } });
+        return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?error=missing#${anchor}` } });
       }
 
       for (const file of files) {
         if (file.size > 5 * 1024 * 1024) {
-          return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=file_too_large#${anchor}` } });
+          return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?error=file_too_large#${anchor}` } });
         }
       }
 
@@ -66,7 +66,7 @@ export const POST: APIRoute = async ({ request }) => {
 
       const failed = uploads.some(u => u === null);
       if (failed) {
-        return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=upload&detail=Some+files+failed#${anchor}` } });
+        return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?error=upload&detail=Some+files+failed#${anchor}` } });
       }
 
       for (const url of uploads) {
@@ -83,16 +83,16 @@ export const POST: APIRoute = async ({ request }) => {
         .eq('id', profile.id);
 
       if (error) {
-        return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=server#${anchor}` } });
+        return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?error=server#${anchor}` } });
       }
 
-      return new Response(null, { status: 302, headers: { Location: `/owner/edit?saved=${category}#${anchor}` } });
+      return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?saved=${category}#${anchor}` } });
     }
 
     if (action === 'delete') {
       const index = parseInt(form.get('index') as string, 10);
       if (isNaN(index) || index < 0 || index >= images.length) {
-        return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=server#${anchor}` } });
+        return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?error=server#${anchor}` } });
       }
 
       const removed = images[index];
@@ -111,14 +111,14 @@ export const POST: APIRoute = async ({ request }) => {
         .eq('id', profile.id);
 
       if (error) {
-        return new Response(null, { status: 302, headers: { Location: `/owner/edit?error=server#${anchor}` } });
+        return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?error=server#${anchor}` } });
       }
 
-      return new Response(null, { status: 302, headers: { Location: `/owner/edit?saved=${category}#${anchor}` } });
+      return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?saved=${category}#${anchor}` } });
     }
 
-    return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=server' } });
+    return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=server' } });
   } catch {
-    return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=server' } });
+    return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=server' } });
   }
 };

@@ -1,0 +1,917 @@
+---
+// Loads the owner's
+// profile; one Save
+// sends everything to
+// /api/owner/profile.
+export const prerender =
+  false;
+import {
+  getSession,
+} from
+  '../../../lib/auth';
+import {
+  supabase,
+} from
+  '../../../lib/supabase';
+import {
+  arr,
+} from
+  '../../../lib/dashboard';
+
+const session =
+  await getSession(
+    Astro.request,
+  );
+if (!session) {
+  return Astro.redirect(
+    '/login',
+  );
+}
+
+const pr =
+  await supabase
+  .from('profiles')
+  .select('*')
+  .eq(
+    'user_id',
+    session.userId,
+  )
+  .single();
+const me: any = pr.data;
+if (!me) {
+  return Astro.redirect(
+    '/owner/profile/create',
+  );
+}
+if (
+  me.profile_type !==
+  'owner'
+) {
+  return Astro.redirect(
+    '/profile/edit',
+  );
+}
+
+// Owners have no page of
+// their own: "View my
+// page" opens their
+// latest listing.
+let pageUrl =
+  '/owner/dashboard';
+try {
+  const lr =
+    await supabase
+    .from('listings')
+    .select('id')
+    .eq(
+      'profile_id',
+      me.id,
+    )
+    .order(
+      'created_at',
+      { ascending: false },
+    )
+    .limit(1);
+  const l =
+    (lr.data ?? [])[0];
+  if (l) {
+    pageUrl =
+      '/listings/' + l.id;
+  }
+} catch {}
+
+// "See how it reaches
+// the sitter": their
+// latest confirmed sit.
+let sitUrl =
+  '/owner/dashboard';
+try {
+  const sr =
+    await supabase
+    .from('sits')
+    .select(
+      'id, listings!inner(' +
+      'profile_id)',
+    )
+    .eq(
+      'listings.profile_id',
+      me.id,
+    )
+    .order(
+      'created_at',
+      { ascending: false },
+    )
+    .limit(1);
+  const s0 =
+    (sr.data ?? [])[0];
+  if (s0) {
+    sitUrl =
+      '/sits/' + s0.id;
+  }
+} catch {}
+
+const th: any =
+  me.theme_json || {};
+const hd: any =
+  me.headings_json || {};
+const ho: any =
+  me.handover_json || {};
+
+const initial = {
+  name: me.name || '',
+  location:
+    me.location || '',
+  tagline:
+    me.tagline || '',
+  bio: me.bio || '',
+  lookingFor:
+    me.looking_for || '',
+  email:
+    me.contact_email ||
+    '',
+  whatsapp:
+    me.whatsapp_number ||
+    '',
+  hero: arr(
+    me.hero_images_json,
+  )
+    .filter(
+      (i: any) => i?.src,
+    )
+    .map((i: any) => ({
+      src: i.src,
+    })),
+  about: arr(
+    me.about_images_json,
+  )
+    .filter(
+      (i: any) => i?.src,
+    )
+    .map((i: any) => ({
+      src: i.src,
+    })),
+  gallery: arr(
+    me.gallery_json,
+  )
+    .filter(
+      (i: any) => i?.src,
+    )
+    .map((i: any) => ({
+      src: i.src,
+    })),
+  pets: arr(
+    me.pets_json,
+  ).map(
+    (p: any, i: number) => ({
+      index: i,
+      name: p?.name || '',
+      type: p?.type || '',
+      breed: p?.breed || '',
+      age: p?.age || '',
+      temperament:
+        p?.temperament ||
+        '',
+      needs:
+        p?.special_needs ||
+        '',
+      photo:
+        p?.photo_url || '',
+    }),
+  ),
+  amenities: arr(
+    me.amenities_json,
+  ),
+  theme: {
+    background:
+      th.background ||
+      '#faf6ee',
+    accent:
+      th.accent ||
+      '#2f5d45',
+    accentLight:
+      th.accent_light ||
+      '#c4ab8a',
+    text:
+      th.text ||
+      '#2c1a0e',
+    textSoft:
+      th.text_soft ||
+      '#6b4e35',
+  },
+  handover: {
+    address:
+      ho.address || '',
+    access:
+      ho.access || '',
+    wifiName:
+      ho.wifiName || '',
+    wifiPass:
+      ho.wifiPass || '',
+    vet: ho.vet || '',
+    vetOoh:
+      ho.vetOoh || '',
+    neighbour:
+      ho.neighbour || '',
+    mobile:
+      ho.mobile || '',
+  },
+  houseNotes: arr(
+    ho.notes,
+  ).filter(
+    (n: any) =>
+      n?.label && n?.value,
+  ),
+  headings: {
+    about_label:
+      hd.about_label || '',
+    about_title:
+      hd.about_title || '',
+    pets_label:
+      hd.pets_label || '',
+    pets_title:
+      hd.pets_title || '',
+    gallery_label:
+      hd.gallery_label ||
+      '',
+    gallery_title:
+      hd.gallery_title ||
+      '',
+    enquiry_label:
+      hd.enquiry_label ||
+      '',
+    enquiry_title:
+      hd.enquiry_title ||
+      '',
+  },
+};
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <meta property="og:image" content="/images/logo-tile.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <title>Edit owner profile — MYAH</title>
+  <style is:global>
+    body { margin: 0; background: #faf6ee; color: #2c1a0e; font-family: "Montserrat", sans-serif; min-height: 100vh; }
+    * { box-sizing: border-box; }
+    a { color: #2f5d45; }
+    a:hover { color: #2c1a0e; }
+    input::placeholder, textarea::placeholder { color: rgba(44,26,14,.35); }
+    input[type="color"] { -webkit-appearance: none; appearance: none; padding: 2px; }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+    @keyframes gs-ring { to { transform: rotate(360deg); } }
+    @keyframes gs-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    @media (max-width: 960px) {
+      [data-topnav] { padding: 14px 24px !important; }
+      [data-pad] { padding: 32px 20px 140px !important; }
+      [data-two-col] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-aside] { position: static !important; }
+      [data-card] { padding: 26px 22px !important; }
+      [data-field-row] { grid-template-columns: minmax(0,1fr) !important; }
+      [data-savebar] { padding: 14px 20px !important; }
+    }
+
+    /* Field focus — same treatment as Log in */
+    [data-edit] input[type=text]:focus, [data-edit] input[type=email]:focus, [data-edit] input[type=tel]:focus, [data-edit] textarea:focus { border-color:#2f5d45 !important; box-shadow:0 0 0 3px rgba(110,84,56,.15) !important; outline:none; }
+    [data-edit] select:focus { border-color:#2f5d45 !important; outline:none; }
+
+    .eo-back:hover { gap:13px !important; color:#2f5d45 !important; }
+    .eo-page:hover { color:#2c1a0e !important; }
+    .eo-jump:hover { background:rgba(110,84,56,.1) !important; color:#2f5d45 !important; border-color:rgba(110,84,56,.5) !important; }
+    .eo-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
+    .eo-thumb:hover { transform:translateY(-2px) !important; box-shadow:0 8px 20px rgba(44,26,14,.14) !important; }
+    .eo-x:hover { background:#b91c1c !important; }
+    .eo-add:hover { background:rgba(110,84,56,.12) !important; border-color:#2f5d45 !important; }
+    .eo-pet:hover { border-color:rgba(110,84,56,.45) !important; }
+    .eo-petx:hover { background:#b91c1c !important; color:#fff !important; }
+    .eo-btn:hover { background:#3e7a5b !important; border-color:#3e7a5b !important; transform:translateY(-2px) !important; box-shadow:0 12px 28px rgba(110,84,56,.36) !important; }
+    .eo-cancel:hover { color:#2c1a0e !important; }
+    .eo-addnote:hover { background:rgba(110,84,56,.1) !important; border-color:#2f5d45 !important; transform:translateY(-1px) !important; }
+    .eo-open:hover { gap:11px !important; color:#2c1a0e !important; }
+    .eo-swatch:hover { border-color:#2f5d45 !important; transform:scale(1.08) !important; }
+    .eo-reset:hover { border-color:#2f5d45 !important; color:#2c1a0e !important; }
+    .eo-strength:hover { border-color:rgba(110,84,56,.5) !important; }
+  </style>
+</head>
+<body>
+<div data-edit="1" style="min-height:100vh;display:flex;flex-direction:column;background:#faf6ee">
+
+  <div data-loader="1" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;background:rgba(250,246,238,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s ease">
+    <div style="position:relative;width:132px;height:132px;display:flex;align-items:center;justify-content:center">
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid rgba(110,84,56,.18)"></div>
+      <div style="position:absolute;inset:0;border-radius:50%;border:3px solid transparent;border-top-color:#2f5d45;border-right-color:rgba(110,84,56,.45);animation:gs-ring 1s linear infinite"></div>
+      <img src="/images/logo-mark.png" alt="" style="width:74px;height:74px;object-fit:contain;animation:gs-pulse 1.8s ease-in-out infinite" />
+    </div>
+  </div>
+
+  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
+    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
+      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
+      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:22px">
+      <a href="/owner/dashboard" class="eo-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Dashboard</a>
+      <a href={pageUrl} class="eo-page" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">View my page</a>
+    </div>
+  </nav>
+
+  <main data-pad="1" data-screen-label="Edit owner profile" style="flex:1;padding:52px 48px 140px">
+    <div style="max-width:1180px;margin:0 auto">
+
+      <div style="border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:30px;margin-bottom:26px">
+        <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>MYAH owner</p>
+        <h1 style="font-family:'Marcellus',serif;font-size:2.5rem;color:#2c1a0e;line-height:1.15;margin:0 0 18px">Edit your <em style="color:#2f5d45;">home</em></h1>
+        <p style="color:#6b4e35;font-size:1rem;line-height:1.75;max-width:600px;margin:0">Your home, your pets, and what you need from a sitter. Everything here is what sitters read before they enquire &mdash; the preview on the right moves as you type.</p>
+      </div>
+
+      <div data-form-error="1" role="alert" style="display:none;margin-bottom:24px;padding:14px 18px;border-radius:12px;background:#fdeeee;border:1px solid #f7cfcf;font-size:.86rem;font-weight:600;color:#a4442e"></div>
+
+      <div data-jumps style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:34px"></div>
+
+      <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:28px;align-items:start">
+
+        <div style="display:flex;flex-direction:column;gap:24px">
+
+          <section id="details" data-card="1" class="eo-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">01</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Details</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 28px;max-width:460px">Who you are, where you are, and a few words about the place a sitter would be staying in.</p>
+
+            <div data-field-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px">
+              <div>
+                <label for="name" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Your name <span style="color:#2f5d45">*</span></label>
+                <input data-name="1" type="text" id="name" required="required" value={initial.name} style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+              </div>
+              <div>
+                <label for="location" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Location</label>
+                <input data-location="1" type="text" id="location" placeholder="e.g. Bath, UK" value={initial.location} style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+              </div>
+            </div>
+
+            <div style="margin-bottom:24px">
+              <label for="tagline" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Tagline</label>
+              <input data-tagline="1" type="text" id="tagline" placeholder="e.g. Cosy Georgian townhouse with two easy dogs" value={initial.tagline} style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+            </div>
+
+            <div style="margin-bottom:26px">
+              <label for="bio" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">About your home</label>
+              <textarea data-bio="1" id="bio" rows="7" placeholder="The house, the neighbourhood, what a week here actually feels like." style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .2s, box-shadow .2s">{initial.bio}</textarea>
+              <p data-bio-count style="font-size:.82rem;color:#6b4e35;margin:8px 0 0;line-height:1.6"></p>
+            </div>
+
+            <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:26px">
+              <p style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 20px">Where enquiries go</p>
+              <div data-field-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+                <div>
+                  <label for="email" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">Enquiry email <span style="color:#2f5d45">*</span></label>
+                  <input data-email="1" type="email" id="email" value={initial.email} style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+                </div>
+                <div>
+                  <label for="whatsapp" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">WhatsApp number</label>
+                  <input data-whatsapp="1" type="tel" id="whatsapp" placeholder="+447700900000" value={initial.whatsapp} style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section id="photos" data-card="1" class="eo-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">02</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Home photos</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 24px"></div>
+            <div data-photo-groups></div>
+            <input data-photo-file="1" type="file" accept="image/*" multiple="multiple" hidden />
+          </section>
+
+          <section id="pets" data-card="1" class="eo-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">03</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Your pets</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 24px;max-width:500px">Add each pet with their quirks, routine and any medication, so a sitter knows exactly what to expect.</p>
+
+            <div data-pets style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px"></div>
+
+            <div data-add-pet-panel>
+              <p style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5c3d20;margin:0 0 18px">New pet</p>
+              <div data-field-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                <input data-pet-name="1" type="text" placeholder="Name — e.g. Solomon" aria-label="Pet name" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#fff;outline:none;transition:border-color .2s, box-shadow .2s" />
+                <select data-pet-type="1" aria-label="Pet type" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#fff;outline:none;transition:border-color .2s">
+                  <option value="Dog">Dog</option>
+                  <option value="Cat">Cat</option>
+                  <option value="Bird">Bird</option>
+                  <option value="Rabbit">Rabbit</option>
+                  <option value="Horse">Horse</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div data-field-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+                <input data-pet-breed="1" type="text" placeholder="Breed — e.g. Labrador" aria-label="Breed" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#fff;outline:none;transition:border-color .2s, box-shadow .2s" />
+                <input data-pet-age="1" type="text" placeholder="Age — e.g. 9 years" aria-label="Age" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#fff;outline:none;transition:border-color .2s, box-shadow .2s" />
+              </div>
+              <input data-pet-temperament="1" type="text" placeholder="Temperament — e.g. Gentle, loves a long walk, wary of strangers at first" aria-label="Temperament" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#fff;outline:none;margin-bottom:16px;transition:border-color .2s, box-shadow .2s" />
+              <textarea data-pet-needs="1" rows="3" placeholder="Special needs — medication, anxieties, anything a sitter must know" aria-label="Special needs" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.94rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#fff;outline:none;resize:vertical;line-height:1.65;margin-bottom:18px;transition:border-color .2s, box-shadow .2s"></textarea>
+              <input data-pet-photo="1" type="file" accept="image/*" aria-label="Pet photo" style="display:block;font-family:'Montserrat',sans-serif;font-size:.86rem;color:#6b4e35;margin-bottom:18px" />
+              <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+                <button type="button" data-add-pet class="eo-btn" style="font-family:'Montserrat',sans-serif;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;box-shadow:0 6px 20px rgba(110,84,56,.28);padding:13px 28px;cursor:pointer;transition:background .25s ease, border-color .25s ease, transform .15s ease">Add pet</button>
+                <button type="button" data-toggle-pet class="eo-cancel" style="font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;background:none;border:none;cursor:pointer;padding:6px 2px;transition:color .2s">Cancel</button>
+              </div>
+            </div>
+
+            <button type="button" data-toggle-pet data-add-pet-btn>+ Add a pet</button>
+          </section>
+
+          <section id="amenities" data-card="1" class="eo-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">04</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Amenities</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p data-amenity-count style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 22px;max-width:500px"></p>
+
+            <div data-amenities style="display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:10px"></div>
+          </section>
+
+          <section id="looking-for" data-card="1" class="eo-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">05</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">What you&rsquo;re looking for</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 22px;max-width:500px">Describe the ideal sitter &mdash; experience, expectations, house rules. Specific beats polite.</p>
+            <textarea data-looking="1" rows="6" aria-label="What you're looking for" placeholder="e.g. Someone comfortable with a large dog, happy in a rural spot with no bus route, and around the house most of the day." style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.97rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;resize:vertical;line-height:1.7;transition:border-color .2s, box-shadow .2s">{initial.lookingFor}</textarea>
+          </section>
+
+          <section id="handover" data-card="1" class="eo-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">06</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Handover details</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 16px"></div>
+
+            <div style="display:flex;align-items:flex-start;gap:13px;background:rgba(110,84,56,.1);border:1px solid rgba(110,84,56,.32);border-radius:12px;padding:16px 18px;margin-bottom:26px;max-width:560px">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#2f5d45" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><rect x="4" y="10" width="16" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+              <p style="font-size:.9rem;color:#5c3d20;line-height:1.65;margin:0">Private. None of this appears on your public page or in browse &mdash; it&rsquo;s released to one sitter only, the moment you confirm them for a sit.</p>
+            </div>
+
+            <div data-handover-fields data-field-row="1" style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:24px"></div>
+
+            <div style="border-top:1px solid rgba(44,26,14,.08);padding-top:26px">
+              <p style="font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6b4e35;margin:0 0 6px">House notes</p>
+              <p style="font-size:.86rem;color:#6b4e35;line-height:1.65;margin:0 0 18px;max-width:500px">The small things a sitter can&rsquo;t guess &mdash; bin day, the gate that sticks, where the logs are.</p>
+              <div data-notes style="display:flex;flex-direction:column;gap:12px;margin-bottom:18px"></div>
+              <div data-field-row="1" style="display:grid;grid-template-columns:.7fr 1.6fr;gap:16px;margin-bottom:16px">
+                <input data-note-label="1" type="text" placeholder="Label — e.g. Bins" aria-label="Note label" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.93rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+                <input data-note-value="1" type="text" placeholder="What a sitter needs to know" aria-label="Note" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.93rem;font-family:'Montserrat',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />
+              </div>
+              <button type="button" data-add-note class="eo-addnote" style="font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:12px 26px;cursor:pointer;transition:background .25s ease, border-color .25s ease, transform .15s ease">Add note</button>
+            </div>
+
+            <div style="border-top:1px solid rgba(44,26,14,.08);margin-top:26px;padding-top:22px">
+              <p style="font-size:.88rem;color:#6b4e35;line-height:1.7;margin:0">Arrival time and how keys change hands are set per sit, on the listing itself &mdash; everything above is the same whoever is sitting. <a href={sitUrl} style="font-weight:600">See how it reaches the sitter &rarr;</a></p>
+            </div>
+          </section>
+
+          <section id="headings" data-card="1" class="eo-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="display:flex;align-items:baseline;gap:14px;margin:0 0 8px"><span style="font-family:'Marcellus',serif;font-size:.92rem;color:#6e5438;letter-spacing:.08em">07</span><h2 style="font-family:'Marcellus',serif;font-size:1.3rem;color:#2c1a0e;margin:0">Section headings</h2></div>
+            <div style="width:40px;height:2px;background:#6e5438;margin:0 0 12px"></div>
+            <p style="font-size:.9rem;color:#6b4e35;line-height:1.7;margin:0 0 26px;max-width:500px">Leave anything blank to keep the wording shown.</p>
+
+            <div data-headings style="display:flex;flex-direction:column;gap:26px"></div>
+          </section>
+        </div>
+
+        <aside data-aside="1" id="preview" style="position:sticky;top:28px;display:flex;flex-direction:column;gap:18px">
+          <div class="eo-card" style="background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;overflow:hidden;box-shadow:0 1px 2px rgba(44,26,14,.04);transition:box-shadow .3s ease, border-color .3s ease">
+            <div style="padding:18px 22px;border-bottom:1px solid rgba(110,84,56,.2);display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0">Page preview</p>
+              <a href={pageUrl} class="eo-open" style="display:inline-flex;align-items:center;gap:7px;font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:gap .2s, color .2s">Open &rarr;</a>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;background:#faf6ee;border-bottom:1px solid rgba(110,84,56,.18)">
+              <span style="display:flex;gap:5px;flex-shrink:0">
+                <span style="width:8px;height:8px;border-radius:50%;background:rgba(44,26,14,.16);display:block"></span>
+                <span style="width:8px;height:8px;border-radius:50%;background:rgba(44,26,14,.16);display:block"></span>
+                <span style="width:8px;height:8px;border-radius:50%;background:rgba(44,26,14,.16);display:block"></span>
+              </span>
+              <span data-pv-url style="flex:1;min-width:0;font-size:.7rem;color:#6b4e35;background:#fff;border:1px solid rgba(44,26,14,.08);border-radius:50px;padding:5px 12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+            </div>
+
+            <div data-pv-body>
+              <div style="position:relative;height:186px;overflow:hidden">
+                <img data-pv-hero src="/images/slideshow-living-room.jpeg" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />
+                <div style="position:absolute;inset:0;background:rgba(44,26,14,.52)"></div>
+                <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:16px;gap:6px">
+                  <span data-pv-badge></span>
+                  <p data-pv-brand>MYAH</p>
+                  <p data-pv-name style="font-size:.72rem;color:rgba(255,255,255,.9);font-weight:600;letter-spacing:.08em;margin:0"></p>
+                  <p data-pv-tagline></p>
+                  <span data-pv-btn>Get In Touch</span>
+                </div>
+              </div>
+
+              <div style="padding:18px 20px">
+                <p data-pv-label>About Our Home</p>
+                <div style="display:flex;gap:12px;align-items:flex-start">
+                  <img data-pv-about src="/images/slideshow-dogs-couch.jpeg" alt="" style="width:62px;height:62px;border-radius:10px;object-fit:cover;flex-shrink:0" />
+                  <p data-pv-bio></p>
+                </div>
+              </div>
+
+              <div style="padding:0 20px 18px">
+                <p data-pv-label>Meet the Pets</p>
+                <div data-pv-pets style="display:flex;flex-wrap:wrap;gap:8px"></div>
+              </div>
+
+              <div style="padding:0 20px 18px">
+                <p data-pv-label>Home Amenities</p>
+                <div data-pv-amenities style="display:flex;flex-wrap:wrap;gap:6px"></div>
+              </div>
+
+              <div style="padding:0 20px 18px">
+                <p data-pv-label>Our Home</p>
+                <div data-pv-gallery style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px"></div>
+              </div>
+
+              <div data-pv-footer>
+                <p data-pv-footer-brand>MYAH</p>
+                <span data-pv-name style="font-size:.6rem;color:rgba(255,255,255,.45)"></span>
+              </div>
+            </div>
+
+            <div style="padding:18px 20px 20px;background:#fff;border-top:1px solid rgba(110,84,56,.2)">
+              <div data-swatches style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-bottom:14px"></div>
+              <div style="display:flex;justify-content:center">
+                <button type="button" data-reset-colours class="eo-reset" style="font-family:'Montserrat',sans-serif;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;background:none;border:1.5px solid rgba(44,26,14,.15);border-radius:50px;padding:9px 22px;cursor:pointer;transition:border-color .2s, color .2s">Reset colours</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="eo-strength" style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:22px 24px;transition:border-color .3s ease">
+            <p style="font-size:.7rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#6e5438;margin:0 0 14px">Profile strength</p>
+            <div style="height:7px;border-radius:50px;background:rgba(44,26,14,.08);overflow:hidden;margin-bottom:12px">
+              <div data-strength-bar></div>
+            </div>
+            <p data-strength-text style="font-size:.86rem;color:#6b4e35;line-height:1.65;margin:0"></p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <div data-savebar="1">
+    <div style="max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap">
+      <p style="font-size:.88rem;color:#6b4e35;margin:0;line-height:1.5">Unsaved changes &mdash; sitters still see the old version.</p>
+      <button type="button" data-save></button>
+    </div>
+  </div>
+</div>
+
+<script is:inline define:vars={{ initial }}>
+(() => {
+  const DEFAULT_THEME = { background: '#faf6ee', accent: '#2f5d45', accentLight: '#c4ab8a', text: '#2c1a0e', textSoft: '#6b4e35' };
+  const ALL_AMENITIES = ['WiFi','Parking','Garden','Pool','Gym','Air Conditioning','Heating','Washer/Dryer','Dishwasher','TV/Streaming','Workspace','Near Public Transport','Near Shops','Rural/Countryside','Beach Nearby','Pet-Friendly Area'];
+  const PLACEHOLDER = '/images/logo-mark.png';
+
+  const s = JSON.parse(JSON.stringify(initial));
+  s.addingPet = false;
+  s.saved = true;
+  s.saving = false;
+  // Uploads waiting for Save: { key: [File] }; image items carry { src, new: n }.
+  const pending = { hero: [], about: [], gallery: [], pet: [] };
+
+  const q = sel => document.querySelector(sel);
+  const qa = sel => Array.from(document.querySelectorAll(sel));
+  const esc = v => { const d = document.createElement('div'); d.textContent = v == null ? '' : String(v); return d.innerHTML; };
+  const dirty = () => { s.saved = false; };
+
+  const loader = q('[data-loader]');
+  let hideT;
+  const showLoader = (stay) => {
+    if (!loader) return;
+    loader.style.opacity = '1';
+    loader.style.pointerEvents = 'all';
+    clearTimeout(hideT);
+    if (!stay) hideT = setTimeout(() => { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }, 1600);
+  };
+  const hideLoader = () => { clearTimeout(hideT); loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; };
+
+  const JUMPS = [
+    { href: '#details', label: 'Details' },
+    { href: '#photos', label: 'Home photos' },
+    { href: '#pets', label: 'Pets' },
+    { href: '#amenities', label: 'Amenities' },
+    { href: '#looking-for', label: 'Looking for' },
+    { href: '#handover', label: 'Handover' },
+    { href: '#preview', label: 'Colours' }
+  ];
+  q('[data-jumps]').innerHTML = JUMPS.map(j =>
+    '<a href="' + j.href + '" class="eo-jump" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#6b4e35;text-decoration:none;padding:8px 16px;border-radius:50px;background:#fff;border:1px solid rgba(110,84,56,.28);transition:background .2s, color .2s, border-color .2s">' + esc(j.label) + '</a>').join('');
+
+  const HANDOVER = [
+    { key: 'address', label: 'Full address', placeholder: 'House name, street, postcode', wide: true },
+    { key: 'access', label: 'Parking & access', placeholder: 'Where a sitter puts the car' },
+    { key: 'wifiName', label: 'Wifi network', placeholder: 'Network name' },
+    { key: 'wifiPass', label: 'Wifi password', placeholder: 'Password' },
+    { key: 'vet', label: 'Vet practice', placeholder: 'Practice name · phone', wide: true },
+    { key: 'vetOoh', label: 'Out-of-hours vet', placeholder: 'Practice name · phone', wide: true },
+    { key: 'neighbour', label: 'Neighbour with a key', placeholder: 'Name · phone' },
+    { key: 'mobile', label: 'Your mobile', placeholder: 'Number a sitter can reach you on' }
+  ];
+  q('[data-handover-fields]').innerHTML = HANDOVER.map(f =>
+    '<div style="' + (f.wide ? 'grid-column:1/-1' : '') + '">' +
+      '<label for="ho-' + f.key + '" style="display:block;font-size:.78rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;margin-bottom:10px">' + esc(f.label) + '</label>' +
+      '<input type="text" id="ho-' + f.key + '" data-handover="' + f.key + '" value="' + esc(s.handover[f.key]) + '" placeholder="' + esc(f.placeholder) + '" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:13px 16px;font-size:.95rem;font-family:\'Montserrat\',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />' +
+    '</div>').join('');
+
+  const HEADINGS = [
+    { title: 'About section', where: 'Your bio text and photos.', label: 'about_label', titleKey: 'about_title', labelPh: 'About Our Home', titlePh: () => 'A great place to stay — for you and the pets.' },
+    { title: 'Pets section', where: 'The row of pet cards.', label: 'pets_label', titleKey: 'pets_title', labelPh: 'Meet the Pets', titlePh: () => 'Who you would be looking after' },
+    { title: 'Gallery section', where: 'The photo grid.', label: 'gallery_label', titleKey: 'gallery_title', labelPh: 'Our Home', titlePh: () => 'Room by room' },
+    { title: 'Contact section', where: 'The enquiry form at the bottom.', label: 'enquiry_label', titleKey: 'enquiry_title', labelPh: 'Get In Touch', titlePh: () => 'Contact ' + (s.name.trim() || 'us') }
+  ];
+  const headInput = (key, ph) => '<input type="text" data-heading="' + key + '" aria-label="' + esc(ph) + '" value="' + esc(s.headings[key]) + '" placeholder="' + esc(ph) + '" style="width:100%;border:1.5px solid rgba(44,26,14,.18);border-radius:10px;padding:12px 15px;font-size:.93rem;font-family:\'Montserrat\',sans-serif;color:#2c1a0e;background:#faf6ee;outline:none;transition:border-color .2s, box-shadow .2s" />';
+  q('[data-headings]').innerHTML = HEADINGS.map(h =>
+    '<div>' +
+      '<p style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5c3d20;margin:0 0 4px">' + esc(h.title) + '</p>' +
+      '<p style="font-size:.84rem;color:#6b4e35;line-height:1.6;margin:0 0 14px">' + esc(h.where) + '</p>' +
+      '<div data-field-row="1" style="display:grid;grid-template-columns:1fr 1.4fr;gap:16px">' + headInput(h.label, h.labelPh) + headInput(h.titleKey, h.titlePh()) + '</div>' +
+    '</div>').join('');
+
+  const SWATCHES = [
+    { key: 'background', label: 'Background' },
+    { key: 'accent', label: 'Accent' },
+    { key: 'accentLight', label: 'Highlight' },
+    { key: 'text', label: 'Text' },
+    { key: 'textSoft', label: 'Soft text' }
+  ];
+  const renderSwatches = () => {
+    q('[data-swatches]').innerHTML = SWATCHES.map(sw =>
+      '<label style="display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer">' +
+        '<input type="color" data-swatch="' + sw.key + '" value="' + esc(s.theme[sw.key]) + '" class="eo-swatch" style="width:38px;height:38px;border:2px solid rgba(44,26,14,.15);border-radius:50%;cursor:pointer;background:#faf6ee;transition:border-color .2s, transform .15s" />' +
+        '<span style="font-size:.64rem;font-weight:600;color:#6b4e35;letter-spacing:.03em">' + esc(sw.label) + '</span>' +
+      '</label>').join('');
+  };
+  renderSwatches();
+
+  const GROUPS = [
+    { key: 'hero', title: 'Banner photos', desc: 'The wide shots at the top of your page. Outside, the living room, the garden — whatever sells the place.' },
+    { key: 'about', title: 'Interior & lifestyle', desc: 'Smaller photos beside your About text.' },
+    { key: 'gallery', title: 'Gallery', desc: 'The grid further down — rooms, garden, neighbourhood.', last: true }
+  ];
+
+  const render = () => {
+    const t = s.theme;
+
+    q('[data-bio-count]').textContent = s.bio.trim().length + ' characters — sitters see the first 130 on the preview card.';
+
+    // Photos
+    q('[data-photo-groups]').innerHTML = GROUPS.map(g => {
+      const list = s[g.key];
+      return '<div style="' + 'padding-bottom:26px;' + (g.last ? '' : 'margin-bottom:26px;border-bottom:1px solid rgba(44,26,14,.07);') + '">' +
+        '<div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:6px">' +
+          '<p style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#5c3d20;margin:0">' + esc(g.title) + '</p>' +
+          '<span style="font-size:.78rem;color:#6b4e35">' + list.length + (list.length === 1 ? ' photo' : ' photos') + '</span>' +
+        '</div>' +
+        '<p style="font-size:.86rem;color:#6b4e35;line-height:1.65;margin:0 0 16px;max-width:480px">' + esc(g.desc) + '</p>' +
+        '<div style="display:flex;flex-wrap:wrap;gap:12px">' +
+          list.map((img, i) => {
+            const badgeStyle = (g.key === 'hero' && i === 0)
+              ? 'position:absolute;left:6px;bottom:6px;font-size:.58rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:rgba(44,26,14,.62);padding:3px 9px;border-radius:50px'
+              : 'display:none';
+            return '<div class="eo-thumb" style="position:relative;width:118px;height:88px;border-radius:10px;overflow:hidden;border:1px solid rgba(110,84,56,.25);transition:transform .2s ease, box-shadow .2s ease">' +
+              '<img src="' + esc(img.src) + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block" />' +
+              '<span style="' + badgeStyle + '">Cover</span>' +
+              '<button type="button" data-remove-photo="' + g.key + ':' + i + '" title="Remove photo" class="eo-x" style="position:absolute;top:6px;right:6px;width:23px;height:23px;border-radius:50%;background:rgba(44,26,14,.6);color:#fff;border:none;font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s ease">&times;</button>' +
+            '</div>';
+          }).join('') +
+          '<button type="button" data-add-photo="' + g.key + '" class="eo-add" style="width:118px;height:88px;border-radius:10px;border:1.5px dashed rgba(110,84,56,.5);background:#faf6ee;color:#2f5d45;font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .25s ease, border-color .25s ease">+ Add</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+    // Pets
+    q('[data-pets]').innerHTML = s.pets.map((p, i) => {
+      const meta = [p.type, p.breed, p.age].filter(Boolean).join(' · ');
+      const needs = p.needs ? 'Special needs: ' + p.needs : '';
+      const needsStyle = 'font-size:.84rem;color:#2f5d45;font-weight:700;line-height:1.6;margin:8px 0 0;' + (p.needs ? '' : 'display:none;');
+      return '<div class="eo-pet" style="display:flex;gap:18px;align-items:flex-start;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:14px;padding:20px 22px;transition:border-color .25s ease">' +
+        '<img src="' + esc(p.photo || PLACEHOLDER) + '" alt="" style="width:74px;height:74px;border-radius:12px;object-fit:cover;flex-shrink:0" />' +
+        '<div style="flex:1;min-width:0">' +
+          '<p style="font-family:\'Marcellus\',serif;font-size:1.1rem;color:#2c1a0e;margin:0 0 4px">' + esc(p.name) + '</p>' +
+          '<p style="font-size:.82rem;color:#2f5d45;font-weight:600;margin:0 0 8px">' + esc(meta) + '</p>' +
+          '<p style="font-size:.86rem;color:#6b4e35;line-height:1.6;margin:0">' + esc(p.temperament || 'No temperament noted yet.') + '</p>' +
+          '<p style="' + needsStyle + '">' + esc(needs) + '</p>' +
+        '</div>' +
+        '<button type="button" data-remove-pet="' + i + '" title="Remove pet" class="eo-petx" style="width:26px;height:26px;border-radius:50%;background:rgba(44,26,14,.08);color:#6b4e35;border:none;font-size:15px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:background .2s ease, color .2s ease">&times;</button>' +
+      '</div>';
+    }).join('');
+    q('[data-add-pet-panel]').setAttribute('style', 'background:#faf6ee;border:1px dashed rgba(110,84,56,.45);border-radius:14px;padding:24px 26px;' + (s.addingPet ? '' : 'display:none;'));
+    q('[data-add-pet-btn]').setAttribute('style', 'font-family:\'Montserrat\',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:13px 28px;cursor:pointer;transition:background .25s ease, border-color .25s ease, transform .15s ease;' + (s.addingPet ? 'display:none;' : ''));
+
+    // Amenities (the design's 16, plus any older ones already saved)
+    const extra = s.amenities.filter(a => !ALL_AMENITIES.includes(a));
+    const allA = ALL_AMENITIES.concat(extra);
+    q('[data-amenity-count]').textContent = s.amenities.length + ' of ' + allA.length + ' selected. Sitters filter on these, so tick everything that genuinely applies.';
+    q('[data-amenities]').innerHTML = allA.map(a => {
+      const on = s.amenities.includes(a);
+      const tickStyle = 'font-size:.68rem;flex-shrink:0;' + (on ? 'color:#2f5d45;' : 'color:rgba(44,26,14,.2);');
+      const style = 'display:flex;align-items:center;gap:9px;text-align:left;font-family:\'Montserrat\',sans-serif;font-size:.88rem;padding:12px 15px;border-radius:10px;cursor:pointer;transition:background .2s ease, border-color .2s ease, color .2s ease;' +
+        (on ? 'background:rgba(110,84,56,.12);border:1.5px solid rgba(110,84,56,.5);color:#2c1a0e;' : 'background:#faf6ee;border:1.5px solid rgba(44,26,14,.1);color:#6b4e35;');
+      return '<button type="button" data-amenity="' + esc(a) + '" aria-pressed="' + on + '" style="' + style + '"><span style="' + tickStyle + '">✓</span>' + esc(a) + '</button>';
+    }).join('');
+
+    // House notes
+    q('[data-notes]').innerHTML = s.houseNotes.map((n, i) =>
+      '<div class="eo-pet" style="display:flex;gap:12px;align-items:center;background:#faf6ee;border:1px solid rgba(110,84,56,.2);border-radius:12px;padding:14px 16px;transition:border-color .25s ease">' +
+        '<span style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;width:100px;flex-shrink:0">' + esc(n.label) + '</span>' +
+        '<span style="flex:1;min-width:0;font-size:.92rem;color:#6b4e35;line-height:1.6">' + esc(n.value) + '</span>' +
+        '<button type="button" data-remove-note="' + i + '" title="Remove note" class="eo-petx" style="width:24px;height:24px;border-radius:50%;background:rgba(44,26,14,.08);color:#6b4e35;border:none;font-size:14px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:background .2s ease, color .2s ease">&times;</button>' +
+      '</div>').join('');
+
+    // Contact title placeholder follows the name.
+    const ct = q('[data-heading="enquiry_title"]');
+    if (ct) ct.placeholder = 'Contact ' + (s.name.trim() || 'us');
+
+    // Preview
+    q('[data-pv-url]').textContent = 'myahsits.com/' + ((s.name.trim() || 'your-name').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+    q('[data-pv-body]').setAttribute('style', 'background:' + t.background + ';transition:background .3s ease');
+    q('[data-pv-hero]').src = (s.hero[0] && s.hero[0].src) || '/images/slideshow-living-room.jpeg';
+    q('[data-pv-about]').src = (s.about[0] && s.about[0].src) || (s.gallery[0] && s.gallery[0].src) || '/images/slideshow-dogs-couch.jpeg';
+    const badge = q('[data-pv-badge]');
+    badge.textContent = s.location.trim() || 'Add your location';
+    badge.setAttribute('style', 'font-size:.55rem;background:rgba(255,255,255,.18);color:#fff;padding:4px 11px;border-radius:50px;font-weight:700;letter-spacing:.07em;' + (s.location.trim() ? '' : 'opacity:.45;'));
+    q('[data-pv-brand]').setAttribute('style', 'font-family:\'Montserrat\',sans-serif;font-weight:500;letter-spacing:.28em;font-size:1.35rem;color:#fff;line-height:1;margin:4px 0 0');
+    qa('[data-pv-name]').forEach(el => { el.textContent = s.name.trim() || 'Your name'; });
+    const tag = q('[data-pv-tagline]');
+    tag.textContent = s.tagline.trim() || 'Your one-line description';
+    tag.setAttribute('style', 'font-size:.62rem;color:rgba(255,255,255,.7);margin:0;' + (s.tagline.trim() ? '' : 'font-style:italic;opacity:.6;'));
+    q('[data-pv-btn]').setAttribute('style', 'display:inline-block;margin-top:6px;background:' + t.accent + ';color:#fff;font-size:.55rem;font-weight:600;padding:6px 15px;border-radius:6px;letter-spacing:.07em;text-transform:uppercase;');
+    const pvLabel = 'font-size:.58rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;margin:0 0 9px;color:' + t.accent + ';';
+    qa('[data-pv-label]').forEach(el => el.setAttribute('style', pvLabel));
+    const bio = q('[data-pv-bio]');
+    bio.textContent = s.bio.trim() ? (s.bio.trim().length > 130 ? s.bio.trim().slice(0, 130) + '…' : s.bio.trim()) : 'No description yet';
+    bio.setAttribute('style', 'font-size:.66rem;line-height:1.65;margin:0;color:' + t.textSoft + ';' + (s.bio.trim() ? '' : 'font-style:italic;opacity:.5;'));
+    q('[data-pv-pets]').innerHTML = s.pets.slice(0, 4).map(p =>
+      '<span style="' + 'display:flex;align-items:center;gap:6px;padding:5px 10px;border-radius:6px;font-size:.6rem;font-weight:600;background:' + t.accentLight + '26;color:' + t.text + ';' + '">' +
+        '<img src="' + esc(p.photo || PLACEHOLDER) + '" alt="" style="width:24px;height:24px;border-radius:50%;object-fit:cover" />' + esc(p.name) +
+      '</span>').join('');
+    q('[data-pv-amenities]').innerHTML = s.amenities.slice(0, 6).map(a =>
+      '<span style="' + 'font-size:.55rem;padding:3px 8px;border-radius:4px;font-weight:600;background:' + t.accentLight + '26;color:' + t.textSoft + ';' + '">✓ ' + esc(a) + '</span>').join('');
+    q('[data-pv-gallery]').innerHTML = s.gallery.slice(0, 8).map(g =>
+      '<div style="aspect-ratio:1;border-radius:4px;overflow:hidden"><img src="' + esc(g.src) + '" alt="" style="width:100%;height:100%;object-fit:cover;display:block" /></div>').join('');
+    q('[data-pv-footer]').setAttribute('style', 'padding:12px 20px;display:flex;justify-content:space-between;align-items:center;background:' + t.text + ';');
+    q('[data-pv-footer-brand]').setAttribute('style', 'font-family:\'Montserrat\',sans-serif;font-weight:500;letter-spacing:.24em;font-size:.68rem;margin:0;color:rgba(255,255,255,.75)');
+
+    // Strength
+    const handoverDone = Object.values(s.handover).every(v => String(v).trim());
+    const filled = [s.name.trim(), s.location.trim(), s.tagline.trim(), s.bio.trim().length > 80, s.hero.length > 0, s.gallery.length >= 4, s.pets.length > 0, s.amenities.length >= 5, s.lookingFor.trim().length > 40, handoverDone && s.houseNotes.length >= 3].filter(Boolean).length;
+    const pct = Math.round((filled / 10) * 100);
+    q('[data-strength-bar]').setAttribute('style', 'height:100%;width:' + pct + '%;border-radius:50px;background:linear-gradient(90deg,#2f5d45,#c4ab8a);transition:width .4s ease');
+    q('[data-strength-text]').textContent = pct === 100
+      ? 'Complete. Sitters get the whole picture before they write to you — that is what gets good applicants.'
+      : pct + '% complete. ' + (!handoverDone ? 'Handover details are unfinished — a confirmed sitter gets those, so fill them in before your next sit.' : !s.lookingFor.trim() ? '“What you’re looking for” is still empty — it filters out the wrong enquiries.' : s.gallery.length < 4 ? 'A few more gallery photos would help.' : s.amenities.length < 5 ? 'Tick a few more amenities so you show up in filters.' : 'Add a little more to each section.');
+
+    // Save bar
+    q('[data-savebar]').setAttribute('style', 'position:fixed;left:0;right:0;bottom:0;z-index:40;padding:16px 48px;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid rgba(110,84,56,.28);box-shadow:0 -6px 24px rgba(44,26,14,.06);transition:transform .3s ease, opacity .3s ease;' +
+      (s.saved ? 'transform:translateY(100%);opacity:0;pointer-events:none;' : 'transform:translateY(0);opacity:1;'));
+    const btn = q('[data-save]');
+    btn.textContent = s.saving ? 'Saving…' : s.saved ? 'Changes saved' : 'Save changes';
+    btn.disabled = s.saving;
+    btn.setAttribute('style', 'font-family:\'Montserrat\',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease');
+  };
+
+  // Text fields
+  [['[data-name]', 'name'], ['[data-location]', 'location'], ['[data-tagline]', 'tagline'], ['[data-bio]', 'bio'], ['[data-looking]', 'lookingFor'], ['[data-email]', 'email'], ['[data-whatsapp]', 'whatsapp']].forEach(([sel, key]) => {
+    const el = q(sel);
+    if (!el) return;
+    el.addEventListener('input', () => { s[key] = el.value; dirty(); render(); });
+  });
+  document.addEventListener('input', e => {
+    const h = e.target.closest && e.target.closest('[data-handover]');
+    if (h) { s.handover[h.getAttribute('data-handover')] = h.value; dirty(); render(); return; }
+    const hd = e.target.closest && e.target.closest('[data-heading]');
+    if (hd) { s.headings[hd.getAttribute('data-heading')] = hd.value; dirty(); render(); return; }
+    const sw = e.target.closest && e.target.closest('[data-swatch]');
+    if (sw) { s.theme[sw.getAttribute('data-swatch')] = sw.value; dirty(); render(); }
+  });
+
+  // Photos: "+ Add" opens the picker; files upload on Save.
+  const picker = q('[data-photo-file]');
+  let pickFor = null;
+  picker.addEventListener('change', () => {
+    const files = Array.from(picker.files || []);
+    if (pickFor && files.length) {
+      files.forEach(f => {
+        if (f.size > 5 * 1024 * 1024) { showError('file_too_large'); return; }
+        pending[pickFor].push(f);
+        s[pickFor].push({ src: URL.createObjectURL(f), new: pending[pickFor].length - 1 });
+      });
+      dirty(); render();
+    }
+    picker.value = '';
+  });
+
+  const errEl = q('[data-form-error]');
+  const messages = {
+    missing: 'Please add your name.',
+    file_too_large: 'Photos must be under 5 MB each.',
+    upload: 'Some photos failed to upload. Please try again.',
+    server: 'Something went wrong. Please try again.'
+  };
+  const showError = code => {
+    errEl.textContent = messages[code] || messages.server;
+    errEl.style.display = 'block';
+    errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const field = sel => { const el = q(sel); return el ? el.value.trim() : ''; };
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest && e.target.closest('[data-add-photo],[data-remove-photo],[data-remove-pet],[data-toggle-pet],[data-add-pet],[data-amenity],[data-remove-note],[data-add-note],[data-reset-colours],[data-save]');
+    if (!t) return;
+    if (t.hasAttribute('data-add-photo')) { pickFor = t.getAttribute('data-add-photo'); picker.click(); return; }
+    if (t.hasAttribute('data-remove-photo')) {
+      const [key, i] = t.getAttribute('data-remove-photo').split(':');
+      s[key] = s[key].filter((_, n) => n !== Number(i)); dirty(); render(); return;
+    }
+    if (t.hasAttribute('data-remove-pet')) { const i = Number(t.getAttribute('data-remove-pet')); s.pets = s.pets.filter((_, n) => n !== i); dirty(); render(); return; }
+    if (t.hasAttribute('data-toggle-pet')) { s.addingPet = !s.addingPet; render(); if (s.addingPet) q('[data-pet-name]').focus(); return; }
+    if (t.hasAttribute('data-add-pet')) {
+      const name = field('[data-pet-name]');
+      if (!name) { q('[data-pet-name]').focus(); return; }
+      const photoInput = q('[data-pet-photo]');
+      const file = photoInput.files && photoInput.files[0];
+      const pet = {
+        name,
+        type: field('[data-pet-type]') || 'Dog',
+        breed: field('[data-pet-breed]'),
+        age: field('[data-pet-age]'),
+        temperament: field('[data-pet-temperament]'),
+        needs: field('[data-pet-needs]'),
+        photo: ''
+      };
+      if (file) {
+        if (file.size > 5 * 1024 * 1024) { showError('file_too_large'); return; }
+        pending.pet.push(file);
+        pet.new = pending.pet.length - 1;
+        pet.photo = URL.createObjectURL(file);
+      }
+      ['[data-pet-name]', '[data-pet-breed]', '[data-pet-age]', '[data-pet-temperament]', '[data-pet-needs]', '[data-pet-photo]'].forEach(sel => { const el = q(sel); if (el) el.value = ''; });
+      s.pets.push(pet); s.addingPet = false; dirty(); render(); return;
+    }
+    if (t.hasAttribute('data-amenity')) {
+      const a = t.getAttribute('data-amenity');
+      s.amenities = s.amenities.includes(a) ? s.amenities.filter(x => x !== a) : s.amenities.concat(a);
+      dirty(); render(); return;
+    }
+    if (t.hasAttribute('data-remove-note')) { const i = Number(t.getAttribute('data-remove-note')); s.houseNotes = s.houseNotes.filter((_, n) => n !== i); dirty(); render(); return; }
+    if (t.hasAttribute('data-add-note')) {
+      const label = field('[data-note-label]');
+      const value = field('[data-note-value]');
+      if (!label || !value) return;
+      q('[data-note-label]').value = ''; q('[data-note-value]').value = '';
+      s.houseNotes.push({ label, value }); dirty(); render(); return;
+    }
+    if (t.hasAttribute('data-reset-colours')) { s.theme = Object.assign({}, DEFAULT_THEME); renderSwatches(); dirty(); render(); return; }
+    if (t.hasAttribute('data-save')) save();
+  });
+
+  const save = () => {
+    if (s.saving) return;
+    if (!s.name.trim()) { showError('missing'); q('[data-name]').focus(); return; }
+    errEl.style.display = 'none';
+    const imgs = key => s[key].map(i => (typeof i.new === 'number' ? { new: i.new } : { src: i.src }));
+    const payload = {
+      name: s.name, location: s.location, tagline: s.tagline, bio: s.bio,
+      contact_email: s.email, whatsapp_number: s.whatsapp, looking_for: s.lookingFor,
+      amenities: s.amenities, theme: s.theme, headings: s.headings,
+      handover: s.handover, house_notes: s.houseNotes,
+      images: { hero: imgs('hero'), about: imgs('about'), gallery: imgs('gallery') },
+      pets: s.pets.map(p => ({ index: p.index, new: p.new, name: p.name, type: p.type, breed: p.breed, age: p.age, temperament: p.temperament, special_needs: p.needs }))
+    };
+    const fd = new FormData();
+    fd.append('data', JSON.stringify(payload));
+    ['hero', 'about', 'gallery'].forEach(key => pending[key].forEach((f, n) => fd.append(key + '_new_' + n, f)));
+    pending.pet.forEach((f, n) => fd.append('pet_new_' + n, f));
+
+    s.saving = true; render(); showLoader(true);
+    fetch('/api/owner/profile', { method: 'POST', body: fd })
+      .then(r => r.json().catch(() => ({})).then(body => ({ ok: r.ok, body })))
+      .then(({ ok, body }) => {
+        if (!ok) throw new Error(body.error || 'server');
+        s.saved = true; s.saving = false;
+        // Reload so new photos come back as their stored URLs.
+        location.reload();
+      })
+      .catch(err => { s.saving = false; hideLoader(); render(); showError(err.message); });
+  };
+
+  window.addEventListener('beforeunload', e => { if (!s.saved && !s.saving) { e.preventDefault(); e.returnValue = ''; } });
+
+  document.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    if (href.startsWith('#') || href.startsWith('http')) return;
+    a.addEventListener('click', e => { if (e.metaKey || e.ctrlKey || e.shiftKey || !s.saved) return; showLoader(); });
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>

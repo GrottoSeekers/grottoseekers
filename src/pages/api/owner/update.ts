@@ -20,7 +20,7 @@ export const POST: APIRoute = async ({ request }) => {
     const whatsapp_number = (form.get('whatsapp_number') as string | null)?.trim() || null;
 
     if (!name) {
-      return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=missing#details' } });
+      return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=missing#details' } });
     }
 
     const { data: profile } = await supabase
@@ -38,7 +38,7 @@ export const POST: APIRoute = async ({ request }) => {
     const file = form.get('profile_pic');
     if (file instanceof File && file.size > 0) {
       if (file.size > 5 * 1024 * 1024) {
-        return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=file_too_large#details' } });
+        return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=file_too_large#details' } });
       }
       const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
       const path = `${session.userId}/profile.${ext}`;
@@ -66,11 +66,11 @@ export const POST: APIRoute = async ({ request }) => {
       .eq('id', profile.id);
 
     if (error) {
-      return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=server#details' } });
+      return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=server#details' } });
     }
 
-    return new Response(null, { status: 302, headers: { Location: '/owner/edit?saved=details#details' } });
+    return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?saved=details#details' } });
   } catch {
-    return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=server#details' } });
+    return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=server#details' } });
   }
 };

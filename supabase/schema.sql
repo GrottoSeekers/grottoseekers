@@ -224,3 +224,11 @@ CREATE TABLE IF NOT EXISTS invites (
 );
 
 CREATE INDEX IF NOT EXISTS invites_listing_id_idx ON invites (listing_id);
+
+
+-- ── OWNER HANDOVER ───────────────────────────────────────────────────────────
+-- Set once on /owner/profile/edit ("the same whoever is sitting"); released to
+-- a sitter on /sits/[id] once confirmed. A listing's own handover_json overrides.
+--   { address, access, wifiName, wifiPass, vet, vetOoh, neighbour, mobile,
+--     notes: [{label, value}] }
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS handover_json JSONB NOT NULL DEFAULT '{}';

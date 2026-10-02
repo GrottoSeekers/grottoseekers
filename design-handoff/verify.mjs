@@ -31,7 +31,7 @@ const PAGES = {
   'Create profile':        ['src/pages/profile/create.astro'],
   'Edit profile':          ['src/pages/profile/edit.astro'],
   'Create owner profile':  ['src/pages/owner/profile/create.astro'],
-  'Edit owner profile':    ['src/pages/owner/edit.astro'],
+  'Edit owner profile':    ['src/pages/owner/profile/edit.astro'],
   'Post a sit':            ['src/pages/owner/listings/new.astro'],
   'Edit listing':          ['src/pages/owner/listings/[id]/edit.astro'],
   'Messages':              ['src/pages/messages/index.astro', 'src/pages/messages/[id].astro'],

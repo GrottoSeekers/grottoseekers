@@ -182,9 +182,87 @@ const sitterName: string =
   'Your sitter';
 const ownerLoc: string =
   owner.location || '';
-const hand: any =
+// Handover: the owner's
+// profile details (set
+// on Edit owner profile),
+// overridden by anything
+// on the listing itself.
+const lh: any =
   listing.handover_json ||
   {};
+const ph: any =
+  owner.handover_json ||
+  {};
+const split = (
+  v: string,
+) => {
+  const [first, ...rest] =
+    String(v || '')
+      .split(' · ');
+  return {
+    value: first.trim(),
+    note: rest
+      .join(' · ')
+      .trim(),
+  };
+};
+const phNotes = [
+  ph.wifiName
+    ? {
+      label: 'Wifi',
+      value: [
+        ph.wifiName,
+        ph.wifiPass,
+      ]
+        .filter(Boolean)
+        .join(' · '),
+    }
+    : null,
+  ph.access
+    ? {
+      label: 'Parking',
+      value: ph.access,
+    }
+    : null,
+  ...arr(ph.notes),
+].filter(Boolean);
+const phHelp = [
+  ['Vet', ph.vet],
+  [
+    'Out of hours vet',
+    ph.vetOoh,
+  ],
+  [
+    'Neighbour',
+    ph.neighbour,
+  ],
+]
+  .filter(([, v]) => v)
+  .map(([label, v]) => ({
+    label,
+    ...split(v),
+  }));
+const lhNotes = arr(
+  lh.house_notes,
+);
+const lhHelp = arr(
+  lh.emergency,
+);
+const hand: any = {
+  ...lh,
+  address:
+    lh.address ||
+    ph.address ||
+    '',
+  house_notes:
+    lhNotes.length
+      ? lhNotes
+      : phNotes,
+  emergency:
+    lhHelp.length
+      ? lhHelp
+      : phHelp,
+};
 
 // ── Hero. Format, as
 // in the design:
@@ -369,6 +447,7 @@ const helpNote = named(`
 Vet, neighbour and contact numbers from Thomas’s handover details
 `);
 const ownerReach = [
+  ph.mobile,
   owner.whatsapp_number,
   owner.contact_email,
 ]

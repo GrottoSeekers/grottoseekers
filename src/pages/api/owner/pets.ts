@@ -33,14 +33,14 @@ export const POST: APIRoute = async ({ request }) => {
       const special_needs = (form.get('pet_special_needs') as string)?.trim() || null;
 
       if (!name || !type) {
-        return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=missing#pets' } });
+        return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=missing#pets' } });
       }
 
       let photo_url: string | null = null;
       const file = form.get('pet_photo');
       if (file instanceof File && file.size > 0) {
         if (file.size > 5 * 1024 * 1024) {
-          return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=file_too_large#pets' } });
+          return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=file_too_large#pets' } });
         }
         const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg';
         const path = `${session.userId}/pet-${Date.now()}.${ext}`;
@@ -60,7 +60,7 @@ export const POST: APIRoute = async ({ request }) => {
     if (action === 'delete') {
       const index = parseInt(form.get('index') as string, 10);
       if (isNaN(index) || index < 0 || index >= pets.length) {
-        return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=server#pets' } });
+        return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=server#pets' } });
       }
       const removed = pets[index];
       if (removed?.photo_url) {
@@ -78,11 +78,11 @@ export const POST: APIRoute = async ({ request }) => {
       .eq('id', profile.id);
 
     if (error) {
-      return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=server#pets' } });
+      return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=server#pets' } });
     }
 
-    return new Response(null, { status: 302, headers: { Location: `/owner/edit?saved=pets#pets` } });
+    return new Response(null, { status: 302, headers: { Location: `/owner/profile/edit?saved=pets#pets` } });
   } catch {
-    return new Response(null, { status: 302, headers: { Location: '/owner/edit?error=server#pets' } });
+    return new Response(null, { status: 302, headers: { Location: '/owner/profile/edit?error=server#pets' } });
   }
 };
