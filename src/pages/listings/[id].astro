@@ -21,26 +21,33 @@ import {
   arr,
 } from
   '../../lib/dashboard';
+import {
+  getAccount,
+} from
+  '../../lib/account';
+import OwnSitPanel from
+  './_own.astro';
 
 const session =
   await getSession(
     Astro.request,
   );
-let viewer: any = null;
-if (session) {
-  const vr =
-    await supabase
-    .from('profiles')
-    .select(
-      'id, profile_type',
-    )
-    .eq(
-      'user_id',
-      session.userId,
-    )
-    .single();
-  viewer = vr.data;
-}
+// Who is looking, and on
+// which side they are.
+const acct =
+  await getAccount(
+    Astro.request,
+  );
+const viewer: any =
+  acct?.profile
+    ? {
+      ...acct.profile,
+      profile_type:
+        acct.side,
+    }
+    : null;
+const viewerIsOwner =
+  acct?.side === 'owner';
 
 const { id } =
   Astro.params;
@@ -54,14 +61,83 @@ const lr =
   .single();
 const listing: any =
   lr.data;
+// An owner looking at
+// their own sit gets the
+// owner view (even once
+// it is filled); other
+// owners' sits are for
+// sitters, so owners go
+// back to their dashboard.
+const isMine = !!(
+  listing &&
+  viewer &&
+  listing.profile_id ===
+    viewer.id
+);
+if (
+  listing &&
+  viewerIsOwner &&
+  !isMine
+) {
+  return Astro.redirect(
+    '/owner/dashboard',
+  );
+}
 if (
   !listing ||
-  listing.status !==
-    'active'
+  (listing.status !==
+    'active' &&
+    !isMine)
 ) {
   return Astro.redirect(
     '/listings',
   );
+}
+let applicants: any[] = [];
+if (isMine) {
+  try {
+    const ar =
+      await supabase
+      .from('applications')
+      .select(
+        'id, status,' +
+        ' created_at,' +
+        ' profiles(' +
+        'name, profile_pic)',
+      )
+      .eq(
+        'listing_id',
+        listing.id,
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false,
+        },
+      );
+    applicants = (
+      ar.data ?? []
+    ).map((a: any) => ({
+      id: a.id,
+      status: a.status,
+      name:
+        a.profiles?.name ||
+        'A sitter',
+      pic:
+        a.profiles
+          ?.profile_pic ||
+        null,
+      when: new Date(
+        a.created_at,
+      ).toLocaleDateString(
+        'en-GB',
+        {
+          day: 'numeric',
+          month: 'short',
+        },
+      ),
+    }));
+  } catch {}
 }
 
 const owner: any =
@@ -256,6 +332,7 @@ const isLoggedIn =
   !!session;
 const canMessage = !!(
   viewer &&
+  !viewerIsOwner &&
   viewer.id !== owner.id
 );
 // Signed-in sitters can
@@ -305,10 +382,14 @@ const appliedNote =
   ' has your' +
   ' application';
 const dashUrl =
-  viewer?.profile_type ===
-  'owner'
-    ? '/owner/dashboard'
-    : '/dashboard';
+  acct?.home ||
+  '/dashboard';
+const backHref = isMine
+  ? '/owner/dashboard'
+  : '/listings';
+const backDash =
+  '← Back to' +
+  ' dashboard';
 const waNumber = String(
   owner?.whatsapp_number ||
     '',
@@ -393,7 +474,9 @@ const dateTo =
     </a>
     <nav data-header-nav="1" style="display:flex;align-items:center;gap:32px;flex-wrap:nowrap">
       <a href="/" class="sd-nav" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Home</a>
+{!viewerIsOwner && (
       <a href="/listings" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;white-space:nowrap;border-bottom:2px solid #2f5d45;padding-bottom:3px">Browse sits</a>
+)}
       {isLoggedIn ? (
         <a href={dashUrl} class="sd-nav" style="font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Dashboard</a>
       ) : (
@@ -407,7 +490,12 @@ const dateTo =
 
   <main data-screen-label="Sit detail" data-page-pad="1" style="flex:1;padding:40px 48px 100px">
     <div style="max-width:1100px;margin:0 auto">
+{isMine ? (
+      <a href="/owner/dashboard" class="sd-back" style="display:inline-flex;align-items:center;gap:9px;margin-bottom:28px;font-size:.78rem;color:#2f5d45;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:gap .2s, color .2s">{backDash}</a>
+) : (
       <a href="/listings" class="sd-back" style="display:inline-flex;align-items:center;gap:9px;margin-bottom:28px;font-size:.78rem;color:#2f5d45;font-weight:600;letter-spacing:.12em;text-transform:uppercase;text-decoration:none;transition:gap .2s, color .2s">&larr; Back to all sits</a>
+)}
+      {isMine && <OwnSitPanel variant="banner" listing={listing} applicants={applicants} />}
 
       <div data-detail-grid="1" style="display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px;align-items:start">
 
@@ -497,6 +585,8 @@ const dateTo =
             </section>
           )}
 
+{isMine && <OwnSitPanel variant="panel" listing={listing} applicants={applicants} />}
+{!isMine && (
           <section id="enquiry" style="background:#fff;border:2px solid rgba(110,84,56,.35);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
             <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">Interested? Get in touch</h2>
             <div style="width:40px;height:2px;background:#6e5438;margin:0 0 18px"></div>
@@ -550,6 +640,7 @@ const dateTo =
               </div>
             )}
           </section>
+)}
         </div>
 
         <aside data-aside="1" style="position:sticky;top:104px;display:flex;flex-direction:column;gap:20px">
@@ -581,11 +672,13 @@ const dateTo =
                 <span style="background:rgba(110,84,56,.12);color:#2f5d45;font-weight:600;padding:7px 16px;border-radius:50px;font-size:.8rem;letter-spacing:.04em">{dayLabel}</span>
               </div>
             </div>
+{isMine ? <OwnSitPanel variant="side" listing={listing} applicants={applicants} /> : (<>
             <a href="#enquiry" class="sd-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:9px;width:100%;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;text-decoration:none;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:13px 28px;cursor:pointer;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .2s, border-color .2s, transform .12s">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
               {msgLabel}
             </a>
             <p style="font-size:.8rem;color:#6b4e35;text-align:center;margin:-8px 0 0">Chat directly on MYAH</p>
+</>)}
           </div>
 
           <div style="background:#faf6ee;border:1px solid rgba(110,84,56,.28);border-radius:18px;padding:24px 26px">

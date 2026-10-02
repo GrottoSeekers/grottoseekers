@@ -399,6 +399,15 @@ const sections = [
           {!viewer && <a href={'/signup'} class="op-ghost">Join MYAH as a sitter</a>}
         </div>
       </div>
+      {isMe ? (
+        <div class="op-card">
+          <p class="op-p" style="margin:0 0 14px"><strong>This is where sitters contact you.</strong> They can send an enquiry by email, message you on MYAH, or apply to one of your open sits.</p>
+          <div style="display:flex;flex-wrap:wrap;gap:10px">
+            <a href="/applications" class="op-btn">See applications</a>
+            <a href="/messages" class="op-ghost">Messages</a>
+          </div>
+        </div>
+      ) : (
       <form class="op-form" data-enquiry="1">
         <div class="row">
           <label>First name<input type="text" name="first_name" placeholder="Jane" required /></label>
@@ -413,6 +422,7 @@ const sections = [
         <button type="submit" class="op-btn" style="width:100%">Send enquiry</button>
         <p class="op-status" data-enquiry-status="1"></p>
       </form>
+      )}
     </div>
   </section>
 
@@ -491,7 +501,7 @@ const sections = [
 
   // Enquiry form: emailed to the owner
   const form = q('[data-enquiry]'), status = q('[data-enquiry-status]');
-  form.addEventListener('submit', async (e) => {
+  form && form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = form.querySelector('button[type=submit]');
     btn.disabled = true; status.textContent = ''; status.style.color = '#2f7d4f';

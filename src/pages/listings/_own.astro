@@ -1,0 +1,83 @@
+---
+// Shown to an owner looking at their own sit on /listings/[id], in place of
+// the "Get in touch" form and "Message" button sitters see.
+//   variant="panel": the main card — applicants, and what to do next.
+//   variant="side":  the sidebar buttons.
+interface Props {
+  variant: 'panel' | 'side' | 'banner';
+  listing: { id: string; status: string };
+  applicants?: { id: string; name: string; pic: string | null; status: string; when: string }[];
+}
+const { variant, listing, applicants = [] } = Astro.props;
+const live = applicants.filter((a) => a.status !== 'declined');
+const fresh = applicants.filter((a) => a.status === 'new').length;
+const shortlisted = applicants.filter((a) => a.status === 'shortlisted').length;
+const confirmed = applicants.find((a) => a.status === 'confirmed');
+const appsHref = '/applications?listing=' + listing.id;
+const editHref = '/owner/listings/' + listing.id + '/edit';
+const STATUS: Record<string, string> = { new: 'New', shortlisted: 'Shortlisted', declined: 'Declined', confirmed: 'Confirmed' };
+const statusLabel = listing.status === 'active' ? 'Open — sitters can apply' : listing.status === 'filled' ? 'Filled — sitter confirmed' : 'Closed';
+const initials = (n: string) => n.split(/\s+/).map((w) => w[0] || '').join('').slice(0, 2).toUpperCase();
+const btn = "display:inline-flex;align-items:center;justify-content:center;gap:8px;font-family:'Montserrat',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:14px 26px;text-decoration:none;white-space:nowrap;transition:background .2s, border-color .2s, transform .12s;";
+const solid = btn + 'color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;box-shadow:0 6px 20px rgba(110,84,56,.28);';
+const ghost = btn + 'color:#2f5d45;background:#fff;border:1.5px solid rgba(110,84,56,.4);';
+---
+{variant === 'banner' && (
+  <div data-own-banner="1" style="display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:-8px 0 24px;padding:14px 20px;border-radius:14px;background:#2c1a0e;color:#fff;font-size:.88rem">
+    <span><strong style="font-weight:600">This is your sit.</strong> It's shown here exactly as sitters see it.</span>
+    <span style="display:flex;gap:16px;flex-wrap:wrap">
+      <a href={appsHref} style="color:#fff;font-weight:600">Applications{live.length ? ' (' + live.length + ')' : ''}</a>
+      <a href={editHref} style="color:#fff;font-weight:600">Edit</a>
+      <a href="/owner/listings/new" style="color:#fff;font-weight:600">Post another</a>
+    </span>
+  </div>
+)}
+{variant === 'panel' && (
+  <section id="your-sit" data-own-sit="1" style="background:#fff;border:2px solid rgba(47,93,69,.45);border-radius:18px;padding:36px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+    <p style="font-size:.72rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#2f5d45;margin:0 0 10px">Your sit · {statusLabel}</p>
+    <h2 style="font-family:'Marcellus',serif;font-size:1.5rem;color:#2c1a0e;margin:0 0 8px">
+      {confirmed ? confirmed.name + ' is confirmed' : live.length === 0 ? 'No applications yet' : live.length + (live.length === 1 ? ' sitter has' : ' sitters have') + ' applied'}
+    </h2>
+    <div style="width:40px;height:2px;background:#6e5438;margin:0 0 18px"></div>
+    <p style="font-size:.95rem;color:#6b4e35;margin:0 0 22px;line-height:1.7">
+      {confirmed
+        ? 'Your sit pack is ready — dates, keys and handover all in one place.'
+        : live.length === 0
+          ? 'Sitters can find this sit in Browse and apply. You can also go and invite sitters who are free for your dates.'
+          : (fresh ? fresh + ' new to look at' : 'All looked at') + (shortlisted ? ' · ' + shortlisted + ' shortlisted' : '') + '. Shortlist the ones you like, message them, then confirm your sitter.'}
+    </p>
+
+    {live.length > 0 && (
+      <ul style="list-style:none;margin:0 0 24px;padding:0;display:flex;flex-direction:column;gap:10px">
+        {live.slice(0, 4).map((a) => (
+          <li style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid rgba(110,84,56,.18);border-radius:12px;background:#faf6ee">
+            {a.pic
+              ? <img src={a.pic} alt="" style="width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0" />
+              : <span style="width:38px;height:38px;border-radius:50%;flex-shrink:0;background:rgba(110,84,56,.14);color:#2f5d45;display:flex;align-items:center;justify-content:center;font-family:'Marcellus',serif">{initials(a.name)}</span>}
+            <span style="flex:1;min-width:0">
+              <span style="display:block;font-weight:600;color:#2c1a0e;font-size:.92rem">{a.name}</span>
+              <span style="display:block;font-size:.78rem;color:#8a6a4f">Applied {a.when}</span>
+            </span>
+            <span style={'font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:50px;' + (a.status === 'new' ? 'background:#2f5d45;color:#fff' : 'background:#e9e0d2;color:#5c3d20')}>{STATUS[a.status] || a.status}</span>
+          </li>
+        ))}
+        {live.length > 4 && <li style="font-size:.84rem;color:#6b4e35;padding-left:4px">+ {live.length - 4} more</li>}
+      </ul>
+    )}
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      {live.length > 0
+        ? <a href={appsHref} style={solid}>See who's applied</a>
+        : <a href="/find-a-sitter" style={solid}>Find a sitter</a>}
+      <a href={editHref} style={ghost}>Edit this sit</a>
+      <a href="/owner/listings/new" style={ghost}>+ Post another sit</a>
+    </div>
+  </section>
+)}
+{variant === 'side' && (
+  <div data-own-side="1" style="display:flex;flex-direction:column;gap:10px">
+    <a href={appsHref} style={solid + 'width:100%;'}>Applications{live.length ? ' (' + live.length + ')' : ''}</a>
+    <a href={editHref} style={ghost + 'width:100%;'}>Edit this sit</a>
+    <p style="font-size:.8rem;color:#6b4e35;text-align:center;margin:2px 0 0">This is how sitters see your sit</p>
+  </div>
+)}

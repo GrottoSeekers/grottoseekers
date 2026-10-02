@@ -2,6 +2,10 @@
 export const prerender =
   false;
 import {
+  getAccount,
+} from
+  '../lib/account';
+import {
   getSession,
 } from '../lib/auth';
 import {
@@ -11,6 +15,21 @@ const sess =
   await getSession(
     Astro.request,
   );
+// Browsing sits is for
+// sitters: owners manage
+// their own sits from
+// their dashboard.
+const acct =
+  await getAccount(
+    Astro.request,
+  );
+if (
+  acct?.side === 'owner'
+) {
+  return Astro.redirect(
+    '/owner/dashboard',
+  );
+}
 const qr =
   await supabase
   .from('listings')
