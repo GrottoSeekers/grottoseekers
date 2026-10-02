@@ -792,20 +792,49 @@ const initial = {
     if (sw) { s.theme[sw.getAttribute('data-swatch')] = sw.value; dirty(); render(); }
   });
 
+  // New photos are shrunk in the browser before upload: one save can carry at
+  // most 4.5 MB on Vercel, and phone photos are often bigger than that alone.
+  const compressImage = (file, maxW, maxH, quality) => new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxW || height > maxH) {
+        const ratio = Math.min(maxW / width, maxH / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { resolve(file); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(file); return; }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+  const shrink = f => compressImage(f, 1600, 1600, 0.8).catch(() => f);
+  const pendingBytes = () => Object.values(pending).flat().reduce((n, f) => n + f.size, 0);
+  const MAX_SAVE = 4 * 1024 * 1024;
+
   // Photos: "+ Add" opens the picker; files upload on Save.
   const picker = q('[data-photo-file]');
   let pickFor = null;
-  picker.addEventListener('change', () => {
+  picker.addEventListener('change', async () => {
     const files = Array.from(picker.files || []);
-    if (pickFor && files.length) {
-      files.forEach(f => {
-        if (f.size > 5 * 1024 * 1024) { showError('file_too_large'); return; }
-        pending[pickFor].push(f);
-        s[pickFor].push({ src: URL.createObjectURL(f), new: pending[pickFor].length - 1 });
-      });
-      dirty(); render();
-    }
+    const key = pickFor;
     picker.value = '';
+    if (!key || !files.length) return;
+    for (const f of files) {
+      const small = await shrink(f);
+      if (pendingBytes() + small.size > MAX_SAVE) { showError('too_many'); break; }
+      pending[key].push(small);
+      s[key].push({ src: URL.createObjectURL(small), new: pending[key].length - 1 });
+    }
+    dirty(); render();
   });
 
   const errEl = q('[data-form-error]');
@@ -813,6 +842,7 @@ const initial = {
     missing: 'Please add your name.',
     file_too_large: 'Photos must be under 5 MB each.',
     upload: 'Some photos failed to upload. Please try again.',
+    too_many: 'That’s a lot of new photos for one save — save these first, then add more.',
     server: 'Something went wrong. Please try again.'
   };
   const showError = code => {
@@ -823,17 +853,7 @@ const initial = {
 
   const field = sel => { const el = q(sel); return el ? el.value.trim() : ''; };
 
-  document.addEventListener('click', e => {
-    const t = e.target.closest && e.target.closest('[data-add-photo],[data-remove-photo],[data-remove-pet],[data-toggle-pet],[data-add-pet],[data-amenity],[data-remove-note],[data-add-note],[data-reset-colours],[data-save]');
-    if (!t) return;
-    if (t.hasAttribute('data-add-photo')) { pickFor = t.getAttribute('data-add-photo'); picker.click(); return; }
-    if (t.hasAttribute('data-remove-photo')) {
-      const [key, i] = t.getAttribute('data-remove-photo').split(':');
-      s[key] = s[key].filter((_, n) => n !== Number(i)); dirty(); render(); return;
-    }
-    if (t.hasAttribute('data-remove-pet')) { const i = Number(t.getAttribute('data-remove-pet')); s.pets = s.pets.filter((_, n) => n !== i); dirty(); render(); return; }
-    if (t.hasAttribute('data-toggle-pet')) { s.addingPet = !s.addingPet; render(); if (s.addingPet) q('[data-pet-name]').focus(); return; }
-    if (t.hasAttribute('data-add-pet')) {
+  const addPet = async () => {
       const name = field('[data-pet-name]');
       if (!name) { q('[data-pet-name]').focus(); return; }
       const photoInput = q('[data-pet-photo]');
@@ -848,14 +868,27 @@ const initial = {
         photo: ''
       };
       if (file) {
-        if (file.size > 5 * 1024 * 1024) { showError('file_too_large'); return; }
-        pending.pet.push(file);
+        const small = await shrink(file);
+        if (pendingBytes() + small.size > MAX_SAVE) { showError('too_many'); return; }
+        pending.pet.push(small);
         pet.new = pending.pet.length - 1;
-        pet.photo = URL.createObjectURL(file);
+        pet.photo = URL.createObjectURL(small);
       }
       ['[data-pet-name]', '[data-pet-breed]', '[data-pet-age]', '[data-pet-temperament]', '[data-pet-needs]', '[data-pet-photo]'].forEach(sel => { const el = q(sel); if (el) el.value = ''; });
-      s.pets.push(pet); s.addingPet = false; dirty(); render(); return;
+      s.pets.push(pet); s.addingPet = false; dirty(); render();
+  };
+
+  document.addEventListener('click', e => {
+    const t = e.target.closest && e.target.closest('[data-add-photo],[data-remove-photo],[data-remove-pet],[data-toggle-pet],[data-add-pet],[data-amenity],[data-remove-note],[data-add-note],[data-reset-colours],[data-save]');
+    if (!t) return;
+    if (t.hasAttribute('data-add-photo')) { pickFor = t.getAttribute('data-add-photo'); picker.click(); return; }
+    if (t.hasAttribute('data-remove-photo')) {
+      const [key, i] = t.getAttribute('data-remove-photo').split(':');
+      s[key] = s[key].filter((_, n) => n !== Number(i)); dirty(); render(); return;
     }
+    if (t.hasAttribute('data-remove-pet')) { const i = Number(t.getAttribute('data-remove-pet')); s.pets = s.pets.filter((_, n) => n !== i); dirty(); render(); return; }
+    if (t.hasAttribute('data-toggle-pet')) { s.addingPet = !s.addingPet; render(); if (s.addingPet) q('[data-pet-name]').focus(); return; }
+    if (t.hasAttribute('data-add-pet')) { addPet(); return; }
     if (t.hasAttribute('data-amenity')) {
       const a = t.getAttribute('data-amenity');
       s.amenities = s.amenities.includes(a) ? s.amenities.filter(x => x !== a) : s.amenities.concat(a);
@@ -893,7 +926,7 @@ const initial = {
 
     s.saving = true; render(); showLoader(true);
     fetch('/api/owner/profile', { method: 'POST', body: fd })
-      .then(r => r.json().catch(() => ({})).then(body => ({ ok: r.ok, body })))
+      .then(r => r.json().catch(() => ({})).then(body => ({ ok: r.ok, body: r.status === 413 ? { error: 'too_many' } : body })))
       .then(({ ok, body }) => {
         if (!ok) throw new Error(body.error || 'server');
         s.saved = true; s.saving = false;

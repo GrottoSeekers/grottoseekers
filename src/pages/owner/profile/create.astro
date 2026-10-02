@@ -269,6 +269,32 @@ if (existing) {
   bind('[data-location]', 'location');
   bind('[data-bio]', 'bio');
 
+  // Photos are shrunk in the browser before upload: phone photos are often
+  // bigger than the 4.5 MB a single request can carry on Vercel.
+  let compressed = null;
+  const compressImage = (file, maxW, maxH, quality) => new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if (width > maxW || height > maxH) {
+        const ratio = Math.min(maxW / width, maxH / height);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) { resolve(file); return; }
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(blob => {
+        if (!blob) { resolve(file); return; }
+        resolve(new File([blob], file.name.replace(/\.[^.]+$/, '') + '.jpg', { type: 'image/jpeg' }));
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => resolve(file);
+    img.src = URL.createObjectURL(file);
+  });
+
   const file = q('[data-file]');
   const fileLabel = q('[data-file-label]');
   const fileText = q('[data-file-text]');
@@ -284,22 +310,60 @@ if (existing) {
     if (state.pic) URL.revokeObjectURL(state.pic);
     state.pic = URL.createObjectURL(f);
     render();
+    compressed = null;
+    compressImage(f, 1200, 1200, 0.8).then(c => { compressed = c; }).catch(() => {});
   });
 
-  // Real submit to /api/owner/create; just show the loader on the way.
-  q('[data-create]').addEventListener('submit', () => show(true));
-
-  // Server-side validation errors come back as ?error=…
   const messages = {
-    missing: 'Please fill in your name and URL.',
+    missing: 'Please fill in your name, profile URL and location.',
     slug_taken: 'That URL is already taken — try another.',
-    slug_invalid: 'URL can only contain lowercase letters, numbers, and hyphens.',
-    file_too_large: 'Photo must be under 5 MB.',
+    slug_invalid: 'Your profile URL can only use lowercase letters, numbers and hyphens (no spaces).',
+    file_too_large: 'That photo is too large — please choose a smaller one.',
     server: 'Something went wrong. Please try again.'
   };
-  const err = new URLSearchParams(location.search).get('error');
   const errEl = q('[data-form-error]');
-  if (err && messages[err] && errEl) { errEl.textContent = messages[err]; errEl.style.display = 'block'; }
+  const showError = code => {
+    errEl.textContent = messages[code] || messages.server;
+    errEl.style.display = 'block';
+    errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  // The browser's own field checks: say what's wrong in the banner, not just a tooltip.
+  const form = q('[data-create]');
+  form.addEventListener('invalid', e => {
+    e.preventDefault();
+    const field = e.target;
+    showError(field === slugInput && field.value ? 'slug_invalid' : 'missing');
+    field.focus();
+  }, true);
+
+  // Submit with the shrunk photo; any failure shows a message and clears the loader.
+  const submitBtn = form.querySelector('button[type=submit]');
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    errEl.style.display = 'none';
+    submitBtn.disabled = true;
+    show(true);
+    const fd = new FormData(form);
+    if (compressed) fd.set('profile_pic', compressed, compressed.name);
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: fd, redirect: 'follow' });
+      if (res.status === 413) throw new Error('file_too_large');
+      if (!res.ok) throw new Error('server');
+      const code = new URL(res.url).searchParams.get('error');
+      if (code) throw new Error(code);
+      window.location.href = res.url;
+    } catch (err) {
+      clearTimeout(hideT);
+      loader.style.opacity = '0'; loader.style.pointerEvents = 'none';
+      submitBtn.disabled = false;
+      showError(err.message);
+    }
+  });
+
+  // Errors from a plain (non-script) submit come back as ?error=…
+  const err = new URLSearchParams(location.search).get('error');
+  if (err && messages[err]) showError(err);
 
   render();
 })();
