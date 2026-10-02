@@ -12,6 +12,14 @@
 // to /api/sits/checklist.
 export const prerender =
   false;
+import PrivateNote from
+  './_private.astro';
+import AppNav from
+  '../_nav.astro';
+import {
+  getAccount,
+} from
+  '../../lib/account';
 import {
   getSession,
 } from '../../lib/auth';
@@ -264,6 +272,58 @@ const hand: any = {
       : phHelp,
 };
 
+// Private details: the
+// owner always; the
+// sitter from the day
+// before (or once the
+// owner shares them).
+const unlockAt =
+  D(listing.date_from)
+  .getTime() -
+  86400000;
+const releasedEarly =
+  !!(
+    sit.checklist_json ||
+    {}
+  )._released;
+const sitterCanSee =
+  releasedEarly ||
+  Date.now() >= unlockAt;
+const unlocked =
+  isOwner ||
+  sitterCanSee;
+const unlockLabel =
+  new Date(unlockAt)
+  .toLocaleDateString(
+    'en-GB',
+    {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      timeZone: 'UTC',
+    },
+  );
+if (!unlocked) {
+  hand.address = '';
+  hand.address_note =
+    'Full address on ' +
+    unlockLabel;
+  hand.house_notes = [];
+  hand.emergency = arr(
+    hand.emergency,
+  ).filter((e: any) =>
+    /vet/i.test(
+      e?.label || '',
+    ),
+  );
+}
+const keysText =
+  unlocked
+    ? listing.keys || ''
+    : listing.keys
+      ? 'On ' + unlockLabel
+      : '';
+
 // ── Hero. Format, as
 // in the design:
 /*
@@ -355,8 +415,7 @@ const factRows = [
   },
   {
     label: 'Keys',
-    value:
-      listing.keys || '',
+    value: keysText,
     note: listing.keys
       ? 'Set on the listing'
       : '',
@@ -446,11 +505,13 @@ const houseNotes = arr(
 const helpNote = named(`
 Vet, neighbour and contact numbers from Thomas’s handover details
 `);
-const ownerReach = [
-  ph.mobile,
-  owner.whatsapp_number,
-  owner.contact_email,
-]
+const ownerReach = (
+  unlocked ? [
+    ph.mobile,
+    owner.whatsapp_number,
+    owner.contact_email,
+  ] : []
+)
   .filter(Boolean)
   .join(' · ');
 const emergency = [
@@ -537,6 +598,13 @@ const reviewUrl =
     ? '/' + sitter.slug
     : '/dashboard';
 const sitId = sit.id;
+const navAcct =
+  await getAccount(
+    Astro.request,
+  );
+const navSide =
+  navAcct?.side ||
+  'sitter';
 ---
 
 <!doctype html>
@@ -593,17 +661,7 @@ const sitId = sit.id;
     </div>
   </div>
 
-  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
-    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
-      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
-      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
-    </a>
-    <div style="display:flex;align-items:center;gap:22px">
-      <a href={dashUrl} class="cs-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Dashboard</a>
-      <a href={msgUrl} class="cs-msgs" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">Messages</a>
-      <a href={reviewUrl} class="cs-review" style="font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#5c3d20;text-decoration:none;white-space:nowrap;transition:color .2s">Leave a review</a>
-    </div>
-  </nav>
+  <AppNav side={navSide} active="sits" />
 
   <main data-pad="1" data-screen-label="Confirmed sit" style="flex:1;padding:52px 48px 90px">
     <div style="max-width:1120px;margin:0 auto">
@@ -622,6 +680,8 @@ const sitId = sit.id;
           <p style="font-size:.74rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7);margin:6px 0 0">{countLabel}</p>
         </div>
       </div>
+
+      <PrivateNote isOwner={isOwner} unlocked={sitterCanSee} releasedEarly={releasedEarly} unlockLabel={unlockLabel} ownerFirst={ownerFirst} sitterFirst={sitterName.split(' ')[0]} sitId={sitId} />
 
       <div data-two-col="1" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:26px;align-items:start">
 

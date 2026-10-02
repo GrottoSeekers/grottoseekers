@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     const { data: sit } = await supabase
       .from('sits')
-      .select('id, sitter_user_id, listings!inner(profiles!inner(user_id))')
+      .select('id, sitter_user_id, checklist_json, listings!inner(profiles!inner(user_id))')
       .eq('id', body.sit_id)
       .single();
     if (!sit) return json({ error: 'Not found' }, 404);
@@ -36,7 +36,11 @@ export const POST: APIRoute = async ({ request }) => {
     const raw = body.done && typeof body.done === 'object' ? body.done : {};
     for (let i = 0; i < CHECK_COUNT; i++) if (raw[i]) done[i] = true;
 
-    const { error } = await supabase.from('sits').update({ checklist_json: done }).eq('id', sit.id);
+    // Keep the owner's "shared early" flag (see /api/sits/release).
+    const prev: any = (sit as any).checklist_json;
+    const released = !!(prev && typeof prev === 'object' ? prev._released : String(prev || '').includes('"_released":true'));
+    const next: Record<string, boolean> = released ? { ...done, _released: true } : done;
+    const { error } = await supabase.from('sits').update({ checklist_json: next }).eq('id', sit.id);
     if (error) return json({ error: error.message }, 500);
     return json({ ok: true });
   } catch {

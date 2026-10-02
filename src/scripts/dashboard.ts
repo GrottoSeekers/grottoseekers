@@ -28,6 +28,9 @@ function initTabs() {
     messages: '/messages',
     profile: isOwner ? '/owner/profile/edit' : '/profile/edit',
   };
+  // ?tab=sits (from the shared header on other pages) opens that panel.
+  const fromUrl = new URLSearchParams(location.search).get('tab');
+  if (fromUrl && fromUrl !== 'messages' && fromUrl !== 'profile' && panels.some((p) => p.dataset.panel === fromUrl)) setTab(fromUrl);
   tabBtns.forEach((b) =>
     b.addEventListener('click', () => {
       const id = b.dataset.tab!;

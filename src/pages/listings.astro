@@ -1,6 +1,8 @@
 ---
 export const prerender =
   false;
+import AppNav from
+  './_nav.astro';
 import {
   getAccount,
 } from
@@ -208,7 +210,10 @@ const listings =
     </div>
   </div>
 
-  <header data-topbar="1" style="position:sticky;top:0;z-index:210;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;background:rgba(250,246,238,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(110,84,56,.2)">
+  {acct ? (
+<AppNav side="sitter" active="browse" />
+) : (
+<header data-topbar="1" style="position:sticky;top:0;z-index:210;padding:16px 48px;display:flex;justify-content:space-between;align-items:center;gap:40px;background:rgba(250,246,238,.97);backdrop-filter:blur(12px);box-shadow:0 1px 0 rgba(110,84,56,.2)">
     <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.4rem;flex-shrink:0;letter-spacing:.28em">
       <img src="/images/logo-mark.png" alt="" style="height:46px;width:46px;display:block;object-fit:contain" />
       <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)">
@@ -231,6 +236,7 @@ const listings =
       )}
     </nav>
   </header>
+)}
 
   <main data-page-pad="1" style="flex:1;padding:72px 48px 100px">
     <div style="max-width:1100px;margin:0 auto">

@@ -10,6 +10,8 @@
 // /api/verification.
 export const prerender =
   false;
+import AppNav from
+  './_nav.astro';
 import {
   getAccount,
   wrongPlace,
@@ -398,16 +400,7 @@ function tx(v: string) {
     </div>
   </div>
 
-  <nav data-topnav="1" data-screen-label="Top nav" style="display:flex;justify-content:space-between;align-items:center;padding:16px 48px;background:#fff;border-bottom:1px solid rgba(110,84,56,.2)">
-    <a href="/" style="display:inline-flex;align-items:center;gap:14px;text-decoration:none;line-height:1;margin-left:-4px;font-family:'Montserrat',sans-serif;font-weight:500;font-size:1.35rem;letter-spacing:.28em">
-      <img src="/images/logo-mark.png" alt="" style="height:44px;width:44px;display:block;object-fit:contain" />
-      <span style="display:flex;flex-direction:column;gap:5px;padding-left:14px;border-left:1px solid rgba(110,84,56,.4)"><span style="color:#2f5d45;line-height:1">MYAH</span><span style="font-family:'Lato',sans-serif;font-weight:700;font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:#8a6a4f;line-height:1">Make Yourself At Home</span></span>
-    </a>
-    <div style="display:flex;align-items:center;gap:22px">
-      <a href={dashUrl} class="vf-back" style="display:inline-flex;align-items:center;gap:9px;font-size:.78rem;color:#6b4e35;text-decoration:none;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:gap .2s, color .2s">&larr; Dashboard</a>
-      <a href={pageUrl} class="vf-page" style="font-size:.76rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#2f5d45;text-decoration:none;transition:color .2s">View my page</a>
-    </div>
-  </nav>
+  <AppNav side={'sitter'} active="verification" />
 
   <main data-pad="1" data-screen-label="Verification" style="flex:1;padding:52px 48px 90px">
     <div style="max-width:1180px;margin:0 auto">

@@ -1,0 +1,61 @@
+---
+// Sit pack privacy notice (/sits/[id]).
+// Sitter, before the details unlock: what is held back and when it opens.
+// Owner: when the sitter will see them, and a button to share them now.
+interface Props {
+  isOwner: boolean;
+  unlocked: boolean;
+  releasedEarly: boolean;
+  unlockLabel: string;
+  ownerFirst: string;
+  sitterFirst: string;
+  sitId: string;
+}
+const { isOwner, unlocked, releasedEarly, unlockLabel, ownerFirst, sitterFirst, sitId } = Astro.props;
+const show = isOwner || !unlocked;
+---
+{show && (
+  <div data-private-note="1" style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;background:#fff;border:1px solid rgba(110,84,56,.28);border-left:4px solid #2f5d45;border-radius:14px;padding:18px 22px;margin:0 0 24px;font-family:'Montserrat',sans-serif">
+    <span aria-hidden="true" style="width:38px;height:38px;border-radius:50%;background:#faf6ee;border:1px solid rgba(110,84,56,.28);color:#2f5d45;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+    </span>
+    <div style="flex:1 1 260px;min-width:0">
+      {isOwner ? (
+        <>
+          <p style="margin:0 0 4px;font-weight:600;color:#2c1a0e;font-size:.95rem">
+            {unlocked ? `${sitterFirst} can see your private details` : `Private details unlock for ${sitterFirst} on ${unlockLabel}`}
+          </p>
+          <p style="margin:0;color:#6b4e35;font-size:.88rem;line-height:1.65">
+            {unlocked
+              ? (releasedEarly ? 'You shared your address, wifi, access, house notes, neighbour and contact details early.' : 'Your address, wifi, access, house notes, neighbour and contact details opened the day before the sit.')
+              : 'Your address, wifi, access, house notes, neighbour and contact details stay hidden until the day before the sit. Share them sooner if you are happy to.'}
+          </p>
+        </>
+      ) : (
+        <>
+          <p style="margin:0 0 4px;font-weight:600;color:#2c1a0e;font-size:.95rem">Private details unlock on {unlockLabel}</p>
+          <p style="margin:0;color:#6b4e35;font-size:.88rem;line-height:1.65">The full address, wifi, access, house notes, neighbour and {ownerFirst}'s direct contact details appear here the day before your sit — or sooner if {ownerFirst} shares them. Message {ownerFirst} on MYAH in the meantime.</p>
+        </>
+      )}
+    </div>
+    {isOwner && !unlocked && (
+      <button type="button" data-release={sitId} style="align-self:center;font-family:'Montserrat',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:12px 22px;cursor:pointer;white-space:nowrap">Share details now</button>
+    )}
+  </div>
+)}
+{isOwner && !unlocked && (
+  <script is:inline>
+    (function () {
+      var btn = document.querySelector('[data-release]');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        if (!window.confirm('Share your address, wifi, access, house notes, neighbour and contact details with your sitter now?')) return;
+        btn.disabled = true; btn.textContent = 'Sharing…';
+        fetch('/api/sits/release', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sit_id: btn.getAttribute('data-release') }) })
+          .then(function (r) { return r.json().then(function (d) { if (!r.ok) throw new Error(d.error || 'Could not share'); }); })
+          .then(function () { location.reload(); })
+          .catch(function (e) { btn.disabled = false; btn.textContent = 'Share details now'; alert(e.message); });
+      });
+    })();
+  </script>
+)}
