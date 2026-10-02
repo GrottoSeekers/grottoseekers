@@ -867,8 +867,8 @@ const initial = {
     too_many: 'That’s a lot of new photos for one save — save these first, then add more.',
     server: 'Something went wrong. Please try again.'
   };
-  const showError = code => {
-    errEl.textContent = messages[code] || messages.server;
+  const showError = (code, detail) => {
+    errEl.textContent = (messages[code] || messages.server) + (detail ? ' (' + detail + ')' : '');
     errEl.style.display = 'block';
     errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
@@ -948,14 +948,14 @@ const initial = {
 
     s.saving = true; render(); showLoader(true);
     fetch('/api/owner/profile', { method: 'POST', body: fd })
-      .then(r => r.json().catch(() => ({})).then(body => ({ ok: r.ok, body: r.status === 413 ? { error: 'too_many' } : body })))
+      .then(r => r.json().catch(() => ({ detail: 'HTTP ' + r.status })).then(body => ({ ok: r.ok, body: r.status === 413 ? { error: 'too_many' } : body })))
       .then(({ ok, body }) => {
-        if (!ok) throw new Error(body.error || 'server');
+        if (!ok) { const err = new Error(body.error || 'server'); err.detail = body.detail || ''; throw err; }
         s.saved = true; s.saving = false;
         // Reload so new photos come back as their stored URLs.
         location.reload();
       })
-      .catch(err => { s.saving = false; hideLoader(); render(); showError(err.message); });
+      .catch(err => { s.saving = false; hideLoader(); render(); showError(err.message, err.detail || (err.message === 'Failed to fetch' ? 'connection lost' : '')); });
   };
 
   window.addEventListener('beforeunload', e => { if (!s.saved && !s.saving) { e.preventDefault(); e.returnValue = ''; } });

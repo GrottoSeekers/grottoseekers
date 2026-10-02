@@ -3,6 +3,8 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getSession } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
+import { getAccount } from '../../../lib/account';
+import { safeUpdate, jsonArr, jsonObj } from '../../../lib/db';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -20,7 +22,7 @@ const HANDOVER_KEYS = ['address', 'access', 'wifiName', 'wifiPass', 'vet', 'vetO
 const IMAGE_COLUMNS: Record<string, string> = { hero: 'hero_images_json', about: 'about_images_json', gallery: 'gallery_json' };
 
 const str = (v: unknown, max = 2000) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
-const arr = (v: unknown): any[] => (Array.isArray(v) ? v : []);
+const arr = jsonArr;
 const storagePath = (url: string) => {
   const p = url.split('/profile-pics/')[1];
   return p ? decodeURIComponent(p) : null;
@@ -39,13 +41,12 @@ export const POST: APIRoute = async ({ request }) => {
     const session = await getSession(request);
     if (!session) return json({ error: 'Unauthorized' }, 401);
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id, profile_type, hero_images_json, about_images_json, gallery_json, pets_json, headings_json')
-      .eq('user_id', session.userId)
-      .single();
-    if (!profile) return json({ error: 'No profile' }, 400);
-    if (profile.profile_type !== 'owner') return json({ error: 'Owners only' }, 403);
+    // select('*') via getAccount: asking for named columns fails outright on
+    // an older database that lacks one of them.
+    const acct = await getAccount(request);
+    const profile: any = acct?.profile;
+    if (!acct || !profile) return json({ error: 'no_profile' }, 400);
+    if (acct.side !== 'owner') return json({ error: 'owners_only' }, 403);
 
     const form = await request.formData();
     let data: any;
@@ -66,7 +67,7 @@ export const POST: APIRoute = async ({ request }) => {
       const path = `${session.userId}/${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`;
       const buffer = new Uint8Array(await file.arrayBuffer());
       const { error } = await supabase.storage.from('profile-pics').upload(path, buffer, { contentType: file.type, upsert: true });
-      if (error) throw new Error('upload');
+      if (error) throw new Error('upload: ' + error.message);
       return supabase.storage.from('profile-pics').getPublicUrl(path).data.publicUrl;
     };
 
@@ -91,7 +92,7 @@ export const POST: APIRoute = async ({ request }) => {
     updates.theme_json = theme;
 
     // Section headings — merged over what is there; blank keeps the default.
-    const headings: Record<string, string> = { ...(profile.headings_json || {}) };
+    const headings: Record<string, string> = { ...jsonObj(profile.headings_json) };
     for (const k of HEADING_KEYS) {
       const v = str(data.headings?.[k], 160);
       if (v) headings[k] = v; else delete headings[k];
@@ -153,8 +154,8 @@ export const POST: APIRoute = async ({ request }) => {
     currentPets.forEach((p: any) => { if (p?.photo_url && !keptPetPhotos.has(p.photo_url)) toRemove.push(p.photo_url); });
     updates.pets_json = nextPets;
 
-    const { error } = await supabase.from('profiles').update(updates).eq('id', profile.id);
-    if (error) return json({ error: 'server' }, 500);
+    const { error } = await safeUpdate('profiles', updates, ['id', profile.id], ['name']);
+    if (error) return json({ error: 'server', detail: error.message }, 500);
 
     // Tidy up removed files from storage (best effort).
     const paths = toRemove.map(storagePath).filter((p): p is string => !!p);
@@ -164,6 +165,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     return json({ ok: true });
   } catch (e) {
-    return json({ error: e instanceof Error && e.message === 'upload' ? 'upload' : 'server' }, 500);
+    const msg = e instanceof Error ? e.message : '';
+    return json({ error: msg.startsWith('upload') ? 'upload' : 'server', detail: msg }, 500);
   }
 };
