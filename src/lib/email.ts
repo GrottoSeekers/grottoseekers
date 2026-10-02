@@ -55,3 +55,71 @@ export async function emailNewIdCheck(member: { name?: string; location?: string
     return { sent: false, reason: e instanceof Error ? e.message : 'send failed' };
   }
 }
+
+const shell = (body: string) => `
+<div style="font-family:Montserrat,Arial,sans-serif;max-width:520px;margin:0 auto;background:#faf6ee;padding:28px 24px;color:#2c1a0e">
+  <p style="font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 12px">MYAH · Make Yourself At Home</p>
+  ${body}
+  <p style="font-size:12px;color:#8a6a4f;line-height:1.6;margin:26px 0 0">You're getting this because you registered your interest at myahsits.com. Reply to this email if you'd rather not hear from us.</p>
+</div>`;
+
+/** "You're on the list" — sent when someone registers interest before launch. */
+export async function emailInterestThanks(to: string) {
+  const key = import.meta.env.RESEND_API_KEY;
+  if (!key) return { sent: false, reason: 'no RESEND_API_KEY' };
+  try {
+    await new Resend(key).emails.send({
+      from: 'MYAH <hello@myahsits.com>',
+      to,
+      subject: "You're on the list for MYAH",
+      html: shell(`
+  <h1 style="font-family:Georgia,serif;font-weight:400;font-size:26px;margin:0 0 14px">Thanks, you're on the list</h1>
+  <p style="font-size:15px;line-height:1.7;color:#4a3726;margin:0 0 14px">MYAH is a new home for house &amp; pet sitters and home owners, and it's launching soon. We'll email you the moment it's live so you can be one of the first to join.</p>
+  <p style="font-size:15px;line-height:1.7;color:#4a3726;margin:0">Callum &amp; Niamh</p>`),
+    });
+    return { sent: true };
+  } catch (e) {
+    return { sent: false, reason: e instanceof Error ? e.message : 'send failed' };
+  }
+}
+
+/** Fallback when the interest list can't be saved: email the founders instead, so nobody is lost. */
+export async function emailInterestToAdmin(email: string, role: string) {
+  const key = import.meta.env.RESEND_API_KEY;
+  const to = await adminRecipients();
+  if (!key || !to.length) return { sent: false };
+  try {
+    await new Resend(key).emails.send({
+      from: 'MYAH <hello@myahsits.com>', to,
+      subject: `Launch interest: ${email}`,
+      html: `<p>${esc(email)} registered interest (${esc(role || 'not said')}). It couldn't be saved to the launch list — run supabase/launch-interest.sql.</p>`,
+    });
+    return { sent: true };
+  } catch { return { sent: false }; }
+}
+
+/** "MYAH is live" — sent from /admin to everyone on the launch list (100 per batch). */
+export async function emailLaunch(list: string[]): Promise<{ sent: string[]; error?: string }> {
+  const key = import.meta.env.RESEND_API_KEY;
+  if (!key) return { sent: [], error: 'RESEND_API_KEY is not set' };
+  const resend = new Resend(key);
+  const html = shell(`
+  <h1 style="font-family:Georgia,serif;font-weight:400;font-size:26px;margin:0 0 14px">MYAH is live</h1>
+  <p style="font-size:15px;line-height:1.7;color:#4a3726;margin:0 0 22px">You asked us to tell you when MYAH launched, and it's here. Create your free profile as a sitter or a home owner, and start finding sits or the right sitter for your home and pets.</p>
+  <a href="${SITE}/signup" style="display:inline-block;background:#2f5d45;color:#fff;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:14px 28px;border-radius:50px">Join MYAH</a>
+  <p style="font-size:15px;line-height:1.7;color:#4a3726;margin:22px 0 0">Callum &amp; Niamh</p>`);
+  const sent: string[] = [];
+  for (let i = 0; i < list.length; i += 100) {
+    const chunk = list.slice(i, i + 100);
+    try {
+      const { error } = await resend.batch.send(chunk.map((to) => ({
+        from: 'MYAH <hello@myahsits.com>', to, subject: 'MYAH is live: come and join', html,
+      })));
+      if (error) return { sent, error: error.message };
+      sent.push(...chunk);
+    } catch (e) {
+      return { sent, error: e instanceof Error ? e.message : 'send failed' };
+    }
+  }
+  return { sent };
+}

@@ -1,0 +1,53 @@
+---
+// Before launch: a "MYAH is launching soon" band on the founders' page, with
+// the register-your-interest form. Posts with fetch so visitors stay put.
+---
+<section id="launch" data-sec="1" style="background:#f3ece0;padding:88px 48px;border-top:1px solid rgba(110,84,56,.18)">
+  <div class="ls-wrap" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center">
+    <div>
+      <p style="font-family:'Lato',sans-serif;font-size:.75rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 16px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block"></span>Launching soon</p>
+      <h2 style="font-family:'Marcellus',serif;font-weight:400;font-size:2.4rem;line-height:1.15;margin:0 0 16px;color:#2c1a0e">MYAH is coming</h2>
+      <p style="color:#6b4e35;font-size:1rem;line-height:1.8;margin:0 0 12px">We're building MYAH: one place for trusted house &amp; pet sitters and home owners to find each other. Sitters get a page like this one, owners post their sits, and everyone is ID checked.</p>
+      <p style="color:#6b4e35;font-size:1rem;line-height:1.8;margin:0">It's free to join. Register your interest and we'll email you the moment it launches.</p>
+    </div>
+    <form data-interest="1" method="post" action="/api/interest" style="display:flex;flex-direction:column;gap:14px;background:#fff;border:1px solid rgba(110,84,56,.22);border-radius:18px;padding:32px;box-shadow:0 1px 2px rgba(44,26,14,.04)">
+      <label for="ls-email" style="font-size:.74rem;font-weight:600;letter-spacing:.12em;color:#5c3d20;text-transform:uppercase">Your email</label>
+      <input id="ls-email" type="email" name="email" required autocomplete="email" placeholder="you@example.com" class="sp-field" style="padding:13px 15px;border:1.5px solid rgba(110,84,56,.3);border-radius:10px;background:#faf6ee;color:#2c1a0e;font-family:'Montserrat',sans-serif;font-size:.95rem;outline:none" />
+      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px" />
+      <input type="hidden" name="source" value="founders-page" />
+      <div role="radiogroup" aria-label="I'm interested as a" style="display:flex;gap:8px;flex-wrap:wrap">
+        <label style="display:inline-flex;align-items:center;gap:7px;font-size:.9rem;color:#4a3726;background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:50px;padding:9px 14px;cursor:pointer"><input type="radio" name="role" value="sitter" style="accent-color:#2f5d45" /> Sitter</label>
+        <label style="display:inline-flex;align-items:center;gap:7px;font-size:.9rem;color:#4a3726;background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:50px;padding:9px 14px;cursor:pointer"><input type="radio" name="role" value="owner" style="accent-color:#2f5d45" /> Home owner</label>
+        <label style="display:inline-flex;align-items:center;gap:7px;font-size:.9rem;color:#4a3726;background:#faf6ee;border:1px solid rgba(110,84,56,.25);border-radius:50px;padding:9px 14px;cursor:pointer"><input type="radio" name="role" value="both" style="accent-color:#2f5d45" /> Both</label>
+      </div>
+      <button type="submit" class="sp-btn" style="display:inline-flex;align-items:center;justify-content:center;width:100%;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:14px 32px;cursor:pointer;font-family:'Montserrat',sans-serif;box-shadow:0 6px 20px rgba(110,84,56,.28)">Notify me at launch</button>
+      <p data-interest-status="1" role="status" style="font-size:.88rem;text-align:center;min-height:1.2em;margin:0;color:#2f5d45;font-weight:600"></p>
+    </form>
+  </div>
+</section>
+<style>
+  @media (max-width:760px) {
+    #launch { padding:56px 16px !important; }
+    #launch .ls-wrap { grid-template-columns:1fr !important; gap:28px !important; }
+    #launch h2 { font-size:1.9rem !important; }
+    #launch form { padding:22px 18px !important; }
+  }
+</style>
+<script is:inline>
+(() => {
+  const f = document.querySelector('form[data-interest]');
+  if (!f) return;
+  const st = f.querySelector('[data-interest-status]');
+  f.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (st) st.textContent = 'Sending…';
+    fetch('/api/interest', { method: 'POST', body: new FormData(f), headers: { Accept: 'application/json' } })
+      .then((r) => r.json().then((j) => ({ ok: r.ok, j })))
+      .then(({ ok, j }) => {
+        if (ok) { f.reset(); if (st) st.textContent = "Thank you, you're on the list. We'll email you at launch."; }
+        else if (st) st.textContent = j.error === 'email' ? 'Please check your email address.' : 'Something went wrong, please try again.';
+      })
+      .catch(() => { if (st) st.textContent = 'Something went wrong, please try again.'; });
+  });
+})();
+</script>

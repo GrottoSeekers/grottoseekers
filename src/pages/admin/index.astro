@@ -7,6 +7,7 @@
 export const prerender = false;
 import { getAccount } from '../../lib/account';
 import { supabase } from '../../lib/supabase';
+import { LAUNCHED } from '../../lib/launch';
 
 const acct = await getAccount(Astro.request);
 // Signed out, or signed in without admin rights: show the sign-in box.
@@ -26,6 +27,16 @@ if (allowed) try {
   const r = await supabase.from('profiles').select('id, name, slug, id_check_status, id_verified_at, id_reject_reason').in('id_check_status', ['verified', 'rejected']).order('id_verified_at', { ascending: false, nullsFirst: false }).limit(12);
   recent = r.data ?? [];
 } catch {}
+
+// The "launching soon" interest list.
+let interest: any[] = [];
+let interestError = '';
+if (allowed) try {
+  const r = await supabase.from('launch_interest').select('email, role, source, created_at, notified_at').order('created_at', { ascending: false }).limit(2000);
+  if (r.error) interestError = r.error.message;
+  interest = r.data ?? [];
+} catch (e) { interestError = e instanceof Error ? e.message : 'error'; }
+const waiting = interest.filter((i) => !i.notified_at).length;
 
 const sideOf = async (userId: string) => {
   try { const { data } = await supabase.from('users').select('role').eq('id', userId).limit(1); return (data as any)?.[0]?.role === 'owner' ? 'Home owner' : 'Sitter'; } catch { return 'Member'; }
@@ -156,6 +167,30 @@ const rows = await Promise.all(pending.map(async (p) => ({
         </div>
       ))}
 
+      <div class="card recent" id="launch-list">
+        <p class="eyebrow" style="margin-bottom:6px">Launch list</p>
+        {interestError ? (
+          <p style="color:#a4442e;font-size:.9rem;margin:0">The launch list isn't set up yet. Run <b>supabase/launch-interest.sql</b> in Supabase.</p>
+        ) : (
+          <>
+            <p style="margin:0 0 12px;font-size:.92rem;color:#4a3726"><b>{interest.length}</b> {interest.length === 1 ? 'person has' : 'people have'} registered interest{waiting !== interest.length ? `, ${waiting} not yet emailed` : ''}. The site is {LAUNCHED ? <b>live</b> : <b>in “launching soon” mode</b>}.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+              <a class="btn ghost" href="/api/admin/interest" style="text-decoration:none;color:#2f5d45;border-color:rgba(47,93,69,.45)">Download list (CSV)</a>
+              <button type="button" class="btn" data-launch-email disabled={!waiting}>Email everyone: MYAH is live</button>
+            </div>
+            <p class="status" data-launch-status style="margin:0 0 10px"></p>
+            {interest.length > 0 && (
+              <ul>
+                {interest.slice(0, 50).map((i) => (
+                  <li><span style="word-break:break-all">{i.email}</span>
+                    <span class="tag" style="background:#f3ece0;color:#6e5438;white-space:nowrap;align-self:center">{i.role === 'owner' ? 'Home owner' : i.role === 'sitter' ? 'Sitter' : i.role === 'both' ? 'Both' : '—'}{i.notified_at ? ' · emailed' : ''}</span></li>
+                ))}
+              </ul>
+            )}
+          </>
+        )}
+      </div>
+
       {recent.length > 0 && (
         <div class="card recent">
           <p class="eyebrow" style="margin-bottom:6px">Recently decided</p>
@@ -172,6 +207,16 @@ const rows = await Promise.all(pending.map(async (p) => ({
     </div>
   </main>
   <script is:inline>
+    var lb = document.querySelector('[data-launch-email]');
+    if (lb) lb.addEventListener('click', function () {
+      var st = document.querySelector('[data-launch-status]');
+      if (!confirm('Send the "MYAH is live" email to everyone on the launch list who has not had it yet? Only do this once the site is open.')) return;
+      lb.disabled = true; st.style.color = '#6b4e35'; st.textContent = 'Sending…';
+      fetch('/api/admin/interest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'notify' }) })
+        .then(function (r) { return r.json().then(function (d) { if (!r.ok && !d.sent) throw new Error(d.error || 'Could not send'); return d; }); })
+        .then(function (d) { st.style.color = d.error ? '#a4442e' : '#2f5d45'; st.textContent = 'Sent to ' + d.sent + (d.sent === 1 ? ' person.' : ' people.') + (d.error ? ' Stopped early: ' + d.error : ''); })
+        .catch(function (e) { st.style.color = '#a4442e'; st.textContent = e.message; lb.disabled = false; });
+    });
     document.querySelectorAll('[data-check]').forEach(function (card) {
       card.querySelectorAll('[data-decide]').forEach(function (btn) {
         btn.addEventListener('click', function () {

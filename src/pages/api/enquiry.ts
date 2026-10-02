@@ -26,23 +26,30 @@ export const POST: APIRoute = async ({ request }) => {
 
     const { data: profile } = await supabase
       .from('profiles')
-      .select('name, contact_email, whatsapp_number')
+      .select('name, contact_email, whatsapp_number, user_id')
       .eq('slug', slug)
       .single();
 
-    if (!profile?.contact_email) {
+    // No enquiry email set? Send it to the email they log in with.
+    let to = profile?.contact_email as string | undefined;
+    if (!to && profile?.user_id) {
+      const { data: u } = await supabase.from('users').select('email').eq('id', profile.user_id).limit(1);
+      to = (u as any)?.[0]?.email;
+    }
+    if (!to) {
       return new Response(JSON.stringify({ error: "They haven't set up email enquiries yet — message them on MYAH instead." }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const fullName = `${firstName} ${lastName}`.trim();
-    const dates = dateFrom && dateTo ? `${dateFrom} to ${dateTo}` : 'Not specified';
+    const esc = (v: string) => v.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]!));
+    const fullName = esc(`${firstName} ${lastName ?? ''}`.trim());
+    const dates = dateFrom && dateTo ? esc(`${dateFrom} to ${dateTo}`) : 'Not specified';
 
     await resend.emails.send({
       from: 'MYAH <enquiries@myahsits.com>',
-      to: profile.contact_email,
+      to,
       replyTo: email,
       subject: `New enquiry from ${fullName}`,
       html: `
@@ -51,11 +58,11 @@ export const POST: APIRoute = async ({ request }) => {
           <p>You've received a new enquiry through your MYAH page.</p>
           <table style="width:100%;border-collapse:collapse;margin:20px 0;">
             <tr><td style="padding:8px 0;color:#6b4e35;font-weight:bold;">Name</td><td style="padding:8px 0;">${fullName}</td></tr>
-            <tr><td style="padding:8px 0;color:#6b4e35;font-weight:bold;">Email</td><td style="padding:8px 0;"><a href="mailto:${email}">${email}</a></td></tr>
+            <tr><td style="padding:8px 0;color:#6b4e35;font-weight:bold;">Email</td><td style="padding:8px 0;"><a href="mailto:${esc(email)}">${esc(email)}</a></td></tr>
             <tr><td style="padding:8px 0;color:#6b4e35;font-weight:bold;">Dates</td><td style="padding:8px 0;">${dates}</td></tr>
-            ${message ? `<tr><td style="padding:8px 0;color:#6b4e35;font-weight:bold;vertical-align:top;">Message</td><td style="padding:8px 0;">${message.replace(/\n/g, '<br>')}</td></tr>` : ''}
+            ${message ? `<tr><td style="padding:8px 0;color:#6b4e35;font-weight:bold;vertical-align:top;">Message</td><td style="padding:8px 0;">${esc(message).replace(/\n/g, '<br>')}</td></tr>` : ''}
           </table>
-          <p style="color:#6b4e35;font-size:0.85em;">Reply directly to this email to respond to ${firstName}.</p>
+          <p style="color:#6b4e35;font-size:0.85em;">Reply directly to this email to respond to ${esc(firstName)}.</p>
         </div>
       `,
     });
