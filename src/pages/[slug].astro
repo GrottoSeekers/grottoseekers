@@ -37,12 +37,24 @@ const tx = (
 const at = (
   f: string,
 ) => '/images/' + f;
+// Image paths: design
+// "public/…" paths and
+// old grottositters.com
+// links both become this
+// site's own /images/.
+const OLD = new RegExp(
+  '^https?://(www\\.)?' +
+  'grottositters' +
+  '\\.com/',
+);
 const local = (
   s: string,
-) => s.replace(
-  /^public\//,
-  '/',
-);
+) => String(s || '')
+  .replace(
+    /^public\//,
+    '/',
+  )
+  .replace(OLD, '/');
 
 type Pic = {
   src: string;
@@ -245,9 +257,19 @@ const ownRevs =
   ) ?
     p.reviews_json
     .length : 0;
+// review_total: reviews
+// across every platform
+// (more than are written
+// out on the page).
+const totalRevs = Math.max(
+  ownRevs,
+  Number(
+    p.review_total,
+  ) || 0,
+);
 const revCount =
-  ownRevs
-    ? ownRevs + '+'
+  totalRevs
+    ? totalRevs + '+'
     : '40+';
 const plats = platforms
   .map((x: any) => ({

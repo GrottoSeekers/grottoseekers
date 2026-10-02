@@ -304,3 +304,9 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS handover_json JSONB NOT NULL DEFAU
 ALTER TABLE applications DROP CONSTRAINT IF EXISTS applications_status_check;
 ALTER TABLE applications ADD CONSTRAINT applications_status_check
   CHECK (status IN ('new', 'shortlisted', 'declined', 'confirmed'));
+
+
+-- ── REVIEW TOTAL ─────────────────────────────────────────────────────────────
+-- Reviews a sitter has across every platform (more than are written out on
+-- their page). The profile shows the larger of this and the reviews listed.
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS review_total INT;
