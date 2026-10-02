@@ -105,6 +105,42 @@ CREATE TRIGGER listings_updated_at
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 
+-- ── BRING OLDER TABLES UP TO DATE ────────────────────────────────────────────
+-- CREATE TABLE IF NOT EXISTS skips tables that already exist, so databases set
+-- up before a column was added never got it. These add any that are missing;
+-- each is a no-op where the column is already there.
+ALTER TABLE users    ADD COLUMN IF NOT EXISTS role       TEXT        NOT NULL DEFAULT 'sitter';
+ALTER TABLE users    ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tagline              TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS badge_text           TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS bio                  TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS profile_pic          TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS hero_images_json     JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS about_images_json    JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS gallery_json         JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS reviews_json         JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS platforms_json       JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS review_requests_json JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS account_type         TEXT  NOT NULL DEFAULT 'solo';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS profile_type         TEXT  NOT NULL DEFAULT 'sitter';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS location             TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS pets_json            JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS amenities_json       JSONB NOT NULL DEFAULT '[]';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS looking_for          TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS contact_email        TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS whatsapp_number      TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS headings_json        JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS theme_json           JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS created_at           TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS updated_at           TIMESTAMPTZ NOT NULL DEFAULT now();
+
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS status      TEXT        NOT NULL DEFAULT 'active';
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS created_at  TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE listings ADD COLUMN IF NOT EXISTS updated_at  TIMESTAMPTZ NOT NULL DEFAULT now();
+
+
 -- ── MESSAGING ────────────────────────────────────────────────────────────────
 -- Owner ↔ sitter threads (/messages). These were created directly in Supabase
 -- when messaging shipped; recorded here so a fresh database matches the code.
