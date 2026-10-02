@@ -4,6 +4,12 @@ export const prerender =
 import {
   supabase,
 } from '../lib/supabase';
+import {
+  FOUNDERS_SLUG,
+  FOUNDERS_REVIEW_TOTAL,
+  foundersReviews,
+  foundersGallery,
+} from '../data/founders';
 
 const { slug } =
   Astro.params;
@@ -179,13 +185,51 @@ Our Sydney-based profile, covering sits across New South Wales.
 ];
 
 // Profile values
+// JSON columns can come
+// back as text: parse it.
+const arrOf = (v: any) => {
+  if (Array.isArray(v))
+    return v;
+  if (typeof v === 'string') {
+    try {
+      const j = JSON.parse(v);
+      return Array.isArray(j)
+        ? j : [];
+    } catch { return []; }
+  }
+  return [];
+};
 const list = (
   v: any,
   d: any[],
-) => (
-  Array.isArray(v) &&
-  v.length ? v : d
-);
+) => {
+  const a = arrOf(v);
+  return a.length ? a : d;
+};
+// The founders' page keeps
+// its own reviews/photos
+// plus anything added.
+const isFounders =
+  (p.slug || slug) ===
+  FOUNDERS_SLUG;
+const keyOf = (x: any) =>
+  String(x || '')
+  .toLowerCase().trim();
+const mergeBy = (
+  a: any[],
+  b: any[],
+  k: (x: any) => string,
+) => {
+  const seen = new Set();
+  return [...a, ...b]
+  .filter((x) => {
+    const id = k(x);
+    if (!id || seen.has(id))
+      return false;
+    seen.add(id);
+    return true;
+  });
+};
 const name: string =
   p.name ||
   'Callum & Niamh';
@@ -236,14 +280,26 @@ const about = list(
   src: local(a.src),
   alt: a.alt || '',
 }));
-const reviews = list(
-  p.reviews_json,
-  revDef,
-);
-const gallery = list(
-  p.gallery_json,
-  galDef,
-).map((g: Pic) => ({
+const reviews = isFounders
+  ? mergeBy(
+    arrOf(p.reviews_json),
+    foundersReviews,
+    (r) => keyOf(r && r.name),
+  )
+  : list(
+    p.reviews_json,
+    revDef,
+  );
+const gallery = (isFounders
+  ? mergeBy(
+    foundersGallery,
+    arrOf(p.gallery_json),
+    (g) => local(g && g.src),
+  )
+  : list(
+    p.gallery_json,
+    galDef,
+  )).map((g: Pic) => ({
   src: local(g.src),
   alt: g.alt || '',
 }));
@@ -251,12 +307,10 @@ const platforms = list(
   p.platforms_json,
   platDef,
 );
-const ownRevs =
-  Array.isArray(
-    p.reviews_json,
-  ) ?
-    p.reviews_json
-    .length : 0;
+const ownRevs = isFounders
+  ? reviews.length
+  : arrOf(p.reviews_json)
+    .length;
 // review_total: reviews
 // across every platform
 // (more than are written
@@ -266,6 +320,9 @@ const totalRevs = Math.max(
   Number(
     p.review_total,
   ) || 0,
+  isFounders
+    ? FOUNDERS_REVIEW_TOTAL
+    : 0,
 );
 const revCount =
   totalRevs
