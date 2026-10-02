@@ -119,6 +119,29 @@ const myProfileId =
       [data-thread] { min-height: 560px !important; }
     }
 
+    /* ── Phones: list first; a conversation opens full screen ─────────────── */
+    .mx-back { display:none; }
+    @media (max-width: 760px) {
+      [data-msg-pad] { padding: 18px 14px 28px !important; }
+      [data-msg-head] { padding-bottom: 16px !important; margin-bottom: 16px !important; }
+      [data-msg-head] h1 { font-size: 1.9rem !important; }
+      body:not(.mx-open) [data-thread] { display: none !important; }
+      body.mx-open { overflow: hidden; }
+      body.mx-open [data-thread] {
+        position: fixed !important; inset: 0 !important; z-index: 400 !important;
+        height: 100dvh !important; min-height: 0 !important;
+        border: none !important; border-radius: 0 !important; box-shadow: none !important;
+      }
+      body.mx-open [data-thread] > div:first-child { padding: 10px 14px !important; gap: 10px !important; padding-top: max(10px, env(safe-area-inset-top)) !important; }
+      body.mx-open [data-scroll] { padding: 16px 14px !important; }
+      body.mx-open [data-compose] { padding: 10px 12px !important; padding-bottom: max(10px, env(safe-area-inset-bottom)) !important; }
+      [data-input] { font-size: 16px !important; } /* no zoom-in on iPhone */
+      .mx-back { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; margin-left: -6px; border: none; border-radius: 50%; background: transparent; color: #2c1a0e; cursor: pointer; flex-shrink: 0; }
+      .mx-back:active { background: rgba(110,84,56,.12); }
+      [data-view-sit] { padding: 8px 12px !important; font-size: .64rem !important; }
+      [data-active-pic] { width: 38px !important; height: 38px !important; }
+    }
+
     .mx-nav-link:hover { color:#2f5d45 !important; }
     .mx-tab:hover { color:#2f5d45 !important; }
     .mx-card:hover { box-shadow:0 10px 34px rgba(44,26,14,.08) !important; border-color:rgba(110,84,56,.4) !important; }
@@ -176,7 +199,7 @@ const myProfileId =
 
   <main data-msg-pad="1" style="flex:1;padding:40px 48px 60px">
     <div style="max-width:1100px;margin:0 auto">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px;margin-bottom:28px">
+      <div data-msg-head="1" style="display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;border-bottom:1px solid rgba(110,84,56,.3);padding-bottom:26px;margin-bottom:28px">
         <div>
           <p style="font-size:.75rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#6e5438;margin:0 0 14px;display:flex;align-items:center;gap:12px"><span style="width:26px;height:1px;background:#6e5438;display:block;flex-shrink:0"></span>Your inbox</p>
           <h1 style="font-family:'Marcellus',serif;font-size:2.3rem;color:#2c1a0e;line-height:1.15;margin:0">Messages</h1>
@@ -368,9 +391,33 @@ const myProfileId =
     if (history.replaceState) history.replaceState(null, '', '/messages?c=' + encodeURIComponent(id));
   };
 
+  // Phones: tapping a conversation opens it full screen; back returns to the list.
+  const phone = window.matchMedia('(max-width: 760px)');
+  const openThread = (push) => {
+    if (!phone.matches) return;
+    if (!document.body.classList.contains('mx-open') && push && history.pushState) history.pushState({ mxThread: 1 }, '', location.href);
+    document.body.classList.add('mx-open');
+    const box = q('[data-scroll]'); if (box) setTimeout(() => { box.scrollTop = box.scrollHeight; }, 60);
+  };
+  const closeThread = () => {
+    document.body.classList.remove('mx-open');
+    if (history.replaceState) history.replaceState(null, '', '/messages');
+  };
+  const head = q('[data-thread] > div');
+  if (head && !q('[data-thread-back]')) {
+    const back = document.createElement('button');
+    back.type = 'button'; back.className = 'mx-back'; back.setAttribute('data-thread-back', '1'); back.setAttribute('aria-label', 'All messages');
+    back.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>';
+    back.addEventListener('click', () => { if (history.state && history.state.mxThread) history.back(); else closeThread(); });
+    head.insertBefore(back, head.firstChild);
+  }
+  window.addEventListener('popstate', () => { if (document.body.classList.contains('mx-open')) closeThread(); });
+  // Arriving from a notification or "Open message" link (?c=…) opens that conversation.
+  if (initialConv) openThread(false);
+
   q('[data-conv-list]').addEventListener('click', e => {
     const row = e.target.closest && e.target.closest('[data-conv]');
-    if (row) selectThread(row.getAttribute('data-conv'));
+    if (row) { selectThread(row.getAttribute('data-conv')); openThread(true); }
   });
 
   // ── send ───────────────────────────────────────────────────────
