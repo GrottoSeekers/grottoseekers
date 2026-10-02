@@ -190,7 +190,8 @@ Our Sydney-based profile, covering sits across New South Wales.
 const arrOf = (v: any) => {
   if (Array.isArray(v))
     return v;
-  if (typeof v === 'string') {
+  const t = typeof v;
+  if (t === 'string') {
     try {
       const j = JSON.parse(v);
       return Array.isArray(j)
