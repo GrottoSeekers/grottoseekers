@@ -292,11 +292,7 @@ const reviews = isFounders
     revDef,
   );
 const gallery = (isFounders
-  ? mergeBy(
-    foundersGallery,
-    arrOf(p.gallery_json),
-    (g) => local(g && g.src),
-  )
+  ? foundersGallery
   : list(
     p.gallery_json,
     galDef,

@@ -98,6 +98,7 @@ export const foundersReviews = [
   }
 ];
 
+// Twenty photos, one per pet, each with its caption.
 export const foundersGallery = [
   {
     "src": "/images/chester-1.jpg",
@@ -108,28 +109,8 @@ export const foundersGallery = [
     "alt": "Travis on a countryside walk"
   },
   {
-    "src": "/images/travis-2.jpg",
-    "alt": "Travis the Vizsla close-up portrait"
-  },
-  {
-    "src": "/images/travis-3.jpg",
-    "alt": "Travis sleeping in blankets"
-  },
-  {
     "src": "/images/solomon-1.jpg",
     "alt": "Solomon the labradoodle on the grass"
-  },
-  {
-    "src": "/images/solomon-4.jpg",
-    "alt": "Solomon in the snow"
-  },
-  {
-    "src": "/images/solomon-2.jpg",
-    "alt": "Solomon on a muddy walk"
-  },
-  {
-    "src": "/images/mali-1.jpg",
-    "alt": "Solomon in a Santa outfit"
   },
   {
     "src": "/images/zeus-1.jpg",
@@ -140,16 +121,8 @@ export const foundersGallery = [
     "alt": "Alfie the cockapoo with Callum"
   },
   {
-    "src": "/images/alfie-2.jpg",
-    "alt": "Alfie relaxing at home"
-  },
-  {
     "src": "/images/orca-1.jpg",
     "alt": "Orca the springer spaniel on the couch"
-  },
-  {
-    "src": "/images/orca-4.jpg",
-    "alt": "Orca on a countryside walk"
   },
   {
     "src": "/images/black-dog-toy-1.jpg",
@@ -168,40 +141,12 @@ export const foundersGallery = [
     "alt": "Sparky the bearded dragon in his terrarium"
   },
   {
-    "src": "/images/molly-3.jpg",
-    "alt": "Molly in the doorway"
-  },
-  {
-    "src": "/images/scuff-1.jpg",
-    "alt": "Scuff in Christmas reindeer antlers"
-  },
-  {
-    "src": "/images/orca-2.jpg",
-    "alt": "Toby in the park with a stick"
-  },
-  {
     "src": "/images/orca-3.jpg",
     "alt": "Toby in the kitchen"
   },
   {
-    "src": "/images/toby-1.jpg",
-    "alt": "Lena at the back door"
-  },
-  {
-    "src": "/images/toby-2.jpg",
-    "alt": "Lena out with Niamh at a cafe"
-  },
-  {
     "src": "/images/lena-1.jpg",
     "alt": "Lena with a ball in the park"
-  },
-  {
-    "src": "/images/lena-4.jpg",
-    "alt": "Lena looking up on a walk"
-  },
-  {
-    "src": "/images/lena-5.jpg",
-    "alt": "Lena out in the city at night"
   },
   {
     "src": "/images/hero-ted-1.jpg",
@@ -216,16 +161,8 @@ export const foundersGallery = [
     "alt": "Mali being held"
   },
   {
-    "src": "/images/mali-2.jpg",
-    "alt": "Mali with Callum in the kitchen"
-  },
-  {
     "src": "/images/luffy-1.jpg",
     "alt": "Luffy the chocolate spaniel puppy with Callum"
-  },
-  {
-    "src": "/images/bailey-1.jpg",
-    "alt": "YubYub on a sunset walk"
   },
   {
     "src": "/images/bailey-3.jpg",
@@ -236,27 +173,11 @@ export const foundersGallery = [
     "alt": "Daisy and Rocky cuddling on the chair"
   },
   {
-    "src": "/images/arlo-1.jpg",
-    "alt": "Arlo with Niamh"
-  },
-  {
-    "src": "/images/arlo-2.jpg",
-    "alt": "Arlo asleep in the car"
-  },
-  {
     "src": "/images/angela-pets-3.jpg",
     "alt": "Angela's cat in a paper bag"
   },
   {
     "src": "/images/poppy-1.jpg",
     "alt": "Poppy the black Labrador"
-  },
-  {
-    "src": "/images/angela-pets-1.jpg",
-    "alt": "Angela's dogs by the fireplace"
-  },
-  {
-    "src": "/images/angela-pets-5.jpg",
-    "alt": "Angela's animals on the farm"
   }
 ];
