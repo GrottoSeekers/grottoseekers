@@ -14,6 +14,8 @@ export const GET: APIRoute = async () => {
     { loc: SITE + '/listings' },
     { loc: SITE + '/signup' },
     { loc: SITE + '/login' },
+    { loc: SITE + '/privacy' },
+    { loc: SITE + '/terms' },
   ];
   try {
     const sitters = await sitterProfiles('slug, updated_at');

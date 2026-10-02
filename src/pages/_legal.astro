@@ -1,0 +1,88 @@
+---
+// Shared layout for /privacy and /terms: the public header and footer, in the
+// brand type and colours, with the document in a readable column.
+interface Props { title: string; intro: string; updated: string }
+const { title, intro, updated } = Astro.props;
+const path = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} — MYAH</title>
+  <meta name="description" content={intro} />
+  <link rel="icon" href="/images/favicon.png" />
+  <link rel="apple-touch-icon" href="/images/app-tile.png" />
+  <link rel="canonical" href={'https://www.myahsits.com' + path} />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <style is:global>
+    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; }
+    * { box-sizing:border-box; }
+    a { color:#2f5d45; }
+    .lg-top { position:sticky; top:0; z-index:50; padding:16px 48px; display:flex; justify-content:space-between; align-items:center; gap:24px; background:rgba(250,246,238,.97); backdrop-filter:blur(12px); box-shadow:0 1px 0 rgba(110,84,56,.2); }
+    .lg-logo { display:inline-flex; align-items:center; gap:14px; text-decoration:none; line-height:1; font-weight:500; font-size:1.4rem; letter-spacing:.28em; }
+    .lg-logo img { height:46px; width:46px; display:block; object-fit:contain; }
+    .lg-logo > span { display:flex; flex-direction:column; gap:5px; padding-left:14px; border-left:1px solid rgba(110,84,56,.4); }
+    .lg-logo b { color:#2f5d45; font-weight:500; }
+    .lg-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; }
+    .lg-nav { display:flex; gap:26px; align-items:center; }
+    .lg-nav a { font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; text-decoration:none; color:#5c3d20; }
+    .lg-nav a:hover { color:#2f5d45; }
+    main { padding:64px 48px 96px; }
+    .lg-doc { max-width:760px; margin:0 auto; }
+    .lg-eyebrow { font-family:'Lato',sans-serif; font-size:.75rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 16px; display:flex; align-items:center; gap:12px; }
+    .lg-eyebrow::before { content:""; width:26px; height:1px; background:#6e5438; }
+    h1 { font-family:'Marcellus',serif; font-weight:400; font-size:2.6rem; line-height:1.15; margin:0 0 16px; }
+    .lg-intro { color:#6b4e35; font-size:1.02rem; line-height:1.8; margin:0 0 10px; }
+    .lg-updated { font-family:'Lato',sans-serif; font-size:.82rem; color:#8a6a4f; margin:0 0 34px; padding-bottom:28px; border-bottom:1px solid rgba(110,84,56,.3); }
+    .lg-doc h2 { font-family:'Marcellus',serif; font-weight:400; font-size:1.5rem; margin:38px 0 12px; }
+    .lg-doc h3 { font-family:'Montserrat',sans-serif; font-weight:600; font-size:1rem; margin:22px 0 8px; }
+    .lg-doc p, .lg-doc li { color:#4a3726; font-size:.96rem; line-height:1.85; }
+    .lg-doc ul { padding-left:20px; margin:8px 0 14px; }
+    .lg-doc li { margin-bottom:6px; }
+    .lg-card { background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:16px; padding:22px 24px; margin:22px 0; }
+    .lg-card p { margin:0; }
+    footer { background:#2c1a0e; color:rgba(255,255,255,.7); padding:40px 48px 32px; border-top:3px solid #2f5d45; }
+    footer .bar { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.5); }
+    footer a { color:rgba(255,255,255,.7); text-decoration:none; }
+    footer a[aria-current] { color:#fff; }
+    @media (max-width:640px) {
+      .lg-top { padding:10px 16px; }
+      .lg-logo img { height:36px; width:36px; }
+      .lg-logo small, .lg-nav a.lg-hide { display:none; }
+      main { padding:36px 18px 64px; }
+      h1 { font-size:2rem; }
+      footer { padding:32px 20px 28px; }
+    }
+  </style>
+  <link rel="stylesheet" href="/mobile.css" />
+</head>
+<body>
+  <header class="lg-top">
+    <a href="/" class="lg-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Make Yourself At Home</small></span></a>
+    <nav class="lg-nav">
+      <a href="/" class="lg-hide">Home</a>
+      <a href="/listings">Browse sits</a>
+      <a href="/login">Log in</a>
+    </nav>
+  </header>
+  <main>
+    <article class="lg-doc">
+      <p class="lg-eyebrow">MYAH</p>
+      <h1>{title}</h1>
+      <p class="lg-intro">{intro}</p>
+      <p class="lg-updated">Last updated {updated}</p>
+      <slot />
+    </article>
+  </main>
+  <footer>
+    <div class="bar">
+      <span>&copy; 2026 MYAH</span>
+      <span><a href="/privacy" aria-current={path === '/privacy' ? 'page' : undefined}>Privacy</a> &nbsp;·&nbsp; <a href="/terms" aria-current={path === '/terms' ? 'page' : undefined}>Terms</a> &nbsp;·&nbsp; <a href="mailto:hello@myahsits.com">hello@myahsits.com</a></span>
+    </div>
+  </footer>
+</body>
+</html>
