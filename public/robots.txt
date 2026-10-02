@@ -6,4 +6,4 @@ Disallow: /owner/
 Disallow: /messages
 Disallow: /notifications
 
-Sitemap: https://myahsits.com/sitemap.xml
+Sitemap: https://www.myahsits.com/sitemap.xml

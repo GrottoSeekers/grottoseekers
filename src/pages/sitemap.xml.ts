@@ -3,7 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { supabase } from '../lib/supabase';
 
-const SITE = 'https://myahsits.com';
+const SITE = 'https://www.myahsits.com';
 
 // Public pages for search engines, always on myahsits.com: the main pages,
 // every sitter's profile page and every open sit.

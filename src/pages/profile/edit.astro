@@ -818,7 +818,7 @@ const enquiryTitlePh =
   // review link copy
   let copyT;
   q('[data-copy-link]').addEventListener('click', () => {
-    if (navigator.clipboard) navigator.clipboard.writeText('https://myahsits.com/review/' + s.token);
+    if (navigator.clipboard) navigator.clipboard.writeText('https://www.myahsits.com/review/' + s.token);
     setState({ copied: true });
     clearTimeout(copyT);
     copyT = setTimeout(() => setState({ copied: false }), 2000);
