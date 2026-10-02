@@ -1,5 +1,6 @@
 export const prerender = false;
 
+import { sitterProfiles } from '../lib/account';
 import type { APIRoute } from 'astro';
 import { supabase } from '../lib/supabase';
 
@@ -15,10 +16,7 @@ export const GET: APIRoute = async () => {
     { loc: SITE + '/login' },
   ];
   try {
-    const { data: sitters } = await supabase
-      .from('profiles')
-      .select('slug, updated_at')
-      .eq('profile_type', 'sitter');
+    const sitters = await sitterProfiles('slug, updated_at');
     for (const s of sitters ?? []) {
       if (s.slug) urls.push({ loc: SITE + '/' + s.slug, lastmod: s.updated_at?.slice(0, 10) });
     }

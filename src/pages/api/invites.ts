@@ -4,6 +4,7 @@ import type { APIRoute } from 'astro';
 import { getSession } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { notify } from '../../lib/notify';
+import { accountFor, sideOfProfile } from '../../lib/account';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -19,12 +20,9 @@ export const POST: APIRoute = async ({ request }) => {
     const session = await getSession(request);
     if (!session) return json({ error: 'Unauthorized' }, 401);
 
-    const { data: owner } = await supabase
-      .from('profiles')
-      .select('id, name, profile_type')
-      .eq('user_id', session.userId)
-      .single();
-    if (!owner || owner.profile_type !== 'owner') return json({ error: 'Owners only' }, 403);
+    const acct = await accountFor(session.userId, session.email, session.role);
+    const owner: any = acct.profile;
+    if (!owner || acct.side !== 'owner') return json({ error: 'Owners only' }, 403);
 
     const { action, listing_id, sitter_profile_id } = await request.json();
     if (!listing_id || !sitter_profile_id || !['invite', 'undo'].includes(action)) {
@@ -74,10 +72,10 @@ export const POST: APIRoute = async ({ request }) => {
 
     const { data: sitter } = await supabase
       .from('profiles')
-      .select('id, profile_type')
+      .select('*')
       .eq('id', sitter_profile_id)
       .single();
-    if (!sitter || sitter.profile_type !== 'sitter') return json({ error: 'Sitter not found' }, 404);
+    if (!sitter || (await sideOfProfile(sitter)) !== 'sitter') return json({ error: 'Sitter not found' }, 404);
 
     const { data: existingInvite } = await supabase
       .from('invites')

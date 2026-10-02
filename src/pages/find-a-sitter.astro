@@ -15,6 +15,7 @@ export const prerender =
 import {
   getAccount,
   wrongPlace,
+  sitterProfiles,
 } from
   '../lib/account';
 import {
@@ -64,6 +65,11 @@ const pr =
   )
   .single();
 const me: any = pr.data;
+// Side comes from the
+// account (sign-up).
+if (me && acct)
+  me.profile_type =
+    acct.side;
 if (!me) {
   return Astro.redirect(
     '/login',
@@ -230,19 +236,13 @@ const STOP = [
   'upon', 'under',
 ];
 
-let rows: any[] = [];
-try {
-  const sr =
-    await supabase
-    .from('profiles')
-    .select('*')
-    .eq(
-      'profile_type',
-      'sitter',
-    )
-    .limit(200);
-  rows = sr.data ?? [];
-} catch {}
+// Sitters = accounts that
+// signed up as sitters.
+let rows: any[] =
+  await sitterProfiles(
+    '*',
+    200,
+  );
 
 // Sit counts.
 const sitsBy: Record<

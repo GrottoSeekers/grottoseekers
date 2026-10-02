@@ -57,6 +57,11 @@ const pr =
   .single();
 const owner: any =
   pr.data;
+// Side comes from the
+// account (sign-up).
+if (owner && acct)
+  owner.profile_type =
+    acct.side;
 if (!owner) {
   return Astro.redirect(
     '/owner/profile/create',

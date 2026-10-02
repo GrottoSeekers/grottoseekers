@@ -4,6 +4,7 @@ import type { APIRoute } from 'astro';
 import { getSession } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { notify } from '../../lib/notify';
+import { accountFor } from '../../lib/account';
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
@@ -20,13 +21,12 @@ export const POST: APIRoute = async ({ request }) => {
     const { listing_id, message } = await request.json();
     if (!listing_id) return json({ error: 'Missing listing' }, 400);
 
-    const { data: sitter } = await supabase
-      .from('profiles')
-      .select('id, name, profile_type, availability_json, availability_prefs_json')
-      .eq('user_id', session.userId)
-      .single();
+    // Side from the account (sign-up), not the profile's own type field,
+    // which older databases may not have.
+    const acct = await accountFor(session.userId, session.email, session.role);
+    const sitter: any = acct.profile;
     if (!sitter) return json({ error: 'no_profile' }, 400);
-    if (sitter.profile_type !== 'sitter') return json({ error: 'sitters_only' }, 403);
+    if (acct.side !== 'sitter') return json({ error: 'sitters_only' }, 403);
 
     const { data: listing } = await supabase
       .from('listings')
@@ -75,7 +75,7 @@ export const POST: APIRoute = async ({ request }) => {
       tags_json: tags,
       status: 'new',
     });
-    if (error) return json({ error: error.message }, 500);
+    if (error) return json({ error: 'server', detail: error.message }, 500);
 
     await notify(listing.profile_id, {
       kind: 'urgent',
@@ -86,7 +86,7 @@ export const POST: APIRoute = async ({ request }) => {
     });
 
     return json({ ok: true, status: 'new' });
-  } catch {
-    return json({ error: 'server' }, 500);
+  } catch (e) {
+    return json({ error: 'server', detail: e instanceof Error ? e.message : '' }, 500);
   }
 };

@@ -791,7 +791,7 @@ const dateTo =
         body: JSON.stringify({ listing_id: listingId, message: apply.querySelector('textarea').value })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'server');
+      if (!res.ok) { const er = new Error(data.error || 'server'); er.detail = data.detail || ''; throw er; }
       apply.style.display = 'none';
       const done = document.querySelector('[data-applied]');
       done.style.cssText = 'display:flex;align-items:center;gap:12px;flex-wrap:wrap';
@@ -800,7 +800,9 @@ const dateTo =
         ? 'This sit is no longer taking applications.'
         : err.message === 'no_profile'
           ? 'Create your sitter profile first, then apply.'
-          : 'Could not send — please try again.';
+          : err.message === 'sitters_only'
+            ? 'Only sitter accounts can apply for sits.'
+            : 'Could not send — please try again.' + (err.detail ? ' (' + err.detail + ')' : '');
       btn.disabled = false; btn.textContent = 'Apply for this sit';
     }
   });

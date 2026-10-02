@@ -110,3 +110,45 @@ export function wrongPlace(
 export function landingFor(acct: Account): string {
   return acct.profile ? acct.home : acct.createUrl;
 }
+
+/**
+ * Which side another member's profile belongs to (for messages, invites):
+ * their account's sign-up role, falling back to the profile's own type.
+ */
+export async function sideOfProfile(profile: { user_id?: string; profile_type?: string } | null): Promise<Side | null> {
+  if (!profile) return null;
+  try {
+    if (profile.user_id) {
+      const { data } = await supabase.from('users').select('role').eq('id', profile.user_id).limit(1);
+      const role = asSide((data as any)?.[0]?.role);
+      if (role) return role;
+    }
+  } catch {}
+  return asSide(profile.profile_type);
+}
+
+/**
+ * Every sitter's profile: accounts that signed up as sitters. Falls back to
+ * the profiles' own type field if the users lookup fails.
+ */
+export async function sitterProfiles(select = '*', limit = 500): Promise<any[]> {
+  try {
+    const { data: users, error } = await supabase.from('users').select('id').eq('role', 'sitter').limit(2000);
+    if (!error && users) {
+      const ids = users.map((u: any) => u.id);
+      if (!ids.length) return [];
+      const out: any[] = [];
+      for (let i = 0; i < ids.length && out.length < limit; i += 150) {
+        const { data } = await supabase.from('profiles').select(select).in('user_id', ids.slice(i, i + 150));
+        out.push(...(data ?? []));
+      }
+      return out.slice(0, limit);
+    }
+  } catch {}
+  try {
+    const { data } = await supabase.from('profiles').select(select).eq('profile_type', 'sitter').limit(limit);
+    return data ?? [];
+  } catch {
+    return [];
+  }
+}

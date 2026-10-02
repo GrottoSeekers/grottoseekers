@@ -3,17 +3,16 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getSession } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
+import { accountFor } from '../../../lib/account';
 
 export const GET: APIRoute = async ({ request }) => {
   try {
     const session = await getSession(request);
     if (!session) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id, profile_type')
-      .eq('user_id', session.userId)
-      .single();
+    // Sitter or owner comes from the account (sign-up role).
+    const acct = await accountFor(session.userId, session.email, session.role);
+    const profile: any = acct.profile ? { ...acct.profile, profile_type: acct.side } : null;
 
     if (!profile) {
       return new Response(JSON.stringify({ error: 'No profile' }), { status: 400 });

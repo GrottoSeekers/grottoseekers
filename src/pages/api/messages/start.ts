@@ -3,6 +3,7 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getSession } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
+import { accountFor } from '../../../lib/account';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -15,11 +16,9 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(JSON.stringify({ error: 'Missing recipient' }), { status: 400 });
     }
 
-    const { data: senderProfile } = await supabase
-      .from('profiles')
-      .select('id, profile_type')
-      .eq('user_id', session.userId)
-      .single();
+    // Sitter or owner comes from the account (sign-up role).
+    const acct = await accountFor(session.userId, session.email, session.role);
+    const senderProfile: any = acct.profile ? { ...acct.profile, profile_type: acct.side } : null;
 
     if (!senderProfile) {
       return new Response(JSON.stringify({ error: 'No profile found' }), { status: 400 });

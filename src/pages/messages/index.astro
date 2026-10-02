@@ -56,6 +56,11 @@ const pr =
   .single();
 const profile: any =
   pr.data;
+// Side comes from the
+// account (sign-up).
+if (profile && acct)
+  profile.profile_type =
+    acct.side;
 if (!profile) {
   return Astro.redirect(
     session.role ===
