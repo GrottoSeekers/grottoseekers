@@ -4,6 +4,7 @@ import type { APIRoute } from 'astro';
 import bcrypt from 'bcryptjs';
 import { supabase } from '../../../lib/supabase';
 import { signSession, sessionCookie } from '../../../lib/auth';
+import { accountFor, landingFor } from '../../../lib/account';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -27,12 +28,14 @@ export const POST: APIRoute = async ({ request }) => {
       return new Response(null, { status: 302, headers: { Location: '/login?error=invalid' } });
     }
 
-    const token = await signSession(user.id, user.email, user.role ?? 'sitter');
+    // Straight to their own side: their dashboard, or their create-profile page.
+    const acct = await accountFor(user.id, user.email, user.role ?? 'sitter');
+    const token = await signSession(user.id, user.email, acct.side);
 
     return new Response(null, {
       status: 302,
       headers: {
-        Location: '/dashboard',
+        Location: landingFor(acct),
         'Set-Cookie': sessionCookie(token),
       },
     });

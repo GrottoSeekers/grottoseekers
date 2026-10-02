@@ -6,6 +6,11 @@
 export const prerender =
   false;
 import {
+  getAccount,
+  wrongPlace,
+} from
+  '../../../lib/account';
+import {
   getSession,
 } from
   '../../../lib/auth';
@@ -25,6 +30,22 @@ const session =
 if (!session) {
   return Astro.redirect(
     '/login',
+  );
+}
+// Keep each account on its
+// own side of the site.
+const acct =
+  await getAccount(
+    Astro.request,
+  );
+const away =
+  wrongPlace(
+    acct,
+    'owner',
+  );
+if (away) {
+  return Astro.redirect(
+    away,
   );
 }
 
@@ -947,6 +968,28 @@ const initial = {
 
   render();
 })();
+</script>
+<script is:inline>
+  // Just created a profile (?welcome=1): say what to do next.
+  (function () {
+    if (new URLSearchParams(location.search).get('welcome') !== '1') return;
+    var main = document.querySelector('main[data-pad]');
+    if (!main) return;
+    var box = document.createElement('div');
+    box.setAttribute('data-welcome', '1');
+    box.setAttribute('style', 'max-width:1100px;margin:0 auto 28px;background:#2c1a0e;color:#fff;border-radius:18px;padding:24px 26px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between');
+    box.innerHTML =
+      '<div style="flex:1 1 320px;min-width:0">' +
+        '<p style="margin:0 0 6px;font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:#c4ab8a">Your profile is live</p>' +
+        '<h2 style="margin:0 0 8px;font-family:Marcellus,serif;font-size:1.5rem;font-weight:400;line-height:1.25">Next: show sitters your home and pets</h2>' +
+        '<p style="margin:0;font-size:.92rem;line-height:1.65;color:rgba(255,255,255,.8)">Add photos of your home, then each of your pets with their routine. Save at the bottom, then post your first sit from your dashboard.</p>' +
+      '</div>' +
+      '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
+        '<a href="#photos" style="display:inline-flex;align-items:center;justify-content:center;padding:13px 22px;border-radius:50px;background:#2f5d45;color:#fff;text-decoration:none;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Add home photos</a>' +
+        '<a href="/owner/dashboard" style="display:inline-flex;align-items:center;justify-content:center;padding:13px 22px;border-radius:50px;border:1.5px solid rgba(255,255,255,.4);color:#fff;text-decoration:none;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase">Go to my dashboard</a>' +
+      '</div>';
+    main.insertBefore(box, main.firstChild);
+  })();
 </script>
 </body>
 </html>

@@ -2,6 +2,11 @@
 export const prerender =
   false;
 import {
+  getAccount,
+  wrongPlace,
+} from
+  '../lib/account';
+import {
   getSession,
 } from '../lib/auth';
 import {
@@ -28,12 +33,20 @@ if (!session) {
     '/login',
   );
 }
-const role =
-  session.role ??
-  'sitter';
-if (role === 'owner') {
+// Keep each account on its
+// own side of the site.
+const acct =
+  await getAccount(
+    Astro.request,
+  );
+const away =
+  wrongPlace(
+    acct,
+    'sitter',
+  );
+if (away) {
   return Astro.redirect(
-    '/owner/dashboard',
+    away,
   );
 }
 

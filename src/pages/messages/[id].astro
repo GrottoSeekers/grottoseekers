@@ -5,6 +5,11 @@
 export const prerender =
   false;
 import {
+  getAccount,
+  wrongPlace,
+} from
+  '../../lib/account';
+import {
   getSession,
 } from '../../lib/auth';
 import {
@@ -19,6 +24,22 @@ const session =
 if (!session) {
   return Astro.redirect(
     '/login',
+  );
+}
+// Keep each account on its
+// own side of the site.
+const acct =
+  await getAccount(
+    Astro.request,
+  );
+const away =
+  wrongPlace(
+    acct,
+    'any',
+  );
+if (away) {
+  return Astro.redirect(
+    away,
   );
 }
 

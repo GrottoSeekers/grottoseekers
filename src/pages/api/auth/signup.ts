@@ -53,7 +53,8 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: '/dashboard',
+        // New accounts go straight to the right create-profile page.
+        Location: newUser.role === 'owner' ? '/owner/profile/create' : '/profile/create',
         'Set-Cookie': sessionCookie(token),
       },
     });

@@ -7,6 +7,11 @@
 export const prerender =
   false;
 import {
+  getAccount,
+  wrongPlace,
+} from
+  '../../../lib/account';
+import {
   getSession,
 } from
   '../../../lib/auth';
@@ -22,6 +27,23 @@ const session =
 if (!session) {
   return Astro.redirect(
     '/login',
+  );
+}
+// Keep each account on its
+// own side of the site.
+const acct =
+  await getAccount(
+    Astro.request,
+  );
+const away =
+  wrongPlace(
+    acct,
+    'owner',
+    false,
+  );
+if (away) {
+  return Astro.redirect(
+    away,
   );
 }
 
@@ -323,8 +345,9 @@ if (existing) {
     server: 'Something went wrong. Please try again.'
   };
   const errEl = q('[data-form-error]');
+  let detail = '';
   const showError = code => {
-    errEl.textContent = messages[code] || messages.server;
+    errEl.textContent = (messages[code] || messages.server) + (code === 'server' && detail ? ' (' + detail + ')' : '');
     errEl.style.display = 'block';
     errEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
@@ -343,6 +366,7 @@ if (existing) {
   form.addEventListener('submit', async e => {
     e.preventDefault();
     errEl.style.display = 'none';
+    detail = '';
     submitBtn.disabled = true;
     show(true);
     const fd = new FormData(form);
@@ -350,9 +374,12 @@ if (existing) {
     try {
       const res = await fetch(form.action, { method: 'POST', body: fd, redirect: 'follow' });
       if (res.status === 413) throw new Error('file_too_large');
+      const landed = new URL(res.url);
+      const code = landed.searchParams.get('error');
+      if (code) { detail = landed.searchParams.get('detail') || ''; throw new Error(code); }
+      // Profile saved: carry on to wherever the server sent us (the dashboard).
+      if (landed.pathname !== location.pathname) { window.location.href = res.url; return; }
       if (!res.ok) throw new Error('server');
-      const code = new URL(res.url).searchParams.get('error');
-      if (code) throw new Error(code);
       window.location.href = res.url;
     } catch (err) {
       clearTimeout(hideT);
@@ -364,7 +391,7 @@ if (existing) {
 
   // Errors from a plain (non-script) submit come back as ?error=…
   const err = new URLSearchParams(location.search).get('error');
-  if (err && messages[err]) showError(err);
+  if (err && messages[err]) { detail = new URLSearchParams(location.search).get('detail') || ''; showError(err); }
 
   render();
 })();

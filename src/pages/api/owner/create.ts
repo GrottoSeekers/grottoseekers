@@ -3,11 +3,17 @@ export const prerender = false;
 import type { APIRoute } from 'astro';
 import { getSession } from '../../../lib/auth';
 import { supabase } from '../../../lib/supabase';
+import { accountFor } from '../../../lib/account';
 
 export const POST: APIRoute = async ({ request, redirect }) => {
   try {
     const session = await getSession(request);
     if (!session) return redirect('/login');
+
+    // One profile per account, on the side they signed up for.
+    const acct = await accountFor(session.userId, session.email, session.role);
+    if (acct.profile) return redirect(acct.home);
+    if (acct.side !== 'owner') return redirect(acct.createUrl);
 
     const form = await request.formData();
     const name     = (form.get('name') as string | null)?.trim() ?? '';
@@ -47,7 +53,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       }
     }
 
-    const { error } = await supabase.from('profiles').insert({
+    const row: Record<string, unknown> = {
       user_id:           session.userId,
       slug,
       name,
@@ -63,12 +69,24 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       platforms_json:    [],
       pets_json:         [],
       amenities_json:    [],
-    });
+    };
 
-    if (error) return redirect('/owner/profile/create?error=server');
+    // Older databases can be missing some optional columns: drop any the
+    // database says it doesn't have and try again, rather than failing.
+    let error: { message: string } | null = null;
+    for (let tries = 0; tries < 12; tries++) {
+      ({ error } = await supabase.from('profiles').insert(row));
+      const missing = error?.message.match(/'(\w+)' column|column "?(\w+)"? (?:of relation "profiles" )?does not exist/);
+      const col = missing && (missing[1] || missing[2]);
+      if (!col || !(col in row) || ['user_id', 'slug', 'name'].includes(col)) break;
+      delete row[col];
+    }
 
-    return redirect('/owner/dashboard');
-  } catch {
-    return redirect('/owner/profile/create?error=server');
+    if (error) return redirect('/owner/profile/create?error=server&detail=' + encodeURIComponent(error.message));
+
+    // Next step: photos (home and pets for owners).
+    return redirect('/owner/profile/edit?welcome=1');
+  } catch (e) {
+    return redirect('/owner/profile/create?error=server&detail=' + encodeURIComponent(e instanceof Error ? e.message : ''));
   }
 };
