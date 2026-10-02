@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS applications (
   date_fit    TEXT,                                -- e.g. "Free for all 14 days"
   tags_json   JSONB       NOT NULL DEFAULT '[]',   -- ["Dogs", "Works from home"]
   status      TEXT        NOT NULL DEFAULT 'new'
-                          CHECK (status IN ('new', 'shortlisted', 'declined')),
+                          CHECK (status IN ('new', 'shortlisted', 'declined', 'confirmed')),
   created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
   UNIQUE (listing_id, profile_id)
 );
@@ -260,3 +260,11 @@ CREATE INDEX IF NOT EXISTS invites_listing_id_idx ON invites (listing_id);
 --   { address, access, wifiName, wifiPass, vet, vetOoh, neighbour, mobile,
 --     notes: [{label, value}] }
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS handover_json JSONB NOT NULL DEFAULT '{}';
+
+
+-- ── CONFIRMED APPLICATIONS ───────────────────────────────────────────────────
+-- "Confirm sitter" on /applications marks the chosen application 'confirmed'.
+-- Re-create the status check so databases set up before this allow it.
+ALTER TABLE applications DROP CONSTRAINT IF EXISTS applications_status_check;
+ALTER TABLE applications ADD CONSTRAINT applications_status_check
+  CHECK (status IN ('new', 'shortlisted', 'declined', 'confirmed'));

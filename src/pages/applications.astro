@@ -150,6 +150,23 @@ const ago = (
   );
 };
 
+// The confirmed sit for
+// this listing, if any.
+let sitId = '';
+try {
+  const sr =
+    await supabase
+    .from('sits')
+    .select('id')
+    .eq(
+      'listing_id',
+      listing.id,
+    )
+    .maybeSingle();
+  sitId =
+    sr.data?.id || '';
+} catch {}
+
 const applicants = rows
   .map((a) => {
     const p =
@@ -361,18 +378,18 @@ const listingId =
 
       <div data-decide="1" style="display:none">
         <p data-decide-text="1" style="font-size:.92rem;color:#2c1a0e;margin:0;line-height:1.6;max-width:520px"></p>
-        <a href="/messages" class="ap-btn" style="display:inline-flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;text-decoration:none;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease">Offer the sit</a>
+        <a href="/messages" data-offer="1" class="ap-btn" style="display:inline-flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;border-radius:50px;padding:16px 36px;text-decoration:none;white-space:nowrap;box-shadow:0 6px 20px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease">Offer the sit</a>
       </div>
     </div>
   </main>
 </div>
 
-<script is:inline define:vars={{ applicants, listingId }}>
+<script is:inline define:vars={{ applicants, listingId, sitId }}>
 (() => {
   // Ported from the design's script: tabs, sort, shortlist/decline, empty state
   // and decide bar. Status changes are saved via /api/owner/applications.
   const APPLICANTS = applicants;
-  const state = { tab: 'new', sort: 'best', status: {} };
+  const state = { tab: 'new', sort: 'best', status: {}, sitId, confirming: false };
   APPLICANTS.forEach(a => { state.status[a.id] = a.status; });
   const statusOf = id => state.status[id] || 'new';
   const q = s => document.querySelector(s);
@@ -382,7 +399,8 @@ const listingId =
     const { tab, sort } = state;
 
     const counts = { all: APPLICANTS.length, new: 0, shortlist: 0, declined: 0 };
-    APPLICANTS.forEach(a => { counts[statusOf(a.id) === 'shortlisted' ? 'shortlist' : statusOf(a.id) === 'declined' ? 'declined' : 'new']++; });
+    const onList = st => st === 'shortlisted' || st === 'confirmed';
+    APPLICANTS.forEach(a => { counts[onList(statusOf(a.id)) ? 'shortlist' : statusOf(a.id) === 'declined' ? 'declined' : 'new']++; });
 
     const tabDefs = [
       { key: 'new', label: 'New', count: counts.new },
@@ -399,7 +417,7 @@ const listingId =
     let list = APPLICANTS.filter(a => {
       const st = statusOf(a.id);
       if (tab === 'all') return true;
-      if (tab === 'shortlist') return st === 'shortlisted';
+      if (tab === 'shortlist') return onList(st);
       if (tab === 'declined') return st === 'declined';
       return st === 'new';
     });
@@ -409,6 +427,7 @@ const listingId =
     else list = [...list].sort((x, y) => (y.dateFit.indexOf('all') > -1) - (x.dateFit.indexOf('all') > -1) || y.reviews - x.reviews);
 
     const shortlisted = APPLICANTS.filter(a => statusOf(a.id) === 'shortlisted');
+    const confirmed = APPLICANTS.find(a => statusOf(a.id) === 'confirmed');
 
     q('[data-intro]').textContent = counts.new + ' still to look at, ' + counts.shortlist + ' shortlisted. Every one of them can do at least part of your dates — the fit note on each says how much.';
 
@@ -431,18 +450,18 @@ const listingId =
       const photoStyle = 'width:76px;height:76px;border-radius:50%;object-fit:cover;border:2px solid rgba(110,84,56,.35);' + (a.photo ? 'display:block;' : 'display:none;');
       const initialsStyle = 'width:76px;height:76px;border-radius:50%;background:rgba(110,84,56,.14);border:2px solid rgba(110,84,56,.35);color:#2f5d45;font-family:\'Marcellus\',serif;font-size:1.5rem;align-items:center;justify-content:center;' + (a.photo ? 'display:none;' : 'display:flex;');
       const badgeStyle = 'position:absolute;right:-2px;bottom:-2px;width:24px;height:24px;border-radius:50%;background:#2f5d45;color:#fff;font-size:.7rem;display:flex;align-items:center;justify-content:center;border:2px solid #fff;' + (a.badge ? '' : 'display:none;');
-      const statusLabel = st === 'shortlisted' ? 'Shortlisted' : st === 'declined' ? 'Declined' : 'New';
+      const statusLabel = st === 'confirmed' ? 'Confirmed' : st === 'shortlisted' ? 'Shortlisted' : st === 'declined' ? 'Declined' : 'New';
       const statusStyle = 'font-size:.64rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:50px;' +
-        (st === 'shortlisted' ? 'background:#2f5d45;color:#fff;' : st === 'declined' ? 'background:rgba(44,26,14,.1);color:#6b4e35;' : 'background:rgba(110,84,56,.14);color:#2f5d45;');
+        (st === 'shortlisted' || st === 'confirmed' ? 'background:#2f5d45;color:#fff;' : st === 'declined' ? 'background:rgba(44,26,14,.1);color:#6b4e35;' : 'background:rgba(110,84,56,.14);color:#2f5d45;');
       const tagStyle = 'font-size:.74rem;font-weight:600;color:#6b4e35;background:#faf6ee;border:1px solid rgba(110,84,56,.28);padding:5px 13px;border-radius:50px;';
       const wrapStyle = 'display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);background:#fff;border-radius:18px;overflow:hidden;transition:border-color .3s ease, box-shadow .3s ease, opacity .3s ease;' +
-        (st === 'shortlisted'
+        (st === 'shortlisted' || st === 'confirmed'
           ? 'border:1.5px solid #2f5d45;box-shadow:0 10px 30px rgba(110,84,56,.16);'
           : st === 'declined'
             ? 'border:1px solid rgba(44,26,14,.1);opacity:.5;'
             : 'border:1px solid rgba(110,84,56,.22);box-shadow:0 1px 2px rgba(44,26,14,.04);');
       const shortlistStyle = 'font-family:\'Montserrat\',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:13px 20px;cursor:pointer;width:100%;transition:background .25s ease, color .25s ease, border-color .25s ease, transform .15s ease;' +
-        (st === 'shortlisted'
+        (st === 'shortlisted' || st === 'confirmed'
           ? 'background:#2f5d45;color:#fff;border:1.5px solid #2f5d45;box-shadow:0 6px 18px rgba(110,84,56,.28);'
           : 'background:#fff;color:#2f5d45;border:1.5px solid rgba(110,84,56,.45);');
       const declineStyle = 'flex:1;font-family:\'Montserrat\',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:11px 10px;cursor:pointer;background:none;color:#6b4e35;border:1.5px solid rgba(44,26,14,.15);transition:border-color .2s ease, color .2s ease';
@@ -473,10 +492,15 @@ const listingId =
             '<p style="font-size:.78rem;color:#8a6a4f;margin:0">Applied ' + esc(a.applied) + '</p>' +
           '</div>' +
           '<div style="display:flex;flex-direction:column;gap:10px">' +
-            '<button type="button" data-shortlist="' + esc(a.id) + '" style="' + shortlistStyle + '">' + (st === 'shortlisted' ? '✓ Shortlisted' : 'Shortlist') + '</button>' +
+            (st === 'confirmed'
+              ? '<a href="/sits/' + esc(state.sitId) + '" class="ap-btn" style="' + shortlistStyle + 'display:block;text-align:center;text-decoration:none;box-sizing:border-box;">Open sit pack</a>'
+              : '<button type="button" data-shortlist="' + esc(a.id) + '" style="' + shortlistStyle + '">' + (st === 'shortlisted' ? '✓ Shortlisted' : 'Shortlist') + '</button>' +
+                (st === 'shortlisted' && !confirmed
+                  ? '<button type="button" data-confirm="' + esc(a.id) + '" class="ap-btn"' + (state.confirming ? ' disabled' : '') + ' style="font-family:\'Montserrat\',sans-serif;font-size:.76rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:50px;padding:13px 20px;cursor:pointer;width:100%;color:#fff;background:#2f5d45;border:1.5px solid #2f5d45;box-shadow:0 6px 18px rgba(110,84,56,.28);transition:background .25s ease, border-color .25s ease, transform .15s ease">Confirm sitter</button>'
+                  : '')) +
             '<div style="display:flex;gap:10px">' +
               '<a href="/messages" data-message="' + esc(a.profileId) + '" class="ap-ghost" style="flex:1;text-align:center;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#2f5d45;text-decoration:none;border:1.5px solid rgba(110,84,56,.45);border-radius:50px;padding:11px 10px;transition:background .25s ease, border-color .25s ease">Message</a>' +
-              '<button type="button" data-decline="' + esc(a.id) + '" style="' + declineStyle + '">' + (st === 'declined' ? 'Undo' : 'Decline') + '</button>' +
+              (st === 'confirmed' ? '' : '<button type="button" data-decline="' + esc(a.id) + '" style="' + declineStyle + '">' + (st === 'declined' ? 'Undo' : 'Decline') + '</button>') +
             '</div>' +
           '</div>' +
         '</div>' +
@@ -485,7 +509,16 @@ const listingId =
 
     q('[data-empty]').style.cssText = 'flex-direction:column;align-items:flex-start;background:#fff;border:1px dashed rgba(110,84,56,.45);border-radius:18px;padding:44px 40px;' + (list.length === 0 ? 'display:flex;' : 'display:none;');
     q('[data-decide]').style.cssText = 'margin-top:28px;padding:24px 30px;border-radius:18px;background:rgba(110,84,56,.1);border:1px solid rgba(110,84,56,.35);align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;' +
-      (shortlisted.length ? 'display:flex;' : 'display:none;');
+      (shortlisted.length || confirmed ? 'display:flex;' : 'display:none;');
+    const offer = q('[data-offer]');
+    if (confirmed) {
+      q('[data-decide-text]').textContent = confirmed.name + ' is confirmed for this sit. Their sit pack is ready, and you can both see it.';
+      offer.textContent = 'Open sit pack';
+      offer.setAttribute('href', '/sits/' + state.sitId);
+      return;
+    }
+    offer.textContent = 'Offer the sit';
+    offer.setAttribute('href', '#');
     q('[data-decide-text]').textContent = shortlisted.length === 1
       ? 'One name on the shortlist — ' + shortlisted[0].name + '. Offer them the sit and the others are told politely.'
       : shortlisted.length + ' on the shortlist: ' + shortlisted.map(a => a.name).join(', ') + '. Pick one to offer and the rest are told politely.';
@@ -502,6 +535,38 @@ const listingId =
     }).then(r => { if (!r.ok) throw new Error(); }).catch(() => { state.status[id] = prev; render(); });
   };
 
+  // Confirm one sitter: creates their sit pack and tells everyone else politely.
+  const confirmSitter = async id => {
+    const a = APPLICANTS.find(x => x.id === id);
+    if (!a || state.confirming) return;
+    if (!window.confirm('Confirm ' + a.name + ' for this sit? Anyone else still waiting will be told it has gone.')) return;
+    state.confirming = true; render(); show();
+    try {
+      const r = await fetch('/api/owner/applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action: 'confirm' })
+      });
+      const data = await r.json().catch(() => ({}));
+      if (!r.ok || !data.sit_id) throw new Error(data.error || 'server');
+      state.sitId = data.sit_id;
+      APPLICANTS.forEach(x => {
+        const st = statusOf(x.id);
+        if (x.id === id) state.status[x.id] = 'confirmed';
+        else if (st === 'new' || st === 'shortlisted') state.status[x.id] = 'declined';
+      });
+      state.tab = 'shortlist';
+    } catch (err) {
+      window.alert(err.message === 'already_confirmed'
+        ? 'Someone is already confirmed for this sit.'
+        : 'Could not confirm — please try again.');
+    } finally {
+      state.confirming = false;
+      loader.style.opacity = '0'; loader.style.pointerEvents = 'none';
+      render();
+    }
+  };
+
   const loader = q('[data-loader]');
   let hideT;
   const show = () => {
@@ -513,12 +578,20 @@ const listingId =
   };
 
   document.addEventListener('click', async e => {
-    const el = e.target.closest && e.target.closest('[data-tab],[data-sort],[data-shortlist],[data-decline],[data-show-all],[data-message],a[href]');
+    const el = e.target.closest && e.target.closest('[data-tab],[data-sort],[data-shortlist],[data-decline],[data-confirm],[data-offer],[data-show-all],[data-message],a[href]');
     if (!el) return;
     if (el.hasAttribute('data-tab')) { state.tab = el.getAttribute('data-tab'); render(); return; }
     if (el.hasAttribute('data-sort')) { state.sort = el.getAttribute('data-sort'); render(); return; }
     if (el.hasAttribute('data-show-all')) { state.tab = 'all'; render(); return; }
     if (el.hasAttribute('data-shortlist')) { const id = el.getAttribute('data-shortlist'); setStatus(id, statusOf(id) === 'shortlisted' ? 'new' : 'shortlisted'); return; }
+    if (el.hasAttribute('data-confirm')) { confirmSitter(el.getAttribute('data-confirm')); return; }
+    if (el.hasAttribute('data-offer') && el.getAttribute('href') === '#') {
+      e.preventDefault();
+      const sl = APPLICANTS.filter(a => statusOf(a.id) === 'shortlisted');
+      if (sl.length === 1) confirmSitter(sl[0].id);
+      else { state.tab = 'shortlist'; render(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+      return;
+    }
     if (el.hasAttribute('data-decline')) { const id = el.getAttribute('data-decline'); setStatus(id, statusOf(id) === 'declined' ? 'new' : 'declined'); return; }
     if (e.metaKey || e.ctrlKey || e.shiftKey) return;
     if (el.hasAttribute('data-message')) {

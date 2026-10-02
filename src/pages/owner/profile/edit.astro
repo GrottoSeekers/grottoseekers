@@ -118,6 +118,7 @@ const ho: any =
   me.handover_json || {};
 
 const initial = {
+  slug: me.slug || '',
   name: me.name || '',
   location:
     me.location || '',
@@ -729,7 +730,7 @@ const initial = {
     if (ct) ct.placeholder = 'Contact ' + (s.name.trim() || 'us');
 
     // Preview
-    q('[data-pv-url]').textContent = 'myahsits.com/' + ((s.name.trim() || 'your-name').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
+    q('[data-pv-url]').textContent = 'myahsits.com/' + (s.slug || (s.name.trim() || 'your-name').toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''));
     q('[data-pv-body]').setAttribute('style', 'background:' + t.background + ';transition:background .3s ease');
     q('[data-pv-hero]').src = (s.hero[0] && s.hero[0].src) || '/images/slideshow-living-room.jpeg';
     q('[data-pv-about]').src = (s.about[0] && s.about[0].src) || (s.gallery[0] && s.gallery[0].src) || '/images/slideshow-dogs-couch.jpeg';

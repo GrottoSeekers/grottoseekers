@@ -252,6 +252,14 @@ const email =
     if (e.persisted && loader) { loader.style.opacity = '0'; loader.style.pointerEvents = 'none'; }
   });
 
+  // Profile address from a name. Joint accounts (or names with "&"/"and")
+  // run together with "&" as "and": "Callum & Niamh" -> callumandniamh.
+  // Solo names are hyphenated: "Sarah Jones" -> sarah-jones.
+  const autoSlug = (name, joint) => {
+    const s = name.toLowerCase().trim();
+    if (joint || /&|\band\b/.test(s)) return s.replace(/&/g, ' and ').replace(/[^a-z0-9]/g, '');
+    return s.replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+  };
   const nameInput = q('[data-name]');
   const slugInput = q('[data-slug]');
   const taglineInput = q('[data-tagline]');
@@ -265,7 +273,7 @@ const email =
   nameInput && nameInput.addEventListener('input', () => {
     const next = { name: nameInput.value };
     if (!slugEdited) {
-      const auto = nameInput.value.toLowerCase().replace(/[^a-z0-9\s-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+      const auto = autoSlug(nameInput.value, state.type === 'joint');
       slugInput.value = auto;
       next.slug = auto;
     }
@@ -282,7 +290,13 @@ const email =
         c.style.background = on ? 'rgba(110,84,56,.07)' : '#fff';
       });
       q('[data-type-input]').value = card.getAttribute('data-type');
-      setState({ type: card.getAttribute('data-type') });
+      const type = card.getAttribute('data-type');
+      if (!slugEdited && nameInput.value.trim()) {
+        slugInput.value = autoSlug(nameInput.value, type === 'joint');
+        setState({ type, slug: slugInput.value });
+      } else {
+        setState({ type });
+      }
     });
   });
 
