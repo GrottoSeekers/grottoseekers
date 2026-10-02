@@ -358,3 +358,7 @@ CREATE INDEX IF NOT EXISTS saved_sits_profile_id_idx ON saved_sits (profile_id);
 CREATE INDEX IF NOT EXISTS notifications_profile_id_idx ON notifications (profile_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS sits_sitter_user_id_idx ON sits (sitter_user_id);
 CREATE INDEX IF NOT EXISTS invites_listing_id_idx ON invites (listing_id);
+
+-- Tell the API layer to pick up new tables and columns straight away
+-- (otherwise it can keep saying "Could not find the table … in the schema cache").
+NOTIFY pgrst, 'reload schema';
