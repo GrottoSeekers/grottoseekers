@@ -1,6 +1,7 @@
 ---
 // Shared layout for /privacy and /terms: the public header and footer, in the
 // brand type and colours, with the document in a readable column.
+import { LAUNCHED } from '../lib/launch';
 interface Props { title: string; intro: string; updated: string }
 const { title, intro, updated } = Astro.props;
 const path = Astro.url.pathname;
@@ -12,6 +13,7 @@ const path = Astro.url.pathname;
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title} — MYAH</title>
   <meta name="description" content={intro} />
+  {!LAUNCHED && <meta name="robots" content="noindex" />}
   <link rel="icon" href="/images/favicon.png" />
   <link rel="apple-touch-icon" href="/images/app-tile.png" />
   <link rel="canonical" href={'https://www.myahsits.com' + path} />

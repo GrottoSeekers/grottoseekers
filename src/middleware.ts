@@ -15,7 +15,13 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   if (admin) return next();
 
   if (path === '/') return ctx.rewrite('/coming-soon' + ctx.url.search);
-  if (openBeforeLaunch(path)) return next();
+  if (openBeforeLaunch(path)) {
+    // Only the "launching soon" home page should show up on Google; the
+    // founders' page still works for anyone with the link (e.g. Facebook).
+    const res = await next();
+    if (path !== '/coming-soon' && !path.startsWith('/api/') && !/\.[a-z0-9]{2,5}$/i.test(path)) res.headers.set('X-Robots-Tag', 'noindex');
+    return res;
+  }
 
   if (path.startsWith('/api/')) {
     return new Response(JSON.stringify({ error: 'launching_soon' }), { status: 403, headers: { 'Content-Type': 'application/json' } });

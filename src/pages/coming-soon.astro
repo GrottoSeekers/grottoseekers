@@ -1,8 +1,7 @@
 ---
 export const prerender = false;
-// "Launching soon" — what visitors see at myahsits.com before launch, with
-// the interest list sign-up and a link to the founders' page.
-import { FOUNDERS_SLUG } from '../data/founders';
+// "Launching soon" — all a visitor sees at myahsits.com before launch:
+// a short note and the register-your-interest form. Nothing else to click.
 
 const registered = Astro.url.searchParams.has('registered');
 const error = Astro.url.searchParams.get('error');
@@ -38,7 +37,11 @@ const desc = "MYAH is a new home for house & pet sitters and home owners, launch
     .cs-logo b { color:#2f5d45; font-weight:500; }
     .cs-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; }
     .cs-pill { font-family:'Lato',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#2f5d45; background:#fff; border:1px solid rgba(47,93,69,.35); border-radius:50px; padding:9px 16px; white-space:nowrap; }
-    main { max-width:1100px; margin:0 auto; padding:72px 48px 88px; display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:64px; align-items:center; }
+    main { max-width:620px; margin:0 auto; padding:88px 24px 96px; text-align:center; min-height:calc(100vh - 160px); display:flex; flex-direction:column; justify-content:center; }
+    main .cs-eyebrow { justify-content:center; }
+    main .cs-eyebrow::after { content:""; width:26px; height:1px; background:#6e5438; }
+    main .cs-lead { margin-left:auto; margin-right:auto; }
+    .cs-card { text-align:left; }
     .cs-eyebrow { font-family:'Lato',sans-serif; font-size:.75rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 18px; display:flex; align-items:center; gap:12px; }
     .cs-eyebrow::before { content:""; width:26px; height:1px; background:#6e5438; }
     h1 { font-family:'Marcellus',serif; font-weight:400; font-size:3rem; line-height:1.12; margin:0 0 18px; }
@@ -59,24 +62,11 @@ const desc = "MYAH is a new home for house & pet sitters and home owners, launch
     .cs-ok { background:#eef4ef; border:1px solid rgba(47,93,69,.3); color:#2f5d45; border-radius:12px; padding:14px 16px; font-size:.92rem; line-height:1.6; margin:0 0 14px; }
     .cs-err { background:#fbf0ec; border:1px solid rgba(160,82,45,.3); color:#8a3f1e; border-radius:12px; padding:12px 16px; font-size:.9rem; margin:0 0 14px; }
     .cs-trap { position:absolute; left:-9999px; }
-    .cs-founders { display:flex; flex-direction:column; gap:18px; }
-    .cs-photo { position:relative; border-radius:22px; overflow:hidden; aspect-ratio:4/5; background:#2c1a0e; box-shadow:0 18px 50px rgba(44,26,14,.18); }
-    .cs-photo img { width:100%; height:100%; object-fit:cover; object-position:center 30%; display:block; }
-    .cs-photo figcaption { position:absolute; left:0; right:0; bottom:0; padding:60px 24px 22px; background:linear-gradient(180deg, transparent, rgba(44,26,14,.72)); color:#fff; }
-    .cs-photo b { display:block; font-family:'Marcellus',serif; font-weight:400; font-size:1.4rem; margin-bottom:4px; }
-    .cs-photo span { font-size:.86rem; color:rgba(255,255,255,.85); }
-    .cs-meet { display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.78rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#2f5d45; text-decoration:none; border:1.5px solid #2f5d45; border-radius:50px; padding:14px 24px; background:#fff; }
-    .cs-meet:hover { background:#2f5d45; color:#fff; }
-    .cs-points { list-style:none; padding:0; margin:0 0 30px; display:grid; gap:12px; }
-    .cs-points li { display:flex; gap:12px; align-items:flex-start; color:#4a3726; font-size:.95rem; line-height:1.6; }
-    .cs-points li::before { content:""; flex:none; width:8px; height:8px; border-radius:50%; background:#2f5d45; margin-top:8px; }
     footer { border-top:1px solid rgba(110,84,56,.2); padding:26px 48px 32px; }
     footer .bar { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#8a6a4f; }
     footer a { color:#6e5438; text-decoration:none; }
     @media (max-width:860px) {
-      main { grid-template-columns:1fr; gap:40px; padding:40px 16px 64px; }
-      .cs-founders { order:2; }
-      .cs-photo { aspect-ratio:4/3; }
+      main { padding:48px 16px 64px; min-height:0; }
     }
     @media (max-width:640px) {
       .cs-top { padding:10px 16px; }
@@ -91,7 +81,7 @@ const desc = "MYAH is a new home for house & pet sitters and home owners, launch
 </head>
 <body>
   <header class="cs-top">
-    <a href="/" class="cs-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Make Yourself At Home</small></span></a>
+    <span class="cs-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Make Yourself At Home</small></span></span>
     <span class="cs-pill">Launching soon</span>
   </header>
   <main>
@@ -99,11 +89,6 @@ const desc = "MYAH is a new home for house & pet sitters and home owners, launch
       <p class="cs-eyebrow">Coming soon</p>
       <h1>House &amp; pet sitting, <em>made simple</em></h1>
       <p class="cs-lead">MYAH brings trusted house &amp; pet sitters and home owners together in one place. We're putting the finishing touches to it now.</p>
-      <ul class="cs-points">
-        <li>Sitters get a beautiful page to share, and find sits near and far.</li>
-        <li>Home owners post a sit and choose the right sitter for their home and pets.</li>
-        <li>Everyone is ID checked, and it's free to join.</li>
-      </ul>
       <div class="cs-card" id="register">
         <h2>Register your interest</h2>
         <p>Leave your email and we'll let you know the moment MYAH launches.</p>
@@ -123,18 +108,11 @@ const desc = "MYAH is a new home for house & pet sitters and home owners, launch
         </form>
       </div>
     </section>
-    <aside class="cs-founders">
-      <figure class="cs-photo">
-        <img src="/images/couple-villa-1.jpg" alt="Callum and Niamh, the founders of MYAH" />
-        <figcaption><b>Callum &amp; Niamh</b><span>Founders of MYAH, and house &amp; pet sitters ourselves</span></figcaption>
-      </figure>
-      <a class="cs-meet" href={'/' + FOUNDERS_SLUG}>Meet us &amp; book us as your sitters</a>
-    </aside>
   </main>
   <footer>
     <div class="bar">
       <span>&copy; 2026 MYAH</span>
-      <span><a href="/privacy">Privacy</a> &nbsp;·&nbsp; <a href="/terms">Terms</a> &nbsp;·&nbsp; <a href="mailto:hello@myahsits.com">hello@myahsits.com</a></span>
+      <span><a href="/privacy">Privacy</a> &nbsp;·&nbsp; <a href="mailto:hello@myahsits.com">hello@myahsits.com</a></span>
     </div>
   </footer>
 </body>

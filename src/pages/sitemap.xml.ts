@@ -4,7 +4,6 @@ import { sitterProfiles } from '../lib/account';
 import type { APIRoute } from 'astro';
 import { supabase } from '../lib/supabase';
 import { LAUNCHED } from '../lib/launch';
-import { FOUNDERS_SLUG } from '../data/founders';
 
 const SITE = 'https://www.myahsits.com';
 
@@ -12,8 +11,8 @@ const SITE = 'https://www.myahsits.com';
 // every sitter's profile page and every open sit.
 export const GET: APIRoute = async () => {
   if (!LAUNCHED) {
-    // Before launch only these pages are open to the public.
-    const open = ['/', '/' + FOUNDERS_SLUG, '/privacy', '/terms'];
+    // Before launch Google is only shown the launching-soon home page.
+    const open = ['/'];
     return new Response(
       '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
         open.map((p) => '  <url><loc>' + SITE + p + '</loc></url>').join('\n') + '\n</urlset>\n',
