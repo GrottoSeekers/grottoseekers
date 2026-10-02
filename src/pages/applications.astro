@@ -497,17 +497,17 @@ const listingId =
       const reviewLine = a.reviews + (a.reviews === 1 ? ' review' : ' reviews');
       return '<article data-row="1" style="' + wrapStyle + '">' +
         '<div style="padding:26px 28px;display:flex;gap:20px;align-items:flex-start;min-width:0">' +
-          '<div style="position:relative;flex-shrink:0">' +
+          (a.slug ? '<a href="/' + esc(a.slug) + '" data-profile-link="1" title="View ' + esc(a.name) + '\u2019s profile" style="position:relative;flex-shrink:0;display:block;text-decoration:none">' : '<div style="position:relative;flex-shrink:0">') +
             '<img src="' + esc(a.photo || '/images/logo-mark.png') + '" alt="" style="' + photoStyle + '" />' +
             '<span style="' + initialsStyle + '">' + esc(initials) + '</span>' +
             '<span style="' + badgeStyle + '">' + esc(a.badge) + '</span>' +
-          '</div>' +
+          (a.slug ? '</a>' : '</div>') +
           '<div style="flex:1;min-width:0">' +
             '<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px">' +
-              '<h2 style="font-family:\'Marcellus\',serif;font-size:1.28rem;color:#2c1a0e;margin:0;line-height:1.25">' + esc(a.name) + '</h2>' +
+              '<h2 style="font-family:\'Marcellus\',serif;font-size:1.28rem;color:#2c1a0e;margin:0;line-height:1.25">' + (a.slug ? '<a href="/' + esc(a.slug) + '" data-profile-link="1" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(110,84,56,.35)">' + esc(a.name) + '</a>' : esc(a.name)) + '</h2>' +
               '<span style="' + statusStyle + '">' + statusLabel + '</span>' +
             '</div>' +
-            '<p style="font-size:.84rem;color:#2f5d45;font-weight:600;margin:0 0 14px">' + esc(a.meta) + '</p>' +
+            '<p style="font-size:.84rem;color:#2f5d45;font-weight:600;margin:0 0 14px">' + esc(a.meta) + (a.slug ? ' &middot; <a href="/' + esc(a.slug) + '" data-profile-link="1" style="color:#2f5d45;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;border-bottom:1px solid rgba(47,93,69,.4)">View profile &rarr;</a>' : '') + '</p>' +
             (a.message ? '<p style="font-size:.95rem;color:#6b4e35;line-height:1.75;margin:0 0 16px;max-width:520px">“' + esc(a.message) + '”</p>' : '') +
             '<div style="display:flex;gap:8px;flex-wrap:wrap">' + a.tags.map(tg => '<span style="' + tagStyle + '">' + esc(tg) + '</span>').join('') + '</div>' +
           '</div>' +

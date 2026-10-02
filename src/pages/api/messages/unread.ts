@@ -37,14 +37,22 @@ export const GET: APIRoute = async ({ request }) => {
       .neq('sender_profile_id', profile.id)
       .is('read_at', null);
 
-    const { data: messages } = await supabase
+    const { data: rows } = await supabase
       .from('messages')
-      .select('id, body, created_at, conversation_id, sender:profiles!messages_sender_profile_id_fkey(name, profile_pic)')
+      .select('id, body, created_at, conversation_id, sender_profile_id')
       .in('conversation_id', convIds)
       .neq('sender_profile_id', profile.id)
       .is('read_at', null)
       .order('created_at', { ascending: false })
       .limit(5);
+    // Sender names looked up separately (no foreign-key-named join).
+    const senderIds = [...new Set((rows ?? []).map((m: any) => m.sender_profile_id).filter(Boolean))];
+    const senders = new Map<string, any>();
+    if (senderIds.length) {
+      const { data } = await supabase.from('profiles').select('id, name, profile_pic').in('id', senderIds);
+      (data ?? []).forEach((p: any) => senders.set(p.id, p));
+    }
+    const messages = (rows ?? []).map((m: any) => ({ ...m, sender: senders.get(m.sender_profile_id) ?? { name: 'MYAH member', profile_pic: null } }));
 
     return new Response(JSON.stringify({ count: count ?? 0, messages: messages ?? [] }), { status: 200 });
   } catch (e) {

@@ -21,9 +21,23 @@ function initTabs() {
       p.style.display = key === id ? (key === 'dashboard' ? 'flex' : 'block') : 'none';
     });
   };
+  // Messages and Profile open the real pages (the inbox and the profile
+  // editor) rather than a placeholder panel.
+  const isOwner = location.pathname.startsWith('/owner');
+  const goTo: Record<string, string> = {
+    messages: '/messages',
+    profile: isOwner ? '/owner/profile/edit' : '/profile/edit',
+  };
   tabBtns.forEach((b) =>
     b.addEventListener('click', () => {
-      setTab(b.dataset.tab!);
+      const id = b.dataset.tab!;
+      if (goTo[id]) {
+        setTab(id);
+        document.querySelector<HTMLElement>('[data-loader]')?.style.setProperty('opacity', '1');
+        window.location.href = goTo[id];
+        return;
+      }
+      setTab(id);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }),
   );
