@@ -44,8 +44,9 @@ const founders = '/' + FOUNDERS_SLUG;
     .cs-logo img { height:46px; width:46px; object-fit:contain; }
     .cs-logo > span { display:flex; flex-direction:column; gap:5px; padding-left:14px; border-left:1px solid rgba(110,84,56,.4); }
     .cs-logo b { color:var(--green); font-weight:500; }
-    .cs-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; }
+    .cs-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; white-space:nowrap; }
     .cs-top-cta { font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:var(--green); text-decoration:none; border-radius:50px; padding:12px 22px; white-space:nowrap; box-shadow:0 4px 14px rgba(44,26,14,.16); }
+    .cs-top-cta .sm { display:none; }
     .cs-top-cta:hover { background:var(--green2); color:#fff; }
 
     /* shared */
@@ -114,6 +115,7 @@ const founders = '/' + FOUNDERS_SLUG;
     /* glimpses */
     .glimpses { background:var(--cream); }
     .g-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:28px; }
+    .g-grid > *, .peek, .m-sit > div { min-width:0; }
     .g-card { background:#fff; border:1px solid var(--line); border-radius:22px; padding:28px; display:flex; flex-direction:column; gap:22px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:transform .3s ease, box-shadow .3s ease; }
     .g-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(44,26,14,.08); }
     .g-card h3 { font-size:1.45rem; margin:0 0 8px; }
@@ -214,9 +216,10 @@ const founders = '/' + FOUNDERS_SLUG;
     @media (max-width:760px) {
       .cs-top { padding:10px 16px; }
       .cs-logo img { height:36px; width:36px; }
-      .cs-logo small { display:none; }
       .cs-logo { font-size:1.2rem; }
-      .cs-top-cta { padding:10px 16px; font-size:.66rem; }
+      .cs-top-cta { padding:10px 18px; font-size:.66rem; }
+      .cs-top-cta .lg { display:none; }
+      .cs-top-cta .sm { display:inline; }
       .wrap { padding:0 16px; }
       .hero { padding:36px 0 56px; }
       .hero h1 { font-size:2.35rem; }
@@ -247,6 +250,13 @@ const founders = '/' + FOUNDERS_SLUG;
       .f-photos { height:300px; }
       footer { padding:22px 16px 28px; }
     }
+    @media (max-width:380px) {
+      .cs-top { padding:10px 12px; gap:10px; }
+      .cs-logo { gap:10px; font-size:1.05rem; letter-spacing:.22em; }
+      .cs-logo > span { padding-left:10px; }
+      .cs-logo img { height:32px; width:32px; }
+      .cs-top-cta { padding:9px 12px; font-size:.6rem; letter-spacing:.06em; }
+    }
     @media (prefers-reduced-motion: reduce) {
       .chip, .pill i { animation:none; }
       .reveal { opacity:1; transform:none; transition:none; }
@@ -256,7 +266,7 @@ const founders = '/' + FOUNDERS_SLUG;
 <body>
   <header class="cs-top">
     <span class="cs-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Make Yourself At Home</small></span></span>
-    <a class="cs-top-cta" href="#join">Get early access</a>
+    <a class="cs-top-cta" href="#join"><span class="lg">Get early access</span><span class="sm">Join</span></a>
   </header>
 
   <main>

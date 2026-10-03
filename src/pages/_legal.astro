@@ -29,9 +29,9 @@ const path = Astro.url.pathname;
     .lg-logo img { height:46px; width:46px; display:block; object-fit:contain; }
     .lg-logo > span { display:flex; flex-direction:column; gap:5px; padding-left:14px; border-left:1px solid rgba(110,84,56,.4); }
     .lg-logo b { color:#2f5d45; font-weight:500; }
-    .lg-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; }
+    .lg-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; white-space:nowrap; }
     .lg-nav { display:flex; gap:26px; align-items:center; }
-    .lg-nav a { font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; text-decoration:none; color:#5c3d20; }
+    .lg-nav a { white-space:nowrap; font-size:.76rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; text-decoration:none; color:#5c3d20; }
     .lg-nav a:hover { color:#2f5d45; }
     main { padding:64px 48px 96px; }
     .lg-doc { max-width:760px; margin:0 auto; }
@@ -54,7 +54,7 @@ const path = Astro.url.pathname;
     @media (max-width:640px) {
       .lg-top { padding:10px 16px; }
       .lg-logo img { height:36px; width:36px; }
-      .lg-logo small, .lg-nav a.lg-hide { display:none; }
+      .lg-nav a.lg-hide { display:none; }
       main { padding:36px 18px 64px; }
       h1 { font-size:2rem; }
       footer { padding:32px 20px 28px; }
@@ -66,9 +66,13 @@ const path = Astro.url.pathname;
   <header class="lg-top">
     <a href="/" class="lg-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Make Yourself At Home</small></span></a>
     <nav class="lg-nav">
+{LAUNCHED ? (<>
       <a href="/" class="lg-hide">Home</a>
       <a href="/listings">Browse sits</a>
       <a href="/login">Log in</a>
+</>) : (
+      <a href="/">Home</a>
+)}
     </nav>
   </header>
   <main>
