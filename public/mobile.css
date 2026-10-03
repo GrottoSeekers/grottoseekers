@@ -29,9 +29,10 @@ img, video { max-width: 100%; }
   }
   [data-topnav] > a:first-child { gap: 10px !important; margin-left: 0 !important; }
   [data-topnav] > a:first-child img { height: 34px !important; width: 34px !important; }
-  [data-topnav] > a:first-child > span { padding-left: 10px !important; gap: 0 !important; }
+  [data-topnav] > a:first-child > span { padding-left: 10px !important; gap: 4px !important; }
   [data-topnav] > a:first-child > span > span:first-child { font-size: 1.05rem !important; letter-spacing: .24em !important; }
-  [data-topnav] > a:first-child > span > span + span { display: none !important; }
+  /* Keep "Make Yourself At Home" under the logo, on one line */
+  [data-topnav] > a:first-child > span > span + span { display: block !important; font-size: .44rem !important; letter-spacing: .16em !important; white-space: nowrap !important; }
   [data-topnav] > div {
     flex: 1 1 auto; min-width: 0;
     justify-content: flex-end !important;
@@ -55,7 +56,10 @@ img, video { max-width: 100%; }
   /* Public header (Browse, Sit pages) */
   [data-topbar] { padding: 10px 16px !important; gap: 12px !important; }
   [data-topbar] > a:first-child img { height: 36px !important; width: 36px !important; }
-  [data-topbar] > a:first-child > span > span + span { display: none !important; }
+  [data-topbar] > a:first-child { gap: 10px !important; }
+  [data-topbar] > a:first-child > span { padding-left: 10px !important; gap: 4px !important; }
+  [data-topbar] > a:first-child > span > span:first-child { font-size: 1.1rem !important; letter-spacing: .24em !important; }
+  [data-topbar] > a:first-child > span > span + span { display: block !important; font-size: .44rem !important; letter-spacing: .16em !important; white-space: nowrap !important; }
 
   /* ── Page gutters ──────────────────────────────────────────────────────── */
   [data-pad], [data-dash-pad], [data-page-pad] {

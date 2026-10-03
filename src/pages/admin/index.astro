@@ -73,7 +73,7 @@ const rows = await Promise.all(pending.map(async (p) => ({
     .ad-logo img { width:42px; height:42px; object-fit:contain; }
     .ad-logo > span { display:flex; flex-direction:column; gap:5px; padding-left:14px; border-left:1px solid rgba(110,84,56,.4); line-height:1; }
     .ad-logo b { color:#2f5d45; font-weight:500; }
-    .ad-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.55rem; letter-spacing:.24em; text-transform:uppercase; color:#8a6a4f; }
+    .ad-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; white-space:nowrap; }
     .ad-nav { display:flex; gap:20px; align-items:center; flex-wrap:wrap; font-size:.8rem; color:#8a6a4f; }
     .ad-nav a { font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#2f5d45; text-decoration:none; }
     .ad-login { max-width:460px; margin:40px auto; }
@@ -113,7 +113,7 @@ const rows = await Promise.all(pending.map(async (p) => ({
 </head>
 <body>
   <header class="ad-top">
-    <a href="/admin" class="ad-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Admin</small></span></a>
+    <a href="/admin" class="ad-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Make Yourself At Home · Admin</small></span></a>
     {allowed && (
       <nav class="ad-nav"><span>{acct!.email}</span><a href={'/' + FOUNDERS_SLUG} target="_blank" rel="noopener">Our page</a><a href="/profile/edit">Edit our page</a><a href="/" target="_blank" rel="noopener">View site</a><a href="/api/auth/logout?next=/admin">Sign out</a></nav>
     )}
