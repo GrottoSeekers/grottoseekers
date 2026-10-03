@@ -5,6 +5,7 @@ import bcrypt from 'bcryptjs';
 import { supabase } from '../../../lib/supabase';
 import { signSession, sessionCookie } from '../../../lib/auth';
 import { accountFor, landingFor } from '../../../lib/account';
+import { LAUNCHED } from '../../../lib/launch';
 
 export const POST: APIRoute = async ({ request }) => {
   try {
@@ -38,7 +39,8 @@ export const POST: APIRoute = async ({ request }) => {
     return new Response(null, {
       status: 302,
       headers: {
-        Location: next || landingFor(acct),
+        // Before launch: founders go to /admin, everyone else to "launching soon".
+        Location: next || (LAUNCHED ? landingFor(acct) : acct.isAdmin ? '/admin' : '/'),
         'Set-Cookie': sessionCookie(token),
       },
     });

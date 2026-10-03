@@ -7,12 +7,14 @@
 export const prerender = false;
 import { getAccount } from '../../lib/account';
 import { supabase } from '../../lib/supabase';
-import { LAUNCHED } from '../../lib/launch';
+import { LAUNCHED, PREVIEW_COOKIE } from '../../lib/launch';
+import { FOUNDERS_SLUG } from '../../data/founders';
 
 const acct = await getAccount(Astro.request);
 // Signed out, or signed in without admin rights: show the sign-in box.
 const allowed = !!acct?.isAdmin;
 const loginError = Astro.url.searchParams.get('error');
+const previewOn = Astro.cookies.get(PREVIEW_COOKIE)?.value === '1';
 
 let pending: any[] = [];
 let setupError = '';
@@ -113,7 +115,7 @@ const rows = await Promise.all(pending.map(async (p) => ({
   <header class="ad-top">
     <a href="/admin" class="ad-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Admin</small></span></a>
     {allowed && (
-      <nav class="ad-nav"><span>{acct!.email}</span><a href="/" target="_blank" rel="noopener">View site</a><a href="/api/auth/logout?next=/admin">Sign out</a></nav>
+      <nav class="ad-nav"><span>{acct!.email}</span><a href={'/' + FOUNDERS_SLUG} target="_blank" rel="noopener">Our page</a><a href="/profile/edit">Edit our page</a><a href="/" target="_blank" rel="noopener">View site</a><a href="/api/auth/logout?next=/admin">Sign out</a></nav>
     )}
   </header>
   <main>
@@ -166,6 +168,14 @@ const rows = await Promise.all(pending.map(async (p) => ({
           <p class="status" data-status></p>
         </div>
       ))}
+
+      {!LAUNCHED && (
+        <div class="card recent">
+          <p class="eyebrow" style="margin-bottom:6px">Launching soon mode</p>
+          <p style="margin:0 0 12px;font-size:.92rem;color:#4a3726;line-height:1.6">Everyone, including you, sees only the launching soon page and your page. {previewOn ? <b>Full-site preview is on for you on this device.</b> : 'To test the full site, turn on a preview just for you (lasts 8 hours).'}</p>
+          <a class="btn ghost" href={previewOn ? '/api/admin/preview?on=0' : '/api/admin/preview?on=1'} style="text-decoration:none;color:#2f5d45;border-color:rgba(47,93,69,.45)">{previewOn ? 'Turn preview off' : 'Preview the full site'}</a>
+        </div>
+      )}
 
       <div class="card recent" id="launch-list">
         <p class="eyebrow" style="margin-bottom:6px">Launch list</p>

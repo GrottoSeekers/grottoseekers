@@ -1,11 +1,15 @@
 ---
 export const prerender = false;
-// "Launching soon" — all a visitor sees at myahsits.com before launch:
-// a short note and the register-your-interest form. Nothing else to click.
+// "Launching soon" — what everyone sees at myahsits.com before launch: a
+// sneak peek of what MYAH will do, and the register-your-interest form.
+// The only page it links to is the founders' own page.
+import { FOUNDERS_SLUG, FOUNDERS_REVIEW_TOTAL } from '../data/founders';
 
 const registered = Astro.url.searchParams.has('registered');
 const error = Astro.url.searchParams.get('error');
 const desc = "MYAH is a new home for house & pet sitters and home owners, launching soon. Register your interest and we'll tell you the moment it's live.";
+const errText = error === 'email' ? 'Please check your email address and try again.' : error ? 'Something went wrong, please try again.' : '';
+const founders = '/' + FOUNDERS_SLUG;
 ---
 <!doctype html>
 <html lang="en">
@@ -22,98 +26,465 @@ const desc = "MYAH is a new home for house & pet sitters and home owners, launch
   <meta property="og:site_name" content="MYAH" />
   <meta property="og:title" content="MYAH — Make Yourself At Home. Launching soon" />
   <meta property="og:description" content={desc} />
-  <meta property="og:image" content="https://www.myahsits.com/images/logo-tile.png" />
+  <meta property="og:image" content="https://www.myahsits.com/images/slideshow-springer-beach.jpeg" />
+  <meta name="twitter:card" content="summary_large_image" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Montserrat:wght@400;500;600&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
   <style is:global>
-    body { margin:0; background:#faf6ee; color:#2c1a0e; font-family:"Montserrat",sans-serif; }
+    :root { --ink:#2c1a0e; --bg:#faf6ee; --cream:#f3ece0; --green:#2f5d45; --green2:#3e7a5b; --brown:#6e5438; --text:#4a3726; --soft:#6b4e35; --line:rgba(110,84,56,.22); }
+    body { margin:0; background:var(--bg); color:var(--ink); font-family:"Montserrat",sans-serif; overflow-x:hidden; }
     * { box-sizing:border-box; }
-    a { color:#2f5d45; }
-    .cs-top { padding:16px 48px; display:flex; justify-content:space-between; align-items:center; gap:24px; box-shadow:0 1px 0 rgba(110,84,56,.2); background:rgba(250,246,238,.97); }
-    .cs-logo { display:inline-flex; align-items:center; gap:14px; text-decoration:none; line-height:1; font-weight:500; font-size:1.4rem; letter-spacing:.28em; }
-    .cs-logo img { height:46px; width:46px; display:block; object-fit:contain; }
+    a { color:var(--green); }
+    img { display:block; max-width:100%; }
+
+    /* header */
+    .cs-top { position:sticky; top:0; z-index:50; padding:14px 48px; display:flex; justify-content:space-between; align-items:center; gap:20px; background:rgba(250,246,238,.95); backdrop-filter:blur(12px); box-shadow:0 1px 0 rgba(110,84,56,.18); }
+    .cs-logo { display:inline-flex; align-items:center; gap:14px; line-height:1; font-weight:500; font-size:1.4rem; letter-spacing:.28em; }
+    .cs-logo img { height:46px; width:46px; object-fit:contain; }
     .cs-logo > span { display:flex; flex-direction:column; gap:5px; padding-left:14px; border-left:1px solid rgba(110,84,56,.4); }
-    .cs-logo b { color:#2f5d45; font-weight:500; }
+    .cs-logo b { color:var(--green); font-weight:500; }
     .cs-logo small { font-family:'Lato',sans-serif; font-weight:700; font-size:.5rem; letter-spacing:.2em; text-transform:uppercase; color:#8a6a4f; }
-    .cs-pill { font-family:'Lato',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:#2f5d45; background:#fff; border:1px solid rgba(47,93,69,.35); border-radius:50px; padding:9px 16px; white-space:nowrap; }
-    main { max-width:620px; margin:0 auto; padding:88px 24px 96px; text-align:center; min-height:calc(100vh - 160px); display:flex; flex-direction:column; justify-content:center; }
-    main .cs-eyebrow { justify-content:center; }
-    main .cs-eyebrow::after { content:""; width:26px; height:1px; background:#6e5438; }
-    main .cs-lead { margin-left:auto; margin-right:auto; }
-    .cs-card { text-align:left; }
-    .cs-eyebrow { font-family:'Lato',sans-serif; font-size:.75rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:#6e5438; margin:0 0 18px; display:flex; align-items:center; gap:12px; }
-    .cs-eyebrow::before { content:""; width:26px; height:1px; background:#6e5438; }
-    h1 { font-family:'Marcellus',serif; font-weight:400; font-size:3rem; line-height:1.12; margin:0 0 18px; }
-    h1 em { font-style:normal; color:#2f5d45; }
-    .cs-lead { color:#6b4e35; font-size:1.05rem; line-height:1.8; margin:0 0 30px; max-width:520px; }
-    .cs-card { background:#fff; border:1px solid rgba(110,84,56,.22); border-radius:18px; padding:28px; box-shadow:0 1px 2px rgba(44,26,14,.04); }
-    .cs-card h2 { font-family:'Marcellus',serif; font-weight:400; font-size:1.45rem; margin:0 0 6px; }
-    .cs-card p { color:#6b4e35; font-size:.92rem; line-height:1.7; margin:0 0 18px; }
-    .cs-form { display:flex; flex-direction:column; gap:12px; }
-    .cs-form label { font-size:.72rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:#5c3d20; }
-    .cs-form input[type=email] { width:100%; font:inherit; font-size:1rem; padding:14px 16px; border:1px solid rgba(110,84,56,.35); border-radius:12px; background:#faf6ee; color:#2c1a0e; }
-    .cs-form input[type=email]:focus { outline:2px solid rgba(47,93,69,.35); border-color:#2f5d45; }
-    .cs-roles { display:flex; gap:8px; flex-wrap:wrap; }
-    .cs-roles label { display:inline-flex; align-items:center; gap:7px; text-transform:none; letter-spacing:0; font-size:.9rem; font-weight:500; color:#4a3726; background:#faf6ee; border:1px solid rgba(110,84,56,.25); border-radius:50px; padding:9px 14px; cursor:pointer; }
-    .cs-roles input { accent-color:#2f5d45; }
-    .cs-btn { font:inherit; font-size:.8rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:#2f5d45; border:0; border-radius:50px; padding:16px 28px; cursor:pointer; box-shadow:0 4px 14px rgba(44,26,14,.18); margin-top:6px; }
-    .cs-btn:hover { background:#3e7a5b; }
-    .cs-ok { background:#eef4ef; border:1px solid rgba(47,93,69,.3); color:#2f5d45; border-radius:12px; padding:14px 16px; font-size:.92rem; line-height:1.6; margin:0 0 14px; }
-    .cs-err { background:#fbf0ec; border:1px solid rgba(160,82,45,.3); color:#8a3f1e; border-radius:12px; padding:12px 16px; font-size:.9rem; margin:0 0 14px; }
-    .cs-trap { position:absolute; left:-9999px; }
+    .cs-top-cta { font-size:.74rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:var(--green); text-decoration:none; border-radius:50px; padding:12px 22px; white-space:nowrap; box-shadow:0 4px 14px rgba(44,26,14,.16); }
+    .cs-top-cta:hover { background:var(--green2); color:#fff; }
+
+    /* shared */
+    .wrap { max-width:1140px; margin:0 auto; padding:0 48px; }
+    .eyebrow { font-family:'Lato',sans-serif; font-size:.74rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--brown); margin:0 0 16px; display:flex; align-items:center; gap:12px; }
+    .eyebrow::before { content:""; width:26px; height:1px; background:var(--brown); }
+    .eyebrow.c { justify-content:center; }
+    .eyebrow.c::after { content:""; width:26px; height:1px; background:var(--brown); }
+    h1, h2, h3 { font-family:'Marcellus',serif; font-weight:400; margin:0; }
+    h2 { font-size:2.4rem; line-height:1.15; }
+    h2 em, h1 em { font-style:normal; color:var(--green); }
+    .lead { color:var(--soft); font-size:1.04rem; line-height:1.8; }
+    .sec { padding:96px 0; }
+    .sec-head { text-align:center; max-width:640px; margin:0 auto 52px; }
+    .sec-head .lead { margin:14px 0 0; }
+    .reveal { opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
+    .reveal.in { opacity:1; transform:none; }
+
+    /* hero */
+    .hero { padding:72px 0 88px; }
+    .hero .wrap { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:56px; align-items:center; }
+    .pill { display:inline-flex; align-items:center; gap:8px; font-family:'Lato',sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--green); background:#fff; border:1px solid rgba(47,93,69,.3); border-radius:50px; padding:8px 14px; margin-bottom:22px; }
+    .pill i { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 1.8s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(.8); } }
+    .hero h1 { font-size:3.4rem; line-height:1.08; margin:0 0 20px; }
+    .hero .lead { margin:0 0 28px; max-width:520px; }
+    .trust { display:flex; gap:18px; flex-wrap:wrap; margin-top:20px; font-size:.82rem; color:var(--soft); }
+    .trust span { display:inline-flex; align-items:center; gap:7px; }
+    .trust svg { color:var(--green); flex:none; }
+
+    /* interest form */
+    .iform { background:#fff; border:1px solid var(--line); border-radius:18px; padding:22px; box-shadow:0 10px 30px rgba(44,26,14,.06); max-width:520px; }
+    .iform-row { display:flex; gap:10px; }
+    .iform input[type=email] { flex:1; min-width:0; font:inherit; font-size:1rem; padding:14px 16px; border:1px solid rgba(110,84,56,.35); border-radius:50px; background:var(--bg); color:var(--ink); }
+    .iform input[type=email]:focus { outline:2px solid rgba(47,93,69,.3); border-color:var(--green); }
+    .iform button { font:inherit; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:var(--green); border:0; border-radius:50px; padding:0 24px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 14px rgba(44,26,14,.18); }
+    .iform button:hover { background:var(--green2); }
+    .roles { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; align-items:center; }
+    .roles > span { font-size:.78rem; color:var(--soft); margin-right:2px; }
+    .roles label { display:inline-flex; align-items:center; gap:7px; font-size:.86rem; color:var(--text); background:var(--bg); border:1px solid rgba(110,84,56,.25); border-radius:50px; padding:7px 13px; cursor:pointer; }
+    .roles input { accent-color:var(--green); margin:0; }
+    .istatus { font-size:.88rem; font-weight:600; color:var(--green); margin:12px 0 0; min-height:1.2em; }
+    .istatus.err { color:#8a3f1e; }
+    .trap { position:absolute; left:-9999px; }
+
+    /* hero collage */
+    .collage { position:relative; height:540px; }
+    .ph { position:absolute; border-radius:22px; overflow:hidden; box-shadow:0 20px 50px rgba(44,26,14,.18); border:5px solid #fff; background:var(--cream); }
+    .ph img { width:100%; height:100%; object-fit:cover; }
+    .ph1 { left:8%; top:0; width:62%; height:64%; }
+    .ph2 { right:0; top:22%; width:44%; height:46%; }
+    .ph3 { left:0; bottom:0; width:46%; height:40%; }
+    .chip { position:absolute; z-index:2; background:#fff; border:1px solid var(--line); border-radius:14px; padding:11px 14px; box-shadow:0 12px 30px rgba(44,26,14,.14); font-size:.8rem; color:var(--text); display:flex; align-items:center; gap:10px; animation:bob 5s ease-in-out infinite; }
+    .chip b { display:block; color:var(--ink); font-size:.84rem; font-weight:600; }
+    .chip small { color:var(--soft); font-size:.74rem; }
+    .chip .dot { width:34px; height:34px; border-radius:50%; background:#eef4ef; color:var(--green); display:flex; align-items:center; justify-content:center; flex:none; }
+    .chip1 { right:4%; top:2%; }
+    .chip2 { left:46%; bottom:4%; animation-delay:-2s; }
+    .chip3 { left:-2%; top:44%; animation-delay:-3.5s; }
+    @keyframes bob { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-8px); } }
+    .stars { color:#c08a2e; letter-spacing:2px; font-size:.8rem; }
+
+    /* glimpses */
+    .glimpses { background:var(--cream); }
+    .g-grid { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:28px; }
+    .g-card { background:#fff; border:1px solid var(--line); border-radius:22px; padding:28px; display:flex; flex-direction:column; gap:22px; box-shadow:0 1px 2px rgba(44,26,14,.04); transition:transform .3s ease, box-shadow .3s ease; }
+    .g-card:hover { transform:translateY(-4px); box-shadow:0 16px 40px rgba(44,26,14,.08); }
+    .g-card h3 { font-size:1.45rem; margin:0 0 8px; }
+    .g-card p { margin:0; color:var(--soft); font-size:.94rem; line-height:1.7; }
+    .peek { position:relative; background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:18px; min-height:236px; overflow:hidden; }
+    .peek::after { content:"Sneak peek"; position:absolute; top:12px; right:12px; font-family:'Lato',sans-serif; font-size:.6rem; font-weight:700; letter-spacing:.16em; text-transform:uppercase; color:var(--brown); background:#fff; border:1px solid var(--line); border-radius:50px; padding:4px 9px; }
+
+    /* mock: profile */
+    .m-prof { display:flex; flex-direction:column; gap:12px; }
+    .m-cover { height:84px; border-radius:12px; overflow:hidden; }
+    .m-cover img { width:100%; height:100%; object-fit:cover; object-position:center 35%; }
+    .m-id { display:flex; align-items:flex-end; gap:12px; margin-top:-34px; padding:0 10px; }
+    .m-ava { width:62px; height:62px; border-radius:50%; border:3px solid #fff; overflow:hidden; flex:none; box-shadow:0 4px 12px rgba(44,26,14,.15); }
+    .m-ava img { width:100%; height:100%; object-fit:cover; }
+    .m-name { font-family:'Marcellus',serif; font-size:1.15rem; }
+    .m-badge { display:inline-flex; align-items:center; gap:5px; font-size:.68rem; font-weight:600; color:var(--green); background:#eef4ef; border-radius:50px; padding:3px 9px; margin-left:6px; vertical-align:middle; }
+    .m-meta { font-size:.76rem; color:var(--soft); padding:0 10px; }
+    .m-tags { display:flex; gap:6px; flex-wrap:wrap; padding:0 10px; }
+    .m-tags span { font-size:.7rem; background:#fff; border:1px solid var(--line); border-radius:50px; padding:4px 10px; color:var(--text); }
+    .m-btn { align-self:flex-start; margin:2px 10px 0; font-size:.66rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:var(--green); border-radius:50px; padding:8px 16px; }
+
+    /* mock: sit listing */
+    .m-sit { display:grid; grid-template-columns:120px minmax(0,1fr); gap:14px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:10px; }
+    .m-sit + .m-sit { margin-top:10px; }
+    .m-sit .img { border-radius:10px; overflow:hidden; height:96px; }
+    .m-sit .img img { width:100%; height:100%; object-fit:cover; }
+    .m-sit b { display:block; font-family:'Marcellus',serif; font-weight:400; font-size:1rem; margin:2px 0 4px; }
+    .m-sit .where { font-size:.72rem; color:var(--soft); }
+    .m-sit .facts { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+    .m-sit .facts span { font-size:.66rem; background:var(--cream); color:var(--brown); border-radius:50px; padding:3px 8px; font-weight:600; }
+
+    /* mock: messages */
+    .m-chat { display:flex; flex-direction:column; gap:9px; padding-top:28px; }
+    .bub { max-width:82%; font-size:.8rem; line-height:1.5; padding:10px 13px; border-radius:16px; }
+    .bub.them { background:#fff; border:1px solid var(--line); border-bottom-left-radius:5px; color:var(--text); }
+    .bub.me { align-self:flex-end; background:var(--green); color:#fff; border-bottom-right-radius:5px; }
+    .bub small { display:block; font-size:.64rem; opacity:.7; margin-top:3px; }
+    .m-confirm { align-self:center; display:inline-flex; align-items:center; gap:7px; font-size:.72rem; font-weight:600; color:var(--green); background:#eef4ef; border:1px solid rgba(47,93,69,.25); border-radius:50px; padding:6px 12px; margin-top:4px; }
+
+    /* mock: sit pack */
+    .m-pack { display:flex; flex-direction:column; gap:8px; padding-top:28px; }
+    .m-row { display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 12px; font-size:.8rem; color:var(--text); }
+    .m-row .ic { width:30px; height:30px; border-radius:9px; background:var(--cream); color:var(--brown); display:flex; align-items:center; justify-content:center; flex:none; }
+    .m-row .r { margin-left:auto; font-size:.68rem; font-weight:600; color:var(--green); white-space:nowrap; }
+    .m-row.locked { background:repeating-linear-gradient(135deg,#fff,#fff 8px,#fbf7f0 8px,#fbf7f0 16px); }
+    .m-row.locked .r { color:var(--brown); display:inline-flex; align-items:center; gap:4px; }
+    .blur { filter:blur(4px); user-select:none; }
+
+    /* both sides */
+    .sides { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:28px; }
+    .side { border-radius:22px; overflow:hidden; background:#fff; border:1px solid var(--line); display:flex; flex-direction:column; }
+    .side .img { height:220px; overflow:hidden; }
+    .side .img img { width:100%; height:100%; object-fit:cover; transition:transform .8s ease; }
+    .side:hover .img img { transform:scale(1.04); }
+    .side .body { padding:30px; }
+    .side h3 { font-size:1.6rem; margin:6px 0 16px; }
+    .side ol { list-style:none; padding:0; margin:0; display:grid; gap:14px; counter-reset:s; }
+    .side li { counter-increment:s; display:flex; gap:14px; color:var(--text); font-size:.95rem; line-height:1.6; }
+    .side li::before { content:counter(s); flex:none; width:28px; height:28px; border-radius:50%; background:var(--cream); color:var(--green); font-weight:600; font-size:.8rem; display:flex; align-items:center; justify-content:center; margin-top:1px; }
+    .side .tag { font-family:'Lato',sans-serif; font-size:.7rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--brown); }
+
+    /* trust strip */
+    .t-grid { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:22px; }
+    .t-item { text-align:center; padding:26px 18px; background:#fff; border:1px solid var(--line); border-radius:18px; }
+    .t-item .ic { width:52px; height:52px; border-radius:50%; background:#eef4ef; color:var(--green); display:flex; align-items:center; justify-content:center; margin:0 auto 14px; }
+    .t-item b { display:block; font-family:'Marcellus',serif; font-weight:400; font-size:1.15rem; margin-bottom:6px; }
+    .t-item span { font-size:.86rem; color:var(--soft); line-height:1.6; }
+
+    /* founders */
+    .founders { background:var(--cream); }
+    .f-wrap { display:grid; grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr); gap:56px; align-items:center; }
+    .f-photos { position:relative; height:440px; }
+    .f-photos .ph1 { left:0; top:0; width:70%; height:78%; }
+    .f-photos .ph2 { right:0; bottom:0; width:48%; height:52%; top:auto; }
+    blockquote { margin:0 0 22px; font-family:'Marcellus',serif; font-size:1.5rem; line-height:1.45; color:var(--ink); }
+    .f-sign { font-size:.86rem; color:var(--soft); margin:0 0 26px; }
+    .f-stats { display:flex; gap:28px; flex-wrap:wrap; margin:0 0 28px; }
+    .f-stats div b { display:block; font-family:'Marcellus',serif; font-weight:400; font-size:1.9rem; color:var(--green); }
+    .f-stats div span { font-size:.78rem; color:var(--soft); }
+    .btn-line { display:inline-flex; align-items:center; gap:8px; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--green); text-decoration:none; border:1.5px solid var(--green); border-radius:50px; padding:14px 24px; background:#fff; }
+    .btn-line:hover { background:var(--green); color:#fff; }
+
+    /* final */
+    .final { text-align:center; }
+    .final .iform { margin:30px auto 0; text-align:left; }
+    .final h2 { font-size:2.6rem; }
+
     footer { border-top:1px solid rgba(110,84,56,.2); padding:26px 48px 32px; }
-    footer .bar { max-width:1100px; margin:0 auto; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#8a6a4f; }
-    footer a { color:#6e5438; text-decoration:none; }
-    @media (max-width:860px) {
-      main { padding:48px 16px 64px; min-height:0; }
+    footer .bar { max-width:1140px; margin:0 auto; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#8a6a4f; }
+    footer a { color:var(--brown); text-decoration:none; }
+
+    @media (max-width:980px) {
+      .hero .wrap, .f-wrap { grid-template-columns:1fr; gap:44px; }
+      .collage { height:460px; max-width:560px; width:100%; margin:0 auto; }
+      .t-grid { grid-template-columns:repeat(2, minmax(0,1fr)); }
+      .f-photos { max-width:520px; width:100%; margin:0 auto; height:380px; }
     }
-    @media (max-width:640px) {
+    @media (max-width:760px) {
       .cs-top { padding:10px 16px; }
       .cs-logo img { height:36px; width:36px; }
       .cs-logo small { display:none; }
-      .cs-pill { font-size:.62rem; padding:7px 12px; }
-      h1 { font-size:2.2rem; }
-      .cs-card { padding:22px 18px; }
+      .cs-logo { font-size:1.2rem; }
+      .cs-top-cta { padding:10px 16px; font-size:.66rem; }
+      .wrap { padding:0 16px; }
+      .hero { padding:36px 0 56px; }
+      .hero h1 { font-size:2.35rem; }
+      .sec { padding:64px 0; }
+      h2, .final h2 { font-size:1.9rem; }
+      .sec-head { margin-bottom:34px; }
+      .g-grid, .sides { grid-template-columns:1fr; gap:20px; }
+      .g-card { padding:20px; }
+      .collage { height:380px; }
+      .chip { padding:9px 11px; font-size:.74rem; }
+      .chip .dot { width:28px; height:28px; }
+      .chip1 { right:0; top:0; }
+      .chip3 { left:0; top:46%; }
+      .chip2 { left:auto; right:0; bottom:2%; }
+      .iform { padding:16px; }
+      .iform-row { flex-direction:column; }
+      .iform button { padding:15px 20px; }
+      .m-sit { grid-template-columns:96px minmax(0,1fr); }
+      .m-sit .img { height:84px; }
+      .side .body { padding:22px; }
+      .side .img { height:180px; }
+      .t-grid { gap:12px; }
+      .t-item { padding:20px 12px; }
+      blockquote { font-size:1.25rem; }
+      .f-photos { height:300px; }
       footer { padding:22px 16px 28px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .chip, .pill i { animation:none; }
+      .reveal { opacity:1; transform:none; transition:none; }
     }
   </style>
 </head>
 <body>
   <header class="cs-top">
     <span class="cs-logo"><img src="/images/logo-mark.png" alt="" /><span><b>MYAH</b><small>Make Yourself At Home</small></span></span>
-    <span class="cs-pill">Launching soon</span>
+    <a class="cs-top-cta" href="#join">Get early access</a>
   </header>
+
   <main>
-    <section>
-      <p class="cs-eyebrow">Coming soon</p>
-      <h1>House &amp; pet sitting, <em>made simple</em></h1>
-      <p class="cs-lead">MYAH brings trusted house &amp; pet sitters and home owners together in one place. We're putting the finishing touches to it now.</p>
-      <div class="cs-card" id="register">
-        <h2>Register your interest</h2>
-        <p>Leave your email and we'll let you know the moment MYAH launches.</p>
-        {registered && <p class="cs-ok" role="status">Thank you, you're on the list. We'll email you as soon as MYAH is live.</p>}
-        {error && <p class="cs-err" role="alert">{error === 'email' ? 'Please check your email address and try again.' : 'Something went wrong, please try again.'}</p>}
-        <form class="cs-form" method="post" action="/api/interest" data-interest>
-          <label for="cs-email">Email address</label>
-          <input id="cs-email" type="email" name="email" required autocomplete="email" placeholder="you@example.com" />
-          <input class="cs-trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-          <input type="hidden" name="source" value="coming-soon" />
-          <div class="cs-roles" role="radiogroup" aria-label="I'm interested as a">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <span class="pill"><i></i>Launching soon · Free to join</span>
+          <h1>House &amp; pet sitting, <em>made simple</em></h1>
+          <p class="lead">MYAH brings trusted house &amp; pet sitters and home owners together in one place. Find the perfect sitter for your home and pets, or find your next sit, all in one beautiful, easy space.</p>
+          <form class="iform" id="join" method="post" action="/api/interest" data-interest>
+            <div class="iform-row">
+              <input type="email" name="email" required autocomplete="email" placeholder="Your email address" aria-label="Your email address" />
+              <button type="submit">Notify me</button>
+            </div>
+            <input class="trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+            <input type="hidden" name="source" value="coming-soon" />
+            <div class="roles" role="radiogroup" aria-label="I'm interested as a">
+              <span>I'm a</span>
+              <label><input type="radio" name="role" value="sitter" /> Sitter</label>
+              <label><input type="radio" name="role" value="owner" /> Home owner</label>
+              <label><input type="radio" name="role" value="both" /> Both</label>
+            </div>
+            <p class={'istatus' + (errText ? ' err' : '')} data-status role="status">{registered ? "Thank you, you're on the list. We'll email you the moment MYAH is live." : errText}</p>
+          </form>
+          <div class="trust">
+            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>Everyone ID checked</span>
+            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>Made by sitters</span>
+            <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>Free to join</span>
+          </div>
+        </div>
+
+        <div class="collage" aria-hidden="true">
+          <div class="ph ph1"><img src="/images/slideshow-springer-beach.jpeg" alt="" /></div>
+          <div class="ph ph2"><img src="/images/slideshow-living-room.jpeg" alt="" /></div>
+          <div class="ph ph3"><img src="/images/slideshow-cockapoo-window.jpeg" alt="" /></div>
+          <div class="chip chip1"><span class="dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></span><span><b>ID verified</b><small>Every member, every time</small></span></div>
+          <div class="chip chip3"><span class="dot"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V21H3z"/></svg></span><span><b>New sit in Cornwall</b><small>12–19 Nov · 2 dogs</small></span></div>
+          <div class="chip chip2"><span><span class="stars">★★★★★</span><b>"We came home to happy puppies"</b><small>Heather, home owner</small></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Glimpses -->
+    <section class="sec glimpses">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow c">A glimpse inside</p>
+          <h2>Everything a sit needs, <em>in one place</em></h2>
+          <p class="lead">Here's a sneak peek at what's coming. No more juggling spreadsheets, group chats and scraps of paper.</p>
+        </div>
+        <div class="g-grid">
+          <article class="g-card reveal">
+            <div class="peek">
+              <div class="m-prof">
+                <div class="m-cover"><img src="/images/slideshow-dogs-lake.jpeg" alt="" /></div>
+                <div class="m-id">
+                  <div class="m-ava"><img src="/images/couple-field-1.jpg" alt="" /></div>
+                  <div><span class="m-name">Callum &amp; Niamh</span><span class="m-badge">✓ ID verified</span></div>
+                </div>
+                <div class="m-meta"><span class="stars">★★★★★</span> {FOUNDERS_REVIEW_TOTAL}+ reviews · UK &amp; Australia</div>
+                <div class="m-tags"><span>Dogs</span><span>Cats</span><span>Long stays</span><span>Garden care</span></div>
+                <span class="m-btn">Book us</span>
+              </div>
+            </div>
+            <div><h3>Your own sitter page</h3><p>A beautiful page all about you: photos, reviews from past sits, the pets you love and when you're free. Share one link anywhere.</p></div>
+          </article>
+
+          <article class="g-card reveal">
+            <div class="peek">
+              <div class="m-sit">
+                <div class="img"><img src="/images/slideshow-garden-conservatory.jpeg" alt="" /></div>
+                <div><span class="where">Cornwall · 12–19 Nov</span><b>Cottage by the sea</b><div class="facts"><span>2 dogs</span><span>Garden</span><span>Wifi</span></div></div>
+              </div>
+              <div class="m-sit">
+                <div class="img"><img src="/images/slideshow-cat-bag.jpeg" alt="" /></div>
+                <div><span class="where">Edinburgh · 3–10 Dec</span><b>City flat with Luna</b><div class="facts"><span>1 cat</span><span>Near station</span></div></div>
+              </div>
+            </div>
+            <div><h3>Find sits you'll love</h3><p>Browse homes and pets near and far, save your favourites and apply in a tap. Owners post a sit and choose from the sitters who apply.</p></div>
+          </article>
+
+          <article class="g-card reveal">
+            <div class="peek">
+              <div class="m-chat">
+                <div class="bub them">Hi! Would you be free 12–19 Nov for Bramble and Moss? 🐾<small>Owner</small></div>
+                <div class="bub me">We'd love to! We've looked after two spaniels before.<small>You</small></div>
+                <div class="bub them">Perfect, confirming you now.<small>Owner</small></div>
+                <span class="m-confirm">✓ Sit confirmed · 12–19 Nov</span>
+              </div>
+            </div>
+            <div><h3>Message &amp; confirm in one place</h3><p>Chat, agree the dates and confirm the sit without swapping numbers. Everything about each sit stays together.</p></div>
+          </article>
+
+          <article class="g-card reveal">
+            <div class="peek">
+              <div class="m-pack">
+                <div class="m-row"><span class="ic">🐕</span>Feeding: 8am &amp; 5pm, one scoop<span class="r">✓ Shared</span></div>
+                <div class="m-row"><span class="ic">🩺</span>Vet: Harbour Vets, 01234…<span class="r">✓ Shared</span></div>
+                <div class="m-row locked"><span class="ic">🏡</span><span class="blur">14 Harbour Road, St Ives</span><span class="r">🔒 Day before</span></div>
+                <div class="m-row locked"><span class="ic">📶</span><span class="blur">Wifi: Bramble2026</span><span class="r">🔒 Day before</span></div>
+              </div>
+            </div>
+            <div><h3>A sit pack that keeps you safe</h3><p>Routines, vet details and house notes in one handy pack. The address and door codes stay hidden until the day before, unless the owner shares them sooner.</p></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Both sides -->
+    <section class="sec">
+      <div class="wrap">
+        <div class="sec-head reveal">
+          <p class="eyebrow c">How it works</p>
+          <h2>Made for <em>both sides</em> of a sit</h2>
+        </div>
+        <div class="sides">
+          <article class="side reveal">
+            <div class="img"><img src="/images/slideshow-spaniel-walk.jpeg" alt="A sitter walking a spaniel" /></div>
+            <div class="body">
+              <span class="tag">For sitters</span>
+              <h3>See more of the world, with a furry friend</h3>
+              <ol>
+                <li>Create your page with your photos and reviews</li>
+                <li>Browse sits and apply in a tap</li>
+                <li>Chat, confirm and get your sit pack</li>
+              </ol>
+            </div>
+          </article>
+          <article class="side reveal">
+            <div class="img"><img src="/images/slideshow-dogs-couch.jpeg" alt="Two dogs relaxing at home" /></div>
+            <div class="body">
+              <span class="tag">For home owners</span>
+              <h3>Go away knowing they're happy at home</h3>
+              <ol>
+                <li>Post your sit with your home and pets</li>
+                <li>Meet ID-checked sitters and read their reviews</li>
+                <li>Pick your sitter and share your sit pack</li>
+              </ol>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Trust -->
+    <section class="sec" style="padding-top:0">
+      <div class="wrap">
+        <div class="t-grid">
+          <div class="t-item reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><b>Everyone ID checked</b><span>Photo ID and a selfie, checked by us before anyone can apply or post.</span></div>
+          <div class="t-item reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><b>Private stays private</b><span>Addresses and codes are only shared with your confirmed sitter.</span></div>
+          <div class="t-item reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 2.9 5.9 6.1.9-4.5 4.3 1.1 6.1L12 17.3 6.4 20.2l1.1-6.1L3 9.8l6.1-.9z"/></svg></div><b>Real reviews</b><span>Bring your reviews with you, and collect new ones after every sit.</span></div>
+          <div class="t-item reveal"><div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg></div><b>Free to join</b><span>No membership fees. Sign up as a sitter, an owner, or both.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Founders -->
+    <section class="sec founders">
+      <div class="wrap f-wrap">
+        <div class="f-photos reveal" aria-hidden="true">
+          <div class="ph ph1"><img src="/images/couple-villa-1.jpg" alt="" style="object-position:center 30%" /></div>
+          <div class="ph ph2"><img src="/images/couple-boat-1.jpg" alt="" style="object-position:center 30%" /></div>
+        </div>
+        <div class="reveal">
+          <p class="eyebrow">Made by sitters</p>
+          <h2 style="margin-bottom:22px">Hello, we're <em>Callum &amp; Niamh</em></h2>
+          <p class="lead" style="margin:0 0 24px">We're house &amp; pet sitters ourselves, and we built MYAH to be the place we always wished existed: simple, safe and made for the people (and pets) who use it.</p>
+          <blockquote>"Callum &amp; Niamh were amazing sitters! We came home to happy puppies and they went the extra mile."</blockquote>
+          <p class="f-sign">Heather · home owner, Sydney</p>
+          <div class="f-stats">
+            <div><b>{FOUNDERS_REVIEW_TOTAL}+</b><span>reviews from home owners</span></div>
+            <div><b>UK &amp; Australia</b><span>sits so far</span></div>
+          </div>
+          <a class="btn-line" href={founders}>Meet us &amp; book us as your sitters →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Final CTA -->
+    <section class="sec final">
+      <div class="wrap reveal">
+        <p class="eyebrow c">Be the first in</p>
+        <h2>Make yourself <em>at home</em></h2>
+        <p class="lead" style="max-width:560px;margin:14px auto 0">Register your interest and we'll email you the moment MYAH opens, so you can be one of the very first members.</p>
+        <form class="iform" method="post" action="/api/interest" data-interest>
+          <div class="iform-row">
+            <input type="email" name="email" required autocomplete="email" placeholder="Your email address" aria-label="Your email address" />
+            <button type="submit">Notify me</button>
+          </div>
+          <input class="trap" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <input type="hidden" name="source" value="coming-soon-bottom" />
+          <div class="roles" role="radiogroup" aria-label="I'm interested as a">
+            <span>I'm a</span>
             <label><input type="radio" name="role" value="sitter" /> Sitter</label>
             <label><input type="radio" name="role" value="owner" /> Home owner</label>
             <label><input type="radio" name="role" value="both" /> Both</label>
           </div>
-          <button class="cs-btn" type="submit">Notify me at launch</button>
+          <p class="istatus" data-status role="status"></p>
         </form>
       </div>
     </section>
   </main>
+
   <footer>
     <div class="bar">
       <span>&copy; 2026 MYAH</span>
       <span><a href="/privacy">Privacy</a> &nbsp;·&nbsp; <a href="mailto:hello@myahsits.com">hello@myahsits.com</a></span>
     </div>
   </footer>
+
+  <script is:inline>
+  (() => {
+    // Send the interest form without leaving the page.
+    document.querySelectorAll('form[data-interest]').forEach((f) => {
+      const st = f.querySelector('[data-status]');
+      f.addEventListener('submit', (e) => {
+        e.preventDefault();
+        st.className = 'istatus'; st.textContent = 'Sending…';
+        fetch('/api/interest', { method: 'POST', body: new FormData(f), headers: { Accept: 'application/json' } })
+          .then((r) => r.json().then((j) => ({ ok: r.ok, j })))
+          .then(({ ok, j }) => {
+            if (ok) { f.reset(); st.textContent = "Thank you, you're on the list. We'll email you the moment MYAH is live."; }
+            else { st.className = 'istatus err'; st.textContent = j.error === 'email' ? 'Please check your email address and try again.' : 'Something went wrong, please try again.'; }
+          })
+          .catch(() => { st.className = 'istatus err'; st.textContent = 'Something went wrong, please try again.'; });
+      });
+    });
+    // Fade sections in as they scroll into view.
+    const els = document.querySelectorAll('.reveal');
+    if (!('IntersectionObserver' in window)) { els.forEach((el) => el.classList.add('in')); return; }
+    const io = new IntersectionObserver((entries) => entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } }), { threshold: 0.12 });
+    els.forEach((el) => io.observe(el));
+  })();
+  </script>
 </body>
 </html>
