@@ -83,10 +83,13 @@ const founders = '/' + FOUNDERS_SLUG;
     .iform input[type=email]:focus { outline:2px solid rgba(47,93,69,.3); border-color:var(--green); }
     .iform button { font:inherit; font-size:.76rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#fff; background:var(--green); border:0; border-radius:50px; padding:0 24px; cursor:pointer; white-space:nowrap; box-shadow:0 4px 14px rgba(44,26,14,.18); }
     .iform button:hover { background:var(--green2); }
-    .roles { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; align-items:center; }
-    .roles > span { font-size:.78rem; color:var(--soft); margin-right:2px; }
-    .roles label { display:inline-flex; align-items:center; gap:7px; font-size:.86rem; color:var(--text); background:var(--bg); border:1px solid rgba(110,84,56,.25); border-radius:50px; padding:7px 13px; cursor:pointer; }
-    .roles input { accent-color:var(--green); margin:0; }
+    .roles { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin-top:14px; }
+    .roles > span { grid-column:1 / -1; font-size:.7rem; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--soft); }
+    .roles label { position:relative; display:flex; align-items:center; justify-content:center; text-align:center; min-height:44px; padding:8px 10px; font-size:.86rem; font-weight:500; color:var(--text); background:var(--bg); border:1px solid rgba(110,84,56,.28); border-radius:50px; cursor:pointer; transition:background .2s, color .2s, border-color .2s; }
+    .roles label:hover { border-color:var(--green); }
+    .roles input { position:absolute; opacity:0; width:1px; height:1px; margin:0; }
+    .roles label:has(input:checked) { background:var(--green); border-color:var(--green); color:#fff; }
+    .roles label:has(input:focus-visible) { outline:2px solid rgba(47,93,69,.4); outline-offset:2px; }
     .istatus { font-size:.88rem; font-weight:600; color:var(--green); margin:12px 0 0; min-height:1.2em; }
     .istatus.err { color:#8a3f1e; }
     .trap { position:absolute; left:-9999px; }
@@ -228,9 +231,12 @@ const founders = '/' + FOUNDERS_SLUG;
       .chip1 { right:0; top:0; }
       .chip3 { left:0; top:46%; }
       .chip2 { left:auto; right:0; bottom:2%; }
-      .iform { padding:16px; }
-      .iform-row { flex-direction:column; }
-      .iform button { padding:15px 20px; }
+      .iform { padding:16px; display:flex; flex-direction:column; gap:12px; }
+      .iform-row { display:contents; }
+      .iform input[type=email] { order:1; }
+      .iform .roles { order:2; margin-top:2px; }
+      .iform button { order:3; padding:15px 20px; }
+      .iform .istatus { order:4; margin:0; }
       .m-sit { grid-template-columns:96px minmax(0,1fr); }
       .m-sit .img { height:84px; }
       .side .body { padding:22px; }
