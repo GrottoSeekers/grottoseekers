@@ -11,6 +11,7 @@ const OPEN = new Set([
   '/', '/coming-soon', '/' + FOUNDERS_SLUG, '/privacy', '/terms', '/login', '/admin',
   '/sitemap.xml', '/robots.txt',
   '/api/enquiry', '/api/interest', '/api/auth/login', '/api/auth/logout',
+  '/api/billing/webhook', // Stripe calls it; every request is signature-checked
 ]);
 
 /** Can a signed-out visitor open this path before launch? */
@@ -25,5 +26,5 @@ export const PREVIEW_COOKIE = 'myah_preview';
 
 /** Extra paths the founders can use before launch without the preview. */
 export function adminBeforeLaunch(path: string): boolean {
-  return /^\/(admin|api\/admin|profile\/edit|api\/profile|api\/auth|api\/verification|verification)(\/|$)/.test(path);
+  return /^\/(admin|api\/admin|profile\/edit|api\/profile|api\/auth|api\/verification|verification|billing|api\/billing)(\/|$)/.test(path);
 }
