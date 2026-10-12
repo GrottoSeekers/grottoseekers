@@ -5,8 +5,9 @@ import { buildNav } from
   '../lib/appnav';
 import { getAccount } from
   '../lib/account';
-import { PAYMENTS_ENABLED } from
-  '../lib/billing';
+import {
+  PAYMENTS_ENABLED,
+} from '../lib/billing';
 const me =
   await getAccount(
     Astro.request,
