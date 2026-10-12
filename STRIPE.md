@@ -14,14 +14,14 @@ is set in Vercel.
 
 - `src/lib/billing.ts` — the switch (`PAYMENTS_ENABLED`), plan lookup keys, `hasAccess()`, syncing.
 - `/billing` — the member's Membership page (in the nav only when payments are on).
-- `/api/billing/checkout` — starts a Checkout for the member's own side.
+- `/api/billing/checkout` — starts a Checkout (same price for sitters and owners).
 - `/api/billing/portal` — opens the Customer Portal (change plan, card, invoices, cancel).
 - `/api/billing/webhook` — Stripe tells MYAH about changes; saved in the `billing` table.
 - `supabase/billing.sql` — creates the `billing` table.
-- `scripts/stripe-setup.mjs` — creates the products and prices.
+- `scripts/stripe-setup.mjs` — creates the product and its two prices.
 
-Prices are found by **lookup key**: `myah_sitter_monthly`, `myah_sitter_annual`,
-`myah_owner_monthly`, `myah_owner_annual`.
+Sitters and owners pay the same. There is one product, **MYAH Membership**,
+with two prices found by **lookup key**: `myah_monthly` and `myah_annual`.
 
 ## Setting it up (do it all in test mode first)
 
@@ -32,11 +32,11 @@ Prices are found by **lookup key**: `myah_sitter_monthly`, `myah_sitter_annual`,
    sales in another country need registering there.
 3. **Supabase** — run `supabase/billing.sql` in the SQL Editor.
 4. **Products and prices** —
-   `STRIPE_SECRET_KEY=sk_test_… node scripts/stripe-setup.mjs --sitter-monthly 999 --sitter-annual 9900 --owner-monthly 999 --owner-annual 9900`
+   `STRIPE_SECRET_KEY=sk_test_… node scripts/stripe-setup.mjs --monthly 499 --annual 4999`
    (amounts in pence, VAT included).
 5. **Customer portal** — Settings → Billing → Customer portal: allow cancelling,
    updating payment methods, invoice history, and switching between the
-   monthly and yearly prices of each product.
+   monthly and yearly prices of MYAH Membership.
 6. **Webhook** — Developers → Webhooks → add
    `https://www.myahsits.com/api/billing/webhook` with events
    `checkout.session.completed`, `customer.subscription.created`,

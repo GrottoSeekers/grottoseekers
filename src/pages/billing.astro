@@ -3,7 +3,7 @@
 // member's `billing` row
 // (src/lib/billing.ts) and
 // the live Stripe prices
-// for their side. Buttons
+// (same for both sides). Buttons
 // post to /api/billing/*.
 // While PAYMENTS_ENABLED
 // is off it just says
@@ -21,7 +21,7 @@ import {
   PAYMENTS_ENABLED,
   getBilling,
   hasAccess,
-  pricesFor,
+  prices as livePrices,
 } from
   '../lib/billing';
 
@@ -54,9 +54,8 @@ const member =
 const prices =
   PAYMENTS_ENABLED &&
   !member
-    ? await pricesFor(
-      acct!.side,
-    ).catch(() => ({}))
+    ? await livePrices()
+      .catch(() => ({}))
     : {};
 
 const money = (p: any) =>
@@ -145,7 +144,7 @@ const btn =
       {member && (
         <section style={card}>
           {welcome && <p style="margin:0 0 14px;color:#2f5d45;font-weight:600">Welcome aboard — your membership is active.</p>}
-          <h2 style="font-family:'Marcellus',serif;font-weight:400;font-size:1.5rem;margin:0 0 8px">{sideName} membership · {planName}</h2>
+          <h2 style="font-family:'Marcellus',serif;font-weight:400;font-size:1.5rem;margin:0 0 8px">MYAH membership · {planName}</h2>
           <p style="margin:0 0 22px;color:#6b4e35;line-height:1.75">
             {billing!.status === 'past_due'
               ? 'Your last payment didn’t go through. Please update your card to keep your membership.'

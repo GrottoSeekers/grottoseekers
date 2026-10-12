@@ -3,9 +3,7 @@
 // that already exists is left alone.
 //
 //   STRIPE_SECRET_KEY=sk_test_… node scripts/stripe-setup.mjs \
-//     --currency gbp \
-//     --sitter-monthly 999 --sitter-annual 9900 \
-//     --owner-monthly 999  --owner-annual 9900
+//     --currency gbp --monthly 499 --annual 4999
 //
 // Amounts are in the smallest unit (pence). Prices include VAT
 // (tax_behavior=inclusive), as UK shoppers expect. To change a price later,
@@ -23,28 +21,20 @@ const currency = (args.currency || 'gbp').toLowerCase();
 // Electronically supplied services: an online membership.
 const TAX_CODE = 'txcd_10000000';
 
-const PRODUCTS = {
-  sitter: { name: 'MYAH Sitter membership', description: 'Apply for sits and message owners on MYAH.' },
-  owner: { name: 'MYAH Owner membership', description: 'Post sits and find trusted sitters on MYAH.' },
-};
+// One membership for everyone: sitters and owners pay the same.
+const PRODUCT = { name: 'MYAH Membership', description: 'Membership of MYAH, for house & pet sitters and home owners.' };
 const PRICES = [
-  { side: 'sitter', interval: 'month', lookup_key: 'myah_sitter_monthly', arg: 'sitter-monthly' },
-  { side: 'sitter', interval: 'year', lookup_key: 'myah_sitter_annual', arg: 'sitter-annual' },
-  { side: 'owner', interval: 'month', lookup_key: 'myah_owner_monthly', arg: 'owner-monthly' },
-  { side: 'owner', interval: 'year', lookup_key: 'myah_owner_annual', arg: 'owner-annual' },
+  { interval: 'month', lookup_key: 'myah_monthly', arg: 'monthly' },
+  { interval: 'year', lookup_key: 'myah_annual', arg: 'annual' },
 ];
 
 for (const p of PRICES) {
   if (!/^\d+$/.test(args[p.arg] || '')) throw new Error(`Missing --${p.arg} <amount in pence>`);
 }
 
-const productIds = {};
-for (const [side, info] of Object.entries(PRODUCTS)) {
-  const found = await stripe.products.search({ query: `metadata['myah_side']:'${side}' AND active:'true'` });
-  const product = found.data[0] ?? (await stripe.products.create({ ...info, tax_code: TAX_CODE, metadata: { myah_side: side } }));
-  productIds[side] = product.id;
-  console.log(`${found.data[0] ? 'exists ' : 'created'}  ${product.id}  ${info.name}`);
-}
+const found = await stripe.products.search({ query: `metadata['myah']:'membership' AND active:'true'` });
+const product = found.data[0] ?? (await stripe.products.create({ ...PRODUCT, tax_code: TAX_CODE, metadata: { myah: 'membership' } }));
+console.log(`${found.data[0] ? 'exists ' : 'created'}  ${product.id}  ${PRODUCT.name}`);
 
 for (const p of PRICES) {
   const { data } = await stripe.prices.list({ lookup_keys: [p.lookup_key], active: true, limit: 1 });
@@ -53,7 +43,7 @@ for (const p of PRICES) {
     continue;
   }
   const price = await stripe.prices.create({
-    product: productIds[p.side],
+    product: product.id,
     currency,
     unit_amount: Number(args[p.arg]),
     recurring: { interval: p.interval },

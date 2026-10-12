@@ -8,7 +8,8 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
 
 // Start a membership: { interval: 'month' | 'year' } → { url } of a Stripe
-// Checkout page for the plan on the member's own side (sitter or owner).
+// Checkout page. Sitters and owners pay the same; the side is kept on the
+// subscription's metadata for reporting.
 // Someone who already has a membership is sent to the billing portal instead,
 // so nobody ends up paying twice.
 export const POST: APIRoute = async ({ request }) => {
@@ -28,7 +29,7 @@ export const POST: APIRoute = async ({ request }) => {
       return json({ url: portal.url });
     }
 
-    const lookupKey = PLANS[acct.side][interval];
+    const lookupKey = PLANS[interval];
     const { data: prices } = await stripe().prices.list({ lookup_keys: [lookupKey], active: true, limit: 1 });
     if (!prices[0]) return json({ error: `No active Stripe price with lookup key ${lookupKey}` }, 500);
 

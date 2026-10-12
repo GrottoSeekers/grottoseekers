@@ -1,6 +1,6 @@
 // MYAH memberships, billed through Stripe.
 //
-// Sitters and owners each have their own plan, paid monthly or yearly. Stripe
+// Sitters and owners pay the same membership, monthly or yearly. Stripe
 // does the rest: Checkout takes the first payment, the Customer Portal lets
 // members change plan, update their card, download invoices or cancel, Stripe
 // Billing sends the renewal invoices, and Stripe Tax works out UK VAT (and tax
@@ -14,7 +14,6 @@
 // Stripe Dashboard without a deploy: create the new price, move the lookup
 // key across ("Transfer lookup key"), done.
 import Stripe from 'stripe';
-import type { Side } from './account';
 import { supabase } from './supabase';
 
 const env = (k: string) =>
@@ -24,10 +23,11 @@ export const PAYMENTS_ENABLED = env('PAYMENTS_ENABLED').toLowerCase() === 'true'
 
 export type Interval = 'month' | 'year';
 
-/** Stripe price lookup keys, one per side and billing interval. */
-export const PLANS: Record<Side, Record<Interval, string>> = {
-  sitter: { month: 'myah_sitter_monthly', year: 'myah_sitter_annual' },
-  owner: { month: 'myah_owner_monthly', year: 'myah_owner_annual' },
+/** Stripe price lookup keys, one per billing interval (the same for sitters
+ *  and owners). */
+export const PLANS: Record<Interval, string> = {
+  month: 'myah_monthly',
+  year: 'myah_annual',
 };
 
 /** Subscription states that keep a membership open. past_due is the grace
@@ -111,14 +111,13 @@ export async function syncSubscription(subscriptionId: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
-/** The live price for each interval on one side, for showing on /billing. */
-export async function pricesFor(side: Side): Promise<Partial<Record<Interval, Stripe.Price>>> {
-  const keys = PLANS[side];
-  const { data } = await stripe().prices.list({ lookup_keys: [keys.month, keys.year], active: true });
+/** The live price for each interval, for showing on /billing. */
+export async function prices(): Promise<Partial<Record<Interval, Stripe.Price>>> {
+  const { data } = await stripe().prices.list({ lookup_keys: [PLANS.month, PLANS.year], active: true });
   const out: Partial<Record<Interval, Stripe.Price>> = {};
   for (const p of data) {
-    if (p.lookup_key === keys.month) out.month = p;
-    if (p.lookup_key === keys.year) out.year = p;
+    if (p.lookup_key === PLANS.month) out.month = p;
+    if (p.lookup_key === PLANS.year) out.year = p;
   }
   return out;
 }
