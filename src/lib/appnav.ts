@@ -3,7 +3,7 @@
 //   Top bar: logo + this side's pages (current one underlined) + Log out.
 //   Tab bar: Dashboard · Sits · Messages · Profile (current one underlined).
 // `active` is a top-bar key (browse, saved, availability, verification,
-// notifications, post, find, applications) or a tab key (dashboard, sits,
+// notifications, post, find, applications, billing) or a tab key (dashboard, sits,
 // messages, profile).
 export type NavSide = 'sitter' | 'owner';
 
@@ -14,7 +14,7 @@ const ICONS: Record<string, string> = {
   profile: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle>',
 };
 
-export function buildNav(side: NavSide, active = '', admin = false) {
+export function buildNav(side: NavSide, active = '', admin = false, billing = false) {
   const owner = side === 'owner';
   const home = owner ? '/owner/dashboard' : '/dashboard';
   const links = (owner
@@ -31,7 +31,7 @@ export function buildNav(side: NavSide, active = '', admin = false) {
       { key: 'availability', label: 'Availability', href: '/availability' },
       { key: 'verification', label: 'Verification', href: '/verification' },
       { key: 'notifications', label: 'Notifications', href: '/notifications' },
-    ]).concat(admin ? [{ key: 'idchecks', label: 'ID checks', href: '/admin' }] : []).map((l) => ({
+    ]).concat(billing ? [{ key: 'billing', label: 'Membership', href: '/billing' }] : []).concat(admin ? [{ key: 'idchecks', label: 'ID checks', href: '/admin' }] : []).map((l) => ({
     ...l,
     on: l.key === active,
   }));
